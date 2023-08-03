@@ -1,14 +1,18 @@
+import MockData from "./MockData";
+import Btn from "./component/btn";
+import React, {useState} from  'react'
 
-import Testando from './component/Testando'
-import Lux from './component/lux';
+function App(){ 
 
-function App(){
+    if (MockData === null) return null;
     return (
         <div>
-            <h1>Testando tudo que não funciona</h1>
-             <Testando/>
-                <Lux/>
+           {MockData.map((item, index)=>(
+        <div key={index}>              
+            <Btn item={item} />
         </div>
+           ))}   
+           </div>
     )
 }
 export default App;
