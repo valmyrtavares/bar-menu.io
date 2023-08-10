@@ -1,5 +1,6 @@
 const btnMenu =[
     {title: "Bebidas", category:"bebidas",  ChildCategory: "bebidas",  display: true, mainBtn:false},
+    {title: "Refrigerante", category:"bebidas",  ChildCategory: "refrigerante",  display: true, mainBtn:false},
     {title: "Pratos", category:"pratos",  ChildCategory: "pratos",  display: true, mainBtn:false},
     {title: "Lanches", category:"lanches",  ChildCategory: "lanches",  display: true, mainBtn:false},
     {title: "Sobremesas", category:"sobremesas",  ChildCategory: "sobremesas",  display: true, mainBtn:false},
