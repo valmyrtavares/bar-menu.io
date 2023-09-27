@@ -1,0 +1,16 @@
+{"ObjetoPrincipal":{
+        "PrincipalPrimeiro":12,
+        "PrincipalSegundo": "Teste de string",
+        "PrincipalTerceiro": true,
+        "PrincipalArrayPrimeiro": [
+            {"arrayPrimeiroFirst": "Teste de string"},
+            {"arrayPrimeiroSecond": 12},
+            {"arrayPrimeiroThird": true}
+        ],
+        "PrincipalArraySegundoStrings":[
+            "Brasil", "Argentina", "Chile", "Uruguai", "Paraguai"
+        ], 
+        "PrincipalQuarto": 1122112,
+        "PrincipalQuinto": "Ultimo dado" 
+    }
+}

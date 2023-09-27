@@ -1,0 +1,54 @@
+{
+    "button":{
+        "1":{
+            "title": "Bebidas",
+            "category": "main",
+            "parent": "bebidas",
+            "display": false
+        },
+          "2":{
+            "title": "Pratos",
+            "category": "main",
+            "parent": "pratos",
+            "display": false
+        },
+        "3":{
+            "title": "Porções",
+            "category": "main",
+            "parent": "porcoes",
+            "display": false
+        },
+          "4":{
+            "title": "Sobremesas",
+            "category": "main",
+            "parent": "sobremesas",
+            "display": false
+        },
+          "5":{
+            "title": "Alcoolicos",
+            "category": "bebidas",
+            "parent": "alcoolicos",
+            "display": false
+        },
+          "6":{
+            "title": "Não Alcoolicos",
+            "category": "bebidas",
+            "parent": "naoalcoolicos",
+            "display": false
+        },
+         "7":{
+            "title": "Refrigerante",
+            "category": "naoalcoolicos",
+            "parent": "refrigerante",
+            "display": false
+        },
+         "8":{
+            "title": "Sucos",
+            "category": "naoalcoolicos",
+            "parent": "sucos",
+            "display": false
+        }
+
+        
+    }
+}

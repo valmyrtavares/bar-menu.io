@@ -1,12 +1,20 @@
 const btnMenu =[
-    {title: "Bebidas", category:"bebidas",  ChildCategory: "bebidas",  display: true, mainBtn:false},
-    {title: "Refrigerante", category:"bebidas",  ChildCategory: "refrigerante",  display: true, mainBtn:false},
-    {title: "Pratos", category:"pratos",  ChildCategory: "pratos",  display: true, mainBtn:false},
-    {title: "Lanches", category:"lanches",  ChildCategory: "lanches",  display: true, mainBtn:false},
-    {title: "Sobremesas", category:"sobremesas",  ChildCategory: "sobremesas",  display: true, mainBtn:false},
-    {title: "Porções", category:"porcoes",  ChildCategory: "porcoes",  display: true, mainBtn:false},
-    {title: "Entradas", category:"entradas",  ChildCategory: "entradas",  display: true, mainBtn:false},
+    {title: "Bebidas",  display: true, subBtns: [
+        {
+          title: "Alcoólicas",         
+          display: true,          
+          subBtns:[{title: "Drinks", display: true, subBtns:[],subItems:[{title:"Manhattan", text:"Essa é a bebida mais gostosa que existe", image:"https://www.thecocktaildb.com/images/media/drink/hz7p4t1589575281.jpg", valor: 50},{title:"Caipirinha", text:"Essa é a bebida mais gostosa que existe", image:"https://www.thecocktaildb.com/images/media/drink/hz7p4t1589575281.jpg", valor: 50},]},{title: "Vinhos", display: true, subBtns:[],subItems:[]},{title: "Cervejas", display: true, subBtns:[],subItems:[]},
+        ]
+        },       
+
+      ],subItems:[]},    
+    {title: "Pratos", display: true, subBtns:[],subItems:[]},
+    {title: "Lanches", display: true, subBtns:[],subItems:[]},
+    {title: "Sobremesas",display: true, subBtns:[],subItems:[]},
+    {title: "Porções",  display: true, subBtns:[],subItems:[]},
+    {title: "Entradas",  display: true, subBtns:[],subItems:[]},
    
 ]
+
 
 export default btnMenu;
