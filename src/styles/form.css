@@ -1,0 +1,7 @@
+.form-position {
+    position: absolute;
+    top: 100px;
+    left: 10%;
+    color: red;
+    background-color: gray;
+}

@@ -3,12 +3,12 @@ import React from 'react';
   const Button = (props) => {
 
     const handleClick = () =>{
-        props.click();
+        props.onClick();
     }
 
     return (
       <>
-        <button onClick={handleClick}>{props.label}</button>        
+        <button className="btn btn-success" onClick={handleClick}>{props.label}</button>        
       </>
     )
   };

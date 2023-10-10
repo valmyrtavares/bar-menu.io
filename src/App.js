@@ -3,7 +3,9 @@ import NestedBtn from './nestedBtn';
 import Form from './form';
 import Button from './component/Button';
 import {getBtnData} from './api/buttonApi';
-import Banner from  './component/banner';
+import FormItem from  './formItem';
+import Header from './component/header';
+import  CarrosselImages from './component/carrosselImages';
 
 
 function App() {
@@ -14,8 +16,7 @@ function App() {
  React.useEffect(() => {
    const fetchData = async() =>{
     try{
-      const data = await getBtnData();
-      console.log(data)      
+      const data = await getBtnData();         
       setMenuButton(data)
     }catch(error) {
       console.error("Error fetching data", error);
@@ -34,15 +35,19 @@ function App() {
 //butons collections
   if (menuButton === null) return null;
   return (
-    <div>      
-      <Banner />   
+    <div> 
+      {false &&<Header />   } 
+      {true && <CarrosselImages/>}        
+      {false && <Form />}
+     
       {menuButton.map((item, index) => (
         <div key={index}>
           <NestedBtn parent={"main"} item={item} menuButton={menuButton}  />
         </div>
       ))}
-      <Button click={showForm} label="show form"/>
-      {displayForm && <Form />}
+      <div>
+        {false && <FormItem/>}
+      </div>
     </div>
   );
 }

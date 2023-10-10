@@ -17,3 +17,17 @@ export async  function getBtnData(){
         throw error
     }
 }
+export async function fetchCategories(){
+    const categories = await getBtnData();
+    return categories.map((item) => item.parent)
+}
+
+ export async function fetchCategoriesItem(){  
+     const parents = await fetchCategories(); // All parents used
+     const categories = await getBtnData(); //Whole objects array from firevase
+  
+     let usedCategories = new Set(categories.map(item => item.category)) //Changing categories in object and  to set to remove duplicates
+     const usedParentsItems = parents.filter((item)=> !usedCategories.has(item)); //Filtering parents that are not in usedCategories    
+        
+       return usedParentsItems; 
+ }
