@@ -12,7 +12,7 @@ function MainMenu() {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getBtnData();
+        const data = await getBtnData('button');
         setMenuButton(data);
       } catch (error) {
         console.error('Error fetching data', error);
@@ -27,11 +27,12 @@ function MainMenu() {
         {false && <Header />}
         {true && <CarrosselImages />}
         {false && <Form />}
-        {menuButton.map((item, index) => (
-          <div key={index}>
-            <NestedBtn parent={'main'} item={item} menuButton={menuButton} />
-          </div>
-        ))}
+        {menuButton &&
+          menuButton.map((item, index) => (
+            <div key={index}>
+              <NestedBtn parent={'main'} item={item} menuButton={menuButton} />
+            </div>
+          ))}
         <div>{false && <FormItem />}</div>
       </div>
     </>

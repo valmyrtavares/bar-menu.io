@@ -9,6 +9,7 @@ function FormItem() {
     category: '',
     comment: '',
     price: 0,
+    image: '',
     display: false,
     carrossel: false,
   });
@@ -20,8 +21,10 @@ function FormItem() {
 
   const fetchCategories = async () => {
     const categories = await fetchCategoriesItem();
+    categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
+
   function handleChange({ target }) {
     const { id, value, type, checked } = target;
 
@@ -36,39 +39,39 @@ function FormItem() {
         [id]: value,
       });
     }
-
-    setForm({
-      ...form,
-      [id]: value,
-      [id]: value,
-      [id]: value,
-      [id]: value,
-      [id]: value,
-    });
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(form);
-    // fetch('https://react-bar-67f33-default-rtdb.firebaseio.com/item.json', {
-    //   method: 'POST',
-    //   body: JSON.stringify(form), // Converte o objeto form em JSON
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error('Erro ao enviar os dados para o Firebase.');
-    //     }
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-    //     console.log('Dados enviados com sucesso:', data);
-    //   })
-    //   .catch((error) => {
-    //     console.error('Erro:', error);
-    //   });
+    fetch('https://react-bar-67f33-default-rtdb.firebaseio.com/item.json', {
+      method: 'POST',
+      body: JSON.stringify(form), // Converte o objeto form em JSON
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Erro ao enviar os dados para o Firebase.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Dados enviados com sucesso:', data);
+        setForm({
+          //Clear the form
+          title: '',
+          category: '',
+          comment: '',
+          price: 0,
+          image: '',
+          display: false,
+          carrossel: false,
+        });
+      })
+      .catch((error) => {
+        console.error('Erro:', error);
+      });
   }
 
   return (
@@ -114,7 +117,7 @@ function FormItem() {
         />
         <Input
           id="image"
-          label="image"
+          label="Image"
           value={form.image}
           type="text"
           onChange={handleChange}
