@@ -12,10 +12,11 @@ function CarrosselImages() {
     'https://www.melhoresdestinos.com.br/wp-content/uploads/2020/09/comidas-tipicas-capa2019.jpg',
   ]);
   const [intervalId, setIntervalId] = React.useState(null);
+  const [carrosselImages, setCarrosselImages] = React.useState([]);
 
   // Functions
   React.useEffect(() => {
-    // fetchCarrosselImages();
+    fetchCarrosselImages();
 
     const newInterval = setInterval(() => {
       if (index == 2) {
@@ -57,11 +58,11 @@ function CarrosselImages() {
   async function fetchCarrosselImages() {
     console.log('funcionando');
     const response = await getBtnData('item');
-    const carrosselImages = await response
+    const carrosselImagesNovo = await response
       .filter((item) => item.carrossel === true)
       .map((item) => item.image);
-    console.log(carrosselImages);
-    setImages(carrosselImages);
+    console.log(carrosselImagesNovo);
+    setCarrosselImages(carrosselImagesNovo);
     console.log(images);
     runCarrossel();
 
@@ -75,6 +76,8 @@ function CarrosselImages() {
   return (
     <>
       <div className="content-carrossel">
+        {carrosselImages && <p>{JSON.stringify(carrosselImages)}</p>} //display
+        the array
         <div className="carrossel">
           <img src={images[index]} />
         </div>
