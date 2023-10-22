@@ -31,7 +31,6 @@ function CarrosselImages() {
 
   function runCarrossel() {
     const newInterval = setInterval(() => {
-      debugger;
       if (index == 2) {
         setIndex(0);
       } else {
