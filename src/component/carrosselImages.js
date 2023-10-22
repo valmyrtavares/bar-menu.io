@@ -5,23 +5,27 @@ import { getBtnData } from '../api/buttonApi';
 // Effect for auto-advancing
 function CarrosselImages() {
   const [index, setIndex] = React.useState(0);
-  const [images, setImages] = React.useState([]);
+  //const [images, setImages] = React.useState([]);
+  const [images, setImages] = React.useState([
+    'https://img.elo7.com.br/product/zoom/258B7CB/adesivo-parede-restaurante-prato-feito-comida-caseira-lenha-adesivo-restaurante-fritas-salada.jpg',
+    'https://img.cybercook.com.br/receitas/151/x-salada-3.jpeg',
+    'https://www.melhoresdestinos.com.br/wp-content/uploads/2020/09/comidas-tipicas-capa2019.jpg',
+  ]);
   const [intervalId, setIntervalId] = React.useState(null);
 
   // Functions
   React.useEffect(() => {
-    fetchCarrosselImages();
+    // fetchCarrosselImages();
 
-    // const newInterval = setInterval(() => {
-    //   debugger;
-    //   if (index == 2) {
-    //     setIndex(0);
-    //   } else {
-    //     setIndex((prevIndex) => prevIndex + 1);
-    //   }
-    // }, 4000);
+    const newInterval = setInterval(() => {
+      if (index == 2) {
+        setIndex(0);
+      } else {
+        setIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }
+    }, 4000);
 
-    // return () => clearInterval(newInterval);
+    return () => clearInterval(newInterval);
   }, []);
 
   function forward() {
