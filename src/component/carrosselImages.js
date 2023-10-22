@@ -61,10 +61,10 @@ function CarrosselImages() {
     const carrosselImagesNovo = await response
       .filter((item) => item.carrossel === true)
       .map((item) => item.image);
-    console.log(carrosselImagesNovo);
+    // console.log(carrosselImagesNovo);
     setCarrosselImages(carrosselImagesNovo);
-    console.log(images);
-    runCarrossel();
+    console.log(carrosselImages);
+    // runCarrossel();
 
     // if (!response.ok) {
     //   throw new Error('something  went wrong!');
