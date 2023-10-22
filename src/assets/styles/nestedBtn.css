@@ -1,0 +1,46 @@
+/* .item-menu{
+    display:grid;
+    grid-template-columns:3fr 1fr;
+    justify-items: center;
+    padding: 10px; 
+}
+.item-menu div p, h3{
+    margin: 1px 2px;
+} 
+
+.image-wrapper{
+    max-width: 100px;
+}
+.image-wrapper img{
+    width: 100%;
+    height: auto;
+     place-items: center;
+
+} */
+.nested-btn{
+width:100%;
+}
+.nested-btn button{
+    width: 80%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family:ink free;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color:rgb(22, 92, 172)
+}
+.nested-btn .main{
+    background: rgba(255, 0, 0, 0.753);
+}
+.nested-btn .bebidas{
+    background: rgba(255, 0, 0, 0.527);
+}
+.nested-btn .alcoolicos {
+    background: rgba(255, 0, 0, 0.308);
+}
+.nested-btn .naoalcoolicos{
+        background: rgba(129, 12, 129, 0.267);
+    }
+
+       

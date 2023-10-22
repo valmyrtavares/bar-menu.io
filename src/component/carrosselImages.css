@@ -1,0 +1,13 @@
+.content-carrossel .carrossel{
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    margin: 0 15%;
+    
+}
+.content-carrossel .carrossel img{
+    
+    object-fit: cover;
+    width: 70%;
+    height: 25vh;
+}
