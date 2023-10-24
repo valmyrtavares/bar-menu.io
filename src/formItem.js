@@ -20,7 +20,8 @@ function FormItem() {
   }, []);
 
   const fetchCategories = async () => {
-    const categories = await fetchCategoriesItem();
+    const categories = await fetchCategoriesItem('button');
+    console.log(categories);
     categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };

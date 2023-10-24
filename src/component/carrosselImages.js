@@ -21,7 +21,7 @@ function CarrosselImages() {
   useEffect(() => {
     const intervalId = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % carrosselImages.length);
-    }, 2000);
+    }, 4000);
 
     return () => {
       clearInterval(intervalId);

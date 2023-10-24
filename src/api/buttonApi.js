@@ -18,14 +18,16 @@ export async function getBtnData(collectionName) {
     throw error;
   }
 }
-export async function fetchCategories() {
-  const categories = await getBtnData();
+
+export async function fetchCategories(item) {
+  const categories = await getBtnData(item);
+
   return categories.map((item) => item.parent);
 }
 
-export async function fetchCategoriesItem() {
-  const parents = await fetchCategories(); // All parents used
-  const categories = await getBtnData(); //Whole objects array from firevase
+export async function fetchCategoriesItem(collectionName) {
+  const parents = await fetchCategories(collectionName); // All parents used
+  const categories = await getBtnData(collectionName); //Whole objects array from firevase
 
   let usedCategories = new Set(categories.map((item) => item.category)); //Changing categories in object and  to set to remove duplicates
   const usedParentsItems = parents.filter((item) => !usedCategories.has(item)); //Filtering parents that are not in usedCategories
