@@ -7,6 +7,7 @@ import MainMenu from './Pages/MainMenu';
 // import { getBtnData } from './api/buttonApi';
 import FormItem from './formItem';
 import Header from './component/header';
+import MenuButton from './component/menuButton';
 // import CarrosselImages from './component/carrosselImages';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
   return (
     <>
       {true && <Header />}
+      <MenuButton />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainMenu />} />

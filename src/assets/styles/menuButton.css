@@ -1,0 +1,53 @@
+*{
+    text-decoration: none;
+    list-style:none;
+}
+
+[data-menu="button"] {
+   display:none
+}
+[data-menu="lista"] {
+    display:flex;
+    justify-content: space-around;
+    
+
+
+ }
+@media(max-width:700px){
+    [data-menu="button"] {
+        display:flex;  
+        padding: .5rem 1rem;
+        align-items:center;
+        border: none;
+        background: none;
+        position: fixed;
+        top: 100px;
+        left: 11px;
+        
+    }
+    [data-menu="button"]::before{        
+        content:'';
+        width:50px;
+        height: 8px;
+        display: inline-block;
+        background:#6b0d0d;
+        margin-right:4px;
+        box-shadow: 0 13px #6b0d0d,0 -13px #6b0d0d;
+        
+    }
+    [data-menu="lista"] {
+        display:none;
+        width:100px;
+        align-items: right;
+        flex-direction: column;
+        justify-content: space-around;
+        border:solid 1px black;
+        padding:0;
+        margin:0;
+        height: 180px;    
+     }
+    .active{
+         display:flex;
+     }
+}
+
