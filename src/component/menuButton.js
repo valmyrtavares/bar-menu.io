@@ -1,12 +1,18 @@
 import React from 'react';
 import '../assets/styles/menuButton.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 const MenuButton = () => {
   const [modal, setModal] = React.useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setModal(!modal);
   };
+
+  React.useEffect(() => {
+    setModal(false);
+  }, [navigate]);
 
   return (
     <>

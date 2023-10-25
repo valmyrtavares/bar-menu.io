@@ -31,12 +31,12 @@ function App() {
   //butons collections
   // if (menuButton === null) return null;
 
-  const [checkbox, setCheckbox] = React.useState(false);
+  // const [checkbox, setCheckbox] = React.useState(false);
 
-  function handleChange({ target }) {
-    setCheckbox(target.checked);
-    console.log(checkbox);
-  }
+  // function handleChange({ target }) {
+  //   setCheckbox(target.checked);
+  //   console.log(checkbox);
+  // }
   return (
     <BrowserRouter>
       {true && <Header />}
