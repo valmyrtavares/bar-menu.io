@@ -38,26 +38,14 @@ function App() {
     console.log(checkbox);
   }
   return (
-    <>
+    <BrowserRouter>
       {true && <Header />}
       <MenuButton />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<MainMenu />} />
-          <Route path="/admin/item" element={<FormItem />} />
-        </Routes>
-      </BrowserRouter>
-    </>
-    //   <div>
-    //     {false && <CarrosselImages />}
-    //     {false && <Form />}
-    //     {menuButton.map((item, index) => (
-    //       <div key={index}>
-    //         <NestedBtn parent={'main'} item={item} menuButton={menuButton} />
-    //       </div>
-    //     ))}
-    //     <div>{true && <FormItem />}</div>
-    //   </div>
+      <Routes>
+        <Route path="/" element={<MainMenu />} />
+        <Route path="/admin/item" element={<FormItem />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

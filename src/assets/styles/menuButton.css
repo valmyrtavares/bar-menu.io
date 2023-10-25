@@ -2,6 +2,25 @@
     text-decoration: none;
     list-style:none;
 }
+.modal_menu{
+    position:fixed;
+    top:10%;
+    left:31px;   
+    background-color:white;
+    border: #6b0d0d solid 3px;
+    border-radius: 10px;
+}
+.modal_menu ul{
+    padding-left:1px
+}
+.modal_menu ul li{
+    padding: 17px 50px 5px 21px;
+    font-family: Calibri;
+    font-size:31px;
+    font-weight: bold;
+    color: rgb(22, 92, 172);
+}
+
 
 [data-menu="button"] {
    display:none
