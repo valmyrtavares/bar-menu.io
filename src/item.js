@@ -1,5 +1,6 @@
 import React from 'react';
 import { getBtnData } from './api/buttonApi';
+import './assets/styles/item.css';
 
 function Item() {
   const [item, setItem] = React.useState([]);
@@ -21,14 +22,16 @@ function Item() {
     <>
       {item &&
         item.map((item, index) => (
-          <div key={index}>
-            <h2>{item.title}</h2>
-            <p>{item.description}</p>
-            <p>{item.price}</p>
-            <p>{item.category}</p>
-            <p>{item.parent}</p>
-            <p>{item.image}</p>
-            <p>{item.carrossel}</p>
+          <div key={index} className="item-container container my-2 card">
+            <div className="row">
+              <div className="col-7">
+                <h2 className="my-0">{item.title}</h2>
+                <p className="comments">{item.comment}</p>
+                <p className="price float-end fw-bold">R${item.price},00</p>
+              </div>
+
+              <img className="col-5 img-thumbnail" src={item.image} alt="123" />
+            </div>
           </div>
         ))}
     </>

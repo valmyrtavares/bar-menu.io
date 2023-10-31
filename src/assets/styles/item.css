@@ -1,0 +1,16 @@
+.item-container:{
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;    
+}
+.item-container h2{
+color:#A43334;
+font-size:25px;
+font-weight: bold;
+}
+.item-container .comments{
+    font-size: 12px;
+    color:#A43334;
+
+}
+.price{
+color: #A43334;
+}

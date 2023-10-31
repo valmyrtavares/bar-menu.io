@@ -35,7 +35,7 @@ function MainMenu() {
             </div>
           ))}
         <div>{false && <FormItem />}</div>
-        <div>{true && <Item />}</div> //testing componetn item
+        <div>{true && <Item />}</div> //testing component item
       </div>
     </>
   );
