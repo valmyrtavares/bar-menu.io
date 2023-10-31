@@ -5,6 +5,7 @@ import Header from '../component/header';
 import NestedBtn from '../nestedBtn';
 import { getBtnData } from '../api/buttonApi';
 import FormItem from '../formItem';
+import Item from '../item';
 
 function MainMenu() {
   const [displayForm, setDisplayForm] = React.useState(false);
@@ -34,6 +35,7 @@ function MainMenu() {
             </div>
           ))}
         <div>{false && <FormItem />}</div>
+        <div>{true && <Item />}</div> //testing componetn item
       </div>
     </>
   );
