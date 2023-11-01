@@ -14,6 +14,10 @@ function MainMenu() {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
+        //  const data = await getBtnData('button');
+        //  const dataItem = await getBtnData('item');
+        //  setMenuButton(data);
+        //  setItem(dataItem);
         const [data, dataItem] = await Promise.all([
           getBtnData('button'),
           getBtnData('item'),
