@@ -10,7 +10,6 @@ function Item() {
       try {
         const data = await getBtnData('item');
         setItem(data);
-        console.log(data);
       } catch (error) {
         console.log('Error fetching data', error);
       }

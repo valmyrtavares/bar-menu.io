@@ -4,6 +4,7 @@ import './assets/styles/nestedBtn.css';
 const NestedBtn = ({ item, parent, menuButton }) => {
   const [display, setDisplay] = useState(false);
   const [childCategory, setChildCategory] = React.useState([]);
+  const [childItem, setChildItem] = React.useState([]);
 
   const hasChildItems = () => {
     setDisplay(!display);
