@@ -21,7 +21,7 @@ export async function getBtnData(collectionName) {
 
 export async function fetchCategories(item) {
   const categories = await getBtnData(item);
-
+  console.log(categories);
   return categories.map((item) => item.parent);
 }
 

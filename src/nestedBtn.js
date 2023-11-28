@@ -23,7 +23,6 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
       const filterItem = dishes.filter(
         (dishe) => item.parent == dishe.category
       );
-      console.log(filterItem);
       setChildItem(filterItem);
     }
   }, []);
@@ -35,7 +34,6 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
           {item.title}
         </button>
       )}
-
       {display &&
         childCategory.length > 0 &&
         childCategory.map((childItem, index) => (
@@ -49,7 +47,6 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
             </div>
           </React.Fragment>
         ))}
-
       {display &&
         childItem.length > 0 &&
         childItem.map((item, index) => (

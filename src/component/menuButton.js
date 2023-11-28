@@ -29,9 +29,9 @@ const MenuButton = () => {
             <li>Pedidos</li>
             <li>Conta</li>
             <li>Promoções</li>
-            <li>Pedidos</li>
+            <Link to="/admin/category">form categoria</Link>
             <li>
-              <Link to="/admin/item">Sobre</Link>
+              <Link to="/admin/item">form pratos</Link>
             </li>
           </ul>
         </div>

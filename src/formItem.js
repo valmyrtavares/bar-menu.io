@@ -76,7 +76,7 @@ function FormItem() {
   }
 
   return (
-    <div className="container mt-5 p-3 bg-body-tertiar ">
+    <div className="container mt-5 p-3 bg-body-tertiar">
       <Title title="Adicione um novo prato" />
       <form onSubmit={handleSubmit} className="m-1">
         <Input

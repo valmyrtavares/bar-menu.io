@@ -2,6 +2,7 @@ import React from 'react';
 import Input from './component/Input';
 import { fetchCategories, fetchCategoriesItem } from './api/buttonApi';
 import './assets/styles/form.css';
+import Title from './component/title';
 
 function Form() {
   const [form, setForm] = React.useState({
@@ -14,18 +15,11 @@ function Form() {
 
   React.useEffect(() => {
     const fetchCategory = async () => {
-      const categories = await fetchCategories();
-      setCategories(categories);
+      const grabCategory = await fetchCategories('button');
+      grabCategory.unshift('Selecione uma categoria'); // Add a first option
+      setCategories(grabCategory);
     };
     fetchCategory();
-    console.log(categories);
-
-    //    const fetchCategoryItem = async () => {
-    //   const cat = await fetchCategoriesItem();
-    //   setCategories(categories)
-    // }
-    // fetchCategoryItem();
-    // console.log(categories);
   }, []);
 
   function handleSubmit(event) {
@@ -58,35 +52,49 @@ function Form() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="form-position">
-      <Input
-        id="title"
-        label="title"
-        value={form.title}
-        type="text"
-        onChange={handleChange}
-      />
-      <select id="category" value={form.category} onChange={handleChange}>
-        {categories.map((category) => (
-          <option value={category}>{category}</option>
-        ))}
-      </select>
-      <Input
-        id="parent"
-        label="Parent"
-        value={form.parent}
-        type="text"
-        onChange={handleChange}
-      />
-      <Input
-        id="display"
-        label="Display"
-        value={form.display}
-        type="text"
-        onChange={handleChange}
-      />
-      <button>Enviar</button>
-    </form>
+    <div className="container mt-5 p-3 bg-body-tertiar">
+      <Title title="Adicione um novo botão" />
+      <form onSubmit={handleSubmit} className="m-1">
+        <Input
+          id="title"
+          label="title"
+          value={form.title}
+          type="text"
+          onChange={handleChange}
+        />
+        <div className="my-3">
+          <label className="form-label">Categoria</label>
+          <select
+            id="category"
+            className="form-select"
+            value={form.category}
+            onChange={handleChange}
+          >
+            {categories &&
+              categories.map((category, index) => (
+                <option key={index} value={category}>
+                  {category}
+                </option>
+              ))}
+          </select>
+        </div>
+        <Input
+          id="parent"
+          label="Parent"
+          value={form.parent}
+          type="text"
+          onChange={handleChange}
+        />
+        <Input
+          id="display"
+          label="Display"
+          value={form.display}
+          type="text"
+          onChange={handleChange}
+        />
+        <button className="btn btn-primary">Enviar</button>
+      </form>
+    </div>
   );
 }
 export default Form;

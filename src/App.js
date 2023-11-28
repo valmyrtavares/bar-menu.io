@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
 // import NestedBtn from './nestedBtn';
-// import Form from './form';
+import Form from './form';
 // import Button from './component/Button';
 // import { getBtnData } from './api/buttonApi';
 import FormItem from './formItem';
@@ -44,6 +44,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainMenu />} />
         <Route path="/admin/item" element={<FormItem />} />
+        <Route path="/admin/category" element={<Form />} />
       </Routes>
     </BrowserRouter>
   );
