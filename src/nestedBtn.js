@@ -15,7 +15,6 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
     if (menuButton) {
       setChildCategory(menuButton.filter((btn) => item.parent == btn.category));
     }
-    console.log(childItem);
   }, []);
 
   React.useEffect(() => {

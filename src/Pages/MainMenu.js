@@ -1,7 +1,6 @@
 import React from 'react';
 import Form from '../form';
 import CarrosselImages from '../component/carrosselImages';
-import Header from '../component/header';
 import NestedBtn from '../nestedBtn';
 import { getBtnData } from '../api/buttonApi';
 import FormItem from '../formItem';
@@ -20,6 +19,8 @@ function MainMenu() {
         ]);
         setMenuButton(data);
         setDishes(dataItem);
+        console.log(data);
+        console.log(dataItem);
       } catch (error) {
         console.error('Error fetching data', error);
       }
@@ -30,9 +31,7 @@ function MainMenu() {
   return (
     <>
       <div>
-        {false && <Header />}
         {true && <CarrosselImages />}
-        {false && <Form />}
         {menuButton &&
           dishes &&
           menuButton.map((item, index) => (
@@ -45,8 +44,6 @@ function MainMenu() {
               />
             </div>
           ))}
-        <div>{false && <FormItem />}</div>
-        <div>{true && <Item />}</div> //testing component item
       </div>
     </>
   );
