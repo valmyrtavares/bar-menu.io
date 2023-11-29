@@ -1,21 +1,38 @@
+import { app } from '../config-firebase/firebase.js';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+
+//FIRESTORE
+const db = getFirestore(app);
+
 export async function getBtnData(collectionName) {
+  const db = getFirestore();
+  const docRef = collection(db, collectionName);
+
   try {
-    const response = await fetch(
-      `https://react-bar-67f33-default-rtdb.firebaseio.com/${collectionName}.json`
-    );
-    if (!response.ok) {
-      throw new Error('Something went wrong!');
-    }
-    const data = await response.json();
-    let updatedArray = [];
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        updatedArray.push({ ...data[key], id: key });
-      }
-    }
-    return updatedArray;
+    const docSnap = await getDocs(docRef);
+    let array = [];
+
+    docSnap.forEach((doc) => {
+      array.push(doc.data());
+    });
+
+    return array;
+    //   const response = await fetch(
+    //     `https://react-bar-67f33-default-rtdb.firebaseio.com/${collectionName}.json`
+    //   );
+    //   if (!response.ok) {
+    //     throw new Error('Something went wrong!');
+    //   }
+    //   const data = await response.json();
+    //   let updatedArray = [];
+    //   for (const key in data) {
+    //     if (data.hasOwnProperty(key)) {
+    //       updatedArray.push({ ...data[key], id: key });
+    //     }
+    //   }
+    //   return updatedArray;
   } catch (error) {
-    throw error;
+    //   throw error;
   }
 }
 
