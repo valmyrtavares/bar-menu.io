@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchCategoriesItem } from './api/buttonApi';
 import Input from './component/Input';
 import Title from './component/title';
+import { app } from './config-firebase/firebase.js';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 function FormItem() {
   const [form, setForm] = React.useState({
@@ -14,6 +16,9 @@ function FormItem() {
     carrossel: false,
   });
   const [categories, setCategories] = React.useState([]);
+
+  //FIRESTORE
+  const db = getFirestore(app);
 
   React.useEffect(() => {
     fetchCategories();
@@ -44,34 +49,12 @@ function FormItem() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch('https://react-bar-67f33-default-rtdb.firebaseio.com/item.json', {
-      method: 'POST',
-      body: JSON.stringify(form), // Converte o objeto form em JSON
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Erro ao enviar os dados para o Firebase.');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Dados enviados com sucesso:', data);
-        setForm({
-          //Clear the form
-          title: '',
-          category: '',
-          comment: '',
-          price: 0,
-          image: '',
-          display: false,
-          carrossel: false,
-        });
+    addDoc(collection(db, 'item'), form)
+      .then((docRef) => {
+        console.log(docRef.id);
       })
       .catch((error) => {
-        console.error('Erro:', error);
+        console.log(error);
       });
   }
 
