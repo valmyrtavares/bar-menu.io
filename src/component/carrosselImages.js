@@ -12,6 +12,7 @@ function CarrosselImages() {
       const carrosselImagesNovo = response
         .filter((item) => item.carrossel === true)
         .map((item) => item.image);
+      console.log(carrosselImagesNovo);
       setCarrosselImages(carrosselImagesNovo);
     };
 

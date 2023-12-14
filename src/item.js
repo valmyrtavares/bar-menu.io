@@ -7,6 +7,7 @@ function Item({ newItem }) {
 
   React.useEffect(() => {
     setItem(newItem);
+    console.log(item)
   }, []);
   //stating to styling the component item
   return (
