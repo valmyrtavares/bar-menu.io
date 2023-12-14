@@ -43,6 +43,7 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
                 parent={item.parent}
                 item={childItem}
                 menuButton={menuButton}
+                dishes={dishes}
               />
             </div>
           </React.Fragment>
