@@ -36,3 +36,20 @@ export async function fetchCategoriesItem(collectionName) {
 
   return noUsedParentsItems;
 }
+
+// export async function fetchCategoriesButton(collectionName){
+//     const categoriesItem = await getBtnData(collectionName)
+//     const  filteredCategoriesItem = new Set(categoriesItem.map((item)=> item.category))
+//     let btnCategories = await getBtnData("button")
+//     btnCategories = btnCategories.map((item)=> item.category)
+//     return [...new Set(btnCategories.filter((item) => !filteredCategoriesItem.has(item)))];
+
+// }
+export async function fetchCategoriesButton(collectionName) {
+  const categoriesItem = new Set((await getBtnData(collectionName)).map(item => item.category));
+  const btnCategories = (await getBtnData("button")).map(item => item.parent);   
+  
+
+  return [...new Set(btnCategories.filter(item => !categoriesItem.has(item)))];
+}
+

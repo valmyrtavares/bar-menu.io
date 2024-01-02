@@ -4,8 +4,10 @@ import Input from './component/Input';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { useNavigate  } from 'react-router-dom';
 
 function FormItem() {
+  const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
     category: '',
@@ -25,8 +27,7 @@ function FormItem() {
   }, []);
 
   const fetchCategories = async () => {
-    const categories = await fetchCategoriesItem('button');
-    console.log(categories);
+    const categories = await fetchCategoriesItem('button');    
     categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
@@ -52,6 +53,7 @@ function FormItem() {
     addDoc(collection(db, 'item'), form)
       .then((docRef) => {
         console.log(docRef.id);
+        navigate('/');
       })
       .catch((error) => {
         console.log(error);

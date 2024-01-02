@@ -1,12 +1,14 @@
 import React from 'react';
 import Input from './component/Input';
-import { fetchCategories, fetchCategoriesItem } from './api/buttonApi';
+import { fetchCategories, fetchCategoriesItem, fetchCategoriesButton } from './api/buttonApi';
 import './assets/styles/form.css';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { useNavigate  } from 'react-router-dom';
 
 function Form() {
+  const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
     category: '',
@@ -20,12 +22,16 @@ function Form() {
 
   React.useEffect(() => {
     const fetchCategory = async () => {
-      const grabCategory = await fetchCategories('button');
+      const grabCategory = await fetchCategoriesButton('item');
       grabCategory.unshift('Selecione uma categoria'); // Add a first option
       setCategories(grabCategory);
     };
     fetchCategory();
   }, []);
+
+  React.useEffect(() =>{
+    const categories = fetchCategoriesButton("item")
+  })
 
   function handleSubmit(event) {
     event.preventDefault(); // Impede o comportamento padrão de recarregar a página
@@ -33,6 +39,13 @@ function Form() {
     addDoc(collection(db, 'button'), form)
       .then((docRef) => {
         console.log(docRef.id);
+        setForm({
+          title: '',
+          category: '',
+          parent: '',
+          display: '',
+        })
+        navigate('/');
       })
       .catch((error) => {
         console.log(error);
