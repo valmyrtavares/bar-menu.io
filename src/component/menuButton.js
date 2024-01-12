@@ -27,12 +27,21 @@ const MenuButton = () => {
               <Link to="/">Home</Link>
             </li>
             <li>Pedidos</li>
+            {/* <li>
+              <Link to="/admin/login">Login</Link>
+            </li>
+            <li>
+              <Link to="/admin/signup">Sign up</Link>
+            </li> */}
             <li>Conta</li>
-            <li>Promoções</li>
-            <Link to="/admin/category">form categoria</Link>
+            <li>
+              {' '}
+              <Link to="/admin">Admin</Link>
+            </li>
+            {/* <Link to="/admin/category">form categoria</Link>
             <li>
               <Link to="/admin/item">form pratos</Link>
-            </li>
+            </li> */}
           </ul>
         </div>
       )}
