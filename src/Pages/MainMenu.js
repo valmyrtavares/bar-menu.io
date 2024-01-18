@@ -16,8 +16,6 @@ function MainMenu() {
         ]);
         setMenuButton(data);
         setDishes(dataItem);
-        console.log(data);
-        console.log(dataItem);
       } catch (error) {
         console.error('Error fetching data', error);
       }

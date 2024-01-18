@@ -1,8 +1,26 @@
+import { debugErrorMap } from 'firebase/auth';
 import { app } from '../config-firebase/firebase.js';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  deleteDoc,
+} from 'firebase/firestore';
 
 //FIRESTORE
 const db = getFirestore(app);
+
+export async function deleteData(coolectionName, id) {
+  const db = getFirestore(app);
+  try {
+    const docRef = doc(db, coolectionName, id);
+    debugger;
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export async function getBtnData(collectionName) {
   const db = getFirestore();
@@ -13,7 +31,7 @@ export async function getBtnData(collectionName) {
     let array = [];
 
     docSnap.forEach((doc) => {
-      array.push(doc.data());
+      array.push({ ...doc.data(), id: doc.id });
     });
 
     return array;
@@ -32,7 +50,9 @@ export async function fetchCategoriesItem(collectionName) {
   const categories = await getBtnData(collectionName); //Whole objects array from firevase
 
   let usedCategories = new Set(categories.map((item) => item.category)); //Changing categories in object and  to set to remove duplicates
-  const noUsedParentsItems = parents.filter((item) => !usedCategories.has(item)); //Filtering parents that are not in usedCategories
+  const noUsedParentsItems = parents.filter(
+    (item) => !usedCategories.has(item)
+  ); //Filtering parents that are not in usedCategories
 
   return noUsedParentsItems;
 }
@@ -46,10 +66,12 @@ export async function fetchCategoriesItem(collectionName) {
 
 // }
 export async function fetchCategoriesButton(collectionName) {
-  const categoriesItem = new Set((await getBtnData(collectionName)).map(item => item.category));
-  const btnCategories = (await getBtnData("button")).map(item => item.parent);   
-  
+  const categoriesItem = new Set(
+    (await getBtnData(collectionName)).map((item) => item.category)
+  );
+  const btnCategories = (await getBtnData('button')).map((item) => item.parent);
 
-  return [...new Set(btnCategories.filter(item => !categoriesItem.has(item)))];
+  return [
+    ...new Set(btnCategories.filter((item) => !categoriesItem.has(item))),
+  ];
 }
-
