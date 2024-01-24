@@ -1,9 +1,12 @@
 import React from 'react';
 import { getBtnData, deleteData } from './api/buttonApi';
+import Form from './form';
 
 const EditFormButton = () => {
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
+  const [modalEdit, setModalEdit] = React.useState(false);
+  const [dataObj, setDataObj] = React.useState({});
 
   // React.useEffect(() => {
   //   const fetchData = async () => {
@@ -63,11 +66,14 @@ const EditFormButton = () => {
     const test = await deleteData('button', n);
   };
 
+  function openModal(item) {
+    setModalEdit(true);
+    setDataObj(item);
+  }
+
   return (
     <div className="container">
-      <button className="btn btn-success" onClick={fetchData}>
-        Trazendo dados
-      </button>
+      {modalEdit && <Form dataObj={dataObj} />}
       {menuButton &&
         menuButton.map((item, index) => {
           return (
@@ -79,7 +85,12 @@ const EditFormButton = () => {
               >
                 Excluir{' '}
               </button>
-              <button className="btn btn-warning col-3">Editar </button>
+              <button
+                className="btn btn-warning col-3"
+                onClick={() => openModal(item)}
+              >
+                Editar{' '}
+              </button>
             </div>
           );
         })}

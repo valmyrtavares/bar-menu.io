@@ -1,13 +1,17 @@
 import React from 'react';
 import Input from './component/Input';
-import { fetchCategories, fetchCategoriesItem, fetchCategoriesButton } from './api/buttonApi';
+import {
+  fetchCategories,
+  fetchCategoriesItem,
+  fetchCategoriesButton,
+} from './api/buttonApi';
 import './assets/styles/form.css';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-function Form() {
+function Form({ dataObj }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -29,27 +33,43 @@ function Form() {
     fetchCategory();
   }, []);
 
-  React.useEffect(() =>{
-    const categories = fetchCategoriesButton("item")
-  })
+  React.useEffect(() => {
+    const categories = fetchCategoriesButton('item');
+  }, [dataObj]);
+
+  React.useEffect(() => {
+    if (dataObj) {
+      setForm(dataObj);
+      // form.title = dataObj.title;
+      // form.category = dataObj.category;
+      // form.parent = dataObj.parent;
+      // form.display = dataObj.display;
+    }
+  }, [dataObj]);
 
   function handleSubmit(event) {
     event.preventDefault(); // Impede o comportamento padrão de recarregar a página
-
-    addDoc(collection(db, 'button'), form)
-      .then((docRef) => {
-        console.log(docRef.id);
-        setForm({
-          title: '',
-          category: '',
-          parent: '',
-          display: '',
+    debugger;
+    if (!dataObj) {
+      alert('this is pushing');
+      addDoc(collection(db, 'button'), form)
+        .then((docRef) => {
+          console.log(docRef.id);
+          setForm({
+            title: '',
+            category: '',
+            parent: '',
+            display: '',
+          });
+          navigate('/');
         })
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      alert('this is update');
+      return;
+    }
   }
 
   function handleChange({ target }) {
