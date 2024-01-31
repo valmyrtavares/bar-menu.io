@@ -8,7 +8,13 @@ import {
 import './assets/styles/form.css';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+} from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 function Form({ dataObj }) {
@@ -40,10 +46,8 @@ function Form({ dataObj }) {
   React.useEffect(() => {
     if (dataObj) {
       setForm(dataObj);
-      // form.title = dataObj.title;
-      // form.category = dataObj.category;
-      // form.parent = dataObj.parent;
-      // form.display = dataObj.display;
+      console.log(form);
+      debugger;
     }
   }, [dataObj]);
 
@@ -68,6 +72,13 @@ function Form({ dataObj }) {
         });
     } else {
       alert('this is update');
+      setDoc(doc(db, 'button', dataObj.id), form)
+        .then(() => {
+          console.log('Document successfully updated !');
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       return;
     }
   }
