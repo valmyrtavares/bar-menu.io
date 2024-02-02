@@ -19,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainMenu />} />
         <Route path="/admin/editButton" element={<EditFormButton />} />
+        <Route path="/admin/EditButton/:id" element={<EditFormButton />} />
         <Route path="/admin/item" element={<FormItem />} />
         <Route path="/admin/category" element={<Form />} />
         <Route path="/admin/login" element={<Login />} />
