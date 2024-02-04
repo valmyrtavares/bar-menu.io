@@ -3,8 +3,15 @@
     font-size: 17px;
 }
 
-.formEdit{
+.form-position {
     position: absolute;
-    top: 10px;
-    left:10px
+    top: 100px;
+    left: 15%;
+}
+@media(max-width: 450px) {
+    .form-position {
+        position: absolute;
+        top: 100px;
+        left: 3%;
+    }
 }

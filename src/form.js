@@ -5,7 +5,6 @@ import {
   fetchCategoriesItem,
   fetchCategoriesButton,
 } from './api/buttonApi';
-import './assets/styles/form.css';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
 import {
@@ -52,7 +51,6 @@ function Form({ dataObj }) {
 
   function handleSubmit(event) {
     event.preventDefault(); // Impede o comportamento padrão de recarregar a página
-    debugger;
     if (!dataObj) {
       alert('this is pushing');
       addDoc(collection(db, 'button'), form)

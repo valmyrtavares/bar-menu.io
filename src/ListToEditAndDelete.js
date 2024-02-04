@@ -4,6 +4,7 @@ import Form from './form';
 import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
 import './assets/styles/ListToEditAndDelete.css';
+import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {
   const [menuButton, setMenuButton] = React.useState([]);
@@ -84,9 +85,19 @@ const EditFormButton = () => {
     }
   }
 
+  function closeModal() {
+    setModalEditButton(false);
+    setModalEditDishes(false);
+  }
+
   return (
     <div className="container">
-      {modalEditButton && <Form dataObj={dataObj} />}
+      {modalEditButton && (
+        <div className="form-position">
+          <CloseButton onClick={() => closeModal()} />
+          <Form dataObj={dataObj} />
+        </div>
+      )}
       {menuButton &&
         id === 'cat' &&
         menuButton.map((item, index) => {
@@ -108,7 +119,12 @@ const EditFormButton = () => {
             </div>
           );
         })}
-      {modalEditDishes && <FormItem dataObj={dataObj} />}
+      {modalEditDishes && (
+        <div className="form-position">
+          <CloseButton onClick={() => closeModal()} />
+          <FormItem dataObj={dataObj} />
+        </div>
+      )}
       {menuButton &&
         id === 'dishes' &&
         dishes.map((item, index) => {
