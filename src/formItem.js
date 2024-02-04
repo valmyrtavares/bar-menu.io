@@ -3,10 +3,16 @@ import { fetchCategoriesItem } from './api/buttonApi';
 import Input from './component/Input';
 import Title from './component/title';
 import { app } from './config-firebase/firebase.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { useNavigate  } from 'react-router-dom';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+} from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
-function FormItem() {
+function FormItem({ dataObj }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -26,8 +32,14 @@ function FormItem() {
     fetchCategories();
   }, []);
 
+  React.useEffect(() => {
+    if (dataObj) {
+      setForm(dataObj);
+    }
+  }, [dataObj]);
+
   const fetchCategories = async () => {
-    const categories = await fetchCategoriesItem('button');    
+    const categories = await fetchCategoriesItem('button');
     categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
@@ -50,14 +62,24 @@ function FormItem() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    addDoc(collection(db, 'item'), form)
-      .then((docRef) => {
-        console.log(docRef.id);
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (!dataObj) {
+      addDoc(collection(db, 'item'), form)
+        .then((docRef) => {
+          console.log(docRef.id);
+          navigate('/');
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      setDoc(doc(db, 'item', dataObj.id), form)
+        .then(() => {
+          console.log('Document successfully updated !');
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
 
   return (

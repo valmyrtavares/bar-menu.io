@@ -47,7 +47,6 @@ function Form({ dataObj }) {
     if (dataObj) {
       setForm(dataObj);
       console.log(form);
-      debugger;
     }
   }, [dataObj]);
 
@@ -71,7 +70,6 @@ function Form({ dataObj }) {
           console.log(error);
         });
     } else {
-      alert('this is update');
       setDoc(doc(db, 'button', dataObj.id), form)
         .then(() => {
           console.log('Document successfully updated !');

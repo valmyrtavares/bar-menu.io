@@ -9,7 +9,7 @@ import Signup from './Login/signup';
 import Login from './Login/login';
 import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
-import EditFormButton from './EditFormButton';
+import EditFormButton from './ListToEditAndDelete';
 
 function App() {
   return (

@@ -1,13 +1,15 @@
 import React from 'react';
 import { getBtnData, deleteData } from './api/buttonApi';
 import Form from './form';
+import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
-import './assets/styles/EditFormButton.css';
+import './assets/styles/ListToEditAndDelete.css';
 
 const EditFormButton = () => {
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
-  const [modalEdit, setModalEdit] = React.useState(false);
+  const [modalEditButton, setModalEditButton] = React.useState(false);
+  const [modalEditDishes, setModalEditDishes] = React.useState(false);
   const [dataObj, setDataObj] = React.useState({});
   const { id } = useParams();
 
@@ -72,14 +74,19 @@ const EditFormButton = () => {
     const test = await deleteData(collecton, n);
   };
 
-  function openModal(item) {
-    setModalEdit(true);
-    setDataObj(item);
+  function openModal(item, type) {
+    if (type === 'button') {
+      setModalEditButton(true);
+      setDataObj(item);
+    } else {
+      setModalEditDishes(true);
+      setDataObj(item);
+    }
   }
 
   return (
     <div className="container">
-      {modalEdit && <Form dataObj={dataObj} />}
+      {modalEditButton && <Form dataObj={dataObj} />}
       {menuButton &&
         id === 'cat' &&
         menuButton.map((item, index) => {
@@ -94,13 +101,14 @@ const EditFormButton = () => {
               </button>
               <button
                 className="btn btn-warning col-3"
-                onClick={() => openModal(item)}
+                onClick={() => openModal(item, 'button')}
               >
                 Editar{' '}
               </button>
             </div>
           );
         })}
+      {modalEditDishes && <FormItem dataObj={dataObj} />}
       {menuButton &&
         id === 'dishes' &&
         dishes.map((item, index) => {
@@ -115,7 +123,7 @@ const EditFormButton = () => {
               </button>
               <button
                 className="btn btn-warning col-3"
-                onClick={() => openModal(item)}
+                onClick={() => openModal(item, 'dishes')}
               >
                 Editar{' '}
               </button>

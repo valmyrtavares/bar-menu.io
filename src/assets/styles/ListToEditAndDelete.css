@@ -1,0 +1,10 @@
+.title-dishes {
+    color: black;
+    font-size: 17px;
+}
+
+.formEdit{
+    position: absolute;
+    top: 10px;
+    left:10px
+}
