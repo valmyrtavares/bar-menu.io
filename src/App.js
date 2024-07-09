@@ -10,8 +10,6 @@ import Login from './Login/login';
 import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
 import ListToEditAndDelete from './ListToEditAndDelete';
-//alterando só para testar
-//alterando só para testar
 
 function App() {
   return (
