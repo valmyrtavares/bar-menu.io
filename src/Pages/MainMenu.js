@@ -4,7 +4,7 @@ import NestedBtn from '../nestedBtn';
 import { getBtnData } from '../api/buttonApi';
 
 function MainMenu() {
-  const [displayForm, setDisplayForm] = React.useState(false);
+  // const [displayForm, setDisplayForm] = React.useState(false);
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
   React.useEffect(() => {

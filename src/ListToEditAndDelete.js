@@ -4,7 +4,7 @@ import Form from './form';
 import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
 import './assets/styles/ListToEditAndDelete.css';
-import CloseButton from 'react-bootstrap/CloseButton';
+// import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {
   const [menuButton, setMenuButton] = React.useState([]);
@@ -94,7 +94,7 @@ const EditFormButton = () => {
     <div className="container">
       {modalEditButton && (
         <div className="form-position">
-          <CloseButton onClick={() => closeModal()} />
+          {/* <CloseButton onClick={() => closeModal()} /> */}
           <Form dataObj={dataObj} />
         </div>
       )}
@@ -121,7 +121,7 @@ const EditFormButton = () => {
         })}
       {modalEditDishes && (
         <div className="form-position">
-          <CloseButton onClick={() => closeModal()} />
+          {/* <CloseButton onClick={() => closeModal()} /> */}
           <FormItem dataObj={dataObj} />
         </div>
       )}
