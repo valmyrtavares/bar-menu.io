@@ -15,7 +15,6 @@ export async function deleteData(coolectionName, id) {
   const db = getFirestore(app);
   try {
     const docRef = doc(db, coolectionName, id);
-    debugger;
     await deleteDoc(docRef);
   } catch (error) {
     console.log(error);
@@ -25,15 +24,13 @@ export async function deleteData(coolectionName, id) {
 export async function getBtnData(collectionName) {
   const db = getFirestore();
   const docRef = collection(db, collectionName);
-
   try {
     const docSnap = await getDocs(docRef);
     let array = [];
-
     docSnap.forEach((doc) => {
       array.push({ ...doc.data(), id: doc.id });
     });
-
+    console.log('ARRAY  ', array);
     return array;
   } catch (error) {
     throw error;
