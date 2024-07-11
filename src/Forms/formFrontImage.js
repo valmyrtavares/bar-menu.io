@@ -3,11 +3,13 @@ import Input from '../component/Input';
 import { app, storage } from '../config-firebase/firebase.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { setDoc, doc, getFirestore } from 'firebase/firestore';
+import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';
 
 const FormFrontImage = () => {
   const [url, setUrl] = React.useState('');
   const [progress, setProgress] = React.useState('');
+  const global = React.useContext(GlobalContext);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -30,7 +32,7 @@ const FormFrontImage = () => {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUrl(downloadURL);
-          console.log(url);
+          global.setImage(downloadURL);
           setDoc(doc(db, 'frontImage', 'oIKq1AHF4cHMkqgOcz1h'), {
             image: downloadURL,
           })

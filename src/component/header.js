@@ -1,8 +1,10 @@
 import React from 'react';
 import { getBtnData } from '../api/buttonApi';
+import { GlobalContext } from '../GlobalContext';
 import './header.css';
 
 function Header() {
+  const global = React.useContext(GlobalContext);
   const [url, setUrl] = React.useState('');
 
   React.useEffect(() => {
@@ -20,7 +22,7 @@ function Header() {
   return (
     <header className="main_header">
       <nav>
-        <img src={url} alt="google logo" />
+        <img src={global.image} alt="google logo" />
       </nav>
     </header>
   );
