@@ -22,6 +22,9 @@ const FormMenu = () => {
         <button className="col-sm-4 btn btn-success nostyle m-2">
           <Link to="/admin/editButton/dishes">Lista de pratos</Link>
         </button>
+        <button className="col-sm-4 btn btn-success nostyle m-2">
+          <Link to="/admin/frontimage">Adicione sua marca</Link>
+        </button>
       </div>
     </div>
   );

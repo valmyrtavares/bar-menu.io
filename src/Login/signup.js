@@ -21,6 +21,7 @@ function Signup() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    debugger;
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,

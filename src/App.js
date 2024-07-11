@@ -9,6 +9,7 @@ import Signup from './Login/signup';
 import Login from './Login/login';
 import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
+import FormFrontImage from './Forms/formFrontImage';
 import ListToEditAndDelete from './ListToEditAndDelete';
 
 function App() {
@@ -25,8 +26,9 @@ function App() {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/signup" element={<Signup />} />
         <Route path="/admin" element={<Protected />} />
+        <Route path="/admin/signup" element={<Signup />} />
         <Route path="/admin/admin" element={<Admin />} />
-        <Route />
+        <Route path="/admin/frontimage" element={<FormFrontImage />} />
       </Routes>
     </BrowserRouter>
   );
