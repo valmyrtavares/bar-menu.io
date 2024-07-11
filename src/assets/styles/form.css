@@ -5,3 +5,7 @@
     background-color: rgb(221, 214, 214);
   
 }
+
+.image-preview{
+    max-width: 200px;
+}

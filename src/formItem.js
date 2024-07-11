@@ -2,7 +2,8 @@ import React from 'react';
 import { fetchCategoriesItem } from './api/buttonApi';
 import Input from './component/Input';
 import Title from './component/title';
-import { app } from './config-firebase/firebase.js';
+import { app, storage } from './config-firebase/firebase.js';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
   getFirestore,
   collection,
@@ -11,6 +12,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import './assets/styles/form.css';
 
 function FormItem({ dataObj }) {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ function FormItem({ dataObj }) {
     carrossel: false,
   });
   const [categories, setCategories] = React.useState([]);
+  const [url, setUrl] = React.useState('');
+  const [progress, setProgress] = React.useState(0);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -59,6 +63,42 @@ function FormItem({ dataObj }) {
       });
     }
   }
+
+  const onfileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const path = `dishes/${file.name}`;
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Progress function (optional)
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(progress);
+          console.log('Upload is ' + progress + '% done');
+        },
+        (error) => {
+          console.error(error);
+        },
+        async () => {
+          // Handle successful uploads
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setUrl(downloadURL);
+          console.log('File available at', downloadURL);
+          form.image = downloadURL;
+        }
+      );
+    }
+  };
+
+  // const handleUpload = () => {
+  //   if (image) {
+  //     const storageRef = ref(storage, `dishes/${image.name}`);
+  //     const uploadTask = this.uploadBytesResumable(storageRef, image);
+  //   }
+  // };
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -130,6 +170,9 @@ function FormItem({ dataObj }) {
           type="text"
           onChange={handleChange}
         />
+        <input type="file" onChange={onfileChange} />
+        <progress value={progress} max="100" />
+        {url && <img className="image-preview" src={url} alt="Uploaded file" />}
         <div className="form-check my-5">
           <input
             className="form-check-input"
