@@ -3,12 +3,13 @@
     list-style:none;
 }
 .modal_menu{
-    position:fixed;
-    top:10%;
-    left:31px;   
-    background-color:white;
+position: absolute;
+    top: 115px;
+    left: 17%;
+    background-color: white;
     border: #6b0d0d solid 3px;
     border-radius: 10px;
+    width: max-content;
 }
 .modal_menu ul{
     padding-left:1px
@@ -32,16 +33,16 @@
 
 
  }
-@media(max-width:700px){
+
     [data-menu="button"] {
         display:flex;  
         padding: .5rem 1rem;
         align-items:center;
         border: none;
         background: none;
-        position: fixed;
-        top: 36px;
-        left: 5px;
+        position: relative;
+        top: -169px;
+            left: -23px;
         
     }
     [data-menu="button"]::before{        
@@ -68,5 +69,5 @@
     .active{
          display:flex;
      }
-}
+
 

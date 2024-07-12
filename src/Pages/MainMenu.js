@@ -2,6 +2,7 @@ import React from 'react';
 import CarrosselImages from '../component/carrosselImages';
 import NestedBtn from '../component/nestedBtn';
 import { getBtnData } from '../api/Api';
+import MenuButton from '../component/menuButton';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -26,6 +27,7 @@ function MainMenu() {
   return (
     <>
       <div>
+        <MenuButton />
         {true && <CarrosselImages />}
         {menuButton &&
           dishes &&

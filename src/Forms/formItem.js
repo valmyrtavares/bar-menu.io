@@ -3,6 +3,7 @@ import { fetchCategoriesItem } from '../api/Api.js';
 import Input from '../component/Input';
 import Title from '../component/title';
 import { app, storage } from '../config-firebase/firebase.js';
+import MenuButton from '../component/menuButton';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
   getFirestore,
@@ -124,6 +125,7 @@ function FormItem({ dataObj }) {
 
   return (
     <div className="container mt-5 p-3 bg-body-tertiar">
+      <MenuButton />
       <Title title="Adicione um novo prato" />
       <form onSubmit={handleSubmit} className="m-1">
         <Input

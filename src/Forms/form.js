@@ -5,6 +5,7 @@ import {
   fetchCategoriesItem,
   fetchCategoriesButton,
 } from '../api/Api.js';
+import MenuButton from '../component/menuButton';
 import Title from '../component/title.js';
 import { app } from '../config-firebase/firebase.js';
 import {
@@ -86,6 +87,7 @@ function Form({ dataObj }) {
 
   return (
     <div className="container mt-5 p-3 bg-body-tertiar">
+      <MenuButton />
       <Title title="Adicione um novo botão" />
       <form onSubmit={handleSubmit} className="m-1">
         <Input

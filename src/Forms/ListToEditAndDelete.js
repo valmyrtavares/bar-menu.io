@@ -4,6 +4,7 @@ import Form from './form';
 import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
 import '../assets/styles/ListToEditAndDelete.css';
+import MenuButton from '../component/menuButton';
 //import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {
@@ -92,6 +93,7 @@ const EditFormButton = () => {
 
   return (
     <div className="container">
+      <MenuButton />
       {modalEditButton && (
         <div className="form-position">
           {/* <CloseButton onClick={() => closeModal()} /> */}
