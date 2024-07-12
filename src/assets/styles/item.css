@@ -17,10 +17,9 @@ color: #A43334;
 
 .content-modal-dishes{
    position: fixed;
-   top: 20%;
+   top: 200px;
    left:5%;
-   background: white;;
-   height:60vh;
+   background: white;
    border:solid 2px gray;
    width: 80%;  
    z-index: 10;
@@ -51,7 +50,8 @@ color: #A43334;
    color:black;
 }
 .content-modal-dishes h3 {
-    padding: 10%;
+    padding-bottom: 50px;
     color: black;
     text-align: center;
+    padding-bottom: 50px;
 }
