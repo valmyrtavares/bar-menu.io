@@ -2,3 +2,7 @@
     text-align: center;
     color:red;
 }
+.ultra-wrapper{
+    max-width: 600px;
+    margin:10px auto;
+}

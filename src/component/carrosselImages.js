@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/carrosselImages.css';
 import { getBtnData } from '../api/Api';
+import { ReactComponent as Forward } from '../assets/icons/arrow-bar-right.svg';
+import { ReactComponent as Backward } from '../assets/icons/arrow-bar-left.svg';
 
 function CarrosselImages() {
   const [index, setIndex] = useState(0);
@@ -46,12 +48,12 @@ function CarrosselImages() {
           <img src={carrosselImages[index]} alt={`Image ${index}`} />
         )}
       </div>
-      <div className="d-flex justify-content-between mt-3">
-        <button className="btn btn-success" onClick={backward}>
-          Anterior
+      <div className="wrapper d-flex justify-content-between mt-3">
+        <button onClick={backward}>
+          <Backward width={35} height={35} />
         </button>
-        <button className="btn btn-success" onClick={forward}>
-          Seguinte
+        <button onClick={forward}>
+          <Forward width={35} height={35} />
         </button>
       </div>
     </div>

@@ -11,26 +11,32 @@ import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
 import FormFrontImage from './Forms/formFrontImage';
 import ListToEditAndDelete from './Forms/ListToEditAndDelete';
+import './style.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      {true && <Header />}
-      <MenuButton />
-      <Routes>
-        <Route path="/" element={<MainMenu />} />
-        {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
-        <Route path="/admin/EditButton/:id" element={<ListToEditAndDelete />} />
-        <Route path="/admin/item" element={<FormItem />} />
-        <Route path="/admin/category" element={<Form />} />
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/signup" element={<Signup />} />
-        <Route path="/admin" element={<Protected />} />
-        <Route path="/admin/signup" element={<Signup />} />
-        <Route path="/admin/admin" element={<Admin />} />
-        <Route path="/admin/frontimage" element={<FormFrontImage />} />
-      </Routes>
-    </BrowserRouter>
+    <div className="ultra-wrapper">
+      <BrowserRouter>
+        {true && <Header />}
+        <MenuButton />
+        <Routes>
+          <Route path="/" element={<MainMenu />} />
+          {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
+          <Route
+            path="/admin/EditButton/:id"
+            element={<ListToEditAndDelete />}
+          />
+          <Route path="/admin/item" element={<FormItem />} />
+          <Route path="/admin/category" element={<Form />} />
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/signup" element={<Signup />} />
+          <Route path="/admin" element={<Protected />} />
+          <Route path="/admin/signup" element={<Signup />} />
+          <Route path="/admin/admin" element={<Admin />} />
+          <Route path="/admin/frontimage" element={<FormFrontImage />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 

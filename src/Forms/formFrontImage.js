@@ -5,11 +5,15 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { setDoc, doc, getFirestore } from 'firebase/firestore';
 import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';
+import { useNavigate } from 'react-router-dom';
 
 const FormFrontImage = () => {
   const [url, setUrl] = React.useState('');
   const [progress, setProgress] = React.useState('');
   const global = React.useContext(GlobalContext);
+
+  //Navigate
+  const navigate = useNavigate();
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -38,6 +42,7 @@ const FormFrontImage = () => {
           })
             .then(() => {
               console.log('Document successfully updated !');
+              navigate('/');
             })
             .catch((error) => {
               console.log(error);
