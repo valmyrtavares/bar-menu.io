@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBtnData } from '../../api/buttonApi';
+import { getBtnData } from '../../api/Api';
 import '../../assets/styles/item.css';
 import DishesModal from './dishesModal';
 

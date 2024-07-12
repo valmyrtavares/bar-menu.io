@@ -1,5 +1,5 @@
 import React from 'react';
-import { fetchCategoriesItem } from '../api/buttonApi';
+import { fetchCategoriesItem } from '../api/Api.js';
 import Input from '../component/Input';
 import Title from '../component/title';
 import { app, storage } from '../config-firebase/firebase.js';

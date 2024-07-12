@@ -4,7 +4,7 @@ import {
   fetchCategories,
   fetchCategoriesItem,
   fetchCategoriesButton,
-} from '../api/buttonApi.js';
+} from '../api/Api.js';
 import Title from '../component/title.js';
 import { app } from '../config-firebase/firebase.js';
 import {

@@ -1,7 +1,7 @@
 import React from 'react';
 import CarrosselImages from '../component/carrosselImages';
 import NestedBtn from '../component/nestedBtn';
-import { getBtnData } from '../api/buttonApi';
+import { getBtnData } from '../api/Api';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);

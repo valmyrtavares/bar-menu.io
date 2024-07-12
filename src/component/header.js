@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBtnData } from '../api/buttonApi';
+import { getBtnData } from '../api/Api';
 import { GlobalContext } from '../GlobalContext';
 import '../assets/styles/header.css';
 

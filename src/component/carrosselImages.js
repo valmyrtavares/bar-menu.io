@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/carrosselImages.css';
-import { getBtnData } from '../api/buttonApi';
+import { getBtnData } from '../api/Api';
 
 function CarrosselImages() {
   const [index, setIndex] = useState(0);
