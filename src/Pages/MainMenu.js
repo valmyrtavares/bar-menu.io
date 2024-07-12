@@ -1,6 +1,6 @@
 import React from 'react';
 import CarrosselImages from '../component/carrosselImages';
-import NestedBtn from '../nestedBtn';
+import NestedBtn from '../component/nestedBtn';
 import { getBtnData } from '../api/buttonApi';
 
 function MainMenu() {

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import './assets/styles/item.css';
+import '../../assets/styles/item.css';
 
-const ItemModal = ({ item, openmodal }) => {
+const DishesModal = ({ item, openmodal }) => {
   useEffect(() => {
     console.log('ITEM   ', item.title);
   }, [item]);
@@ -18,4 +18,4 @@ const ItemModal = ({ item, openmodal }) => {
     </div>
   );
 };
-export default ItemModal;
+export default DishesModal;

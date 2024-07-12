@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import './assets/styles/nestedBtn.css';
-import Dishes from './Dishes';
+import '../assets/styles/nestedBtn.css';
+import Dishes from './Dishes/Dishes';
 
 const NestedBtn = ({ item, parent, menuButton, dishes }) => {
   const [display, setDisplay] = useState(false);

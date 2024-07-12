@@ -1,7 +1,7 @@
 import React from 'react';
-import { getBtnData } from './api/buttonApi';
-import './assets/styles/item.css';
-import ItemModal from './ItemModal';
+import { getBtnData } from '../../api/buttonApi';
+import '../../assets/styles/item.css';
+import DishesModal from './dishesModal';
 
 function Dishes({ newItem }) {
   const [item, setItem] = React.useState([]);
@@ -18,7 +18,7 @@ function Dishes({ newItem }) {
   };
   return (
     <>
-      {modal && <ItemModal item={item} openmodal={openmodal} />}
+      {modal && <DishesModal item={item} openmodal={openmodal} />}
       {item && (
         <div onClick={openmodal} className="item-container container my-2 card">
           <div className="row">
