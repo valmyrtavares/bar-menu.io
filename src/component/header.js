@@ -12,7 +12,7 @@ function Header() {
       try {
         const image = await getBtnData('frontImage');
         console.log('IMAGE    ', image[0].image);
-        setUrl(image[0].image);
+        global.setImage(image[0].image);
       } catch (error) {
         console.error('Error fetching data', error);
       }

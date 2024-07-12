@@ -14,3 +14,44 @@ font-weight: bold;
 .price{
 color: #A43334;
 }
+
+.content-modal-dishes{
+   position: fixed;
+   top: 20%;
+   left:5%;
+   background: white;;
+   height:60vh;
+   border:solid 2px gray;
+   width: 80%;  
+   z-index: 10;
+
+}
+.content-modal-dishes div {
+   display: flex;
+   justify-content: end;
+}
+.content-modal-dishes div button {
+    margin: 0px;
+    color: black;
+    border: none;
+    background: none;
+    max-width: 30px;
+    max-height: 30px;
+}
+.content-modal-dishes h1{
+    text-align: center !important;
+    color:red;
+}
+.content-modal-dishes img {
+   width: 80%;
+   margin:10px 10%;
+}
+.content-modal-dishes p {
+   padding:10%;
+   color:black;
+}
+.content-modal-dishes h3 {
+    padding: 10%;
+    color: black;
+    text-align: center;
+}
