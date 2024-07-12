@@ -1,6 +1,7 @@
 import React from 'react';
 import { getBtnData } from '../api/Api';
 import { GlobalContext } from '../GlobalContext';
+import { Link } from 'react-router-dom';
 import '../assets/styles/header.css';
 
 function Header() {
@@ -22,7 +23,10 @@ function Header() {
   return (
     <header className="main_header">
       <nav>
-        <img src={global.image} alt="google logo" />
+        <Link to="/">
+          {' '}
+          <img src={global.image} alt="google logo" />
+        </Link>
       </nav>
     </header>
   );
