@@ -4,7 +4,7 @@ import MainMenu from './Pages/MainMenu';
 import Form from './Forms/form';
 import FormItem from './Forms/formItem';
 import Header from './component/header';
-//import MenuButton from './component/menuButton';
+import MenuButton from './component/menuButton';
 import Signup from './Forms/Login/signup';
 import Login from './Forms/Login/login';
 import Admin from './Pages/FormMenu';
@@ -18,7 +18,7 @@ function App() {
     <div className="ultra-wrapper">
       <BrowserRouter>
         {true && <Header />}
-        {/* <MenuButton /> */}
+        <MenuButton />
         <Routes>
           <Route path="/" element={<MainMenu />} />
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
