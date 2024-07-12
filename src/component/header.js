@@ -1,7 +1,7 @@
 import React from 'react';
 import { getBtnData } from '../api/buttonApi';
 import { GlobalContext } from '../GlobalContext';
-import './header.css';
+import '../assets/styles/header.css';
 
 function Header() {
   const global = React.useContext(GlobalContext);

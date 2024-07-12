@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
-import Form from './form';
-import FormItem from './formItem';
+import Form from './Forms/form';
+import FormItem from './Forms/formItem';
 import Header from './component/header';
 import MenuButton from './component/menuButton';
 import Signup from './Login/signup';
@@ -10,7 +10,7 @@ import Login from './Login/login';
 import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
 import FormFrontImage from './Forms/formFrontImage';
-import ListToEditAndDelete from './ListToEditAndDelete';
+import ListToEditAndDelete from './Forms/ListToEditAndDelete';
 
 function App() {
   return (

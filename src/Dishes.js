@@ -3,7 +3,7 @@ import { getBtnData } from './api/buttonApi';
 import './assets/styles/item.css';
 import ItemModal from './ItemModal';
 
-function Item({ newItem }) {
+function Dishes({ newItem }) {
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
 
@@ -34,4 +34,4 @@ function Item({ newItem }) {
     </>
   );
 }
-export default Item;
+export default Dishes;

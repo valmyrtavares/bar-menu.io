@@ -1,9 +1,9 @@
 import React from 'react';
-import { getBtnData, deleteData } from './api/buttonApi';
+import { getBtnData, deleteData } from '../api/buttonApi';
 import Form from './form';
 import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
-import './assets/styles/ListToEditAndDelete.css';
+import '../assets/styles/ListToEditAndDelete.css';
 //import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {

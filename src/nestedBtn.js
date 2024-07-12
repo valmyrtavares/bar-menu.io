@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './assets/styles/nestedBtn.css';
-import Item from './item';
+import Dishes from './Dishes';
 
 const NestedBtn = ({ item, parent, menuButton, dishes }) => {
   const [display, setDisplay] = useState(false);
@@ -51,7 +51,7 @@ const NestedBtn = ({ item, parent, menuButton, dishes }) => {
         childItem.length > 0 &&
         childItem.map((item, index) => (
           <React.Fragment key={index}>
-            <Item newItem={item} />
+            <Dishes newItem={item} />
           </React.Fragment>
         ))}
     </div>

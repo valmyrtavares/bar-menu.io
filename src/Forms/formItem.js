@@ -1,8 +1,8 @@
 import React from 'react';
-import { fetchCategoriesItem } from './api/buttonApi';
-import Input from './component/Input';
-import Title from './component/title';
-import { app, storage } from './config-firebase/firebase.js';
+import { fetchCategoriesItem } from '../api/buttonApi';
+import Input from '../component/Input';
+import Title from '../component/title';
+import { app, storage } from '../config-firebase/firebase.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
   getFirestore,
@@ -12,7 +12,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import './assets/styles/form.css';
+import '../assets/styles/form.css';
 
 function FormItem({ dataObj }) {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './carrosselImages.css';
+import '../assets/styles/carrosselImages.css';
 import { getBtnData } from '../api/buttonApi';
 
 function CarrosselImages() {

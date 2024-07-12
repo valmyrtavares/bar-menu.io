@@ -1,12 +1,12 @@
 import React from 'react';
-import Input from './component/Input';
+import Input from '../component/Input';
 import {
   fetchCategories,
   fetchCategoriesItem,
   fetchCategoriesButton,
-} from './api/buttonApi';
-import Title from './component/title';
-import { app } from './config-firebase/firebase.js';
+} from '../api/buttonApi.js';
+import Title from '../component/title.js';
+import { app } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
