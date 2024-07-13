@@ -1,11 +1,11 @@
 import React from 'react';
-import Input from '../component/Input';
+import Input from '../component/Input.js';
 import {
   fetchCategories,
   fetchCategoriesItem,
   fetchCategoriesButton,
 } from '../api/Api.js';
-import MenuButton from '../component/menuButton';
+import MenuButton from '../component/menuButton.js';
 import Title from '../component/title.js';
 import { app } from '../config-firebase/firebase.js';
 import {
@@ -35,6 +35,7 @@ function Form({ dataObj }) {
       const grabCategory = await fetchCategoriesButton('item');
       grabCategory.unshift('Selecione uma categoria'); // Add a first option
       setCategories(grabCategory);
+      console.log('Categorias de botões disponiveis ', grabCategory);
     };
     fetchCategory();
   }, []);
@@ -46,7 +47,6 @@ function Form({ dataObj }) {
   React.useEffect(() => {
     if (dataObj) {
       setForm(dataObj);
-      console.log(form);
     }
   }, [dataObj]);
 
@@ -56,7 +56,6 @@ function Form({ dataObj }) {
       alert('this is pushing');
       addDoc(collection(db, 'button'), form)
         .then((docRef) => {
-          console.log(docRef.id);
           setForm({
             title: '',
             category: '',

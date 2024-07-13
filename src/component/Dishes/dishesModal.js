@@ -2,10 +2,6 @@ import React, { useEffect } from 'react';
 import '../../assets/styles/item.css';
 
 const DishesModal = ({ item, openmodal }) => {
-  useEffect(() => {
-    console.log('ITEM   ', item.title);
-  }, [item]);
-
   return (
     <div className="content-modal-dishes">
       <div>

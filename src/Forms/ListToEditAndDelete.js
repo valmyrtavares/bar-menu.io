@@ -1,6 +1,6 @@
 import React from 'react';
 import { getBtnData, deleteData } from '../api/Api';
-import Form from './form';
+import AddButtonForm from './AddButtonForm';
 import FormItem from './formItem';
 import { useParams } from 'react-router-dom';
 import '../assets/styles/ListToEditAndDelete.css';
@@ -15,20 +15,7 @@ const EditFormButton = () => {
   const [dataObj, setDataObj] = React.useState({});
   const { id } = useParams();
 
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const fetchButton = await getBtnData('button');
-  //       setMenuButton(fetchButton);
-  //     } catch (error) {
-  //       console.error('Error fetching data', error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
   React.useEffect(() => {
-    console.log(id);
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
@@ -97,7 +84,7 @@ const EditFormButton = () => {
       {modalEditButton && (
         <div className="form-position">
           {/* <CloseButton onClick={() => closeModal()} /> */}
-          <Form dataObj={dataObj} />
+          <AddButtonForm dataObj={dataObj} />
         </div>
       )}
       {menuButton &&

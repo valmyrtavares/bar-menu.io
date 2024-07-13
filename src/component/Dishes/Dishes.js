@@ -9,12 +9,10 @@ function Dishes({ newItem }) {
 
   React.useEffect(() => {
     setItem(newItem);
-    console.log('ESTAMOS NO ITEM  ', item);
   }, []);
   //stating to styling the component item
   const openmodal = () => {
     setModal(!modal);
-    console.log('Disparado ');
   };
   return (
     <>

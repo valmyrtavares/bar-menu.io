@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
-import Form from './Forms/form';
+import AddButtonForm from './Forms/AddButtonForm';
 import FormItem from './Forms/formItem';
 import Header from './component/header';
 import Signup from './Forms/Login/signup';
@@ -26,7 +26,7 @@ function App() {
             element={<ListToEditAndDelete />}
           />
           <Route path="/admin/item" element={<FormItem />} />
-          <Route path="/admin/category" element={<Form />} />
+          <Route path="/admin/category" element={<AddButtonForm />} />
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/signup" element={<Signup />} />
           <Route path="/admin" element={<Protected />} />

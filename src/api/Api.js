@@ -30,7 +30,6 @@ export async function getBtnData(collectionName) {
     docSnap.forEach((doc) => {
       array.push({ ...doc.data(), id: doc.id });
     });
-    console.log('ARRAY  ', array);
     return array;
   } catch (error) {
     throw error;

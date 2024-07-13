@@ -27,7 +27,6 @@ function Login() {
         form.password
       );
       const user = userCredential.user;
-      console.log(user);
       localStorage.setItem('token', user.accessToken);
       localStorage.setItem('user', JSON.stringify(user));
       navigate('/admin');

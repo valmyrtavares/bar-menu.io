@@ -78,7 +78,6 @@ function FormItem({ dataObj }) {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setProgress(progress);
-          console.log('Upload is ' + progress + '% done');
         },
         (error) => {
           console.error(error);
@@ -87,7 +86,6 @@ function FormItem({ dataObj }) {
           // Handle successful uploads
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUrl(downloadURL);
-          console.log('File available at', downloadURL);
           form.image = downloadURL;
         }
       );
@@ -106,7 +104,6 @@ function FormItem({ dataObj }) {
     if (!dataObj) {
       addDoc(collection(db, 'item'), form)
         .then((docRef) => {
-          console.log(docRef.id);
           navigate('/');
         })
         .catch((error) => {
