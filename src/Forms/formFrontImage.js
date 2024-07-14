@@ -6,6 +6,7 @@ import { setDoc, doc, getFirestore } from 'firebase/firestore';
 import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';
 import { useNavigate } from 'react-router-dom';
+import MenuButton from '../component/menuHamburguerButton.js';
 
 const FormFrontImage = () => {
   const [url, setUrl] = React.useState('');
@@ -53,7 +54,7 @@ const FormFrontImage = () => {
   };
   return (
     <>
-      {' '}
+      <MenuButton />{' '}
       <Input
         id="uploadImage"
         label="Upload image"

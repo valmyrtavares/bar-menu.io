@@ -7,5 +7,18 @@
 }
 
 .image-preview{
-    max-width: 200px;
+   
 }
+.custom-select {  
+    max-height: 100px;
+    /* Ajuste conforme necessário */
+    overflow: hidden;
+    /* Para evitar que as opções ultrapassem o tamanho do select */
+}
+
+.custom-select:focus {
+    overflow: hidden;
+    /* Habilita o scroll no dropdown */
+}
+
+

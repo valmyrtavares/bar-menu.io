@@ -62,12 +62,17 @@ export async function fetchCategoriesItem(collectionName) {
 
 // }
 export async function fetchCategoriesButton(collectionName) {
-  const categoriesItem = new Set(
-    (await getBtnData(collectionName)).map((item) => item.category)
+  const dishesCategories = new Set(
+    (await getBtnData(collectionName)).map((item) => item.category) //Categoria de todos os pratos publicados
   );
-  const btnCategories = (await getBtnData('button')).map((item) => item.parent);
+  const btnCategories = (await getBtnData('button')).map((item) => item.parent); //Todas as categorias já criadas
+  // Parent pode ser o pai de um botão ou de um prato se ele tiver um filho
+  // botão ele pode ter neto, se o filho dele for um prato ele não pode ter neto, porque
+  //prato não pode ter filho
+  console.log('CATEGORIES ITEM   ', dishesCategories);
+  console.log('BTN CATEGORIES', btnCategories);
 
   return [
-    ...new Set(btnCategories.filter((item) => !categoriesItem.has(item))),
+    ...new Set(btnCategories.filter((item) => !dishesCategories.has(item))),
   ];
 }

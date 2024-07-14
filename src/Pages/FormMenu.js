@@ -1,7 +1,7 @@
 //import React, { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Title from '../component/title.js';
-import MenuButton from '../component/menuButton';
+import MenuButton from '../component/menuHamburguerButton.js';
 import '../assets/styles/FormMenu.css';
 
 const FormMenu = () => {
@@ -11,10 +11,10 @@ const FormMenu = () => {
       <Title title="Menu de Formulários" />
       <div className="row">
         <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/category">Adicione Categoria </Link>
+          <Link to="/admin/category">Adicione Botão </Link>
         </button>
         <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/editButton/cat">Lista de Categorias</Link>
+          <Link to="/admin/editButton/cat">Lista de Botões</Link>
         </button>
       </div>
       <div className="row">

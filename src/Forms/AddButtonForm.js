@@ -5,7 +5,7 @@ import {
   fetchCategoriesItem,
   fetchCategoriesButton,
 } from '../api/Api.js';
-import MenuButton from '../component/menuButton.js';
+import MenuButton from '../component/menuHamburguerButton.js';
 import Title from '../component/title.js';
 import { app } from '../config-firebase/firebase.js';
 import {
@@ -16,8 +16,9 @@ import {
   doc,
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import '../assets/styles/form.css';
 
-function Form({ dataObj }) {
+function AddButtonForm({ dataObj, EditButtonTitle }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -33,9 +34,9 @@ function Form({ dataObj }) {
   React.useEffect(() => {
     const fetchCategory = async () => {
       const grabCategory = await fetchCategoriesButton('item');
+      console.log('GRAB CATEGORY    ', grabCategory);
       grabCategory.unshift('Selecione uma categoria'); // Add a first option
       setCategories(grabCategory);
-      console.log('Categorias de botões disponiveis ', grabCategory);
     };
     fetchCategory();
   }, []);
@@ -71,6 +72,7 @@ function Form({ dataObj }) {
       setDoc(doc(db, 'button', dataObj.id), form)
         .then(() => {
           console.log('Document successfully updated !');
+          navigate('/');
         })
         .catch((error) => {
           console.log(error);
@@ -85,9 +87,11 @@ function Form({ dataObj }) {
   }
 
   return (
-    <div className="container mt-5 p-3 bg-body-tertiar">
+    <div className="container mt-2 p-3 bg-body-tertiar">
       <MenuButton />
-      <Title title="Adicione um novo botão" />
+      <Title
+        mainTitle={EditButtonTitle ? EditButtonTitle : 'Adicione um novo botão'}
+      />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"
@@ -100,7 +104,7 @@ function Form({ dataObj }) {
           <label className="form-label">Categoria</label>
           <select
             id="category"
-            className="form-select"
+            className="form-select custom-select"
             value={form.category}
             onChange={handleChange}
           >
@@ -131,4 +135,4 @@ function Form({ dataObj }) {
     </div>
   );
 }
-export default Form;
+export default AddButtonForm;

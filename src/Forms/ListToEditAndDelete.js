@@ -1,10 +1,10 @@
 import React from 'react';
 import { getBtnData, deleteData } from '../api/Api';
 import AddButtonForm from './AddButtonForm';
-import FormItem from './formItem';
+import AddDishesForm from './AddDishesForm';
 import { useParams } from 'react-router-dom';
 import '../assets/styles/ListToEditAndDelete.css';
-import MenuButton from '../component/menuButton';
+import MenuButton from '../component/menuHamburguerButton';
 //import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {
@@ -14,6 +14,8 @@ const EditFormButton = () => {
   const [modalEditDishes, setModalEditDishes] = React.useState(false);
   const [dataObj, setDataObj] = React.useState({});
   const { id } = useParams();
+  const EditDishesTitle = 'Edite o Prato';
+  const EditButtonTitle = 'Edite o Botão';
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -84,7 +86,7 @@ const EditFormButton = () => {
       {modalEditButton && (
         <div className="form-position">
           {/* <CloseButton onClick={() => closeModal()} /> */}
-          <AddButtonForm dataObj={dataObj} />
+          <AddButtonForm dataObj={dataObj} EditButtonTitle={EditButtonTitle} />
         </div>
       )}
       {menuButton &&
@@ -111,7 +113,7 @@ const EditFormButton = () => {
       {modalEditDishes && (
         <div className="form-position">
           {/* <CloseButton onClick={() => closeModal()} /> */}
-          <FormItem dataObj={dataObj} />
+          <AddDishesForm dataObj={dataObj} mainTitle={EditDishesTitle} />
         </div>
       )}
       {menuButton &&
