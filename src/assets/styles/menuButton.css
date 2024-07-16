@@ -10,6 +10,7 @@ position: absolute;
     border: #6b0d0d solid 3px;
     border-radius: 10px;
     width: max-content;
+    z-index: 15;
 }
 .modal_menu ul{
     padding-left:1px

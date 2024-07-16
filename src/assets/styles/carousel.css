@@ -1,0 +1,10 @@
+.slick-slide img {
+    width: 300px;
+    max-height: 170px;
+}
+.slick-slide p {
+  text-align: center;
+  margin-top:5px;
+  font-family: sans-serif;
+  color:black
+}

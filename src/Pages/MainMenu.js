@@ -1,8 +1,9 @@
 import React from 'react';
-import CarrosselImages from '../component/carrosselImages';
+import CarrosselImages from '../component/carouselComponent';
 import NestedBtn from '../component/nestedBtn';
 import { getBtnData } from '../api/Api';
 import MenuButton from '../component/menuHamburguerButton';
+import '../assets/styles/mainMenu.css';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -29,18 +30,20 @@ function MainMenu() {
       <div>
         <MenuButton />
         {true && <CarrosselImages />}
-        {menuButton &&
-          dishes &&
-          menuButton.map((item, index) => (
-            <div key={index}>
-              <NestedBtn
-                parent={'main'}
-                item={item}
-                menuButton={menuButton}
-                dishes={dishes}
-              />
-            </div>
-          ))}
+        <div className="container-btn">
+          {menuButton &&
+            dishes &&
+            menuButton.map((item, index) => (
+              <div key={index}>
+                <NestedBtn
+                  parent={'main'}
+                  item={item}
+                  menuButton={menuButton}
+                  dishes={dishes}
+                />
+              </div>
+            ))}
+        </div>
       </div>
     </>
   );
