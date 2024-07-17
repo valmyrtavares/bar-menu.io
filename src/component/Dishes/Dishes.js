@@ -25,7 +25,11 @@ function Dishes({ newItem }) {
               <p className="comments">{item.comment}</p>
               <p className="price float-end fw-bold">R${item.price},00</p>
             </div>
-            <img className="col-5 img-thumbnail" src={item.image} alt="123" />
+            <img
+              className="col-5 img-thumbnail img-customize"
+              src={item.image}
+              alt="123"
+            />
           </div>
         </div>
       )}

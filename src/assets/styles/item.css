@@ -56,3 +56,6 @@ color: #A43334;
     text-align: center;
     padding-bottom: 50px;
 }
+.item-container img{
+    max-height: 140px;
+}
