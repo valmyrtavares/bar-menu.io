@@ -13,9 +13,11 @@ import ListToEditAndDelete from './Forms/ListToEditAndDelete';
 import './style.css';
 
 function App() {
+  const basename =
+    process.env.NODE_ENV === 'development' ? '/' : '/bar-menu.io';
   return (
     <div className="ultra-wrapper">
-      <BrowserRouter basename="/bar-menu.io">
+      <BrowserRouter basename={basename}>
         {true && <Header />}
 
         <Routes>
