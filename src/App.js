@@ -15,7 +15,7 @@ import './style.css';
 function App() {
   return (
     <div className="ultra-wrapper">
-      <BrowserRouter>
+      <BrowserRouter basename="/bar-menu.io">
         {true && <Header />}
 
         <Routes>
