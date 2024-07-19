@@ -1,0 +1,18 @@
+.welcome-message{
+    padding:5px;
+}
+.welcome-message main{
+    padding: 5px;
+    border:solid 2px brown;
+    border-radius: 5%;
+}
+.welcome-message h1{
+    text-align: center;
+    color:brown;;
+}
+.welcome-message p {
+    padding: 10px;
+    margin:0;
+    text-align:center;
+
+}

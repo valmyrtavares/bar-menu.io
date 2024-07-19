@@ -10,6 +10,8 @@ import Admin from './Pages/FormMenu';
 import Protected from './component/Protected';
 import FormFrontImage from './Forms/formFrontImage';
 import ListToEditAndDelete from './Forms/ListToEditAndDelete';
+import ProtectedUser from './component/ProtectedUser';
+import CreateCustomer from './Forms/Login/createCustomer';
 import './style.css';
 
 function App() {
@@ -21,7 +23,10 @@ function App() {
         {true && <Header />}
 
         <Routes>
-          <Route path="/" element={<MainMenu />} />
+          <Route path="/menu" element={<MainMenu />} />
+          <Route path="/" element={<ProtectedUser />} />
+          <Route path="/create-customer" element={<CreateCustomer />} />
+
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route
             path="/admin/EditButton/:id"
