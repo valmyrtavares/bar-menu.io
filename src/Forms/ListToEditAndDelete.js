@@ -85,7 +85,7 @@ const EditFormButton = () => {
       <MenuButton />
       {modalEditButton && (
         <div className="form-position">          
-          <AddButtonForm dataObj={dataObj} EditButtonTitle={EditButtonTitle} />
+          <AddButtonForm dataObj={dataObj} EditButtonTitle={EditButtonTitle} setModalEditButton={setModalEditButton} />
         </div>
       )}
       {menuButton &&
@@ -112,7 +112,7 @@ const EditFormButton = () => {
       {modalEditDishes && (
         <div className="form-position">
           {/* <CloseButton onClick={() => closeModal()} /> */}
-          <AddDishesForm dataObj={dataObj} mainTitle={EditDishesTitle} />
+          <AddDishesForm dataObj={dataObj} mainTitle={EditDishesTitle} setModalEditDishes={setModalEditDishes} />
         </div>
       )}
       {menuButton &&

@@ -15,7 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/form.css';
 
-function AddDishesForm({ dataObj, mainTitle }) {
+function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -116,7 +116,9 @@ function AddDishesForm({ dataObj, mainTitle }) {
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
-      <MenuButton />
+        <div className="close-btn">
+        <button onClick={() => setModalEditDishes(false)}>X</button>
+      </div>
       <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
