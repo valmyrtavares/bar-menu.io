@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter , Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import FormItem from './Forms/AddDishesForm';
@@ -15,11 +15,11 @@ import CreateCustomer from './Forms/Login/createCustomer';
 import './style.css';
 
 function App() {
-  const basename =
-    process.env.NODE_ENV === 'development' ? '/' : '/bar-menu.io';
+  
+  const basename = '/bar-menu.io';
   return (
     <div className="ultra-wrapper">
-      <BrowserRouter basename={basename}>
+      <HashRouter basename={basename}>
         {true && <Header />}
 
         <Routes>
@@ -41,7 +41,7 @@ function App() {
           <Route path="/admin/admin" element={<Admin />} />
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </div>
   );
 }
