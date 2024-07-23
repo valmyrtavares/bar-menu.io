@@ -14,6 +14,19 @@ function Dishes({ newItem }) {
   const openmodal = () => {
     setModal(!modal);
   };
+
+  const formatPrice = (price) => {  
+    
+    
+    price = typeof price === 'number' ? price.toString() : price;
+  
+    if (price.toString().indexOf('.') !== -1) {     
+      return `R$${price.toString().replace('.', ',')}`;
+    } else {      
+      return `R$${price},00`;
+    }
+  };
+
   return (
     <>
       {modal && <DishesModal item={item} openmodal={openmodal} />}
@@ -32,7 +45,7 @@ function Dishes({ newItem }) {
           </div>
               <div className="container-request-button">
               <button className="request-client">Faça o seu pedido</button>
-              <p className="price float-end fw-bold">R${item.price},00</p>
+              {item && <p className="price float-end fw-bold">{formatPrice(item.price)}</p>}
               </div>
         </div>
       )}

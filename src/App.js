@@ -17,6 +17,7 @@ import './style.css';
 function App() {
   
   const basename = '/bar-menu.io';
+  //const basename = '/';
   return (
     <div className="ultra-wrapper">
       <HashRouter basename={basename}>
