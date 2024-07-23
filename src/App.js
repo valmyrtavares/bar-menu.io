@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter , Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter , Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import FormItem from './Forms/AddDishesForm';
@@ -20,7 +20,7 @@ function App() {
   //const basename = '/';
   return (
     <div className="ultra-wrapper">
-      <HashRouter basename={basename}>
+      <BrowserRouter basename={basename}>
         {true && <Header />}
 
         <Routes>
@@ -42,7 +42,7 @@ function App() {
           <Route path="/admin/admin" element={<Admin />} />
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </div>
   );
 }
