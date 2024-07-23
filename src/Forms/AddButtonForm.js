@@ -87,7 +87,7 @@ function AddButtonForm({ dataObj, EditButtonTitle }) {
   }
 
   return (
-    <div className="container mt-2 p-3 bg-body-tertiar">
+    <div className="Edit-Add-Popup mt-2 p-3 bg-body-tertiar">
       <MenuButton />
       <Title
         mainTitle={EditButtonTitle ? EditButtonTitle : 'Adicione um novo botão'}

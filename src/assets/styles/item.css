@@ -11,20 +11,50 @@ font-weight: bold;
     color:#A43334;
 
 }
+.item-container .container-request-button{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 11px;
+    justify-items: center
+}
+.item-container div .request-client{
+    font-size: 14px;
+    margin:0;
+    padding:2px 3px;
+    background: rgba(255, 0, 0, 0.753);
+}
 .price{
 color: #A43334;
+margin:0
 }
+
+
 
 .content-modal-dishes{
     box-shadow: 14px 23px #8888889c;
     position: fixed;
-    top: 200px;
-    left: 2%;
+    top: 5%;
+    left: 10%;
     background: white;
     border: solid 2px gray;
     width: 80%;
+    max-width: 300px;
     z-index: 50;
-
+}
+.content-modal-dishes .request-client{
+    font-size: 14px;
+    margin:0;
+    padding:2px 3px;
+    background: rgba(255, 0, 0, 0.753);
+    margin:20px 10%;
+    box-shadow: 6px 5px #8888889c;
+    
+}
+.content-modal-dishes h4{
+    font-size: 18px;
+    margin:0;
+    text-align: center;  
+    
 }
 .content-modal-dishes div {
    display: flex;
@@ -47,8 +77,9 @@ color: #A43334;
    margin:10px 10%;
 }
 .content-modal-dishes p {
-   padding:10%;
+   padding:5%;
    color:black;
+   margin-bottom: 7px;
 }
 .content-modal-dishes h3 {
     padding-bottom: 50px;

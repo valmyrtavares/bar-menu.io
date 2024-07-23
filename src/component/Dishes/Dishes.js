@@ -23,7 +23,6 @@ function Dishes({ newItem }) {
             <div className="col-7">
               <h2 className="my-0">{item.title}</h2>
               <p className="comments">{item.comment}</p>
-              <p className="price float-end fw-bold">R${item.price},00</p>
             </div>
             <img
               className="col-5 img-thumbnail img-customize"
@@ -31,6 +30,10 @@ function Dishes({ newItem }) {
               alt="123"
             />
           </div>
+              <div className="container-request-button">
+              <button className="request-client">Faça o seu pedido</button>
+              <p className="price float-end fw-bold">R${item.price},00</p>
+              </div>
         </div>
       )}
     </>

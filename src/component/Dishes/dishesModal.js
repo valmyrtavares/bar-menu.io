@@ -10,7 +10,8 @@ const DishesModal = ({ item, openmodal }) => {
       <h1>{item.title}</h1>
       <img src={item.image} alt="img" />
       <p>{item.comment}</p>
-      <h3>Valor: R${item.price},00</h3>
+      <h4>Valor: R${item.price},00</h4>
+      <button className="request-client">Faça o seu pedido</button>
     </div>
   );
 };

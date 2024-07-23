@@ -84,8 +84,7 @@ const EditFormButton = () => {
     <div className="container">
       <MenuButton />
       {modalEditButton && (
-        <div className="form-position">
-          {/* <CloseButton onClick={() => closeModal()} /> */}
+        <div className="form-position">          
           <AddButtonForm dataObj={dataObj} EditButtonTitle={EditButtonTitle} />
         </div>
       )}
