@@ -115,7 +115,7 @@ function AddDishesForm({ dataObj, mainTitle }) {
   }
 
   return (
-    <div className="container mt-5 p-3 bg-body-tertiar">
+    <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
       <MenuButton />
       <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
       <form onSubmit={handleSubmit} className="m-1">
