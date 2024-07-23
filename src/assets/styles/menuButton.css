@@ -23,6 +23,17 @@ position: absolute;
     color: rgb(22, 92, 172);
 }
 
+.close-btn{
+    display:flex;
+    justify-content: end;
+}
+.close-btn button{
+    background-color: transparent;
+    border:none;
+    font-size: 20px;
+    padding:4px;
+}
+
 
 [data-menu="button"] {
    display:none

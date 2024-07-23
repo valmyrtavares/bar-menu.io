@@ -168,7 +168,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         <input type="file" onChange={onfileChange} />
         <progress value={progress} max="100" />
         {url && <img className="image-preview" src={url} alt="Uploaded file" />}
-        <div className="form-check my-5">
+        <div className="form-check my-1">
           <input
             className="form-check-input"
             id="carrossel"
