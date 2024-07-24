@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
 import AddButtonForm from './Forms/AddButtonForm';
+import AddSideDishesForm from './Forms/AddSideDishesForm';
 import FormItem from './Forms/AddDishesForm';
 import Header from './component/header';
 import Signup from './Forms/Login/signup';
@@ -15,8 +16,8 @@ import CreateCustomer from './Forms/Login/createCustomer';
 import './style.css';
 
 function App() {
-  const basename = '/bar-menu.io';
-  //const basename = '/';
+  //const basename = '/bar-menu.io';
+  const basename = '/';
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -34,6 +35,7 @@ function App() {
           />
           <Route path="/admin/item" element={<FormItem />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
+          <Route path="/admin/sidedishes" element={<AddSideDishesForm />} />
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/signup" element={<Signup />} />
           <Route path="/admin" element={<Protected />} />
