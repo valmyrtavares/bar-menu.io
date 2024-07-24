@@ -25,7 +25,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
     title: '',
     category: '',
     parent: '',
-    display: '',
+    display: 'true',
   });
   const [categories, setCategories] = React.useState([]);
 
@@ -51,6 +51,14 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
     }
   }, [dataObj]);
 
+  React.useEffect(() => {
+    // Atualiza o valor de parent sempre que o título muda
+    setForm(prevForm => ({
+      ...prevForm,
+      parent: returningParent(prevForm.title),
+    }));
+  }, [form.title]);
+
   function handleSubmit(event) {
     event.preventDefault(); // Impede o comportamento padrão de recarregar a página
     if (!dataObj) {
@@ -60,10 +68,11 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
           setForm({
             title: '',
             category: '',
-            parent: '',
-            display: '',
+            parent: returningParent(''), 
+            display: "true",
           });
           navigate('/');
+          console.log("FORM   ", form)
         })
         .catch((error) => {
           console.log(error);
@@ -86,8 +95,19 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
     setForm({ ...form, [id]: value, [id]: value, [id]: value, [id]: value });
   }
 
+  function normalizeString(str) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  
+  function returningParent(title) {    
+    const words = title.split(' ');  
+    let result = words.map(word => normalizeString(word).toLowerCase()).join('');
+    return result
+  }
+
   return (
     <div className="Edit-Add-Popup mt-2 p-3 bg-body-tertiar">
+      <button onClick={returningParent}>TESTE</button>
       <div className="close-btn">
         {setModalEditButton ? (
           <button onClick={() => setModalEditButton(false)}>X</button>
@@ -101,7 +121,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"
-          label="title"
+          label="Título"
           value={form.title}
           type="text"
           onChange={handleChange}
@@ -123,18 +143,16 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
           </select>
         </div>
         <Input
-          id="parent"
-          label="Parent"
+          id="parent"          
           value={form.parent}
-          type="text"
-          onChange={handleChange}
+          type="hidden"  
+           
         />
         <Input
-          id="display"
-          label="Display"
+          id="display"          
           value={form.display}
-          type="text"
-          onChange={handleChange}
+          type="hidden"       
+           
         />
         <button className="btn btn-primary">Enviar</button>
       </form>
