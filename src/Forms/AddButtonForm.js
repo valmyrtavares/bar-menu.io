@@ -17,8 +17,9 @@ import {
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/form.css';
+import { Link } from 'react-router-dom';
 
-function AddButtonForm({ dataObj, EditButtonTitle,setModalEditButton }) {
+function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -87,9 +88,13 @@ function AddButtonForm({ dataObj, EditButtonTitle,setModalEditButton }) {
   }
 
   return (
-    <div className="Edit-Add-Popup mt-2 p-3 bg-body-tertiar">     
+    <div className="Edit-Add-Popup mt-2 p-3 bg-body-tertiar">
       <div className="close-btn">
-        <button onClick={() => setModalEditButton(false)}>X</button>
+        {setModalEditButton ? (
+          <button onClick={() => setModalEditButton(false)}>X</button>
+        ) : (
+          <Link to="/admin/admin">X</Link>
+        )}
       </div>
       <Title
         mainTitle={EditButtonTitle ? EditButtonTitle : 'Adicione um novo botão'}

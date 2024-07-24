@@ -19,9 +19,9 @@ const MenuButton = () => {
       <button data-menu="button" onClick={toggleMenu}></button>;
       {modal && (
         <div className="modal_menu">
-            <div className="close-btn">
-        <button onClick={toggleMenu}>X</button>
-      </div>
+          <div className="close-btn">
+            <button onClick={toggleMenu}>X</button>
+          </div>
           <ul>
             <li>
               <Link to="/">Home</Link>

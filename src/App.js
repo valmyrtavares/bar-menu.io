@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, HashRouter , Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
 import MainMenu from './Pages/MainMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import FormItem from './Forms/AddDishesForm';
@@ -15,7 +15,6 @@ import CreateCustomer from './Forms/Login/createCustomer';
 import './style.css';
 
 function App() {
-  
   const basename = '/bar-menu.io';
   //const basename = '/';
   return (

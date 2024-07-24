@@ -12,7 +12,7 @@ import {
   setDoc,
   doc,
 } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../assets/styles/form.css';
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -116,8 +116,12 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
-        <div className="close-btn">
-        <button onClick={() => setModalEditDishes(false)}>X</button>
+      <div className="close-btn">
+        {setModalEditDishes ? (
+          <button onClick={() => setModalEditDishes(false)}>X</button>
+        ) : (
+          <Link to="/admin/admin">X</Link>
+        )}
       </div>
       <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
       <form onSubmit={handleSubmit} className="m-1">
