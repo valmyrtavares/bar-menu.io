@@ -1,8 +1,8 @@
 //import React, { useLayoutEffect } from 'react';
-import { Link } from 'react-router-dom';
-import Title from '../component/title.js';
-import MenuButton from '../component/menuHamburguerButton.js';
-import '../assets/styles/FormMenu.css';
+import { Link } from "react-router-dom";
+import Title from "../component/title.js";
+import MenuButton from "../component/menuHamburguerButton.js";
+import "../assets/styles/FormMenu.css";
 
 const FormMenu = () => {
   return (
@@ -29,6 +29,11 @@ const FormMenu = () => {
         </button>
         <button className="col-sm-4 btn btn-success nostyle m-2">
           <Link to="/admin/sidedishes">Adicione Acompanhamentos opcionais</Link>
+        </button>
+        <button className="col-sm-4 btn btn-success nostyle m-2">
+          <Link to="/admin/editButton/sidedishes">
+            Lista de acompanhamentos
+          </Link>
         </button>
       </div>
     </div>

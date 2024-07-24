@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import "../assets/styles/form.css";
+import { cardClasses } from "@mui/material";
 
 function AddSideDishesForm() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function AddSideDishesForm() {
     price: 0,
     sideDishes: "",
   });
+  const [noNavigate, setNoNavigate] = React.useState(false);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -38,7 +40,13 @@ function AddSideDishesForm() {
     if (form.price && form.sideDishes) {
       addDoc(collection(db, "sideDishes"), form)
         .then((docRef) => {
-          navigate("/");
+          if (!noNavigate) {
+            navigate("/admin/editButton/sidedishes");
+            console.log("Não Clicado");
+          } else {
+            setForm({ price: 0, sideDishes: "" });
+            console.log("Clicado");
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -46,9 +54,17 @@ function AddSideDishesForm() {
     }
     alert("Os campos precisan ser integralmente preenchidos");
   }
+  function changeUrl() {
+    console.log("Funcionando");
+    setNoNavigate(!noNavigate);
+    console.log(noNavigate);
+  }
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
+      <div className="close-btn">
+        <Link to="/admin/admin">X</Link>
+      </div>
       <Title mainTitle="Adicione um novo Acompanhamento " />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
@@ -66,7 +82,19 @@ function AddSideDishesForm() {
           onChange={handleChange}
         />
         <button className="btn btn-primary">Enviar</button>
-      </form>
+      </form>{" "}
+      <div className="form-check my-1">
+        <input
+          className="form-check-input"
+          id="carrossel"
+          type="checkbox"
+          checked={noNavigate}
+          onChange={changeUrl}
+        />
+        <label className="form-check-label">
+          Mantenha clicado se não quiser mudar de tela
+        </label>
+      </div>
     </div>
   );
 }
