@@ -24,8 +24,7 @@ const CarouselComponent = () => {
       const carrosselImagesNovo = response.filter(
         (item) => item.carrossel === true
       );
-      setCarrosselImages(carrosselImagesNovo);
-      console.log(carrosselImagesNovo);
+      setCarrosselImages(carrosselImagesNovo);      
     };
 
     fetchData();

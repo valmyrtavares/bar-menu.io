@@ -32,11 +32,10 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   //FIRESTORE
   const db = getFirestore(app);
 
-  React.useEffect(() => {
+  React.useEffect(() => {    
     const fetchCategory = async () => {
-      const grabCategory = await fetchCategoriesButton('item');
-      console.log('GRAB CATEGORY    ', grabCategory);
-      grabCategory.unshift('Selecione uma categoria'); // Add a first option
+      const grabCategory = await fetchCategoriesButton('item');     
+      grabCategory.unshift('Selecione uma Categoria', 'main'); // Add a first option
       setCategories(grabCategory);
     };
     fetchCategory();

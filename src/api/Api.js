@@ -29,7 +29,7 @@ export async function getBtnData(collectionName) {
     let array = [];
     docSnap.forEach((doc) => {
       array.push({ ...doc.data(), id: doc.id });
-    });
+    });     
     return array;
   } catch (error) {
     throw error;
@@ -61,17 +61,15 @@ export async function fetchCategoriesItem(collectionName) {
 //     return [...new Set(btnCategories.filter((item) => !filteredCategoriesItem.has(item)))];
 
 // }
-export async function fetchCategoriesButton(collectionName) {
+export async function fetchCategoriesButton(collectionName) {  
   const dishesCategories = new Set(
     (await getBtnData(collectionName)).map((item) => item.category) //Categoria de todos os pratos publicados
   );
+    
   const btnCategories = (await getBtnData('button')).map((item) => item.parent); //Todas as categorias já criadas
   // Parent pode ser o pai de um botão ou de um prato se ele tiver um filho
   // botão ele pode ter neto, se o filho dele for um prato ele não pode ter neto, porque
   //prato não pode ter filho
-  console.log('CATEGORIES ITEM   ', dishesCategories);
-  console.log('BTN CATEGORIES', btnCategories);
-
   return [
     ...new Set(btnCategories.filter((item) => !dishesCategories.has(item))),
   ];

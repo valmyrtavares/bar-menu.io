@@ -116,7 +116,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
-      <div className="close-btn">
+        <div className="close-btn">
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
         ) : (
