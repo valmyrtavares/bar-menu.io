@@ -15,20 +15,30 @@ import { useNavigate, Link } from "react-router-dom";
 import "../assets/styles/form.css";
 import { cardClasses } from "@mui/material";
 
-function AddSideDishesForm() {
+function AddSideDishesForm({
+  dataObj,
+  EditSideDishesTitle,
+  setModalEditSideDishes,
+}) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     price: 0,
     sideDishes: "",
   });
   const [noNavigate, setNoNavigate] = React.useState(false);
+  const [hideShowCheckForm, setHideShowCheckForm] = React.useState(true);
 
   //FIRESTORE
   const db = getFirestore(app);
 
-  function handleChange({ target }) {
-    const { id, value, type, checked } = target;
+  React.useEffect(() => {
+    if (dataObj) {
+      setHideShowCheckForm(false);
+    }
+  });
 
+  function handleChange({ target }) {
+    const { id, value } = target;
     setForm({
       ...form,
       [id]: value,
@@ -37,35 +47,54 @@ function AddSideDishesForm() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (form.price && form.sideDishes) {
-      addDoc(collection(db, "sideDishes"), form)
-        .then((docRef) => {
-          if (!noNavigate) {
-            navigate("/admin/editButton/sidedishes");
-            console.log("Não Clicado");
-          } else {
-            setForm({ price: 0, sideDishes: "" });
-            console.log("Clicado");
-          }
+    if (!dataObj) {
+      if (form.price && form.sideDishes) {
+        addDoc(collection(db, "sideDishes"), form)
+          .then((docRef) => {
+            if (!noNavigate) {
+              navigate("/admin/editButton/sidedishes");
+            } else {
+              setForm({ price: 0, sideDishes: "" });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    } else {
+      setDoc(doc(db, "sideDishes", dataObj.id), form)
+        .then(() => {
+          console.log("Document successfully updated !");
+          setModalEditSideDishes(false);
         })
         .catch((error) => {
           console.log(error);
         });
+      return;
     }
-    alert("Os campos precisan ser integralmente preenchidos");
   }
   function changeUrl() {
-    console.log("Funcionando");
     setNoNavigate(!noNavigate);
-    console.log(noNavigate);
   }
+  // Bring the data from listToEditAndDelete to form local
+  React.useEffect(() => {
+    if (dataObj) {
+      setForm(dataObj);
+    }
+  }, [dataObj]);
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
       <div className="close-btn">
         <Link to="/admin/admin">X</Link>
       </div>
-      <Title mainTitle="Adicione um novo Acompanhamento " />
+      <Title
+        mainTitle={
+          EditSideDishesTitle
+            ? EditSideDishesTitle
+            : "Adicione um novo Acompanhamento 123"
+        }
+      />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="sideDishes"
@@ -83,18 +112,20 @@ function AddSideDishesForm() {
         />
         <button className="btn btn-primary">Enviar</button>
       </form>{" "}
-      <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="carrossel"
-          type="checkbox"
-          checked={noNavigate}
-          onChange={changeUrl}
-        />
-        <label className="form-check-label">
-          Mantenha clicado se não quiser mudar de tela
-        </label>
-      </div>
+      {hideShowCheckForm && (
+        <div className="form-check my-1">
+          <input
+            className="form-check-input"
+            id="carrossel"
+            type="checkbox"
+            checked={noNavigate}
+            onChange={changeUrl}
+          />
+          <label className="form-check-label">
+            Mantenha clicado se não quiser mudar de tela
+          </label>
+        </div>
+      )}
     </div>
   );
 }
