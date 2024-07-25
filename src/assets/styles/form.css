@@ -2,10 +2,11 @@
     position: relative;
     top: 100px;
     left: 3%; 
-    background-color: rgb(221, 214, 214);
+    background-color: rgb(196, 184, 184);
   
 }
-.Edit-Add-Popup{
+/* Retirar a condição de fixo desse pop porque limita o campo de atuação */
+/* .Edit-Add-Popup{
     position: fixed;
     top: 19px;
     left:10%;
@@ -13,7 +14,7 @@
     width: 80%;
     max-width: 700px;
     background: rgb(229 229 229);
-}
+} */
 .Edit-Add-Popup .close-btn{
     display:flex;
     justify-content: end;
@@ -37,6 +38,15 @@
 .custom-select:focus {
     overflow: hidden;
     /* Habilita o scroll no dropdown */
+}
+
+.container-new-sideDishes{
+    position:fixed;
+    top: 20%;
+    left:10%;
+    width: 80%;
+    border:solid 2px brown;
+    background:white;
 }
 
 

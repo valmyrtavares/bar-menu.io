@@ -13,6 +13,7 @@ import FormFrontImage from "./Forms/formFrontImage";
 import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
 import ProtectedUser from "./component/ProtectedUser";
 import CreateCustomer from "./Forms/Login/createCustomer";
+
 import "./style.css";
 
 function App() {
@@ -35,6 +36,10 @@ function App() {
           />
           <Route path="/admin/item" element={<FormItem />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
+          {/* <Route
+            path="/admin/SideDisehsInDishes"
+            element={<NoNameSideDisehsInDishes />}
+          /> */}
           <Route path="/admin/sidedishes" element={<AddSideDishesForm />} />
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/signup" element={<Signup />} />
