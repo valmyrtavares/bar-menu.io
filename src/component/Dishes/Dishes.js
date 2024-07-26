@@ -1,7 +1,7 @@
-import React from 'react';
-import { getBtnData } from '../../api/Api';
-import '../../assets/styles/item.css';
-import DishesModal from './dishesModal';
+import React from "react";
+import { getBtnData } from "../../api/Api";
+import "../../assets/styles/dishes.css";
+import DishesModal from "./dishesModal";
 
 function Dishes({ newItem }) {
   const [item, setItem] = React.useState([]);
@@ -15,14 +15,12 @@ function Dishes({ newItem }) {
     setModal(!modal);
   };
 
-  const formatPrice = (price) => {  
-    
-    
-    price = typeof price === 'number' ? price.toString() : price;
-  
-    if (price.toString().indexOf('.') !== -1) {     
-      return `R$${price.toString().replace('.', ',')}`;
-    } else {      
+  const formatPrice = (price) => {
+    price = typeof price === "number" ? price.toString() : price;
+
+    if (price.toString().indexOf(".") !== -1) {
+      return `R$${price.toString().replace(".", ",")}`;
+    } else {
       return `R$${price},00`;
     }
   };
@@ -43,10 +41,10 @@ function Dishes({ newItem }) {
               alt="123"
             />
           </div>
-              <div className="container-request-button">
-              <button className="request-client">Faça o seu pedido</button>
-              {item && <p className="price float-end fw-bold">{item.price}</p>}
-              </div>
+          <div className="container-request-button">
+            <button className="request-client">Faça o seu pedido</button>
+            {item && <p className="price float-end fw-bold">{item.price}</p>}
+          </div>
         </div>
       )}
     </>
