@@ -17,15 +17,5 @@
     font-weight: 700;
     font-size: 19px;
 }
-.container-modal-request{
-    position: absolute;
-    top: 206px;
-    z-index: 50;
-    background: white;
-    padding: 10px;
-    width: 80%;
-    margin:0px 10%;
-    box-shadow: 14px 23px #8888881f;
 
-}
 

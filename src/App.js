@@ -13,12 +13,13 @@ import FormFrontImage from "./Forms/formFrontImage";
 import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
 import ProtectedUser from "./component/ProtectedUser";
 import CreateCustomer from "./Forms/Login/createCustomer";
+import RequestModal from "./component/requestModal";
 
 import "./style.css";
 
 function App() {
-  const basename = "/bar-menu.io";
-  //const basename = "/";
+  //const basename = "/bar-menu.io";
+  const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -28,6 +29,7 @@ function App() {
           <Route path="/menu" element={<MainMenu />} />
           <Route path="/" element={<ProtectedUser />} />
           <Route path="/create-customer" element={<CreateCustomer />} />
+          <Route path="/request" element={<RequestModal />} />
 
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route

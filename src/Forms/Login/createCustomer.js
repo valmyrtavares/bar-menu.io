@@ -1,21 +1,21 @@
-import React from 'react';
-import Input from '../../component/Input.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
-import { useNavigate } from 'react-router-dom';
-import { GlobalContext } from '../../GlobalContext';
-import '../../assets/styles/createCustomer.css';
-import { Link } from 'react-router-dom';
+import React from "react";
+import Input from "../../component/Input.js";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { app } from "../../config-firebase/firebase.js";
+import { useNavigate } from "react-router-dom";
+import { GlobalContext } from "../../GlobalContext";
+import "../../assets/styles/createCustomer.css";
+import { Link } from "react-router-dom";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
 
   const [form, setForm] = React.useState({
-    name: '',
-    phone: '',
-    birthday: '',
-    email: '',
+    name: "",
+    phone: "",
+    birthday: "",
+    email: "",
   });
 
   //FIRESTORE
@@ -23,19 +23,23 @@ const CreateCustomer = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    addDoc(collection(db, 'user'), form)
+    addDoc(collection(db, "user"), form)
       .then((docRef) => {
         global.setId(docRef.id); //Pego o id do cliente criado e mando para o meu useContext para vincular os pedidos ao cliente que os fez
+        const currentUser = {
+          id: docRef.id,
+          name: form.name,
+        };
+        localStorage.setItem("userMenu", JSON.stringify(currentUser));
         setForm({
-          name: '',
-          phone: '',
-          birthday: '',
-          email: '',
+          name: "",
+          phone: "",
+          birthday: "",
+          email: "",
         });
       })
       .then(() => {
-        localStorage.setItem('userMenu', JSON.stringify(form.name));
-        navigate('/');
+        navigate("/");
       })
       .catch((error) => {
         console.log(error);

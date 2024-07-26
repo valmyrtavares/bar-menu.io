@@ -1,0 +1,14 @@
+.container-modal-request{
+    border:solid red 2px;
+
+}
+
+.container-modal-request .individual-dishes{
+    display:grid;
+    grid-template-columns: 3fr 1fr;
+    column-gap:30px
+}
+
+.container-modal-request .individual-dishes img{
+max-width: 300px;
+}
