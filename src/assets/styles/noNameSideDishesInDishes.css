@@ -1,7 +1,8 @@
 .internal-container{
     width:90%;
   margin:10px auto;
-  min-height: 300px;
+  max-height: calc(80vh - 40px); /* Altura máxima ajustada ao padding do contêiner externo */
+  overflow-y: auto;
 }
 .internal-container .btn-add-side-dishes{
     margin:100px 10% 10px;
