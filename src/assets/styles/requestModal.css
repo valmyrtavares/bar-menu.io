@@ -4,11 +4,17 @@
 }
 
 .container-modal-request .individual-dishes{
-    display:grid;
+    display: grid;
     grid-template-columns: 3fr 1fr;
-    column-gap:30px
+    column-gap: 30px;
+    justify-items: center;
+    max-width: 80%;
+    margin: 5px 7% 5px 15%;
+    border: solid 1px brown;
+    align-items: center;
+    border-radius: 10px;
 }
 
-.container-modal-request .individual-dishes img{
-max-width: 300px;
+.container-modal-request .individual-dishes .dishes-price{
+font-weight: 700;
 }

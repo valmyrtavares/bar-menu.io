@@ -1,5 +1,5 @@
-import React from "react";
-import "../../assets/styles/dishes.css";
+import React from 'react';
+import '../../assets/styles/dishes.css';
 import {
   getFirestore,
   collection,
@@ -9,13 +9,13 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-} from "firebase/firestore";
-import { app } from "../../config-firebase/firebase.js";
-import { useNavigate, Link } from "react-router-dom";
+} from 'firebase/firestore';
+import { app } from '../../config-firebase/firebase.js';
+import { useNavigate, Link } from 'react-router-dom';
 
 const DishesModal = ({ item, openmodal }) => {
   const [totalPrice, setTotalPrice] = React.useState(Number(item.price));
-  const [currentUser, setCurrentUser] = React.useState("");
+  const [currentUser, setCurrentUser] = React.useState('');
   const [form, setForm] = React.useState({
     name: item.title,
     id: item.id,
@@ -27,8 +27,8 @@ const DishesModal = ({ item, openmodal }) => {
 
   React.useEffect(() => {
     console.log(item);
-    if (localStorage.hasOwnProperty("userMenu")) {
-      const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       setCurrentUser(currentUserNew.id);
     }
   }, [item]);
@@ -50,7 +50,7 @@ const DishesModal = ({ item, openmodal }) => {
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      const userDocRef = doc(db, "user", currentUser);
+      const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
@@ -72,7 +72,7 @@ const DishesModal = ({ item, openmodal }) => {
         image: item.image,
       });
 
-      navigate("/");
+      navigate('/request');
     } catch (error) {
       console.log(error);
     }
