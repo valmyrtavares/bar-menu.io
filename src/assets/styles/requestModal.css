@@ -1,20 +1,49 @@
-.container-modal-request{
-    border:solid red 2px;
 
+.container-modal-request .current-client{
+    text-align: center;
+    font-size: 22px;
 }
-
+.container-modal-request .current-client span{
+    font-size: 18px;
+    font-weight: 700;
+}
 .container-modal-request .individual-dishes{
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 3fr 1fr 1fr;
     column-gap: 30px;
     justify-items: center;
     max-width: 80%;
-    margin: 5px 7% 5px 15%;
+    padding: 9px 5px;
+    margin: 5px 10% 5px 10%;
     border: solid 1px brown;
     align-items: center;
     border-radius: 10px;
 }
+.container-modal-request h3{
+    text-align: center;
+    font-family: ink free;
+    font-size: 23px;
+    font-weight: 700;
+    
+}
+.container-modal-request .individual-dishes h2{
+    font-size: 18px;
+}
 
 .container-modal-request .individual-dishes .dishes-price{
 font-weight: 700;
+font-size:18px;
+margin:0;
+}
+
+.container-modal-request .individual-dishes .status-request-pend{
+    font-size:11px;
+    color:red;
+    margin:0
+}
+
+.container-modal-request .no-request{
+    text-align: center;
+    color:red;
+    margin-top:200px;
 }
