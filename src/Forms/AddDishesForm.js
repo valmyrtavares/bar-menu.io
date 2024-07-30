@@ -13,7 +13,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
-import NoNameSideDisehsInDishes from "./noNameSideDishesInDishes";
+import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
 //import { cardClasses } from "@mui/material";
 
@@ -213,7 +213,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       </form>
       {showPopupSideDishes && (
         <div className="container-new-sideDishes">
-          <NoNameSideDisehsInDishes
+          <IncludeSideDishesForm
             setShowPopupSideDisehs={setShowPopupSideDisehs}
             setNewSideDishesList={setNewSideDishesList}
           />

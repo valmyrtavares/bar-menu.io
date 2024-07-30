@@ -49,6 +49,7 @@
     width: 80%;
     border:solid 2px brown;
     background:white;
+    max-width: 450px;
 }
 
 

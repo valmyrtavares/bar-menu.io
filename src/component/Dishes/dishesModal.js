@@ -1,5 +1,5 @@
-import React from 'react';
-import '../../assets/styles/dishes.css';
+import React from "react";
+import "../../assets/styles/dishes.css";
 import {
   getFirestore,
   collection,
@@ -9,29 +9,40 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-} from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
-import { useNavigate, Link } from 'react-router-dom';
+} from "firebase/firestore";
+import { app } from "../../config-firebase/firebase.js";
+import { useNavigate, Link } from "react-router-dom";
 
 const DishesModal = ({ item, openmodal }) => {
   const [totalPrice, setTotalPrice] = React.useState(Number(item.price));
-  const [currentUser, setCurrentUser] = React.useState('');
+  const [currentUser, setCurrentUser] = React.useState("");
   const [form, setForm] = React.useState({
     name: item.title,
     id: item.id,
     finalPrice: Number(item.price),
     image: item.image,
   });
+  const [itemOnScreen, setItemOnScreen] = React.useState("");
+  const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
+    []
+  );
   const navigate = useNavigate();
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    console.log(item);
-    if (localStorage.hasOwnProperty('userMenu')) {
-      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+    if (localStorage.hasOwnProperty("userMenu")) {
+      const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
       setCurrentUser(currentUserNew.id);
     }
   }, [item]);
+
+  React.useEffect(() => {
+    if (itemOnScreen) {
+      const arrayList = [...sideDishesListOnScreen, itemOnScreen];
+      setSideDishesListOnScreen(arrayList);
+    }
+    console.log(sideDishesListOnScreen);
+  }, [itemOnScreen]);
 
   function handleChange(e) {
     const additionalPrice = Number(e.target.value);
@@ -47,10 +58,18 @@ const DishesModal = ({ item, openmodal }) => {
     }));
   }
 
+  const selectMaximumNumberSideDishes = (e) => {
+    console.log("Funcionando");
+    const id = e.target.value;
+    const selectedItem = item.sideDishesElementList[id];
+
+    setItemOnScreen(selectedItem.sideDishes);
+  };
+
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      const userDocRef = doc(db, 'user', currentUser);
+      const userDocRef = doc(db, "user", currentUser);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
@@ -72,7 +91,7 @@ const DishesModal = ({ item, openmodal }) => {
         image: item.image,
       });
 
-      navigate('/request');
+      navigate("/request");
     } catch (error) {
       console.log(error);
     }
@@ -83,32 +102,59 @@ const DishesModal = ({ item, openmodal }) => {
       <div className="close-btn">
         <button onClick={openmodal}>X</button>
       </div>
-      <p>{currentUser}</p>
       <h1>{item.title}</h1>
       <img src={item.image} alt="img" />
       <p>{item.comment}</p>
       <h4>Valor: R${totalPrice.toFixed(2)}</h4>
       <form className="my-3" onSubmit={handleSubmit}>
-        <h4>Selecione o seu acompanhamento</h4>
-        <div className="side-dishes-list">
-          {item.sideDishesElementList &&
-            item.sideDishesElementList.map((sideDishItem, index) => (
-              <div key={index}>
-                <input
-                  className="form-check-input"
-                  id="carrossel"
-                  value={sideDishItem.price}
-                  type="checkbox"
-                  onChange={handleChange}
-                />
-                <label className="form-check-label">
-                  {sideDishItem.sideDishes}
-                </label>
-              </div>
-            ))}
+        {item.sideDishesElementList && (
+          <>
+            <h4>Selecione o seu acompanhamento</h4>
+            <div className="side-dishes-list">
+              {item.maxLimitSideDishes == 0 ? (
+                item.sideDishesElementList.map((sideDishItem, index) => (
+                  <div key={index}>
+                    <input
+                      className="form-check-input"
+                      id="carrossel"
+                      value={sideDishItem.price}
+                      type="checkbox"
+                      onChange={handleChange}
+                    />
+                    <label className="form-check-label">
+                      {sideDishItem.sideDishes}
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <div className="select-limit-sidedishes">
+                  <select
+                    id="sideDishesElement"
+                    value={form.sideDishesElement}
+                    className="form-select"
+                    onChange={selectMaximumNumberSideDishes}
+                  >
+                    <option value="">Selecione um acompanhamento</option>
+                    {item.sideDishesElementList &&
+                      item.sideDishesElementList.map((item, index) => (
+                        <option key={index} value={index}>
+                          {" "}
+                          {item.sideDishes}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+        <div>
+          {sideDishesListOnScreen &&
+            sideDishesListOnScreen.map((item) => <p>{item}</p>)}
         </div>
         <button className="request-client">Faça o seu pedido</button>
       </form>
+      <h2>{itemOnScreen}</h2>
     </div>
   );
 };

@@ -113,3 +113,6 @@ margin:0
 .side-dishes-list div input{
     margin-right:7px;
 }
+.side-dishes-list .select-limit-sidedishes{
+  color:red;
+}
