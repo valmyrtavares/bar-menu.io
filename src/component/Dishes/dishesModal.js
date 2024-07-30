@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { app } from "../../config-firebase/firebase.js";
 import { useNavigate, Link } from "react-router-dom";
+import { cardClasses } from "@mui/material";
 
 //React variables
 const DishesModal = ({ item, setModal }) => {
@@ -48,10 +49,19 @@ const DishesModal = ({ item, setModal }) => {
     }
   }, [itemOnScreen]);
 
+  React.useEffect(() => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      finalPrice: totalPrice,
+    }));
+  }, [totalPrice]);
+
   //select side dishes
   const selectMaximumNumberSideDishes = (e) => {
     const id = e.target.value;
     const selectedItem = item.sideDishesElementList[id];
+    setTotalPrice(totalPrice + Number(selectedItem.price));
+
     setItemOnScreen(selectedItem.sideDishes);
   };
 
