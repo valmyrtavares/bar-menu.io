@@ -28,12 +28,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     display: false,
     carrossel: false,
     sideDishesElementList: [],
+    maxLimitSideDishes: 0,
   });
   const [categories, setCategories] = React.useState([]);
   const [url, setUrl] = React.useState("");
   const [progress, setProgress] = React.useState(0);
   const [showPopupSideDishes, setShowPopupSideDisehs] = React.useState(false);
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
+  const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -43,8 +45,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     setForm((prevForm) => ({
       ...prevForm,
       sideDishesElementList: newSideDishesList,
+      maxLimitSideDishes: maxLimitSideDishes,
     }));
-  }, [newSideDishesList]);
+  }, [newSideDishesList, maxLimitSideDishes]);
 
   React.useEffect(() => {
     fetchCategories();
@@ -188,12 +191,19 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           onChange={handleChange}
         />
         <Input
-          id="image"
+          id="sideDishesElementList"
           label="Image"
           value={form.sideDishesElementList}
           type="hidden"
           onChange={handleChange}
         />
+        <Input
+          id="maxLimitSideDishes"
+          value={form.maxLimitSideDishes}
+          type="hidden"
+          onChange={handleChange}
+        />
+
         <input type="file" onChange={onfileChange} />
         <progress value={progress} max="100" />
         {url && <img className="image-preview" src={url} alt="Uploaded file" />}
@@ -216,6 +226,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <IncludeSideDishesForm
             setShowPopupSideDisehs={setShowPopupSideDisehs}
             setNewSideDishesList={setNewSideDishesList}
+            setMaxLimitSideDishes={setMaxLimitSideDishes}
           />
         </div>
       )}

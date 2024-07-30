@@ -50,6 +50,10 @@ function IncludeSideDishesForm({
     setNewSideDishesList(selectedSideDishes);
   };
 
+  const handleChange = (e) => {
+    setMaxLimitSideDishes(Number(e.target.value));
+  };
+
   return (
     <div className="internal-container">
       <div className="close-btn">
@@ -93,7 +97,7 @@ function IncludeSideDishesForm({
         id="limitSideDishes"
         label="Selecione uma quantidade máxima de acompanhamentos"
         type="number"
-        onChange={(e) => setMaxLimitSideDishes(e.target.value)}
+        onChange={handleChange}
       />
 
       <button
