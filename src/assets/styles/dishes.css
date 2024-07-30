@@ -79,7 +79,7 @@ margin:0
 }
 .content-modal-dishes p {
     padding: 1% 3%;
-    color: black;
+   
     margin-bottom: 7px;
     font-size: 13px;
     text-align: center;
@@ -113,6 +113,24 @@ margin:0
 .side-dishes-list div input{
     margin-right:7px;
 }
-.side-dishes-list .select-limit-sidedishes{
-  color:red;
+ 
+
+.limit-dishes{
+    display: block;
+    
+}
+
+.select-limit-sidedishes{
+    padding: 10px 20px;
+}
+.limit-dishes .select-limit-sidedishes p{
+    margin-top: 20px;
+    padding: 10px 50px;
+    color: red;
+    font-weight: 700;
+}
+.added-side-dishes{
+    color:rgb(22, 92, 172)!important;
+    font-weight: 700;
+    font-size: 12px;
 }

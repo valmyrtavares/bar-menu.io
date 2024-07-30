@@ -13,9 +13,11 @@ import {
 import { app } from "../../config-firebase/firebase.js";
 import { useNavigate, Link } from "react-router-dom";
 
-const DishesModal = ({ item, openmodal }) => {
+//React variables
+const DishesModal = ({ item, setModal }) => {
   const [totalPrice, setTotalPrice] = React.useState(Number(item.price));
   const [currentUser, setCurrentUser] = React.useState("");
+  const [disabledSelect, setDisabledSelect] = React.useState(true);
   const [form, setForm] = React.useState({
     name: item.title,
     id: item.id,
@@ -26,6 +28,7 @@ const DishesModal = ({ item, openmodal }) => {
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
     []
   );
+
   const navigate = useNavigate();
   const db = getFirestore(app);
 
@@ -36,14 +39,32 @@ const DishesModal = ({ item, openmodal }) => {
     }
   }, [item]);
 
+  //load side dishes on  screen
   React.useEffect(() => {
     if (itemOnScreen) {
       const arrayList = [...sideDishesListOnScreen, itemOnScreen];
       setSideDishesListOnScreen(arrayList);
+      checkAmountOfsideDishes(arrayList);
     }
-    console.log(sideDishesListOnScreen);
   }, [itemOnScreen]);
 
+  //select side dishes
+  const selectMaximumNumberSideDishes = (e) => {
+    const id = e.target.value;
+    const selectedItem = item.sideDishesElementList[id];
+    setItemOnScreen(selectedItem.sideDishes);
+  };
+
+  //Check number of side dishes to disabled select
+  const checkAmountOfsideDishes = (arrayList) => {
+    if (arrayList.length == item.maxLimitSideDishes) {
+      setDisabledSelect(false);
+    } else {
+      setDisabledSelect(true);
+    }
+  };
+
+  //upload price
   function handleChange(e) {
     const additionalPrice = Number(e.target.value);
     if (e.target.checked) {
@@ -58,12 +79,9 @@ const DishesModal = ({ item, openmodal }) => {
     }));
   }
 
-  const selectMaximumNumberSideDishes = (e) => {
-    console.log("Funcionando");
-    const id = e.target.value;
-    const selectedItem = item.sideDishesElementList[id];
-
-    setItemOnScreen(selectedItem.sideDishes);
+  const closeModal = () => {
+    setModal(false);
+    setItemOnScreen([]);
   };
 
   async function handleSubmit(event) {
@@ -100,7 +118,7 @@ const DishesModal = ({ item, openmodal }) => {
   return (
     <div className="content-modal-dishes">
       <div className="close-btn">
-        <button onClick={openmodal}>X</button>
+        <button onClick={closeModal}>X</button>
       </div>
       <h1>{item.title}</h1>
       <img src={item.image} alt="img" />
@@ -110,7 +128,13 @@ const DishesModal = ({ item, openmodal }) => {
         {item.sideDishesElementList && (
           <>
             <h4>Selecione o seu acompanhamento</h4>
-            <div className="side-dishes-list">
+            <div
+              className={
+                item.maxLimitSideDishes === 0
+                  ? "side-dishes-list"
+                  : "limit-dishes"
+              }
+            >
               {item.maxLimitSideDishes == 0 ? (
                 item.sideDishesElementList.map((sideDishItem, index) => (
                   <div key={index}>
@@ -128,33 +152,39 @@ const DishesModal = ({ item, openmodal }) => {
                 ))
               ) : (
                 <div className="select-limit-sidedishes">
-                  <select
-                    id="sideDishesElement"
-                    value={form.sideDishesElement}
-                    className="form-select"
-                    onChange={selectMaximumNumberSideDishes}
-                  >
-                    <option value="">Selecione um acompanhamento</option>
-                    {item.sideDishesElementList &&
-                      item.sideDishesElementList.map((item, index) => (
-                        <option key={index} value={index}>
-                          {" "}
-                          {item.sideDishes}
-                        </option>
-                      ))}
-                  </select>
+                  {disabledSelect ? (
+                    <select
+                      id="sideDishesElement"
+                      value={form.sideDishesElement}
+                      className="form-select"
+                      onChange={selectMaximumNumberSideDishes}
+                    >
+                      <option value="">Selecione um acompanhamento</option>
+                      {item.sideDishesElementList &&
+                        item.sideDishesElementList.map((item, index) => (
+                          <option key={index} value={index}>
+                            {" "}
+                            {item.sideDishes}
+                          </option>
+                        ))}
+                    </select>
+                  ) : (
+                    <p>
+                      O Numero máximo de acompanhamentos é{" "}
+                      {item.maxLimitSideDishes}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
           </>
         )}
-        <div>
+        <div className="added-side-dishes">
           {sideDishesListOnScreen &&
             sideDishesListOnScreen.map((item) => <p>{item}</p>)}
         </div>
         <button className="request-client">Faça o seu pedido</button>
       </form>
-      <h2>{itemOnScreen}</h2>
     </div>
   );
 };

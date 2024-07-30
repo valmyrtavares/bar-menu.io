@@ -12,7 +12,7 @@ function Dishes({ newItem }) {
   }, []);
   //stating to styling the component item
   const openmodal = () => {
-    setModal(!modal);
+    setModal(true);
   };
 
   const formatPrice = (price) => {
@@ -27,7 +27,7 @@ function Dishes({ newItem }) {
 
   return (
     <>
-      {modal && <DishesModal item={item} openmodal={openmodal} />}
+      {modal && <DishesModal item={item} setModal={setModal} />}
       {item && (
         <div onClick={openmodal} className="item-container container my-2 card">
           <div className="row">
