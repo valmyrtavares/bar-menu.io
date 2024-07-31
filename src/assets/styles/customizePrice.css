@@ -1,0 +1,19 @@
+.container-custome-price{
+    width: 100%;
+    
+    border:solid 2px green;
+    background:white;
+    
+}
+
+.container-custome-price .wrapper-inputs{
+    padding:5% 5%;
+    display:grid;
+    grid-template-columns: 2fr 5fr;
+    column-gap: 10px;
+    align-items: center;
+    
+}
+.container-custome-price .wrapper-inputs label{
+    font-size: 13px;
+}

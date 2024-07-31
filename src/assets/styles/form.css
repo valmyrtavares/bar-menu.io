@@ -52,4 +52,23 @@
     max-width: 450px;
 }
 
+.box-price{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.box-price div label{
+margin:0;
+}
+.box-price button{
+    max-height: 64px;
+    border-radius: 9px;
+    padding: 10px 17px;
+}
+.external-container-customize-price{
+    position:fixed;
+    top:50px;
+    width:84%;
+    margin:10px 6%;
+}
 

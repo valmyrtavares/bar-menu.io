@@ -15,6 +15,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
+import CustomizePrice from "./CustomizePrice";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -34,6 +35,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [url, setUrl] = React.useState("");
   const [progress, setProgress] = React.useState(0);
   const [showPopupSideDishes, setShowPopupSideDisehs] = React.useState(false);
+  const [showPopupCustomizePrice, setShowPopupCustomizePrice] =
+    React.useState(false);
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
 
@@ -180,13 +183,22 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           type="text"
           onChange={handleChange}
         />
-        <Input
-          id="price"
-          label="Preço"
-          value={form.price}
-          type="number"
-          onChange={handleChange}
-        />
+        <div className="box-price">
+          <Input
+            id="price"
+            label="Preço"
+            value={form.price}
+            type="number"
+            onChange={handleChange}
+          />
+          <button
+            className="btn btn-success"
+            type="button"
+            onClick={() => setShowPopupCustomizePrice(true)}
+          >
+            Preço Customizado
+          </button>
+        </div>
         <Input
           id="image"
           label="Image"
@@ -236,6 +248,13 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         </div>
       )}
+      <div className="external-container-customize-price">
+        {showPopupCustomizePrice && (
+          <CustomizePrice
+            setShowPopupCustomizePrice={setShowPopupCustomizePrice}
+          />
+        )}
+      </div>
       <div>
         <button className="btn btn-success m-5" onClick={openModalSideDishes}>
           {" "}
