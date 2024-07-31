@@ -15,7 +15,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
-import CustomizePrice from "./CustomizePrice";
+import CustomizePrice from "./CustomizePriceForm";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -248,13 +248,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         </div>
       )}
-      <div className="external-container-customize-price">
+      {/* <div className="external-container-customize-price">
         {showPopupCustomizePrice && (
           <CustomizePrice
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
+            onPriceChange={onPriceChange}
           />
         )}
-      </div>
+      </div> */}
       <div>
         <button className="btn btn-success m-5" onClick={openModalSideDishes}>
           {" "}

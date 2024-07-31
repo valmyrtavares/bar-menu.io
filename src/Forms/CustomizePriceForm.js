@@ -4,11 +4,29 @@ import Input from "../component/Input.js";
 import Title from "../component/title.js";
 
 function CustomizePrice({ setShowPopupCustomizePrice }) {
+  const [formPrice, setFormPrice] = React.useState({
+    firstPrice: 0,
+    firstLabel: "",
+    secondPrice: 0,
+    secondLabel: "",
+    thirdPrice: 0,
+    thirdLabel: "",
+  });
   const close = () => {
     setShowPopupCustomizePrice(false);
   };
-  const handleChange = () => {
-    console.log("Está funcionando");
+  const handleChange = ({ target }) => {
+    const { id, value } = target;
+    setFormPrice({
+      ...formPrice,
+      [id]: value,
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("fUNCIONA");
+    console.log(formPrice);
   };
   return (
     <div className="container-custome-price">
@@ -16,49 +34,56 @@ function CustomizePrice({ setShowPopupCustomizePrice }) {
         <button onClick={close}>X</button>
       </div>
       <Title Preço mainTitle="Preço Customizado" />
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="wrapper-inputs">
           <Input
-            id="FirstdescriptionPrice"
+            id="firstPrice"
             label="Primeiro preço"
-            type="text"
+            value={formPrice.firstPrice}
+            type="number"
             onChange={handleChange}
           />
           <Input
-            id="firstNewPrice"
+            id="firstLabel"
             label="Descrição do primeiro preço"
-            type="number"
+            value={formPrice.firstLabel}
+            type="text"
             onChange={handleChange}
           />
         </div>
         <div className="wrapper-inputs">
           <Input
-            id="FirstdescriptionPrice"
+            id="secondPrice"
             label="Segundo preço"
-            type="text"
+            value={formPrice.secondPrice}
+            type="number"
             onChange={handleChange}
           />
           <Input
-            id="firstNewPrice"
+            id="secondLabel"
+            value={formPrice.secondLabel}
             label="Descrição do segundo preço"
-            type="number"
+            type="text"
             onChange={handleChange}
           />
         </div>
         <div className="wrapper-inputs">
           <Input
-            id="FirstdescriptionPrice"
+            id="thirdPrice"
+            value={formPrice.thirdPrice}
             label="Terceiro preço"
-            type="text"
-            onChange={handleChange}
-          />
-          <Input
-            id="firstNewPrice"
-            label="Descrição do terceiro preço"
             type="number"
             onChange={handleChange}
           />
+          <Input
+            id="thirdLabel"
+            value={formPrice.thirdLabel}
+            label="Descrição do terceiro preço"
+            type="text"
+            onChange={handleChange}
+          />
         </div>
+        <button>Testar</button>
       </form>
     </div>
   );

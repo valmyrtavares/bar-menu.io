@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { app } from "../../config-firebase/firebase.js";
 import { useNavigate, Link } from "react-router-dom";
-import { cardClasses } from "@mui/material";
+import CustomizedPrice from "./CustomizedPrice.js";
 
 //React variables
 const DishesModal = ({ item, setModal }) => {
@@ -124,6 +124,9 @@ const DishesModal = ({ item, setModal }) => {
       console.log(error);
     }
   }
+  function onPriceChange(price) {
+    setTotalPrice(Number(price));
+  }
 
   return (
     <div className="content-modal-dishes">
@@ -134,6 +137,12 @@ const DishesModal = ({ item, setModal }) => {
       <img src={item.image} alt="img" />
       <p>{item.comment}</p>
       <h4>Valor: R${totalPrice.toFixed(2)}</h4>
+      {item.CustomizedPrice && (
+        <CustomizedPrice
+          item={item.CustomizedPrice}
+          onPriceChange={onPriceChange}
+        />
+      )}
       <form className="my-3" onSubmit={handleSubmit}>
         {item.sideDishesElementList && (
           <>
