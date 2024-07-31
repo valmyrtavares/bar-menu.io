@@ -56,12 +56,10 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   React.useEffect(() => {
     if (dataObj) {
       setForm(dataObj);
+      setNewSideDishesList(dataObj.sideDishesElementList);
+      setMaxLimitSideDishes(dataObj.maxLimitSideDishes);
     }
   }, [dataObj]);
-
-  React.useEffect(() => {
-    console.log("Novos Acompanhamentos   ", newSideDishesList);
-  });
 
   const fetchCategories = async () => {
     const categories = await fetchCategoriesItem("button");
@@ -125,7 +123,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     } else {
       setDoc(doc(db, "item", dataObj.id), form)
         .then(() => {
-          console.log("FORM   ", form);
           navigate("/");
           console.log("Document successfully updated !");
         })
@@ -134,6 +131,13 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         });
     }
   }
+
+  const openModalSideDishes = () => {
+    setShowPopupSideDisehs(true);
+    if (dataObj) {
+      console.log("Data obj", dataObj);
+    }
+  };
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
@@ -226,15 +230,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <IncludeSideDishesForm
             setShowPopupSideDisehs={setShowPopupSideDisehs}
             setNewSideDishesList={setNewSideDishesList}
+            newSideDishesList={newSideDishesList}
             setMaxLimitSideDishes={setMaxLimitSideDishes}
+            maxLimitSideDishes={maxLimitSideDishes}
           />
         </div>
       )}
       <div>
-        <button
-          className="btn btn-success m-5"
-          onClick={() => setShowPopupSideDisehs(true)}
-        >
+        <button className="btn btn-success m-5" onClick={openModalSideDishes}>
           {" "}
           Acrescente acompanhamentos opcionais ao prato
         </button>

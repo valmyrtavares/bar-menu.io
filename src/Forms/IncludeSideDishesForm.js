@@ -7,7 +7,9 @@ import Input from "../component/Input.js";
 function IncludeSideDishesForm({
   setShowPopupSideDisehs,
   setNewSideDishesList,
+  newSideDishesList,
   setMaxLimitSideDishes,
+  maxLimitSideDishes,
 }) {
   //React Data
   const [form, setForm] = React.useState({
@@ -19,6 +21,15 @@ function IncludeSideDishesForm({
   //Load the component
   React.useEffect(() => {
     fetchDataSideDishes();
+  }, []);
+
+  React.useEffect(() => {
+    if (newSideDishesList.length > 0) {
+      setSelectedSideDishes(newSideDishesList);
+    }
+    if (maxLimitSideDishes) {
+      setMaxLimitSideDishes(Number(maxLimitSideDishes));
+    }
   }, []);
 
   //Fetch
@@ -50,8 +61,13 @@ function IncludeSideDishesForm({
     setNewSideDishesList(selectedSideDishes);
   };
 
-  const handleChange = (e) => {
-    setMaxLimitSideDishes(Number(e.target.value));
+  const handleChange = ({ target }) => {
+    const { value } = target;
+    if (value < 0) {
+      setMaxLimitSideDishes(Math.abs(value));
+    } else {
+      setMaxLimitSideDishes(value);
+    }
   };
 
   return (
@@ -96,6 +112,7 @@ function IncludeSideDishesForm({
       <Input
         id="limitSideDishes"
         label="Selecione uma quantidade máxima de acompanhamentos"
+        value={maxLimitSideDishes}
         type="number"
         onChange={handleChange}
       />

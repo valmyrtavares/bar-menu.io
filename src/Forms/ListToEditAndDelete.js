@@ -31,6 +31,7 @@ const EditFormButton = () => {
         ]);
         setMenuButton(data);
         setDishes(dataItem);
+        console.log(dataItem);
         setSideDishes(sideDishes);
       } catch (error) {
         console.error("Error fetching data", error);
@@ -75,11 +76,13 @@ const EditFormButton = () => {
 
   //Open All Edit pop forms
   function openModal(item, type) {
+    console.log(item);
     if (type === "button") {
       setModalEditButton(true);
       setDataObj(item);
     } else if (type === "dishes") {
       setModalEditDishes(true);
+      console.log("ITEM   ", item);
       setDataObj(item);
     } else if (type === "sidedishes") {
       setModalEditSideDishes(true);
