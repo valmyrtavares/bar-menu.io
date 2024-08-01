@@ -39,7 +39,7 @@ margin:0
     border: solid 2px gray;
     width: 80%;
     max-width: 300px;
-    z-index: 50;
+    z-index: 200;
 }
 .content-modal-dishes .request-client{
     font-size: 14px;
