@@ -30,6 +30,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     carrossel: false,
     sideDishesElementList: [],
     maxLimitSideDishes: 0,
+    CustomizedPrice: {},
   });
   const [categories, setCategories] = React.useState([]);
   const [url, setUrl] = React.useState("");
@@ -39,6 +40,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     React.useState(false);
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
+  const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -140,6 +142,22 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     if (dataObj) {
       console.log("Data obj", dataObj);
     }
+  };
+
+  React.useEffect(() => {
+    if (customizedPriceObj) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        CustomizedPrice: customizedPriceObj,
+      }));
+      console.log("Form atualizado   ", form);
+    }
+  }, [customizedPriceObj]);
+
+  const onPriceChange = (customizedPriceChanged) => {
+    console.log("Objeto de preço enviado   ", customizedPriceChanged);
+    setCustomizedPriceObj(customizedPriceChanged);
+    console.log("Preço muda no on Price  ", customizedPriceObj);
   };
 
   return (
@@ -248,14 +266,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         </div>
       )}
-      {/* <div className="external-container-customize-price">
+      <div className="external-container-customize-price">
         {showPopupCustomizePrice && (
           <CustomizePrice
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
             onPriceChange={onPriceChange}
           />
         )}
-      </div> */}
+      </div>
       <div>
         <button className="btn btn-success m-5" onClick={openModalSideDishes}>
           {" "}
