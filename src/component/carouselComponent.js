@@ -1,10 +1,11 @@
-import React from 'react';
-import { getBtnData } from '../api/Api';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import { Box } from '@mui/material';
-import '../assets/styles/carousel.css';
+import React from "react";
+import { getBtnData } from "../api/Api";
+import DishesModal from "./Dishes/dishesModal";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { Box } from "@mui/material";
+import "../assets/styles/carousel.css";
 
 const CarouselComponent = () => {
   const settings = {
@@ -17,31 +18,50 @@ const CarouselComponent = () => {
     autoplaySpeed: 3000,
   };
   const [carrosselImages, setCarrosselImages] = React.useState([]);
+  const [item, setItem] = React.useState([]);
+  const [modal, setModal] = React.useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const response = await getBtnData('item');
+      const response = await getBtnData("item");
       const carrosselImagesNovo = response.filter(
         (item) => item.carrossel === true
       );
-      setCarrosselImages(carrosselImagesNovo);      
+      setCarrosselImages(carrosselImagesNovo);
     };
 
     fetchData();
   }, []);
 
+  // React.useEffect(() => {
+  //   setItem(newItem);
+  // }, [modal]);
+
+  const callDishesModal = (item) => {
+    if (item) {
+      setItem(item);
+      setModal(true);
+    }
+  };
+
   return (
-    <Box sx={{ width: '300px', margin: 'auto' }}>
-      <Slider {...settings}>
-        {carrosselImages &&
-          carrosselImages.map((item, index) => (
-            <div key={index}>
-              <img src={item.image} alt="asdf  2" />
-              <p>{item.title}</p>
-            </div>
-          ))}
-      </Slider>
-    </Box>
+    <>
+      <div className="container-modalDihses-InCarrolse">
+        {modal && <DishesModal item={item} setModal={setModal} />}
+      </div>
+      import DishesModal from "./dishesModal";
+      <Box sx={{ width: "300px", margin: "auto" }}>
+        <Slider {...settings}>
+          {carrosselImages &&
+            carrosselImages.map((item, index) => (
+              <div key={index} onClick={() => callDishesModal(item)}>
+                <img src={item.image} alt="asdf  2" />
+                <p>{item.title}</p>
+              </div>
+            ))}
+        </Slider>
+      </Box>
+    </>
   );
 };
 

@@ -10,7 +10,7 @@ function Dishes({ newItem }) {
   React.useEffect(() => {
     setItem(newItem);
   }, []);
-  //stating to styling the component item
+
   const openmodal = () => {
     setModal(true);
   };
