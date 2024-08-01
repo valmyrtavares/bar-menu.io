@@ -58,11 +58,13 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     fetchCategories();
   }, []);
 
+  //If is there a filled dataObj it will load the input fields
   React.useEffect(() => {
     if (dataObj) {
       setForm(dataObj);
       setNewSideDishesList(dataObj.sideDishesElementList);
       setMaxLimitSideDishes(dataObj.maxLimitSideDishes);
+      setCustomizedPriceObj(dataObj.CustomizedPrice);
     }
   }, [dataObj]);
 
@@ -271,6 +273,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <CustomizePrice
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
             onPriceChange={onPriceChange}
+            customizedPriceObj={customizedPriceObj}
           />
         )}
       </div>

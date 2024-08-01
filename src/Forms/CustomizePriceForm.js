@@ -3,7 +3,11 @@ import "../assets/styles/customizePrice.css";
 import Input from "../component/Input.js";
 import Title from "../component/title.js";
 
-function CustomizePrice({ setShowPopupCustomizePrice, onPriceChange }) {
+function CustomizePrice({
+  setShowPopupCustomizePrice,
+  onPriceChange,
+  customizedPriceObj,
+}) {
   const [formPrice, setFormPrice] = React.useState({
     firstPrice: 0,
     firstLabel: "",
@@ -12,6 +16,13 @@ function CustomizePrice({ setShowPopupCustomizePrice, onPriceChange }) {
     thirdPrice: 0,
     thirdLabel: "",
   });
+
+  React.useEffect(() => {
+    if (customizedPriceObj) {
+      setFormPrice(customizedPriceObj);
+    }
+  }, [customizedPriceObj]);
+
   const close = () => {
     setShowPopupCustomizePrice(false);
   };
