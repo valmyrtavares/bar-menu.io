@@ -49,7 +49,6 @@ const CarouselComponent = () => {
       <div className="container-modalDihses-InCarrolse">
         {modal && <DishesModal item={item} setModal={setModal} />}
       </div>
-      import DishesModal from "./dishesModal";
       <Box sx={{ width: "300px", margin: "auto" }}>
         <Slider {...settings}>
           {carrosselImages &&

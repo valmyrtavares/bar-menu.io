@@ -9,7 +9,7 @@
 }
 .container-modal-request .individual-dishes{
     display: grid;
-    grid-template-columns: 3fr 1fr 1fr;
+    grid-template-columns: 3fr 1fr 1fr 1fr;
     column-gap: 30px;
     justify-items: center;
     max-width: 80%;
@@ -27,12 +27,13 @@
     
 }
 .container-modal-request .individual-dishes h2{
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .container-modal-request .individual-dishes .dishes-price{
 font-weight: 700;
-font-size:18px;
+font-size:15px;
+color:black;
 margin:0;
 }
 
@@ -41,6 +42,14 @@ margin:0;
     color:red;
     margin:0
 }
+
+.container-modal-request .individual-dishes p{
+    background-color: transparent;
+    color:red;
+    font-size:11px;
+    margin-bottom:0;
+}
+
 
 .container-modal-request .no-request{
     text-align: center;

@@ -1,6 +1,6 @@
-import React from 'react';
-import '../assets/styles/menuButton.css';
-import { Link, useNavigate } from 'react-router-dom';
+import React from "react";
+import "../assets/styles/menuButton.css";
+import { Link, useNavigate } from "react-router-dom";
 
 const MenuButton = () => {
   const [modal, setModal] = React.useState(false);
@@ -16,7 +16,7 @@ const MenuButton = () => {
 
   return (
     <>
-      <button data-menu="button" onClick={toggleMenu}></button>;
+      <button data-menu="button" onClick={toggleMenu}></button>
       {modal && (
         <div className="modal_menu">
           <div className="close-btn">
@@ -35,7 +35,7 @@ const MenuButton = () => {
             </li> */}
             <li>Conta</li>
             <li>
-              {' '}
+              {" "}
               <Link to="/admin">Admin</Link>
             </li>
             {/* <Link to="/admin/category">form categoria</Link>
