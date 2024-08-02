@@ -29,6 +29,7 @@ const DishesModal = ({ item, setModal }) => {
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
     []
   );
+  const [radioDisabled, setRadioDisabled] = React.useState(false);
 
   const navigate = useNavigate();
   const db = getFirestore(app);
@@ -46,8 +47,15 @@ const DishesModal = ({ item, setModal }) => {
       const arrayList = [...sideDishesListOnScreen, itemOnScreen];
       setSideDishesListOnScreen(arrayList);
       checkAmountOfsideDishes(arrayList);
+      disabledRadio();
     }
   }, [itemOnScreen]);
+
+  const disabledRadio = () => {
+    if (itemOnScreen) {
+      setRadioDisabled(true);
+    }
+  };
 
   React.useEffect(() => {
     setForm((prevForm) => ({
@@ -79,6 +87,7 @@ const DishesModal = ({ item, setModal }) => {
     const additionalPrice = Number(e.target.value);
     if (e.target.checked) {
       setTotalPrice((prevTotal) => prevTotal + additionalPrice);
+      setRadioDisabled(true);
     } else {
       setTotalPrice((prevTotal) => prevTotal - additionalPrice);
     }
@@ -141,6 +150,7 @@ const DishesModal = ({ item, setModal }) => {
         <CustomizedPrice
           item={item.CustomizedPrice}
           onPriceChange={onPriceChange}
+          radioDisabled={radioDisabled}
         />
       )}
       <form className="my-3" onSubmit={handleSubmit}>

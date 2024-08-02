@@ -1,7 +1,7 @@
 import React from "react";
 import "../../assets/styles/dishes.css";
 
-function CustomizedPrice({ item, onPriceChange }) {
+function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   const [formPriceOnScreen, setFormPriceOnScreen] = React.useState({});
 
   const handleChange = (e) => {
@@ -15,6 +15,7 @@ function CustomizedPrice({ item, onPriceChange }) {
       <form>
         <div>
           <input
+            disabled={radioDisabled}
             className="form-check-input"
             id="carrossel"
             value={item.firstPrice}
@@ -28,6 +29,7 @@ function CustomizedPrice({ item, onPriceChange }) {
         </div>
         <div>
           <input
+            disabled={radioDisabled}
             className="form-check-input"
             id="carrossel"
             name="options"
@@ -41,6 +43,7 @@ function CustomizedPrice({ item, onPriceChange }) {
         </div>
         <div>
           <input
+            disabled={radioDisabled}
             className="form-check-input"
             id="carrossel"
             value={item.thirdPrice}
