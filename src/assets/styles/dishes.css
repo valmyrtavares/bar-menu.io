@@ -134,6 +134,21 @@ margin:0
     font-weight: 700;
     font-size: 12px;
 }
+.added-side-dishes .side-dishe p{
+    margin-bottom: 0;
+}
+.added-side-dishes .side-dishe .btn-close-side-dishes{
+    padding:0;
+}
+.added-side-dishes .side-dishe{
+    border:solid 1px brown;
+    border-radius: 10px;
+    width: 80%;
+    margin:15px 10%;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
 .customized-price-container form{
     display:grid;
     grid-template-columns: 1fr 1fr 1fr;

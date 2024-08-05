@@ -51,6 +51,13 @@ const DishesModal = ({ item, setModal }) => {
     }
   }, [itemOnScreen]);
 
+  // React.useEffect(() => {
+  //   if (sideDishesListOnScreen.length > 0) {
+  //     setRadioDisabled(false);
+  //     setDisabledSelect(true);
+  //   }
+  // }, [sideDishesListOnScreen]);
+
   const disabledRadio = () => {
     if (itemOnScreen) {
       setRadioDisabled(true);
@@ -65,7 +72,7 @@ const DishesModal = ({ item, setModal }) => {
   }, [totalPrice]);
 
   //select side dishes
-  const selectMaximumNumberSideDishes = (e) => {
+  const addSelectedMaximumNumberSideDishes = (e) => {
     const id = e.target.value;
     const selectedItem = item.sideDishesElementList[id];
     setTotalPrice(totalPrice + Number(selectedItem.price));
@@ -137,6 +144,28 @@ const DishesModal = ({ item, setModal }) => {
     setTotalPrice(Number(price));
   }
 
+  const removeSideDish = (index) => {
+    const itemSelected = sideDishesListOnScreen[index]; //Peguei o nome do acompanhamento
+
+    const oneSideDishe = item.sideDishesElementList.filter(
+      //Seleciona o objeto
+      (item) => item.sideDishes == itemSelected
+    );
+    const nameOnScreen = sideDishesListOnScreen.filter(
+      (item) => item != itemSelected
+    ); //Tirar da tela
+    setSideDishesListOnScreen(nameOnScreen); //atualiza a lista de nomes da tela
+
+    setTotalPrice(totalPrice - Number(oneSideDishe[0].price)); //Troca o valor total na tela
+    if (sideDishesListOnScreen.length == 1) {
+      setRadioDisabled(false);
+    }
+
+    if (sideDishesListOnScreen.length <= item.maxLimitSideDishes) {
+      setDisabledSelect(true);
+    }
+  };
+
   return (
     <div className="content-modal-dishes">
       <div className="close-btn">
@@ -188,7 +217,7 @@ const DishesModal = ({ item, setModal }) => {
                       id="sideDishesElement"
                       value={form.sideDishesElement}
                       className="form-select"
-                      onChange={selectMaximumNumberSideDishes}
+                      onChange={addSelectedMaximumNumberSideDishes}
                     >
                       <option value="">Selecione um acompanhamento</option>
                       {item.sideDishesElementList &&
@@ -212,7 +241,18 @@ const DishesModal = ({ item, setModal }) => {
         )}
         <div className="added-side-dishes">
           {sideDishesListOnScreen &&
-            sideDishesListOnScreen.map((item) => <p>{item}</p>)}
+            sideDishesListOnScreen.map((item, index) => (
+              <div className="side-dishe">
+                <p>{item}</p>{" "}
+                <button
+                  type="button"
+                  className="btn-close-side-dishes"
+                  onClick={() => removeSideDish(index)}
+                >
+                  x
+                </button>{" "}
+              </div>
+            ))}
         </div>
         <button className="request-client">Faça o seu pedido</button>
       </form>

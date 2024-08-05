@@ -17,6 +17,11 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
       setShowCustomizedPrice(false);
     }
   }, []);
+
+  React.useEffect(() => {
+    console.log(radioDisabled);
+  }, [radioDisabled]);
+
   return (
     <div className="customized-price-container">
       {showCustomizedPrice && (

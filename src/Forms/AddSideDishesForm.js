@@ -92,7 +92,7 @@ function AddSideDishesForm({
         mainTitle={
           EditSideDishesTitle
             ? EditSideDishesTitle
-            : "Adicione um novo Acompanhamento 123"
+            : "Adicione um novo Acompanhamento"
         }
       />
       <form onSubmit={handleSubmit} className="m-1">
