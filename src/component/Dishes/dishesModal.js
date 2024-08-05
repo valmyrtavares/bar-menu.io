@@ -156,7 +156,9 @@ const DishesModal = ({ item, setModal }) => {
       <form className="my-3" onSubmit={handleSubmit}>
         {item.sideDishesElementList && (
           <>
-            <h4>Selecione o seu acompanhamento</h4>
+            {item.sideDishesElementList.length > 0 && (
+              <h4>Selecione o seu acompanhamento</h4>
+            )}
             <div
               className={
                 item.maxLimitSideDishes === 0
