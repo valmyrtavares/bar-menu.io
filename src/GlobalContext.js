@@ -11,9 +11,7 @@ export const GlobalStorage = ({ children }) => {
     fontTextButton: "Ink Free",
   });
 
-  React.useEffect(() => {
-    console.log("Updated styles in GlobalContext:", styles);
-  }, [styles]);
+  React.useEffect(() => {}, [styles]);
   return (
     <GlobalContext.Provider
       value={{ image, setImage, id, setId, styles, setStyles }}

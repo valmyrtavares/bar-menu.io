@@ -10,31 +10,58 @@ const FormMenu = () => {
       <MenuButton />
       <Title title="Menu de Formulários" />
       <div className="row">
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/category">Adicione Botão </Link>
-        </button>
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/editButton/cat">Lista de Botões</Link>
-        </button>
+        <Link
+          to="/admin/category"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Adicione Botão{" "}
+        </Link>
+
+        <Link
+          to="/admin/editButton/cat"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Lista de Botões
+        </Link>
       </div>
       <div className="row">
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/item">Adicione um prato</Link>
-        </button>
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/editButton/dishes">Lista de pratos</Link>
-        </button>
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/frontimage">Adicione sua marca</Link>
-        </button>
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/sidedishes">Adicione Acompanhamentos opcionais</Link>
-        </button>
-        <button className="col-sm-4 btn btn-success nostyle m-2">
-          <Link to="/admin/editButton/sidedishes">
-            Lista de acompanhamentos
-          </Link>
-        </button>
+        <Link to="/admin/item" className="col-sm-4 btn btn-success nostyle m-2">
+          Adicione um prato
+        </Link>
+
+        <Link
+          to="/admin/editButton/dishes"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Lista de pratos
+        </Link>
+
+        <Link
+          to="/admin/frontimage"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Adicione sua marca
+        </Link>
+
+        <Link
+          to="/admin/sidedishes"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Adicione Acompanhamentos opcionais
+        </Link>
+
+        <Link
+          to="/admin/editButton/sidedishes"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Lista de acompanhamentos
+        </Link>
+        <Link
+          to="/admin/styles"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Gerenciando Style
+        </Link>
       </div>
     </div>
   );

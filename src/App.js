@@ -14,12 +14,13 @@ import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
 import ProtectedUser from "./component/ProtectedUser";
 import CreateCustomer from "./Forms/Login/createCustomer";
 import RequestModal from "./component/requestModal";
+import ScreenStylesForm from "./Forms/ScreenStylesForm";
 
 import "./style.css";
 
 function App() {
-  const basename = "/bar-menu.io";
-  //const basename = "/";
+  //const basename = "/bar-menu.io";
+  const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -49,6 +50,7 @@ function App() {
           <Route path="/admin/signup" element={<Signup />} />
           <Route path="/admin/admin" element={<Admin />} />
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
+          <Route path="/admin/styles" element={<ScreenStylesForm />} />
         </Routes>
       </BrowserRouter>
     </div>
@@ -57,7 +59,7 @@ function App() {
 
 export default App;
 
-//MainMenu    tela principal
+//MainMenu    tela principal       /
 //EditFormButton sem dia não existe
 //EditFormButton   editar ambas telas de pratos e botões
 //FormItem adicionar um novo prato
