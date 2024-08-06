@@ -1,0 +1,21 @@
+.container-btn{
+    margin-top:30px;
+    section{
+       display:grid;
+       grid-template-columns: 1fr 1fr;
+       justify-content: center;
+       padding: 22px 55px 10px 48px;
+       button {
+          border: none;
+         
+          font-weight: 700;
+          font-size: 19px;
+      }
+      .container-btn section p{   
+          font-weight: 700;
+          font-size: 19px;
+      }
+   }
+}
+
+

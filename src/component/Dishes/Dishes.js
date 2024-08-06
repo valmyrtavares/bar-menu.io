@@ -1,6 +1,6 @@
 import React from "react";
 import { getBtnData } from "../../api/Api";
-import "../../assets/styles/dishes.css";
+import "../../assets/styles/dishes.scss";
 import DishesModal from "./dishesModal";
 
 function Dishes({ newItem }) {
