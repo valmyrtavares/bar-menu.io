@@ -46,7 +46,7 @@
   position: fixed;
   top: 5%;
   left: 18%;
-  background: white;
+  background: var(--secundary-bg-color);
   border: solid 2px gray;
   width: 80%;
   max-width: 300px;
@@ -85,7 +85,8 @@
 
 .content-modal-dishes h1 {
   text-align: center !important;
-  color: red;
+  color: var(--title-font-color);
+  font-family:var (--title-font) ;
 }
 
 .content-modal-dishes img {
@@ -131,8 +132,16 @@
   display: block;
 }
 
-.limit-dishes .select-limit-sidedishes {
+.limit-dishes .select-limit-sidedishes{  
+  background-color: var(--secundary-bg-color);
+}
+
+.limit-dishes .select-limit-sidedishes .form-select {
   padding: 10px 20px;
+  background-color: var(--secundary-bg-color);
+  border: solid 1px var(--font-color);
+  font-family: var(--title-font);
+  color: var(--font-color)
 }
 
 .limit-dishes .select-limit-sidedishes p {

@@ -254,7 +254,7 @@ const DishesModal = ({ item, setModal }) => {
               </div>
             ))}
         </div>
-        <button className="request-client">Faça o seu pedido</button>
+        <button className="request-client-modal">Faça o seu pedido 123</button>
       </form>
     </div>
   );
