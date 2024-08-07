@@ -43,6 +43,8 @@
 
 .content-modal-dishes {
   box-shadow: 14px 23px #8888889c;
+  max-height: 90vh;
+  overflow:scroll;
   position: fixed;
   top: 5%;
   left: 18%;
