@@ -62,6 +62,12 @@ const FormMenu = () => {
         >
           Gerenciando Style
         </Link>
+        <Link
+          to="/admin/welcome"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Crie sua Saudação inicial
+        </Link>
       </div>
     </div>
   );

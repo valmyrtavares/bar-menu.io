@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../GlobalContext";
 import "../../assets/styles/createCustomer.css";
 import { Link } from "react-router-dom";
+import { getBtnData } from "../../api/Api.js";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
@@ -18,8 +19,23 @@ const CreateCustomer = () => {
     email: "",
   });
 
+  const [welcome, setWelcome] = React.useState({
+    salute: "",
+    gift: "",
+  });
+
   //FIRESTORE
   const db = getFirestore(app);
+
+  React.useEffect(() => {
+    const fetchDatafunction = async () => {
+      const data = await getBtnData("welcomeCustomer");
+      if (data) {
+        setWelcome(data[0]);
+      }
+    };
+    fetchDatafunction();
+  });
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -55,15 +71,8 @@ const CreateCustomer = () => {
     <section className="welcome-message">
       <main>
         <h1>Seja bem vindo</h1>
-        <p>
-          Vamos tornar a nossa comunicação mais pessoal? Preencha alguns dados
-          para que possamos conhecer as suas prefências e prestarmos um serviço
-          sempre melhor
-        </p>
-        <p>
-          E ganhe um brinde! Um incrivel shake de chocolate como gesto de boas
-          vindas a nossa casa
-        </p>
+        <p>{welcome.salute}</p>
+        <p>{welcome.gift}</p>
       </main>
       <form onSubmit={handleSubmit} className="m-1">
         <Input

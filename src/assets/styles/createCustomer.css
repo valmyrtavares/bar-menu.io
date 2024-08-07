@@ -3,16 +3,20 @@
 }
 .welcome-message main{
     padding: 5px;
-    border:solid 2px brown;
+    border:solid 2px var(--title-font-color);
     border-radius: 5%;
+    margin:10px 15px;
 }
 .welcome-message h1{
     text-align: center;
-    color:brown;;
+    color:var(--title-font-color);
+    font-family:var(--title-font);
 }
 .welcome-message p {
     padding: 10px;
     margin:0;
     text-align:center;
+    font-family:var(--text-font);
+    color:var(--font-color);
 
 }
