@@ -3,7 +3,7 @@ import { app } from "../config-firebase/firebase.js";
 import { doc, getFirestore, getDoc } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import CheckDishesModal from "./Dishes/CheckdishesModal.js";
-import "../assets/styles/requestModal.scss";
+import "../assets/styles/requestModal.css";
 import { deleteRequestItem } from "../api/Api.js";
 
 const RequestModal = () => {

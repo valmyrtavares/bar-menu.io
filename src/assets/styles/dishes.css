@@ -52,6 +52,10 @@
   max-width: 300px;
   z-index: 50;
 }
+.content-modal-dishes .label-side-dishes{
+  color: var(--title-font-color)!important;
+  font-family: var(--title-font)!important
+}
 
 .content-modal-dishes .request-client {
   font-size: 14px;
@@ -67,6 +71,8 @@
   font-weight: 700;
   margin: 0;
   text-align: center;
+  color: var(--font-color)!important;
+  font-family: var(--text-font)!important
 }
 
 .content-modal-dishes .close-btn {
@@ -99,6 +105,8 @@
   margin-bottom: 7px;
   font-size: 13px;
   text-align: center;
+  color: var(--font-color)!important;
+  font-family: var(--text-font)!important
 }
 
 .content-modal-dishes h3 {
@@ -134,6 +142,7 @@
 
 .limit-dishes .select-limit-sidedishes{  
   background-color: var(--secundary-bg-color);
+  margin: 14px 17px;
 }
 
 .limit-dishes .select-limit-sidedishes .form-select {
@@ -189,9 +198,12 @@
 
 .customized-price-container form div label {
   font-size: 14px;
+  color: var(--font-color)!important;
+  font-family: var(--text-font)!important
 }
 
 .customized-price-container form div p {
   font-size: 12px;
   font-weight: 700;
 }
+

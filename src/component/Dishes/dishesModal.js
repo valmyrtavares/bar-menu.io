@@ -186,7 +186,9 @@ const DishesModal = ({ item, setModal }) => {
         {item.sideDishesElementList && (
           <>
             {item.sideDishesElementList.length > 0 && (
-              <h4>Selecione o seu acompanhamento</h4>
+              <h4 className="label-side-dishes">
+                Selecione o seu acompanhamento
+              </h4>
             )}
             <div
               className={
@@ -219,7 +221,7 @@ const DishesModal = ({ item, setModal }) => {
                       className="form-select"
                       onChange={addSelectedMaximumNumberSideDishes}
                     >
-                      <option value="">Selecione um acompanhamento</option>
+                      <option value="">Selecione</option>
                       {item.sideDishesElementList &&
                         item.sideDishesElementList.map((item, index) => (
                           <option key={index} value={index}>

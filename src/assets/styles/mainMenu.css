@@ -18,6 +18,13 @@
       border: none;     
       font-weight: 700;
       font-size: 19px;
+      background: var(--bg-color);
+  font-family: var(--text-font);
+}
+.container-btn section button a{
+      color: var(--font-color);
+      text-decoration: none;
+
   }
   .container-btn section p{   
       font-weight: 700;
