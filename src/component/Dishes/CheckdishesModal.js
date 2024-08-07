@@ -1,5 +1,5 @@
 import React from "react";
-import "../../assets/styles/dishes.scss";
+import "../../assets/styles/dishes.css";
 
 //React variables
 const CheckDishesModal = ({ item, setModal }) => {

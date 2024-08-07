@@ -1,0 +1,33 @@
+@import 'variables.css';
+
+.nested-btn {
+  width: 100%;
+}
+
+.nested-btn button {
+  width: 80%;
+  border-radius: 10px;
+  padding: 10px 20px;
+  margin: 20px 10%;
+  font-family: var(--title-font) !important;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--title-font-color);
+  background: var(--btn-color);
+}
+
+.nested-btn .main {
+  background: var(--btn-color);
+}
+
+.nested-btn .bebidas {
+  background: var(--btn-color);
+}
+
+.nested-btn .alcoolicos {
+  background: rgba(255, 0, 0, 0.308);
+}
+
+.nested-btn .naoalcoolicos {
+  background: rgba(129, 12, 129, 0.267);
+}

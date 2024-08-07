@@ -20,6 +20,7 @@ function ScreenStylesForm() {
     titleFontColor: "",
     titleFont: "",
     textFont: "",
+    secundaryBgColor: "",
   });
   const db = getFirestore(app);
   const navigate = useNavigate();
@@ -65,8 +66,15 @@ function ScreenStylesForm() {
         />
         <Input
           id="bgColor"
-          label="Cor de Fundo"
+          label="Cor de Fundo geral"
           value={form.bgColor}
+          type="color"
+          onChange={handleChange}
+        />
+        <Input
+          id="secundaryBgColor"
+          label="Cor de Fundo secundário"
+          value={form.secundaryBgColor}
           type="color"
           onChange={handleChange}
         />

@@ -5,7 +5,7 @@ import { getBtnData } from "../api/Api";
 import MenuButton from "../component/menuHamburguerButton";
 import RequestModal from "../component/requestModal.js";
 import { Link } from "react-router-dom";
-import "../assets/styles/mainMenu.scss";
+import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";
 
 function MainMenu() {

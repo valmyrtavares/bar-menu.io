@@ -1,8 +1,12 @@
+@import './assets//styles/variables.css';
+
 .main_title{
     text-align: center;
     color:red;
 }
+
 .ultra-wrapper{
     max-width: 600px;
     margin:10px auto;
+    background: var(--bg-color)!important;
 }

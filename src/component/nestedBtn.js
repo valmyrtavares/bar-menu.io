@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../assets/styles/nestedBtn.scss";
+import "../assets/styles/nestedBtn.css";
 import Dishes from "./Dishes/Dishes";
 
 const NestedBtn = ({ item, parent, menuButton, dishes }) => {

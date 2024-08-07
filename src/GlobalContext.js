@@ -6,12 +6,19 @@ export const GlobalStorage = ({ children }) => {
   const [image, setImage] = React.useState("");
   const [id, setId] = React.useState("");
   const [styles, setStyles] = React.useState({
-    mainBgBtnColor: "rgba(255, 0, 0, 0.753)",
-    colorTextButton: "rgb(22, 92, 172)",
-    fontTextButton: "Ink Free",
+    btnColor: "#b02121",
+    secundaryBgColor: "#b02121",
+    bgColor: "#b02121",
+    fontColor: "rgb(230, 235, 230)",
+    titleFontColor: "#bd2828",
+    titleFont: "Arial",
+    textFont: "sans serif",
   });
 
-  React.useEffect(() => {}, [styles]);
+  React.useEffect(() => {
+    console.log("Updated styles in GlobalContext:", styles);
+  }, [styles]);
+
   return (
     <GlobalContext.Provider
       value={{ image, setImage, id, setId, styles, setStyles }}

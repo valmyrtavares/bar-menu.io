@@ -1,0 +1,188 @@
+@import 'variables.css';
+
+.item-container {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  background-color: var(--secundary-bg-color);
+}
+
+.item-container h2 {
+  color: var(--title-font-color);
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.item-container .comments {
+  font-size: 12px;
+  color: var(--font-color);
+  font-family: var(--text-font);
+}
+
+.item-container .container-request-button {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 11px;
+  justify-items: center;
+}
+
+.item-container div .request-client {
+  font-size: 14px;
+  margin: 0;
+  padding: 2px 3px;
+  background: var(--btn-color);
+  color: var(--title-font-color);
+}
+
+.item-container img {
+  max-height: 140px;
+}
+
+.price {
+  color: #A43334;
+  margin: 0;
+}
+
+.content-modal-dishes {
+  box-shadow: 14px 23px #8888889c;
+  position: fixed;
+  top: 5%;
+  left: 18%;
+  background: white;
+  border: solid 2px gray;
+  width: 80%;
+  max-width: 300px;
+  z-index: 50;
+}
+
+.content-modal-dishes .request-client {
+  font-size: 14px;
+  margin: 0;
+  padding: 2px 3px;
+  background: rgba(255, 0, 0, 0.753);
+  margin: 20px 10%;
+  box-shadow: 6px 5px #8888889c;
+}
+
+.content-modal-dishes h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+}
+
+.content-modal-dishes .close-btn {
+  display: flex;
+  justify-content: end;
+}
+
+.content-modal-dishes div button {
+  margin: 0;
+  color: black;
+  border: none;
+  background: none;
+  max-width: 30px;
+  max-height: 30px;
+}
+
+.content-modal-dishes h1 {
+  text-align: center !important;
+  color: red;
+}
+
+.content-modal-dishes img {
+  width: 40%;
+  margin: 10px 30%;
+}
+
+.content-modal-dishes p {
+  padding: 1% 3%;
+  margin-bottom: 7px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.content-modal-dishes h3 {
+  padding-bottom: 50px;
+  color: black;
+  text-align: center;
+}
+
+/* Side Dishes Area */
+
+.side-dishes-list {
+  display: grid;
+  row-gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  margin: 10px 5px;
+}
+
+.side-dishes-list div {
+  padding: 3px;
+  display: flex;
+  justify-content: start;
+  font-size: 12px;
+}
+
+.side-dishes-list div input {
+  margin-right: 7px;
+}
+
+.limit-dishes {
+  display: block;
+}
+
+.limit-dishes .select-limit-sidedishes {
+  padding: 10px 20px;
+}
+
+.limit-dishes .select-limit-sidedishes p {
+  margin-top: 20px;
+  padding: 10px 50px;
+  color: red;
+  font-weight: 700;
+}
+
+.added-side-dishes {
+  color: rgb(22, 92, 172) !important;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.added-side-dishes .side-dishe p {
+  margin-bottom: 0;
+}
+
+.added-side-dishes .side-dishe .btn-close-side-dishes {
+  padding: 0;
+}
+
+.added-side-dishes .side-dishe {
+  border: solid 1px brown;
+  border-radius: 10px;
+  width: 80%;
+  margin: 15px 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customized-price-container form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-top: 30px;
+}
+
+.customized-price-container form div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.customized-price-container form div label {
+  font-size: 14px;
+}
+
+.customized-price-container form div p {
+  font-size: 12px;
+  font-weight: 700;
+}
