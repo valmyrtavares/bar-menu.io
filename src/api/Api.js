@@ -69,6 +69,23 @@ export async function getBtnData(collectionName) {
   }
 }
 
+export async function getOneItemColleciton(collectionName, itemId) {
+  const db = getFirestore();
+  const docRef = doc(db, collectionName, itemId);
+
+  try {
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id };
+    } else {
+      throw new Error("No document found with the given ID");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function fetchCategories(item) {
   const categories = await getBtnData(item);
   return categories.map((item) => item.parent);

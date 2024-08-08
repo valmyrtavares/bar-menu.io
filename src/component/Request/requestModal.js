@@ -1,10 +1,10 @@
 import React from "react";
-import { app } from "../config-firebase/firebase.js";
+import { app } from "../../config-firebase/firebase.js";
 import { doc, getFirestore, getDoc } from "firebase/firestore";
-import { Link } from "react-router-dom";
-import CheckDishesModal from "./Dishes/CheckdishesModal.js";
-import "../assets/styles/requestModal.css";
-import { deleteRequestItem } from "../api/Api.js";
+import { useNavigate, Link } from "react-router-dom";
+import CheckDishesModal from "../Dishes/CheckdishesModal.js";
+import "../../assets/styles/requestModal.css";
+import { deleteRequestItem } from "../../api/Api.js";
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState("");
@@ -12,6 +12,8 @@ const RequestModal = () => {
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
+
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty("userMenu")) {
@@ -76,6 +78,11 @@ const RequestModal = () => {
       ) : (
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
+      <div className="btnFinalRequest">
+        <Link to={`/requestlist/${currentUser}`}>
+          Enviar pedido para cozinha
+        </Link>
+      </div>
     </section>
   );
 };

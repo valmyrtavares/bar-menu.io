@@ -13,15 +13,16 @@ import FormFrontImage from "./Forms/formFrontImage";
 import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
 import ProtectedUser from "./component/ProtectedUser";
 import CreateCustomer from "./Forms/Login/createCustomer";
-import RequestModal from "./component/requestModal";
+import RequestModal from "./component/Request/requestModal";
 import ScreenStylesForm from "./Forms/ScreenStylesForm";
 import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
+import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
 
 import "./style.css";
 
 function App() {
-  const basename = "/bar-menu.io";
-  //const basename = "/";
+  //const basename = "/bar-menu.io";
+  const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -34,6 +35,10 @@ function App() {
           <Route path="/request" element={<RequestModal />} />
 
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
+          <Route
+            path="/requestlist/:id"
+            element={<RequestListToBePrepared />}
+          />
           <Route
             path="/admin/EditButton/:id"
             element={<ListToEditAndDelete />}

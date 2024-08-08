@@ -3,7 +3,7 @@ import CarrosselImages from "../component/carouselComponent";
 import NestedBtn from "../component/nestedBtn";
 import { getBtnData } from "../api/Api";
 import MenuButton from "../component/menuHamburguerButton";
-import RequestModal from "../component/requestModal.js";
+import RequestModal from "../component/Request/requestModal.js";
 import { Link } from "react-router-dom";
 import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";

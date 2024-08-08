@@ -1,0 +1,14 @@
+.container-requestListToBePrepared{
+    background-color:yellow;
+    width:90%;
+    margin:10px 5%;
+    padding: 10px;
+}
+
+.container-requestListToBePrepared .request-item{
+    display:grid;
+    grid-template-columns: 2fr 1fr;
+}
+.container-requestListToBePrepared .request-item img{
+    max-width: 200px;
+}
