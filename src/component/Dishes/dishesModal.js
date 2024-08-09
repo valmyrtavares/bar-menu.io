@@ -24,6 +24,7 @@ const DishesModal = ({ item, setModal }) => {
     id: item.id,
     finalPrice: Number(item.price),
     image: item.image,
+    sideDishes: [],
   });
   const [itemOnScreen, setItemOnScreen] = React.useState("");
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
@@ -44,7 +45,7 @@ const DishesModal = ({ item, setModal }) => {
   //load side dishes on  screen
   React.useEffect(() => {
     if (itemOnScreen) {
-      const arrayList = [...sideDishesListOnScreen, itemOnScreen];
+      const arrayList = [...sideDishesListOnScreen, itemOnScreen]; //itemOnScreen is add in sideDishesOnScreen, it is the new
       setSideDishesListOnScreen(arrayList);
       checkAmountOfsideDishes(arrayList);
       disabledRadio();
@@ -68,8 +69,9 @@ const DishesModal = ({ item, setModal }) => {
     setForm((prevForm) => ({
       ...prevForm,
       finalPrice: totalPrice,
+      sideDishes: sideDishesListOnScreen,
     }));
-  }, [totalPrice]);
+  }, [totalPrice, sideDishesListOnScreen]);
 
   //select side dishes
   const addSelectedMaximumNumberSideDishes = (e) => {
@@ -133,6 +135,7 @@ const DishesModal = ({ item, setModal }) => {
         id: item.id,
         finalPrice: Number(item.price),
         image: item.image,
+        sideDishes: sideDishesListOnScreen,
       });
 
       navigate("/request");
