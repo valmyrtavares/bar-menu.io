@@ -16,32 +16,34 @@ const RequestListToBePrepared = () => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
-  //const [requestsObj, setRequestObj] = React.useState([]);
 
   React.useEffect(() => {
     const fetchUserRequest = async () => {
       const data = await getOneItemColleciton("user", id);
       if (data) {
+        data.done = true;
         addDoc(collection(db, "request"), data);
       }
-      const requestList = await getBtnData("request");
-      console.log(requestList);
+      let requestList = await getBtnData("request");
+      console.log("requestList    ", requestList);
+      requestList = requestList.filter((item) => item.done == true);
+      console.log("requestList    ", requestList);
       setRequestDoneList(requestList);
-      // newArray.push(data);
-      // localStorage.setItem("request", JSON.stringify(newArray));
-      // setRequestObj(data);
-      console.log("data to kitchen", data);
     };
     fetchUserRequest();
   }, [id]);
 
-  // React.useEffect(() => {
-  //   if (localStorage.hasOwnProperty("request")) {
-  //     const data1 = JSON.parse(localStorage.getItem("request"));
-  //     console.log("newArray   ", data1);
-  //     setRequestDoneList(data1);
-  //   }
-  // }, [requestsObj]);
+  const RequestDone = (item) => {
+    item.done = false;
+    console.log(item);
+    setDoc(doc(db, "request", item.id), item)
+      .then(() => {
+        console.log("Document successfully updated !");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <div>
@@ -63,7 +65,12 @@ const RequestListToBePrepared = () => {
                   <span>Data</span>:12-12-2024
                 </p>
               </div>
-              <button className="btn btn-success">Pronto</button>
+              <button
+                className="btn btn-success"
+                onClick={() => RequestDone(item)}
+              >
+                Pronto
+              </button>
             </div>
 
             {item.request &&
