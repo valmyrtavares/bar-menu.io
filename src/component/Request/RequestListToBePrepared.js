@@ -1,35 +1,47 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { getOneItemColleciton } from "../../api/Api.js";
+import { getBtnData, getOneItemColleciton } from "../../api/Api.js";
+import { app } from "../../config-firebase/firebase.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+} from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 
 const RequestListToBePrepared = () => {
   const { id } = useParams();
+  const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
-  const [requestsObj, setRequestObj] = React.useState([]);
+  //const [requestsObj, setRequestObj] = React.useState([]);
 
   React.useEffect(() => {
     const fetchUserRequest = async () => {
       const data = await getOneItemColleciton("user", id);
       if (data) {
-        const newArray = [];
-        newArray.push(data);
-        localStorage.setItem("request", JSON.stringify(newArray));
-        setRequestObj(data);
+        addDoc(collection(db, "request"), data);
       }
+      const requestList = await getBtnData("request");
+      console.log(requestList);
+      setRequestDoneList(requestList);
+      // newArray.push(data);
+      // localStorage.setItem("request", JSON.stringify(newArray));
+      // setRequestObj(data);
       console.log("data to kitchen", data);
     };
     fetchUserRequest();
   }, [id]);
 
-  React.useEffect(() => {
-    if (localStorage.hasOwnProperty("request")) {
-      const data1 = JSON.parse(localStorage.getItem("request"));
-      console.log("newArray   ", data1);
-      setRequestDoneList(data1);
-    }
-  }, [requestsObj]);
+  // React.useEffect(() => {
+  //   if (localStorage.hasOwnProperty("request")) {
+  //     const data1 = JSON.parse(localStorage.getItem("request"));
+  //     console.log("newArray   ", data1);
+  //     setRequestDoneList(data1);
+  //   }
+  // }, [requestsObj]);
 
   return (
     <div>
