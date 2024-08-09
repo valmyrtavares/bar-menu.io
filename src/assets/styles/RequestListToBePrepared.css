@@ -5,10 +5,66 @@
     padding: 10px;
 }
 
+.container-requestListToBePrepared .user-container{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+
+.container-requestListToBePrepared .user-container span{
+    font-weight:200;
+}
+.container-requestListToBePrepared .user-container p{
+    font-weight: 700;
+    margin-bottom:1px;
+    text-align: center;
+    font-size: 17px;
+    
+}
+.container-requestListToBePrepared .user-container button{
+   max-height: 60px; 
+   border-radius: 10px;
+   padding: 10px 20px;   
+   font-family: var(--title-font) !important;
+   font-size: 1.2rem;
+   font-weight: bold;
+   
+   
+    
+}
 .container-requestListToBePrepared .request-item{
     display:grid;
     grid-template-columns: 2fr 1fr;
 }
 .container-requestListToBePrepared .request-item img{
     max-width: 200px;
+}
+
+.container-requestListToBePrepared .request-item{
+    border:solid 3px pink;
+    display:grid;
+    grid-template-columns: 2fr 1fr;
+    
+}
+.request-item div {
+display:flex;
+flex-direction: column;
+justify-content: center;
+gap: 10px; 
+}
+.request-item div h5{
+ text-align: center;
+}
+.request-item div .sideDishes-list{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap:1px;
+    padding: 3px;
+}
+.request-item div .sideDishes-list p{
+    margin-bottom: 1px;
+
 }
