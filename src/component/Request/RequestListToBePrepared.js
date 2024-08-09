@@ -62,7 +62,7 @@ const RequestListToBePrepared = () => {
                     <h5>Acompanhamento</h5>
                     <div className="sideDishes-list">
                       {item.sideDishes && item.sideDishes.length > 0 ? (
-                        item.sideDishes.map((item) => <p>{item}</p>)
+                        item.sideDishes.map((item) => <p>{item},</p>)
                       ) : (
                         <p>Não tem acompanhamento</p>
                       )}
