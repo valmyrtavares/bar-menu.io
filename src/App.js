@@ -1,28 +1,28 @@
-import React from "react";
-import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
-import MainMenu from "./Pages/MainMenu";
-import AddButtonForm from "./Forms/AddButtonForm";
-import AddSideDishesForm from "./Forms/AddSideDishesForm";
-import FormItem from "./Forms/AddDishesForm";
-import Header from "./component/header";
-import Signup from "./Forms/Login/signup";
-import Login from "./Forms/Login/login";
-import Admin from "./Pages/FormMenu";
-import Protected from "./component/Protected";
-import FormFrontImage from "./Forms/formFrontImage";
-import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
-import ProtectedUser from "./component/ProtectedUser";
-import CreateCustomer from "./Forms/Login/createCustomer";
-import RequestModal from "./component/Request/requestModal";
-import ScreenStylesForm from "./Forms/ScreenStylesForm";
-import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
-import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
+import React from 'react';
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
+import MainMenu from './Pages/MainMenu';
+import AddButtonForm from './Forms/AddButtonForm';
+import AddSideDishesForm from './Forms/AddSideDishesForm';
+import FormItem from './Forms/AddDishesForm';
+import Header from './component/header';
+import Signup from './Forms/Login/signup';
+import Login from './Forms/Login/login';
+import Admin from './Pages/FormMenu';
+import Protected from './component/Protected';
+import FormFrontImage from './Forms/formFrontImage';
+import ListToEditAndDelete from './Forms/ListToEditAndDelete';
+import ProtectedUser from './component/ProtectedUser';
+import CreateCustomer from './Forms/Login/createCustomer';
+import RequestModal from './component/Request/requestModal';
+import ScreenStylesForm from './Forms/ScreenStylesForm';
+import WelcomeSaluteForm from './Forms/WelcomeSaluteForm';
+import RequestListToBePrepared from './component/Request/RequestListToBePrepared';
 
-import "./style.css";
+import './style.css';
 
 function App() {
-  //const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = '/bar-menu.io';
+  //const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
