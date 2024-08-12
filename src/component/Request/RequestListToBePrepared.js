@@ -17,29 +17,50 @@ const RequestListToBePrepared = () => {
   const global = React.useContext(GlobalContext);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
-  const [btnStatus, setBtnStatus] = React.useState(false);
 
   React.useEffect(() => {
-    const fetchUserRequest = async () => {
-      if (global.idCustomer) {
-        const data = await getOneItemColleciton("user", global.idCustomer);
-        if (data) {
-          data.done = true;
-          addDoc(collection(db, "request"), data);
-        }
-      }
-      let requestList = await getBtnData("request");
-      requestList = requestList.filter((item) => item.done == true);
-      setRequestDoneList(requestList);
-    };
     fetchUserRequest();
   }, [global.idCustomer]);
+
+  const fetchUserRequest = async () => {
+    if (global.idCustomer) {
+      const data = await getOneItemColleciton("user", global.idCustomer);
+      if (data) {
+        data.done = true;
+        addDoc(collection(db, "request"), data);
+      }
+    }
+    let requestList = await getBtnData("request");
+    console.log("Objeto inteiro   ", requestList);
+    requestList = requestList.filter((item) => item.done == true);
+    setRequestDoneList(requestList);
+  };
+
+  const fetchUserRequests = async () => {
+    let requestList = await getBtnData("request");
+    console.log("Objeto inteiro   ", requestList);
+    requestList = requestList.filter((item) => item.done == true);
+    setRequestDoneList(requestList);
+  };
 
   const RequestDone = (item) => {
     item.done = false;
     setDoc(doc(db, "request", item.id), item)
       .then(() => {
         console.log("Document successfully updated !");
+        fetchUserRequests();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const changeStatusPaid = (item) => {
+    item.paymentDone = true;
+    setDoc(doc(db, "request", item.id), item)
+      .then(() => {
+        console.log("Document successfully updated !");
+        fetchUserRequests();
       })
       .catch((error) => {
         console.log(error);
@@ -68,14 +89,14 @@ const RequestListToBePrepared = () => {
               </div>
               <div className="btn-status">
                 <button
-                  className={btnStatus ? "done" : "pendent"}
+                  className={item.done ? "done" : "pendent"}
                   onClick={() => RequestDone(item)}
                 >
                   Pronto
                 </button>
                 <button
-                  className={btnStatus ? "done" : "pendent"}
-                  onClick={() => setBtnStatus(item.paymentDone)}
+                  className={item.paymentDone ? "done" : "pendent"}
+                  onClick={() => changeStatusPaid(item)}
                 >
                   Pago
                 </button>

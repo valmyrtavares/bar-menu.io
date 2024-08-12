@@ -21,8 +21,8 @@ import RequestListToBePrepared from "./component/Request/RequestListToBePrepared
 import "./style.css";
 
 function App() {
-  //const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = "/bar-menu.io";
+  //const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
