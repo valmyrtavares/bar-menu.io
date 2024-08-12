@@ -17,10 +17,9 @@ const RequestListToBePrepared = () => {
   const global = React.useContext(GlobalContext);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
+  const [btnStatus, setBtnStatus] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("ID DO CLIENTE   ", global.idCustomer);
-
     const fetchUserRequest = async () => {
       if (global.idCustomer) {
         const data = await getOneItemColleciton("user", global.idCustomer);
@@ -67,12 +66,20 @@ const RequestListToBePrepared = () => {
                   <span>Data</span>:12-12-2024
                 </p>
               </div>
-              <button
-                className="btn btn-success"
-                onClick={() => RequestDone(item)}
-              >
-                Pronto
-              </button>
+              <div className="btn-status">
+                <button
+                  className={btnStatus ? "done" : "pendent"}
+                  onClick={() => RequestDone(item)}
+                >
+                  Pronto
+                </button>
+                <button
+                  className={btnStatus ? "done" : "pendent"}
+                  onClick={() => setBtnStatus(item.paymentDone)}
+                >
+                  Pago
+                </button>
+              </div>
             </div>
 
             {item.request &&
