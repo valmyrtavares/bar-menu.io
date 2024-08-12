@@ -1,7 +1,8 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+//import { useParams } from "react-router-dom";
 import { getBtnData, getOneItemColleciton } from "../../api/Api.js";
 import { app } from "../../config-firebase/firebase.js";
+import { GlobalContext } from "../../GlobalContext";
 import {
   getFirestore,
   collection,
@@ -12,30 +13,31 @@ import {
 import "../../assets/styles/RequestListToBePrepared.css";
 
 const RequestListToBePrepared = () => {
-  const { id } = useParams();
   const db = getFirestore(app);
+  const global = React.useContext(GlobalContext);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
 
   React.useEffect(() => {
+    console.log("ID DO CLIENTE   ", global.idCustomer);
+
     const fetchUserRequest = async () => {
-      const data = await getOneItemColleciton("user", id);
-      if (data) {
-        data.done = true;
-        addDoc(collection(db, "request"), data);
+      if (global.idCustomer) {
+        const data = await getOneItemColleciton("user", global.idCustomer);
+        if (data) {
+          data.done = true;
+          addDoc(collection(db, "request"), data);
+        }
       }
       let requestList = await getBtnData("request");
-      console.log("requestList    ", requestList);
       requestList = requestList.filter((item) => item.done == true);
-      console.log("requestList    ", requestList);
       setRequestDoneList(requestList);
     };
     fetchUserRequest();
-  }, [id]);
+  }, [global.idCustomer]);
 
   const RequestDone = (item) => {
     item.done = false;
-    console.log(item);
     setDoc(doc(db, "request", item.id), item)
       .then(() => {
         console.log("Document successfully updated !");

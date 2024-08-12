@@ -5,6 +5,9 @@ import { useNavigate, Link } from "react-router-dom";
 import CheckDishesModal from "../Dishes/CheckdishesModal.js";
 import "../../assets/styles/requestModal.css";
 import { deleteRequestItem } from "../../api/Api.js";
+import WarningMessages from "../WarningMessages";
+import { GlobalContext } from "../../GlobalContext";
+import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState("");
@@ -12,8 +15,11 @@ const RequestModal = () => {
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
+  const [finalPriceRequest, setFinalPriceRequest] = React.useState(0);
+  const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
 
   const navigate = useNavigate();
+  const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty("userMenu")) {
@@ -26,7 +32,7 @@ const RequestModal = () => {
     if (currentUser) {
       fetchUser();
     }
-  }, [currentUser, userData]);
+  }, [currentUser]);
 
   //Take just one item of user collection
 
@@ -34,17 +40,40 @@ const RequestModal = () => {
     const userDocRef = doc(db, "user", currentUser);
     const userDocSnap = await getDoc(userDocRef);
     const data = userDocSnap.data();
+    requestFinalPrice(data);
+
     setUserData(data);
   }
+
+  const requestFinalPrice = (data) => {
+    if (data.request) {
+      const testFinal = data.request
+        .map((item) => item.finalPrice)
+        .reduce((ac, el) => ac + el, 0);
+      setFinalPriceRequest(testFinal);
+    }
+  };
+
   const deleteRequest = (index) => {
     deleteRequestItem(currentUser, index, (updatedRequest) => {
       setUserData(updatedRequest); // Atualiza o estado do dishes com o array atualizado
     });
   };
   const callDishesModal = (item) => {
+    //chama o modal com o resumo do item
     if (item) {
       setItem(item);
       setModal(true);
+    }
+  };
+
+  const sendRequestToKitchen = () => {
+    if (!warningMsg) {
+      setWarningMsg(true);
+    } else {
+      console.log("Passou por aqui");
+      global.setIdCustomer(currentUser);
+      navigate("/requestlist");
     }
   };
 
@@ -59,6 +88,15 @@ const RequestModal = () => {
         </button>
         )
       </div>
+      {warningMsg && (
+        <WarningMessages
+          message="Se tiver dúvidas em relação ao seu pedido, clique em cancelar e retorne a tela anterior. Caso contrário clique em continuar e efetue o seu pagamento no caixa a frente "
+          customer={userData?.name}
+          finalPriceRequest={finalPriceRequest}
+          sendRequestToKitchen={sendRequestToKitchen}
+          setWarningMsg={setWarningMsg}
+        />
+      )}
       <p className="current-client">
         <span>Cliente: </span>
         {userData?.name}
@@ -79,9 +117,9 @@ const RequestModal = () => {
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
       <div className="btnFinalRequest">
-        <Link to={`/requestlist/${currentUser}`}>
+        <button onClick={sendRequestToKitchen}>
           Enviar pedido para cozinha
-        </Link>
+        </button>
       </div>
     </section>
   );

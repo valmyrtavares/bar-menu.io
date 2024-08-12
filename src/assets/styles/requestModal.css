@@ -68,7 +68,7 @@ h3 {
     display: flex;
     justify-content: center;
 }
-.btnFinalRequest a{
+.btnFinalRequest button{
     width: 80%;
     text-align: center;
     text-decoration: none;

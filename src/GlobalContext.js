@@ -5,6 +5,7 @@ export const GlobalContext = React.createContext();
 export const GlobalStorage = ({ children }) => {
   const [image, setImage] = React.useState("");
   const [id, setId] = React.useState("");
+  const [idCustomer, setIdCustomer] = React.useState("");
   const [styles, setStyles] = React.useState({
     btnColor: "#b02121",
     secundaryBgColor: "#b02121",
@@ -21,7 +22,16 @@ export const GlobalStorage = ({ children }) => {
 
   return (
     <GlobalContext.Provider
-      value={{ image, setImage, id, setId, styles, setStyles }}
+      value={{
+        image,
+        setImage,
+        id,
+        setId,
+        styles,
+        setStyles,
+        idCustomer,
+        setIdCustomer,
+      }}
     >
       {children}
     </GlobalContext.Provider>
