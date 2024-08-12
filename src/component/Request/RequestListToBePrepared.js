@@ -19,10 +19,10 @@ const RequestListToBePrepared = () => {
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
 
   React.useEffect(() => {
-    fetchUserRequest();
+    addRequestUser();
   }, [global.idCustomer]);
 
-  const fetchUserRequest = async () => {
+  const addRequestUser = async () => {
     if (global.idCustomer) {
       const data = await getOneItemColleciton("user", global.idCustomer);
       if (data) {
