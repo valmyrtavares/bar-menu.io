@@ -1,29 +1,32 @@
 import React from "react";
-import { getBtnData } from "../api/Api.js";
+import { app } from "../config-firebase/firebase.js";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import "../assets/styles/orderQueue.css";
 
 const OrderQueue = () => {
   const [waitingLine, setWaitingLine] = React.useState([]);
   const [doneLine, setDoneLine] = React.useState([]);
+  const db = getFirestore(app);
 
   React.useEffect(() => {
-    const fetchRequest = async () => {
-      const data = await getBtnData("request");
-      console.log("request data   ", data);
-      const waitingLine = data.filter((item) => item.done);
-      const doneLine = data.filter((item) => !item.done);
-      if (waitingLine) {
-        setWaitingLine(waitingLine);
-      }
-      if (doneLine) {
-        if (doneLine.length > 4) {
-          doneLine.splice(0, 1);
-        }
-        setDoneLine(doneLine);
-      }
-    };
-    fetchRequest();
-  }, []);
+    const requestCollection = collection(db, "request");
+
+    const unsubscribe = onSnapshot(requestCollection, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const waitingLine = data.filter((item) => !item.done);
+      const doneLine = data.filter((item) => item.done);
+
+      setWaitingLine(waitingLine);
+      setDoneLine(doneLine.slice(-4)); // Limita a lista doneLine aos últimos 4 itens
+    });
+
+    // Cleanup function to unsubscribe from the listener when the component unmounts
+    return () => unsubscribe();
+  }, [db]);
 
   return (
     <div className="order-queue-container">
