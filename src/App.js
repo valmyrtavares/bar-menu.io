@@ -17,12 +17,13 @@ import RequestModal from "./component/Request/requestModal";
 import ScreenStylesForm from "./Forms/ScreenStylesForm";
 import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
 import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
+import OrderQueue from "./component/orderQueue";
 
 import "./style.css";
 
 function App() {
-  const basename = "/bar-menu.io";
-  //const basename = "/";
+  //const basename = "/bar-menu.io";
+  const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -33,6 +34,7 @@ function App() {
           <Route path="/" element={<ProtectedUser />} />
           <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/request" element={<RequestModal />} />
+          <Route path="/orderqueue" element={<OrderQueue />} />
 
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route path="/requestlist" element={<RequestListToBePrepared />} />

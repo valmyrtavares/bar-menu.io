@@ -30,12 +30,10 @@ const MenuButton = () => {
               <Link to="/requestlist">Cozinha</Link>
             </li>
 
-            {/* <li>
-              <Link to="/admin/login">Login</Link>
-            </li>
             <li>
-              <Link to="/admin/signup">Sign up</Link>
-            </li> */}
+              <Link to="/orderqueue">Fila de pedidos</Link>
+            </li>
+
             <li>Conta</li>
             <li>
               {" "}

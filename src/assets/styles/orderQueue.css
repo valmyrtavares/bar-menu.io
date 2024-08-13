@@ -1,0 +1,32 @@
+
+.order-queue-container h1{
+text-align: center;
+}
+.order-queue-container .list-columns .horizont-line-queue{
+    display:flex;   
+    justify-content: space-between;
+    align-items: center;
+    margin:10px;
+    padding:2px  10px;
+}
+
+    .order-queue-container .horizont-line-queue p{
+        margin-bottom: 0;
+    }
+.order-queue-container .horizont-line-queue span{
+    font-weight: bold;
+}
+
+.order-queue-container .list-columns{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+   
+}
+
+.order-queue-container .list-columns .border-red{
+    border: solid 2px red;
+}
+
+.order-queue-container .list-columns .border-green{
+    border: solid 2px green
+}
