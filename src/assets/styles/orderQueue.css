@@ -24,11 +24,13 @@ color:var(--font-color)
 .order-queue-container .horizont-line-queue span{
     font-weight: bold;
 }
-
+.order-queue-container span{
+    font-weight: bold;
+}
 .order-queue-container .list-columns{
     display:grid;
     grid-template-columns: 1fr 1fr;
-   
+    gap: 9px;   
 }
 
 .order-queue-container .list-columns .border-red{

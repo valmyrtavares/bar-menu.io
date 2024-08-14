@@ -88,6 +88,17 @@ const RequestModal = () => {
 
   //send request with finel price
   const addRequestUser = async (id) => {
+    const now = new Date();
+    const formattedDateTime = `${String(now.getDate()).padStart(
+      2,
+      "0"
+    )}/${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}/${now.getFullYear()} - ${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}`;
     if (id) {
       const data = await getOneItemColleciton("user", id);
       const userNewRequest = {
@@ -96,10 +107,10 @@ const RequestModal = () => {
         done: true,
         request: data.request,
         finalPriceRequest: finalPriceRequest,
+        dateTime: formattedDateTime,
       };
 
       if (userNewRequest) {
-        debugger;
         addDoc(collection(db, "request"), userNewRequest);
       }
     }

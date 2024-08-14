@@ -30,20 +30,26 @@ const OrderQueue = () => {
         <div>
           {waitingLine &&
             waitingLine.map((item, index) => (
-              <div key={item.id} className="horizont-line-queue border-red">
-                <span>{index}</span>
-                <p>{item.name}</p>
-                <p> Em preparo</p>
+              <div className="border-red">
+                <div key={item.id} className="horizont-line-queue ">
+                  <span>{index}</span>
+                  <p>{item.name}</p>
+                  <p> Em preparo</p>
+                </div>
+                <p className="date">{item.dateTime}</p>
               </div>
             ))}
         </div>
         <div>
           {doneLine &&
             doneLine.map((item, index) => (
-              <div key={item.id} className="horizont-line-queue border-green">
-                <span>{index} - </span>
-                <p>{item.name}</p>
-                <p>Entregue</p>
+              <div className="border-green">
+                <div key={item.id} className="horizont-line-queue">
+                  <span>{index} - </span>
+                  <p>{item.name}</p>
+                  <p>Entregue</p>
+                </div>
+                <span className="date">{item.dateTime}</span>
               </div>
             ))}
         </div>

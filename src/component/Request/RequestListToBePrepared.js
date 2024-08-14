@@ -67,7 +67,7 @@ const RequestListToBePrepared = () => {
                   <span>Mesa</span>: 12
                 </p>
                 <p>
-                  <span>Data</span>:12-12-2024
+                  <span>Data</span> {item.dateTime}
                 </p>
                 <h2>Valor final {item.finalPriceRequest}</h2>
               </div>
