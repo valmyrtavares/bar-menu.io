@@ -5,6 +5,7 @@ import {
   collection,
   doc,
   getDocs,
+  onSnapshot,
   getDoc,
   deleteDoc,
   updateDoc,
@@ -13,6 +14,21 @@ import {
 //FIRESTORE
 const db = getFirestore(app);
 
+//Bringing collecton whenever ther was any change in data
+export function fetchInDataChanges(collectionName, onData) {
+  const requestCollection = collection(db, collectionName);
+
+  const unsubscribe = onSnapshot(requestCollection, (snapshot) => {
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    onData(data);
+  });
+  return unsubscribe;
+}
+
+//Delete item in collection
 export async function deleteData(coolectionName, id) {
   const db = getFirestore(app);
   try {
@@ -54,6 +70,7 @@ export async function deleteRequestItem(userId, itemId) {
   }
 }
 
+//Bringing collection and tranform in array
 export async function getBtnData(collectionName) {
   const db = getFirestore();
   const docRef = collection(db, collectionName);
@@ -69,6 +86,7 @@ export async function getBtnData(collectionName) {
   }
 }
 
+//The name is clear just one item
 export async function getOneItemColleciton(collectionName, itemId) {
   const db = getFirestore();
   const docRef = doc(db, collectionName, itemId);
@@ -86,6 +104,7 @@ export async function getOneItemColleciton(collectionName, itemId) {
   }
 }
 
+//Bring Categories
 export async function fetchCategories(item) {
   const categories = await getBtnData(item);
   return categories.map((item) => item.parent);

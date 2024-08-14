@@ -1,6 +1,7 @@
 import React from "react";
 import { app } from "../config-firebase/firebase.js";
 import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import { fetchInDataChanges } from "../api/Api.js";
 import "../assets/styles/orderQueue.css";
 
 const OrderQueue = () => {
@@ -9,37 +10,17 @@ const OrderQueue = () => {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    const requestCollection = collection(db, "request");
+    const unsubscribe = fetchInDataChanges("request", (data) => {
+      // Separando os dados em duas listas com base no campo `done`
+      const waitingLineData = data.filter((item) => item.done);
+      const doneLineData = data.filter((item) => !item.done);
 
-    const unsubscribe = onSnapshot(requestCollection, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const waitingLine = data.filter((item) => item.done);
-
-      setWaitingLine(waitingLine);
+      setWaitingLine(waitingLineData);
+      setDoneLine(doneLineData);
     });
 
-    // Cleanup function to unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [db]);
-
-  React.useState(() => {
-    const requestCollection = collection(db, "request");
-    const unsubscribe = onSnapshot(requestCollection, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const doneLine = data.filter((item) => !item.done);
-
-      setDoneLine(doneLine.slice(-4)); // Limita a lista doneLine aos últimos 4 itens
-    });
-
-    return () => unsubscribe();
-  }, [waitingLine]);
 
   return (
     <div className="order-queue-container">
@@ -49,7 +30,7 @@ const OrderQueue = () => {
         <div>
           {waitingLine &&
             waitingLine.map((item, index) => (
-              <div className="horizont-line-queue border-red">
+              <div key={item.id} className="horizont-line-queue border-red">
                 <span>{index}</span>
                 <p>{item.name}</p>
                 <p> Em preparo</p>
@@ -59,7 +40,7 @@ const OrderQueue = () => {
         <div>
           {doneLine &&
             doneLine.map((item, index) => (
-              <div className="horizont-line-queue border-green">
+              <div key={item.id} className="horizont-line-queue border-green">
                 <span>{index} - </span>
                 <p>{item.name}</p>
                 <p>Entregue</p>
