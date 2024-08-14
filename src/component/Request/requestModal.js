@@ -42,12 +42,17 @@ const RequestModal = () => {
   //Take just one item of user collection
 
   async function fetchUser() {
-    const userDocRef = doc(db, "user", currentUser);
-    const userDocSnap = await getDoc(userDocRef);
-    const data = userDocSnap.data();
-    requestFinalPrice(data);
-
-    setUserData(data);
+    try {
+      const userDocRef = doc(db, "user", currentUser);
+      const userDocSnap = await getDoc(userDocRef);
+      const data = userDocSnap.data();
+      requestFinalPrice(data);
+      console.log("Sou a data do usuario   ", data);
+      setUserData(data);
+      console.log("Sou o usuario    ", userData);
+    } catch (error) {
+      console.error("Erro ao buscar dados do usuário:", error);
+    }
   }
 
   const requestFinalPrice = (data) => {
@@ -59,11 +64,9 @@ const RequestModal = () => {
     }
   };
 
-  const deleteRequest = (index) => {
-    deleteRequestItem(currentUser, index, (updatedRequest) => {
-      setUserData(updatedRequest); // Atualiza o estado do dishes com o array atualizado
-      fetchUser();
-    });
+  const deleteRequest = async (index) => {
+    await deleteRequestItem(currentUser, index);
+    await fetchUser();
   };
   const callDishesModal = (item) => {
     //chama o modal com o resumo do item
@@ -135,7 +138,9 @@ const RequestModal = () => {
             </h2>
             <p className="dishes-price">R$ {item.finalPrice}</p>
             <p className="status-request-pend">pendente</p>
-            <p onClick={() => deleteRequest(index)}>Cancelar</p>
+            <p className="cancel" onClick={() => deleteRequest(index)}>
+              Cancelar
+            </p>
           </div>
         ))
       ) : (

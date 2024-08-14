@@ -26,6 +26,9 @@
     align-items: center;
     border-radius: 10px;
 }
+.individual-dishes .cancel {
+    cursor: pointer;
+}
 
 h3 {
     text-align: center;
