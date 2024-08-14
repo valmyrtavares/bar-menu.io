@@ -16,9 +16,9 @@ export const GlobalStorage = ({ children }) => {
     textFont: "sans serif",
   });
 
-  React.useEffect(() => {
-    console.log("Updated styles in GlobalContext:", styles);
-  }, [styles]);
+  // React.useEffect(() => {
+  //   console.log("Updated styles in GlobalContext:", styles);
+  // }, [styles]);
 
   return (
     <GlobalContext.Provider

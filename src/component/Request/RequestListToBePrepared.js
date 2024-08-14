@@ -20,16 +20,16 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     addRequestUser();
-  }, [global.idCustomer]);
+  }, []);
 
   const addRequestUser = async () => {
-    if (global.idCustomer) {
-      const data = await getOneItemColleciton("user", global.idCustomer);
-      if (data) {
-        data.done = true;
-        addDoc(collection(db, "request"), data);
-      }
-    }
+    // if (global.idCustomer) {
+    //   const data = await getOneItemColleciton("user", global.idCustomer);
+    //   if (data) {
+    //     data.done = true;
+    //     addDoc(collection(db, "request"), data);
+    //   }
+    // }
     let requestList = await getBtnData("request");
     console.log("Objeto inteiro   ", requestList);
     requestList = requestList.filter((item) => item.done == true);

@@ -44,6 +44,7 @@ const OrderQueue = () => {
   return (
     <div className="order-queue-container">
       <h1> Fila de pedidos</h1>
+      <p>Acompanhe abaixo o andamento e o status do seu pedido</p>
       <div className="list-columns">
         <div>
           {waitingLine &&

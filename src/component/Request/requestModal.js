@@ -1,13 +1,19 @@
 import React from "react";
 import { app } from "../../config-firebase/firebase.js";
-import { doc, getFirestore, getDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  getDoc,
+  collection,
+  addDoc,
+  doc,
+} from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import CheckDishesModal from "../Dishes/CheckdishesModal.js";
 import "../../assets/styles/requestModal.css";
-import { deleteRequestItem } from "../../api/Api.js";
+import { deleteRequestItem, getOneItemColleciton } from "../../api/Api.js";
 import WarningMessages from "../WarningMessages";
 import { GlobalContext } from "../../GlobalContext";
-import { cardClasses } from "@mui/material";
+//import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState("");
@@ -17,7 +23,6 @@ const RequestModal = () => {
   const [modal, setModal] = React.useState(false);
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(0);
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
-
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
 
@@ -57,6 +62,7 @@ const RequestModal = () => {
   const deleteRequest = (index) => {
     deleteRequestItem(currentUser, index, (updatedRequest) => {
       setUserData(updatedRequest); // Atualiza o estado do dishes com o array atualizado
+      fetchUser();
     });
   };
   const callDishesModal = (item) => {
@@ -71,9 +77,20 @@ const RequestModal = () => {
     if (!warningMsg) {
       setWarningMsg(true);
     } else {
-      console.log("Passou por aqui");
-      global.setIdCustomer(currentUser);
-      navigate("/requestlist");
+      // global.setIdCustomer(currentUser);
+      addRequestUser(currentUser);
+      navigate("/orderqueue");
+    }
+  };
+
+  //Manda o usuário com os seus pedidos para o firestore
+  const addRequestUser = async (id) => {
+    if (id) {
+      const data = await getOneItemColleciton("user", id);
+      if (data) {
+        data.done = true;
+        addDoc(collection(db, "request"), data);
+      }
     }
   };
 
