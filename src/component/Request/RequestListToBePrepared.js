@@ -1,40 +1,23 @@
 import React from "react";
-//import { useParams } from "react-router-dom";
-import { getBtnData, getOneItemColleciton } from "../../api/Api.js";
+import { getBtnData } from "../../api/Api.js";
 import { app } from "../../config-firebase/firebase.js";
-import { GlobalContext } from "../../GlobalContext";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  setDoc,
-  doc,
-} from "firebase/firestore";
+
+import { fetchInDataChanges } from "../../api/Api.js";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
-  const global = React.useContext(GlobalContext);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
 
   React.useEffect(() => {
-    addRequestUser();
+    const unsubscribe = fetchInDataChanges("request", (data) => {
+      const requestList = data.filter((item) => item.done == true);
+      setRequestDoneList(requestList);
+    });
+    return () => unsubscribe();
   }, []);
-
-  const addRequestUser = async () => {
-    // if (global.idCustomer) {
-    //   const data = await getOneItemColleciton("user", global.idCustomer);
-    //   if (data) {
-    //     data.done = true;
-    //     addDoc(collection(db, "request"), data);
-    //   }
-    // }
-    let requestList = await getBtnData("request");
-    console.log("Objeto inteiro   ", requestList);
-    requestList = requestList.filter((item) => item.done == true);
-    setRequestDoneList(requestList);
-  };
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
