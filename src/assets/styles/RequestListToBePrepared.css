@@ -1,3 +1,5 @@
+@import "variables";
+
 .container-requestListToBePrepared{
     background-color:yellow;
     width:90%;
@@ -30,13 +32,25 @@
 
 .container-requestListToBePrepared .user-container span{
     font-weight:200;
+    font-family: var(--text-font);
+    color: var(--title-font-color);
 }
 .container-requestListToBePrepared .user-container p{
     font-weight: 700;
     margin-bottom:1px;
     text-align: center;
-    font-size: 17px;
-    
+    font-size: 17px;    
+    font-family: var(--text-font);
+    color: var(--title-font-color);
+}
+.container-requestListToBePrepared .user-container h2{
+    font-weight: 700;
+    margin-bottom:1px;
+    text-align: center;
+    font-size: 20px;  
+    font-family: var(--text-font);
+    color: var(--title-font-color);  
+    margin-top:10px;
 }
 .container-requestListToBePrepared .user-container button{
    max-height: 60px; 

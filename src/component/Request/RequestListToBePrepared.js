@@ -69,6 +69,7 @@ const RequestListToBePrepared = () => {
                 <p>
                   <span>Data</span>:12-12-2024
                 </p>
+                <h2>Valor final {item.finalPriceRequest}</h2>
               </div>
               <div className="btn-status">
                 <button

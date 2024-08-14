@@ -52,10 +52,10 @@ const RequestModal = () => {
 
   const requestFinalPrice = (data) => {
     if (data.request) {
-      const testFinal = data.request
+      const finalPrice = data.request
         .map((item) => item.finalPrice)
         .reduce((ac, el) => ac + el, 0);
-      setFinalPriceRequest(testFinal);
+      setFinalPriceRequest(finalPrice);
     }
   };
 
@@ -83,13 +83,21 @@ const RequestModal = () => {
     }
   };
 
-  //Manda o usuário com os seus pedidos para o firestore
+  //send request with finel price
   const addRequestUser = async (id) => {
     if (id) {
       const data = await getOneItemColleciton("user", id);
-      if (data) {
-        data.done = true;
-        addDoc(collection(db, "request"), data);
+      const userNewRequest = {
+        name: data.name,
+        idUser: data.id,
+        done: true,
+        request: data.request,
+        finalPriceRequest: finalPriceRequest,
+      };
+
+      if (userNewRequest) {
+        debugger;
+        addDoc(collection(db, "request"), userNewRequest);
       }
     }
   };

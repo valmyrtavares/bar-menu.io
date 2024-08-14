@@ -5,7 +5,6 @@ export const GlobalContext = React.createContext();
 export const GlobalStorage = ({ children }) => {
   const [image, setImage] = React.useState("");
   const [id, setId] = React.useState("");
-  const [idCustomer, setIdCustomer] = React.useState("");
   const [styles, setStyles] = React.useState({
     btnColor: "#b02121",
     secundaryBgColor: "#b02121",
@@ -16,10 +15,6 @@ export const GlobalStorage = ({ children }) => {
     textFont: "sans serif",
   });
 
-  // React.useEffect(() => {
-  //   console.log("Updated styles in GlobalContext:", styles);
-  // }, [styles]);
-
   return (
     <GlobalContext.Provider
       value={{
@@ -29,8 +24,6 @@ export const GlobalStorage = ({ children }) => {
         setId,
         styles,
         setStyles,
-        idCustomer,
-        setIdCustomer,
       }}
     >
       {children}
