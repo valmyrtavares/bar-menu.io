@@ -5,6 +5,7 @@ import { app } from "../../config-firebase/firebase.js";
 import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
+import { Link } from "react-router-dom";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -52,6 +53,7 @@ const RequestListToBePrepared = () => {
 
   return (
     <div>
+      <Link to="/requestlistcheck">Todos os pedidos</Link>
       {requestsDoneList &&
         requestsDoneList.map((item) => (
           <div className="container-requestListToBePrepared">

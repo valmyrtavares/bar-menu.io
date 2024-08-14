@@ -18,6 +18,7 @@ import ScreenStylesForm from "./Forms/ScreenStylesForm";
 import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
 import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
 import OrderQueue from "./component/orderQueue";
+import RequestList from "./component/Request/RequestList";
 
 import "./style.css";
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/request" element={<RequestModal />} />
           <Route path="/orderqueue" element={<OrderQueue />} />
+          <Route path="/requestlistcheck" element={<RequestList />} />
 
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route path="/requestlist" element={<RequestListToBePrepared />} />

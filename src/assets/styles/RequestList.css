@@ -1,0 +1,35 @@
+.container-request-list {
+    width:90%;
+    margin:10px 5%;
+    background:pink;
+}
+
+.container-request-list .request{
+    border:solid 2px red;
+    margin:10px 0;
+    background:gray;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+
+}
+.container-request-list .request .dishes{
+    
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+}
+.container-request-list .request p{
+    margin:1px 5px
+}
+
+.container-request-list p, span, h1 {
+    text-align: center;
+}
+
+.container-request-list .dishes{
+    border: solid yellow 2px;
+}
+
+.container-request-list .dishes .sidedishes{
+    border:solid green 2px;
+}
