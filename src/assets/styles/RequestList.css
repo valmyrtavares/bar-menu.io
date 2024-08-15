@@ -1,13 +1,25 @@
+@import 'variables';
 .container-request-list {
     width:90%;
     margin:10px 5%;
-    background:pink;
+    background:white;   
+}
+.container-request-list h1 {
+color: var(--title-font-color);
+font-family: var(--title-font)
+} 
+.container-request-list h3 {
+    font-size: 17px;
+}
+
+.container-request-list .request .customer .customer-name{
+    font-weight: bold !important;
+   
 }
 
 .container-request-list .request{
-    border:solid 2px red;
-    margin:10px 0;
-    background:gray;
+    border:solid .5px black;
+    margin:10px 0;    
     display: grid;
     grid-template-columns: 1fr 2fr;
 
@@ -27,9 +39,12 @@
 }
 
 .container-request-list .dishes{
-    border: solid yellow 2px;
+    border-top: none;
+    border-left: solid black .5px;
+    border-right: solid black .5px;
+    border-bottom: solid black .5px;
 }
 
 .container-request-list .dishes .sidedishes{
-    border:solid green 2px;
+    border-left:solid black .5px;
 }
