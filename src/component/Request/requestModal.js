@@ -4,6 +4,7 @@ import {
   getFirestore,
   getDoc,
   collection,
+  updateDoc,
   addDoc,
   doc,
 } from "firebase/firestore";
@@ -12,7 +13,7 @@ import CheckDishesModal from "../Dishes/CheckdishesModal.js";
 import "../../assets/styles/requestModal.css";
 import { deleteRequestItem, getOneItemColleciton } from "../../api/Api.js";
 import WarningMessages from "../WarningMessages";
-import { GlobalContext } from "../../GlobalContext";
+//import { GlobalContext } from "../../GlobalContext"; 15 08
 //import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
@@ -24,7 +25,7 @@ const RequestModal = () => {
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(0);
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const navigate = useNavigate();
-  const global = React.useContext(GlobalContext);
+  // const global = React.useContext(GlobalContext); 15-08
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty("userMenu")) {
@@ -80,14 +81,12 @@ const RequestModal = () => {
     if (!warningMsg) {
       setWarningMsg(true);
     } else {
-      // global.setIdCustomer(currentUser);
       addRequestUser(currentUser);
       navigate("/orderqueue");
     }
   };
 
-  //send request with finel price
-  const addRequestUser = async (id) => {
+  const takeDataTime = () => {
     const now = new Date();
     const formattedDateTime = `${String(now.getDate()).padStart(
       2,
@@ -99,19 +98,30 @@ const RequestModal = () => {
       2,
       "0"
     )}:${String(now.getMinutes()).padStart(2, "0")}`;
+    return formattedDateTime;
+  };
+
+  //send request with finel price
+  const addRequestUser = async (id) => {
     if (id) {
       const data = await getOneItemColleciton("user", id);
+
       const userNewRequest = {
         name: data.name,
         idUser: data.id,
         done: true,
         request: data.request,
         finalPriceRequest: finalPriceRequest,
-        dateTime: formattedDateTime,
+        dateTime: takeDataTime(),
       };
 
       if (userNewRequest) {
-        addDoc(collection(db, "request"), userNewRequest);
+        addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+
+        const userDocRef = doc(db, "user", id);
+        await updateDoc(userDocRef, {
+          request: [],
+        });
       }
     }
   };
