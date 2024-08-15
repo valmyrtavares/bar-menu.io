@@ -79,6 +79,7 @@ const RequestListToBePrepared = () => {
               </div>
               <div className="btn-status">
                 <button
+                  disabled={!item.paymentDone}
                   className={item.done ? "done" : "pendent"}
                   onClick={() => RequestDone(item)}
                 >
