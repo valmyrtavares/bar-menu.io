@@ -18,10 +18,11 @@ import WarningMessages from "../WarningMessages";
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState("");
-  const [userData, setUserData] = React.useState([]);
+  const [userData, setUserData] = React.useState(null);
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
+  const [disabledBtn, setDisabledBtn] = React.useState(false);
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(0);
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const navigate = useNavigate();
@@ -33,6 +34,17 @@ const RequestModal = () => {
       setCurrentUser(currentUserNew.id);
     }
   }, []);
+
+  React.useEffect(() => {
+    if (userData && Array.isArray(userData.request)) {
+      // Mudança aqui: Verificação de que userData existe e que request é um array
+      if (userData.request.length > 0) {
+        setDisabledBtn(false);
+      } else {
+        setDisabledBtn(true);
+      }
+    }
+  }, [userData]);
 
   React.useEffect(() => {
     if (currentUser) {
@@ -48,9 +60,14 @@ const RequestModal = () => {
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
       requestFinalPrice(data);
-      console.log("Sou a data do usuario   ", data);
       setUserData(data);
-      console.log("Sou o usuario    ", userData);
+
+      if (userData) {
+        if (userData.request.length > 0) {
+          setDisabledBtn(true);
+        }
+      }
+      console.log(disabledBtn);
     } catch (error) {
       console.error("Erro ao buscar dados do usuário:", error);
     }
@@ -69,6 +86,7 @@ const RequestModal = () => {
     await deleteRequestItem(currentUser, index);
     await fetchUser();
   };
+
   const callDishesModal = (item) => {
     //chama o modal com o resumo do item
     if (item) {
@@ -131,12 +149,7 @@ const RequestModal = () => {
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
-      <div className="close-btn">
-        <button>
-          <Link to="/menu">X</Link>
-        </button>
-        )
-      </div>
+
       {warningMsg && (
         <WarningMessages
           message="Se tiver dúvidas em relação ao seu pedido, clique em cancelar e retorne a tela anterior. Caso contrário clique em continuar e efetue o seu pagamento no caixa a frente "
@@ -168,7 +181,16 @@ const RequestModal = () => {
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
       <div className="btnFinalRequest">
-        <button onClick={sendRequestToKitchen}>
+        <Link className="keep-shopping" to="/menu">
+          Continue Comprando
+        </Link>
+      </div>
+      <div disabled={disabledBtn} className="btnFinalRequest">
+        <button
+          disabled={disabledBtn}
+          className="send-request"
+          onClick={sendRequestToKitchen}
+        >
           Enviar pedido para cozinha
         </button>
       </div>

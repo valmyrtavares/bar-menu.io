@@ -71,7 +71,8 @@ h3 {
     display: flex;
     justify-content: center;
 }
-.btnFinalRequest button{
+.btnFinalRequest .keep-shopping, 
+.btnFinalRequest .send-request {
     width: 80%;
     text-align: center;
     text-decoration: none;
