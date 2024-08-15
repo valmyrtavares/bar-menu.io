@@ -53,7 +53,11 @@ const RequestListToBePrepared = () => {
 
   return (
     <div>
-      <Link to="/requestlistcheck">Todos os pedidos</Link>
+      <div className="container-btn-request">
+        <Link className="all-request" to="/requestlistcheck">
+          Todos os pedidos
+        </Link>
+      </div>
       {requestsDoneList &&
         requestsDoneList.map((item) => (
           <div className="container-requestListToBePrepared">

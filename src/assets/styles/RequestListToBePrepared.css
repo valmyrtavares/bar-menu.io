@@ -1,11 +1,25 @@
 @import "variables";
 
+.container-btn-request {
+display:flex;
+padding: 2px 7%;
+justify-content: end;
+}
+
+.all-request{
+    text-decoration:none;
+    background:var(--secundary-bg-color);
+    padding:8px 15px;
+    border-radius: 8px;
+    color: var(--title-font-color);
+}
 .container-requestListToBePrepared{
     background-color:yellow;
     width:90%;
     margin:10px 5%;
     padding: 10px;
 }
+
 
 .container-requestListToBePrepared .user-container{
     display:grid;

@@ -16,6 +16,10 @@ font-family: var(--title-font)
     font-weight: bold !important;
    
 }
+.container-request-list .request .customer .idUser{
+    font-size:12px
+   
+}
 
 .container-request-list .request{
     border:solid .5px black;
