@@ -8,11 +8,14 @@ const WarningMessage = ({
   setWarningMsg,
   sendRequestToKitchen,
 }) => {
+  React.useEffect(() => {
+    console.log(finalPriceRequest);
+  }, []);
   return (
     <div className="container-warning-message">
       <h3>{customer}</h3>
       <p>{message}</p>
-      <h3>Valor Final R$ {finalPriceRequest},00</h3>
+      {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
       <div className="container-btn">
         <button onClick={sendRequestToKitchen}>Continuar</button>
         <button onClick={() => setWarningMsg(false)}>Cancelar</button>

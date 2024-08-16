@@ -23,7 +23,7 @@ const RequestModal = () => {
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
   const [disabledBtn, setDisabledBtn] = React.useState(false);
-  const [finalPriceRequest, setFinalPriceRequest] = React.useState(0);
+  const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const navigate = useNavigate();
   // const global = React.useContext(GlobalContext); 15-08
@@ -38,6 +38,8 @@ const RequestModal = () => {
   React.useEffect(() => {
     if (userData && Array.isArray(userData.request)) {
       // Mudança aqui: Verificação de que userData existe e que request é um array
+
+      requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
       } else {
@@ -59,7 +61,7 @@ const RequestModal = () => {
       const userDocRef = doc(db, "user", currentUser);
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
-      requestFinalPrice(data);
+
       setUserData(data);
 
       if (userData) {
@@ -67,14 +69,13 @@ const RequestModal = () => {
           setDisabledBtn(true);
         }
       }
-      console.log(disabledBtn);
     } catch (error) {
       console.error("Erro ao buscar dados do usuário:", error);
     }
   }
 
   const requestFinalPrice = (data) => {
-    if (data.request) {
+    if (userData && userData.request.length > 0) {
       const finalPrice = data.request
         .map((item) => item.finalPrice)
         .reduce((ac, el) => ac + el, 0);
@@ -164,7 +165,9 @@ const RequestModal = () => {
         {userData?.name}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
-      {userData && userData.request.length > 0 ? (
+      {userData &&
+      Array.isArray(userData.request) &&
+      userData.request.length > 0 ? (
         userData.request.map((item, index) => (
           <div className="individual-dishes my-3" key={item.id}>
             <h2 onClick={() => callDishesModal(item)} className="my-0">
