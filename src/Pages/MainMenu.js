@@ -49,9 +49,14 @@ function MainMenu() {
         <div className="container-btn">
           {nameClient && (
             <section>
-              <p>Bem vindo {nameClient}</p>
+              <div>
+                <p>Bem vindo {nameClient}</p>
+              </div>
               <button>
                 <Link to="/request">Seus Pedidos</Link>
+              </button>
+              <button>
+                <Link to="/orderqueue">Fila de pedidos</Link>
               </button>
             </section>
           )}
