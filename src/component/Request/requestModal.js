@@ -169,7 +169,7 @@ const RequestModal = () => {
       Array.isArray(userData.request) &&
       userData.request.length > 0 ? (
         userData.request.map((item, index) => (
-          <div className="individual-dishes my-3" key={item.id}>
+          <div className="individual-dishes my-3" key={index}>
             <h2 onClick={() => callDishesModal(item)} className="my-0">
               {item.name}
             </h2>

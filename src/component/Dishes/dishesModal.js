@@ -116,24 +116,27 @@ const DishesModal = ({ item, setModal }) => {
     event.preventDefault();
     try {
       const userDocRef = doc(db, "user", currentUser);
-      //Esse retorna o endereço do documento procurao (userDocRef.path)     user/u3lrJowKgANuCC9Nuw4o
       const userDocSnap = await getDoc(userDocRef);
-      //Esse retonra o objeto userDocSnap.data()  Como está
 
       if (userDocSnap.exists()) {
         // Se o documento do usuário já existir, atualiza o array request
+        const currentRequests = userDocSnap.data().request || [];
 
+        // Acrescente o novo objeto 'form' ao array 'request'
+        currentRequests.push(form);
+
+        // Atualize o documento com o novo array 'request'
         await updateDoc(userDocRef, {
-          request: arrayUnion(form), //o array union acrescenta um novo objeto a um array, sem deixar duplicar form é um objeto
+          request: currentRequests,
         });
       } else {
         // Se o documento do usuário não existir, cria o documento com o array request
         await setDoc(userDocRef, {
-          //Cria o que não tem
           request: [form],
         });
       }
-      //item é  a props que está vindo do pai
+
+      // Atualiza o estado do formulário para o próximo item
       setForm({
         name: item.title,
         id: item.id,
@@ -142,6 +145,7 @@ const DishesModal = ({ item, setModal }) => {
         sideDishes: sideDishesListOnScreen,
       });
 
+      // Redireciona o usuário para a página de requisições
       navigate("/request");
     } catch (error) {
       console.log(error);
