@@ -26,9 +26,6 @@ const MenuButton = () => {
             <li>
               <Link to="/">Home</Link>
             </li>
-            <li>
-              <Link to="/requestlist">Cozinha</Link>
-            </li>
 
             <li>
               <Link to="/orderqueue">Fila de pedidos</Link>

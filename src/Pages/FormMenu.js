@@ -68,6 +68,12 @@ const FormMenu = () => {
         >
           Crie sua Saudação inicial
         </Link>
+        <Link
+          to="/requestlist"
+          className="col-sm-4 btn btn-success nostyle m-2"
+        >
+          Pedidos da Cozinha
+        </Link>
       </div>
     </div>
   );

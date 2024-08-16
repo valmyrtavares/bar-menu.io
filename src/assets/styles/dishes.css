@@ -68,6 +68,18 @@
   box-shadow: 6px 5px #8888889c;
 }
 
+.content-modal-dishes .request-client-modal {
+width: 80%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
+
 .content-modal-dishes h4 {
   font-size: 15px;
   font-weight: 700;

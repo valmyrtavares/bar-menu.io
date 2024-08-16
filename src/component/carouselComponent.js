@@ -33,10 +33,6 @@ const CarouselComponent = () => {
     fetchData();
   }, []);
 
-  // React.useEffect(() => {
-  //   setItem(newItem);
-  // }, [modal]);
-
   const callDishesModal = (item) => {
     if (item) {
       setItem(item);
