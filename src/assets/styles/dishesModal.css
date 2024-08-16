@@ -1,0 +1,151 @@
+.content-modal-dishes {
+    box-shadow: 14px 23px #8888889c;
+    max-height: 90vh;
+    overflow:scroll;
+    position: fixed;
+    top: 5%;
+    left: 18%;
+    background: var(--secundary-bg-color);
+    border: solid 2px gray;
+    width: 80%;
+    max-width: 300px;
+    z-index: 50;
+  }
+
+  .content-modal-dishes .label-side-dishes{
+    color: var(--title-font-color)!important;
+    font-family: var(--title-font)!important
+  }
+
+  .content-modal-dishes .request-client {
+    font-size: 14px;
+    margin: 0;
+    padding: 2px 3px;
+    background: rgba(255, 0, 0, 0.753);
+    margin: 20px 10%;
+    box-shadow: 6px 5px #8888889c;
+  }
+
+  .content-modal-dishes .request-client-modal {
+    width: 80%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+    }
+    .content-modal-dishes h4 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+        color: var(--font-color)!important;
+        font-family: var(--text-font)!important
+      }
+      .content-modal-dishes .close-btn {
+        display: flex;
+        justify-content: end;
+      }
+
+      .content-modal-dishes div button {
+        margin: 0;
+        color: black;
+        border: none;
+        background: none;
+        max-width: 30px;
+        max-height: 30px;
+      }
+      .content-modal-dishes h1 {
+        text-align: center !important;
+        color: var(--title-font-color);
+        font-family:var (--title-font) ;
+      }
+
+      .content-modal-dishes img {
+        width: 40%;
+        margin: 10px 30%;
+      }
+
+      .content-modal-dishes p {
+        padding: 1% 3%;
+        margin-bottom: 7px;
+        font-size: 13px;
+        text-align: center;
+        color: var(--font-color)!important;
+        font-family: var(--text-font)!important
+      }
+      .content-modal-dishes h3 {
+        padding-bottom: 50px;
+        color: black;
+        text-align: center;
+      }
+
+      .side-dishes-list {
+        display: grid;
+        row-gap: 5px;
+        grid-template-columns: 1fr 1fr;
+        padding: 2px;
+        margin: 10px 5px;
+      }
+
+      .side-dishes-list div {
+        padding: 3px;
+        display: flex;
+        justify-content: start;
+        font-size: 12px;
+      }
+
+      .side-dishes-list div input {
+        margin-right: 7px;
+      }
+
+      .limit-dishes {
+        display: block;
+      }
+
+      .limit-dishes .select-limit-sidedishes{  
+        background-color: var(--secundary-bg-color);
+        margin: 14px 17px;
+      }
+
+      .limit-dishes .select-limit-sidedishes .form-select {
+        padding: 10px 20px;
+        background-color: var(--secundary-bg-color);
+        border: solid 1px var(--font-color);
+        font-family: var(--title-font);
+        color: var(--font-color)
+      }
+
+      .limit-dishes .select-limit-sidedishes p {
+        margin-top: 20px;
+        padding: 10px 50px;
+        color: red;
+        font-weight: 700;
+      }
+
+      .added-side-dishes {
+        color: rgb(22, 92, 172) !important;
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .added-side-dishes .side-dishe p {
+        margin-bottom: 0;
+      }
+      
+      .added-side-dishes .side-dishe .btn-close-side-dishes {
+        padding: 0;
+      }
+
+      .added-side-dishes .side-dishe {
+        border: solid 1px brown;
+        border-radius: 10px;
+        width: 80%;
+        margin: 15px 10%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }

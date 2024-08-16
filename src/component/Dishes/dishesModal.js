@@ -1,5 +1,5 @@
 import React from "react";
-import "../../assets/styles/dishes.css";
+import "../../assets/styles/dishesModal.css";
 import {
   getFirestore,
   collection,

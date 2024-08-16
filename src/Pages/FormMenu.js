@@ -1,13 +1,12 @@
 //import React, { useLayoutEffect } from 'react';
 import { Link } from "react-router-dom";
 import Title from "../component/title.js";
-import MenuButton from "../component/menuHamburguerButton.js";
+
 import "../assets/styles/FormMenu.css";
 
 const FormMenu = () => {
   return (
     <div className="container">
-      <MenuButton />
       <Title title="Menu de Formulários" />
       <div className="row">
         <Link
