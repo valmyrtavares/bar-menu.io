@@ -47,7 +47,7 @@
     max-height: 80vh;
     overflow-y:auto;
     width: 80%;
-    border:solid 2px brown;
+    border:solid 2px var(--secundary-bg-color);
     background:white;
     max-width: 450px;
 }

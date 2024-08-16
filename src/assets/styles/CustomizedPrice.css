@@ -1,0 +1,22 @@
+.customized-price-container form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 30px;
+  }
+  
+  .customized-price-container form div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .customized-price-container form div label {
+    font-size: 14px;
+    color: var(--font-color)!important;
+    font-family: var(--text-font)!important
+  }
+  
+  .customized-price-container form div p {
+    font-size: 12px;
+    font-weight: 700;
+  }

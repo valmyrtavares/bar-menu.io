@@ -141,7 +141,7 @@
       }
 
       .added-side-dishes .side-dishe {
-        border: solid 1px brown;
+        border: solid 1px var(--secundary-bg-color);
         border-radius: 10px;
         width: 80%;
         margin: 15px 10%;

@@ -1,5 +1,5 @@
 import React from "react";
-import "../../assets/styles/dishes.css";
+import "../../assets/styles/CustomizedPrice.css";
 
 function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   const [formPriceOnScreen, setFormPriceOnScreen] = React.useState({});

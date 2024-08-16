@@ -22,7 +22,7 @@
     max-width: 80%;
     padding: 9px 5px;
     margin: 5px 10% 5px 10%;
-    border: solid 1px brown;
+    border: solid 1px var(--secundary-bg-color);
     align-items: center;
     border-radius: 10px;
 }
@@ -40,6 +40,8 @@ h3 {
 
 .individual-dishes h2 {
     font-size: 16px;
+    color: var(--title-font-color);
+    font-family: var(--font-title);
 }
 
 .dishes-price {
@@ -57,15 +59,17 @@ h3 {
 
 .individual-dishes p {
     background-color: transparent;
-    color: red;
-    font-size: 11px;
+    color: var(--font-color);
+    font-family: var(--text-font);
+    font-size: 14px;
     margin-bottom: 0;
 }
 
 .no-request {
     text-align: center;
-    color: red;
+    color: #8d1a1a;
     margin-top: 200px;
+    font-size: 25px;
 }
 .btnFinalRequest{
     display: flex;

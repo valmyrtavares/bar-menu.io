@@ -164,13 +164,13 @@ const RequestModal = () => {
         {userData?.name}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
-      {userData && userData.request ? (
+      {userData && userData.request.length > 0 ? (
         userData.request.map((item, index) => (
           <div className="individual-dishes my-3" key={item.id}>
             <h2 onClick={() => callDishesModal(item)} className="my-0">
               {item.name}
             </h2>
-            <p className="dishes-price">R$ {item.finalPrice}</p>
+            <p className="dishes-price">R$ {item.finalPrice},00</p>
             <p className="status-request-pend">pendente</p>
             <p className="cancel" onClick={() => deleteRequest(index)}>
               Cancelar

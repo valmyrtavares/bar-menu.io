@@ -19,7 +19,7 @@
     margin:2px 5px;
     width: 220px;
     align-items: center;
-    border:solid 1px brown;
+    border:solid 1px var(--secundary-bg-color);
     padding:2px 2px;
     max-height: 40px;
 }
