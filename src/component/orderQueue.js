@@ -22,6 +22,17 @@ const OrderQueue = () => {
     return () => unsubscribe();
   }, [db]);
 
+  React.useEffect(() => {
+    console.log("Antes da depuração  ", doneLine);
+    if (doneLine) {
+      if (doneLine.length > 4) {
+        doneLine.splice(0, 1);
+      }
+      setDoneLine(doneLine);
+    }
+    console.log("Depois da depuração  ", doneLine);
+  }, [waitingLine]);
+
   return (
     <div className="order-queue-container">
       <h1> Fila de pedidos</h1>
