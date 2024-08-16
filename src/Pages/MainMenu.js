@@ -44,7 +44,7 @@ function MainMenu() {
   return (
     <>
       <div>
-        <MenuButton />
+        {/* <MenuButton /> */}
         {true && <CarrosselImages />}
         <div className="container-btn">
           {nameClient && (
@@ -74,6 +74,9 @@ function MainMenu() {
             ))}
         </div>
       </div>
+      <Link to="/admin/admin">
+        <div className="footer"></div>
+      </Link>
     </>
   );
 }
