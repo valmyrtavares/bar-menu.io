@@ -13,6 +13,7 @@ function MainMenu() {
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
   const [nameClient, serNameClient] = React.useState("");
+  const containerRef = React.useRef(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +44,7 @@ function MainMenu() {
 
   return (
     <>
-      <div>
+      <div ref={containerRef} style={{ height: "500px", overflowY: "auto" }}>
         {/* <MenuButton /> */}
         {true && <CarrosselImages />}
         <div className="container-btn">
@@ -65,6 +66,7 @@ function MainMenu() {
             menuButton.map((item, index) => (
               <div key={index}>
                 <NestedBtn
+                  containerRef={containerRef}
                   parent={"main"}
                   item={item}
                   menuButton={menuButton}
