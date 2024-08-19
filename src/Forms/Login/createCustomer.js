@@ -7,10 +7,12 @@ import { GlobalContext } from "../../GlobalContext";
 import "../../assets/styles/createCustomer.css";
 import { Link } from "react-router-dom";
 import { getBtnData } from "../../api/Api.js";
+import { FormControlLabel } from "@mui/material";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
+  const anonymousClient = React.useRef(null);
 
   const [form, setForm] = React.useState({
     name: "",
@@ -24,7 +26,19 @@ const CreateCustomer = () => {
     gift: "",
   });
 
-  //FIRESTORE
+  React.useEffect(() => {
+    if (form.name === "") {
+      // Ativa o botão de "não quero deixar meus dados" quando o nome está vazio
+
+      anonymousClient.current.disabled = false;
+    } else {
+      // Desativa o botão quando há dados no nome
+
+      anonymousClient.current.disabled = true;
+    }
+  }, [form]);
+
+  // FIRESTORE
   const db = getFirestore(app);
 
   React.useEffect(() => {
@@ -35,16 +49,29 @@ const CreateCustomer = () => {
       }
     };
     fetchDatafunction();
-  });
+  }, []); // Adiciona [] para garantir que a função execute apenas uma vez na montagem
 
   function handleSubmit(event) {
     event.preventDefault();
-    addDoc(collection(db, "user"), form)
+
+    // Preenche o formulário com dados default se o nome estiver vazio
+    const formToSubmit =
+      form.name === ""
+        ? {
+            name: "anonimo",
+            phone: "777",
+            birthday: "77",
+            email: "anonimo@anonimo.com",
+          }
+        : form;
+
+    // Envia o formulário para o Firestore
+    addDoc(collection(db, "user"), formToSubmit)
       .then((docRef) => {
-        global.setId(docRef.id); //Pego o id do cliente criado e mando para o meu useContext para vincular os pedidos ao cliente que os fez
+        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
         const currentUser = {
           id: docRef.id,
-          name: form.name,
+          name: formToSubmit.name,
         };
         localStorage.setItem("userMenu", JSON.stringify(currentUser));
         setForm({
@@ -64,7 +91,44 @@ const CreateCustomer = () => {
 
   function handleChange({ target }) {
     const { id, value } = target;
-    setForm({ ...form, [id]: value, [id]: value, [id]: value, [id]: value });
+    setForm((prevForm) => ({
+      ...prevForm,
+      [id]: value,
+    }));
+  }
+
+  function handleAnonymousSubmit(event) {
+    event.preventDefault();
+
+    // Define dados default e envia para o Firestore
+    const formWithDefaults = {
+      name: "anonimo",
+      phone: "777",
+      birthday: "77",
+      email: "anonimo@anonimo.com",
+    };
+
+    addDoc(collection(db, "user"), formWithDefaults)
+      .then((docRef) => {
+        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+        const currentUser = {
+          id: docRef.id,
+          name: formWithDefaults.name,
+        };
+        localStorage.setItem("userMenu", JSON.stringify(currentUser));
+        setForm({
+          name: "",
+          phone: "",
+          birthday: "",
+          email: "",
+        });
+      })
+      .then(() => {
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   return (
@@ -104,12 +168,25 @@ const CreateCustomer = () => {
           type="email"
           onChange={handleChange}
         />
-        <button className="btn btn-primary">Enviar</button>
+        <div className="create-new-customer-btns">
+          <button type="submit" className="btn btn-primary">
+            Enviar
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleAnonymousSubmit}
+            ref={anonymousClient}
+          >
+            Não quero deixar meus dados
+          </button>
+        </div>
       </form>
-      <Link to="/menu" className="btn btn-warning">
+      {/* <Link to="/menu" className="btn btn-warning">
         Não quero deixar meus dados
-      </Link>
+      </Link> */}
     </section>
   );
 };
+
 export default CreateCustomer;

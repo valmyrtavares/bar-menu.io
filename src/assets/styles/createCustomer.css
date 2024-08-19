@@ -1,3 +1,4 @@
+@import 'variables';
 .welcome-message{
     padding:5px;
 }
@@ -19,4 +20,16 @@
     font-family:var(--text-font);
     color:var(--font-color);
 
+}
+.welcome-message .create-new-customer-btns{
+    display:flex;
+    justify-content: space-around;
+}
+.welcome-message .create-new-customer-btns button{
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+    font-family: var(--title-font) !important; border-radius: 10px;
+    padding: 10px 14px;
+    margin: 20px 10%;
 }
