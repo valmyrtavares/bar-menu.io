@@ -1,7 +1,47 @@
-.nostyle {    
-    a{
-        color: white;      
-        text-decoration:none;        
+@import 'variables';
+a{
+    color: white;      
+    text-decoration:none;        
 
-    }
+}
+.form-menu-container{
+}
+.form-menu-container .sub-container{
+    display:grid;
+    border:solid .5px var(--secundary-bg-color) ;
+    grid-template-columns: 2fr 1fr;
+    margin:0 11px;
+    justify-items: center;
+    padding: 2%;
+    border:solid .5px 
+}
+.form-menu-container .sub-container .btn-form{
+    display: grid;
+    align-items: center;
+  
+}
+.form-menu-container .sub-container .btn-form a{
+    max-height: 43px;
+    background: var(--btn-color);
+    color: var(--title-font-color);
+    border:none;
+}
+.form-menu-container .sub-container .btn-form .sidedishe{
+    max-height: 63px;
+    margin-bottom: 4px;
+}
+
+.form-menu-container .sub-container .btn-text p{
+max-width: 300px;
+}
+.form-menu-container .kitchen-request{
+    display: flex;
+    justify-content: center;
+    margin:10px 0 10px 0;
+    padding: 10px;
+}
+.form-menu-container .kitchen-request a{
+background: var(--btn-color);
+color: var(--title-font-color);
+border:none;
 }
