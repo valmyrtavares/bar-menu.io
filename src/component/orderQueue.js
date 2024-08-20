@@ -24,14 +24,28 @@ const OrderQueue = () => {
 
   React.useEffect(() => {
     console.log("Antes da depuração  ", doneLine);
+    let updatedDoneLine = [];
+
     if (doneLine) {
-      if (doneLine.length > 4) {
-        doneLine.splice(0, 1);
+      console.log("Teem doneLIne");
+      if (doneLine && doneLine.length > 4) {
+        updatedDoneLine = [...doneLine]; // Crie uma cópia do array
+        updatedDoneLine.splice(3, 1); // Remove o item com índice 3
+        console.log(
+          "Entrou no segundo if e teem o updateDoneeLine     ",
+          updatedDoneLine
+        );
       }
-      setDoneLine(doneLine);
+      setDoneLine(updatedDoneLine);
     }
+    console.log("Depois da updatedDoneLine  ", updatedDoneLine);
     console.log("Depois da depuração  ", doneLine);
   }, [waitingLine]);
+
+  function getFirstFourLetters(inputString) {
+    // Retorna os 4 primeiros caracteres da string
+    return inputString.slice(0, 4);
+  }
 
   return (
     <div className="order-queue-container">
@@ -39,28 +53,32 @@ const OrderQueue = () => {
       <p>Acompanhe abaixo o andamento e o status do seu pedido</p>
       <div className="list-columns">
         <div>
+          <h3>Em preparo</h3>
           {waitingLine &&
             waitingLine.map((item, index) => (
               <div className="border-red">
                 <div key={item.id} className="horizont-line-queue ">
-                  <span>{index}</span>
-                  <p>{item.name}</p>
-                  <p> Em preparo</p>
+                  <p>Nome: {item.name}</p>
+                  <p>
+                    <span>Pedido</span>: {getFirstFourLetters(item.id)} ;{" "}
+                  </p>
                 </div>
                 <p className="date">{item.dateTime}</p>
               </div>
             ))}
         </div>
         <div>
+          <h3>Pronto</h3>
           {doneLine &&
             doneLine.map((item, index) => (
               <div className="border-green">
                 <div key={item.id} className="horizont-line-queue">
-                  <span>{index} - </span>
                   <p>{item.name}</p>
-                  <p>Entregue</p>
+                  <p>
+                    <span>Pedido</span>: {getFirstFourLetters(item.id)} ;
+                  </p>
                 </div>
-                <span className="date">{item.dateTime}</span>
+                <p className="date">{item.dateTime}</p>
               </div>
             ))}
         </div>

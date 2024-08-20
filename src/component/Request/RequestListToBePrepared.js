@@ -14,11 +14,17 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
+      console.log("data   ", data);
       const requestList = data.filter((item) => item.done == true);
       setRequestDoneList(requestList);
     });
     return () => unsubscribe();
   }, []);
+
+  function getFirstFourLetters(inputString) {
+    // Retorna os 4 primeiros caracteres da string
+    return inputString.slice(0, 4);
+  }
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
@@ -67,7 +73,7 @@ const RequestListToBePrepared = () => {
                   <span>Nome</span> {item.name}
                 </p>
                 <p>
-                  <span>Pedido</span>: 1234
+                  <span>Pedido</span>: {getFirstFourLetters(item.id)} ;
                 </p>
                 <p>
                   <span>Mesa</span>: 12

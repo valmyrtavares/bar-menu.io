@@ -6,10 +6,7 @@ font-family: var(--title-font);
 color: var(--title-font-color);
 }
 .order-queue-container .list-columns .horizont-line-queue{
-    display:flex;   
-    justify-content: space-between;
-    align-items: center;
-    margin:10px;
+    display:block; 
     padding:2px  10px;
 }
 .order-queue-container p{
@@ -18,9 +15,9 @@ font-family: var(--text-font);
 color:var(--font-color)
 }
 
-    .order-queue-container .horizont-line-queue p{
-        margin-bottom: 0;
-    }
+.order-queue-container .horizont-line-queue p{
+    margin-bottom: 0;
+}
 .order-queue-container .horizont-line-queue span{
     font-weight: bold;
 }
@@ -31,6 +28,9 @@ color:var(--font-color)
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap: 9px;   
+}
+.order-queue-container .list-columns .date{
+    margin-bottom: 0;
 }
 
 .order-queue-container .list-columns .border-red{
