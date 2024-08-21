@@ -6,6 +6,7 @@ import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 import { Link } from "react-router-dom";
+import { getFirstFourLetters } from "../../Helpers/Helpers.js";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -14,22 +15,20 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
-      console.log("data   ", data);
-      const requestList = data.filter((item) => item.done == true);
+      const requestList = data.filter((item) => item.orderDelivered == false);
       setRequestDoneList(requestList);
     });
     return () => unsubscribe();
   }, []);
 
-  function getFirstFourLetters(inputString) {
-    // Retorna os 4 primeiros caracteres da string
-    return inputString.slice(0, 4);
-  }
+  // function getFirstFourLetters(inputString) {
+  //   return inputString.slice(0, 4);
+  // }
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
     console.log("Objeto inteiro   ", requestList);
-    requestList = requestList.filter((item) => item.done == true);
+    requestList = requestList.filter((item) => item.orderDelivered == false);
     setRequestDoneList(requestList);
   };
 
@@ -47,6 +46,17 @@ const RequestListToBePrepared = () => {
 
   const changeStatusPaid = (item) => {
     item.paymentDone = true;
+    setDoc(doc(db, "request", item.id), item)
+      .then(() => {
+        console.log("Document successfully updated !");
+        fetchUserRequests();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const orderDelivery = (item) => {
+    item.orderDelivered = true;
     setDoc(doc(db, "request", item.id), item)
       .then(() => {
         console.log("Document successfully updated !");
@@ -85,17 +95,23 @@ const RequestListToBePrepared = () => {
               </div>
               <div className="btn-status">
                 <button
+                  className={item.paymentDone ? "done" : "pendent"}
+                  onClick={() => changeStatusPaid(item)}
+                >
+                  Pago
+                </button>
+                <button
                   disabled={!item.paymentDone}
-                  className={item.done ? "done" : "pendent"}
+                  className={item.done ? "pendent" : "done"}
                   onClick={() => RequestDone(item)}
                 >
                   Pronto
                 </button>
                 <button
-                  className={item.paymentDone ? "done" : "pendent"}
-                  onClick={() => changeStatusPaid(item)}
+                  className={item.orderDelivered ? "done" : "pendent"}
+                  onClick={() => orderDelivery(item)}
                 >
-                  Pago
+                  Entregue
                 </button>
               </div>
             </div>

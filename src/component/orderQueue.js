@@ -3,6 +3,7 @@ import { app } from "../config-firebase/firebase.js";
 import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import { fetchInDataChanges } from "../api/Api.js";
 import "../assets/styles/orderQueue.css";
+import { getFirstFourLetters } from "../Helpers/Helpers.js";
 
 const OrderQueue = () => {
   const [waitingLine, setWaitingLine] = React.useState([]);
@@ -21,31 +22,6 @@ const OrderQueue = () => {
 
     return () => unsubscribe();
   }, [db]);
-
-  React.useEffect(() => {
-    console.log("Antes da depuração  ", doneLine);
-    let updatedDoneLine = [];
-
-    if (doneLine) {
-      console.log("Teem doneLIne");
-      if (doneLine && doneLine.length > 4) {
-        updatedDoneLine = [...doneLine]; // Crie uma cópia do array
-        updatedDoneLine.splice(3, 1); // Remove o item com índice 3
-        console.log(
-          "Entrou no segundo if e teem o updateDoneeLine     ",
-          updatedDoneLine
-        );
-      }
-      setDoneLine(updatedDoneLine);
-    }
-    console.log("Depois da updatedDoneLine  ", updatedDoneLine);
-    console.log("Depois da depuração  ", doneLine);
-  }, [waitingLine]);
-
-  function getFirstFourLetters(inputString) {
-    // Retorna os 4 primeiros caracteres da string
-    return inputString.slice(0, 4);
-  }
 
   return (
     <div className="order-queue-container">

@@ -1,6 +1,7 @@
 import React from "react";
 import "../../assets/styles/RequestList.css";
 import { fetchInDataChanges } from "../../api/Api.js";
+import { getFirstFourLetters } from "../../Helpers/Helpers.js";
 // import Input from "../Input.js";
 
 const RequestList = () => {
@@ -29,34 +30,6 @@ const RequestList = () => {
   return (
     <div className="container-request-list">
       <h1>Lista de Pedidos</h1>
-      {/* {    <div>
-        <form onSubmit={handleSubmit} className="m-1">
-          <Input
-            id="comment"
-            label="Comentário"
-            value={form.comment}
-            type="text"
-            onChange={handleChange}
-          />
-          <div className="my-3">
-            <label className="form-label">Categoria</label>
-            <select
-              id="category"
-              value={form.category}
-              className="form-select"
-              onChange={handleChange}
-            >
-              <option>Categoria</option>
-              <option>Categoria</option>
-              ))
-            </select>
-          </div>
-          <div>
-            <button className="btn btn-success m-5"> Clique</button>
-          </div>
-        </form>
-      </div>} */}
-
       {requestsDoneList &&
         requestsDoneList.map((item) => (
           <div key={item.id} className="request">
@@ -64,6 +37,9 @@ const RequestList = () => {
               <h3>Cliente</h3>
               <p className="customer-name">
                 <span>Nome</span> {item.name}
+              </p>
+              <p>
+                <span>Pedido</span> {getFirstFourLetters(item.id)}
               </p>
               <p>
                 <span>Valor Total R$ </span> {item.finalPriceRequest},00

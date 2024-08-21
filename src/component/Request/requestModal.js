@@ -129,6 +129,7 @@ const RequestModal = () => {
         name: data.name,
         idUser: data.id,
         done: true,
+        orderDelivered: false,
         request: data.request,
         finalPriceRequest: finalPriceRequest,
         dateTime: takeDataTime(),
