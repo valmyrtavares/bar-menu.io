@@ -16,6 +16,7 @@ import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
 import CustomizePrice from "./CustomizePriceForm";
+import RecipeDish from "../component/Dishes/recipeDish.js";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -41,6 +42,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
+  const [recipeModal, setRecipeModal] = React.useState(false);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -146,6 +148,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     }
   };
 
+  const openRecipeModal = () => {
+    setRecipeModal(true);
+    console.log(recipeModal);
+  };
+
   React.useEffect(() => {
     if (customizedPriceObj) {
       setForm((prevForm) => ({
@@ -170,6 +177,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         ) : (
           <Link to="/admin/admin">X</Link>
         )}
+      </div>
+      <div className="recipeModal-container">
+        {recipeModal && <RecipeDish setRecipeModal={setRecipeModal} />}
       </div>
       <Title mainTitle={mainTitle ? mainTitle : "Adicione um novo prato"} />
       <form onSubmit={handleSubmit} className="m-1">
@@ -277,10 +287,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         )}
       </div>
-      <div>
-        <button className="btn btn-success m-5" onClick={openModalSideDishes}>
+      <div className="sidedishes-recipe-btn-container">
+        <button className="btn btn-success " onClick={openModalSideDishes}>
           {" "}
-          Acrescente acompanhamentos opcionais ao prato
+          Acompanhamentos
+        </button>
+        <button className="btn btn-success recipe" onClick={openRecipeModal}>
+          {" "}
+          Receita
         </button>
       </div>
     </div>

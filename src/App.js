@@ -19,6 +19,7 @@ import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
 import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
 import OrderQueue from "./component/orderQueue";
 import RequestList from "./component/Request/RequestList";
+import RecipeDish from "./component/Dishes/recipeDish";
 
 import "./style.css";
 
@@ -45,6 +46,7 @@ function App() {
             element={<ListToEditAndDelete />}
           />
           <Route path="/admin/item" element={<FormItem />} />
+          <Route path="/admin/recipedish" element={<RecipeDish />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
           {/* <Route
             path="/admin/SideDisehsInDishes"

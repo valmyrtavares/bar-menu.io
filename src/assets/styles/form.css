@@ -24,6 +24,23 @@
     border:none;
     font-size: 20px
 }
+.Edit-Add-Popup .recipeModal-container{
+    position: fixed;
+    top:20%;
+    width: 60%;
+    max-height: 50vh;
+
+}
+
+.Edit-Add-Popup  .sidedishes-recipe-btn-container{
+    display: flex;
+    justify-content: space-around;
+    margin-top:30px;
+}
+
+.Edit-Add-Popup  .sidedishes-recipe-btn-container .recipe{
+    padding:2px 60px;
+}
 
 .image-preview{
    max-width: 60px

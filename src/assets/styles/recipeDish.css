@@ -1,0 +1,24 @@
+.recipeDish-container{
+    background-color:gray;
+    max-height: 50vh;
+    overflow-y:auto;
+}
+.recipeDish-container .ingridients{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+.recipeDish-container .ingridients button{
+    max-height: 50px;
+}
+.recipeDish-container .ingridients input{
+    margin-bottom:0 !important;
+}
+
+.recipeDish-container .text-area{
+    width: 100%;
+    min-height: 15vh;
+}
+
+
+
