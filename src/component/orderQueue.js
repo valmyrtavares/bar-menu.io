@@ -14,7 +14,9 @@ const OrderQueue = () => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
       // Separando os dados em duas listas com base no campo `done`
       const waitingLineData = data.filter((item) => item.done);
-      const doneLineData = data.filter((item) => !item.done);
+      const doneLineData = data.filter(
+        (item) => !item.done && !item.orderDelivered
+      );
 
       setWaitingLine(waitingLineData);
       setDoneLine(doneLineData);

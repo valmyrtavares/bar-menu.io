@@ -19,14 +19,6 @@ const RequestList = () => {
     return () => unsubscribe();
   }, []);
 
-  // const handleSubmit = () => {
-  //   console.log("rolando");
-  // };
-
-  // const handleChange = () => {
-  //   console.log("é nóis");
-  // };
-
   return (
     <div className="container-request-list">
       <h1>Lista de Pedidos</h1>
