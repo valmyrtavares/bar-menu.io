@@ -3,13 +3,10 @@ import "../../assets/styles/recipeDish.css";
 import Input from "../Input";
 import CloseBtn from "../closeBtn";
 
-const RecipeDish = ({ setRecipeModal }) => {
+const RecipeDish = ({ setRecipeModal, setRecipe }) => {
   const [ingridients, setIngridients] = React.useState("");
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
-  const [form, setForm] = React.useState({
-    gift: "",
-    salute: "",
-  });
+  const [recipeExplanation, setRecipeExplanation] = React.useState("");
   const fieldFocus = React.useRef();
 
   const addIngredient = () => {
@@ -17,10 +14,14 @@ const RecipeDish = ({ setRecipeModal }) => {
     setIngridients("");
     fieldFocus.current.focus();
   };
-  function handleChange({ target }) {
-    const { id, value } = target;
-    setForm({ ...form, [id]: value, [id]: value });
-  }
+
+  const sendRecipe = () => {
+    setRecipe({
+      FinalingridientsList: IngridientsGroup,
+      Explanation: recipeExplanation,
+    });
+    setRecipeModal(false);
+  };
 
   const remveIten = (index) => {
     let updatedList = [...IngridientsGroup];
@@ -57,12 +58,14 @@ const RecipeDish = ({ setRecipeModal }) => {
         <textarea
           id="gift"
           className="text-area"
-          value={form.gift}
-          onChange={handleChange}
+          value={recipeExplanation}
+          onChange={({ target }) => setRecipeExplanation(target.value)}
         >
           Saudação
         </textarea>
+        <p>{recipeExplanation} </p>
       </div>
+      <button onClick={sendRecipe}>Enviar Receita</button>
     </div>
   );
 };

@@ -27,6 +27,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     comment: "",
     price: 0,
     image: "",
+    recipe: {},
     display: false,
     carrossel: false,
     sideDishesElementList: [],
@@ -43,6 +44,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
   const [recipeModal, setRecipeModal] = React.useState(false);
+  const [recipe, setRecipe] = React.useState(`null`);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -53,8 +55,16 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       ...prevForm,
       sideDishesElementList: newSideDishesList,
       maxLimitSideDishes: maxLimitSideDishes,
+      recipe: recipe,
     }));
   }, [newSideDishesList, maxLimitSideDishes]);
+
+  React.useEffect(() => {
+    if (recipe) {
+      form.recipe = recipe;
+      console.log(form);
+    }
+  }, [recipe]);
 
   React.useEffect(() => {
     fetchCategories();
@@ -159,7 +169,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         ...prevForm,
         CustomizedPrice: customizedPriceObj,
       }));
-      console.log("Form atualizado   ", form);
     }
   }, [customizedPriceObj]);
 
@@ -179,7 +188,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         )}
       </div>
       <div className="recipeModal-container">
-        {recipeModal && <RecipeDish setRecipeModal={setRecipeModal} />}
+        {recipeModal && (
+          <RecipeDish setRecipeModal={setRecipeModal} setRecipe={setRecipe} />
+        )}
       </div>
       <Title mainTitle={mainTitle ? mainTitle : "Adicione um novo prato"} />
       <form onSubmit={handleSubmit} className="m-1">
