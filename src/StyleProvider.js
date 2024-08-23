@@ -22,10 +22,9 @@ const StyleProvider = ({ children }) => {
       try {
         const data = await getBtnData("styles");
         const stylesObj = data[1]; // Certifique-se de que o data[1] realmente contém o objeto de estilos
-        console.log("Fetched styles from backend:", stylesObj);
+
         setStyles(stylesObj);
         const cssVariables = convertToCSSVariables(stylesObj);
-
         // Apply styles to document root
         for (const [key, value] of Object.entries(cssVariables)) {
           document.documentElement.style.setProperty(key, value);

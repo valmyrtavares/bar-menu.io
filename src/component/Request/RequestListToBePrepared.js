@@ -6,7 +6,7 @@ import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 import { Link } from "react-router-dom";
-import { getFirstFourLetters } from "../../Helpers/Helpers.js";
+import { getFirstFourLetters, useModal } from "../../Helpers/Helpers.js";
 import RecipeModal from "./RecipeModal";
 
 const RequestListToBePrepared = () => {
@@ -14,6 +14,8 @@ const RequestListToBePrepared = () => {
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [recipeModal, setRecipeModal] = React.useState(false);
+
+  const { isOpen, toggle } = useModal();
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
@@ -68,8 +70,10 @@ const RequestListToBePrepared = () => {
       });
   };
 
-  const openRecipeModal = () => {
-    console.log(requestsDoneList);
+  const openRecipeModal = (itemIndex, recipeIndex) => {
+    const updateRequests = [...requestsDoneList];
+    updateRequests[itemIndex].request[recipeIndex].recipeOpenCloseModal = true;
+    setRequestDoneList(updateRequests);
   };
 
   return (
@@ -80,7 +84,7 @@ const RequestListToBePrepared = () => {
         </Link>
       </div>
       {requestsDoneList &&
-        requestsDoneList.map((item) => (
+        requestsDoneList.map((item, itemIndex) => (
           <div className="container-requestListToBePrepared">
             <div className="user-container">
               <div>
@@ -122,10 +126,12 @@ const RequestListToBePrepared = () => {
             </div>
 
             {item.request &&
-              item.request.map((item) => (
+              item.request.map((item, recipeIndex) => (
                 <div className="request-item">
-                  {item.recipeOpenCloseModal && item && (
-                    <RecipeModal setRecipeModal={setRecipeModal} item={item} />
+                  {isOpen(`${item.id}-${recipeIndex}`) && (
+                    <RecipeModal
+                      closeModal={() => toggle(`${item.id}-${recipeIndex}`)}
+                    />
                   )}
                   <div>
                     <h5>{item.name}</h5>
@@ -141,7 +147,7 @@ const RequestListToBePrepared = () => {
                   <div>
                     <img src={item.image} alt="123" />
                     <button
-                      onClick={openRecipeModal}
+                      onClick={() => toggle(`${item.id}-${recipeIndex}`)}
                       className="btn btn-warning"
                     >
                       Receita
