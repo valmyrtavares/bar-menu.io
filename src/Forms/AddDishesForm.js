@@ -16,7 +16,7 @@ import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
 import CustomizePrice from "./CustomizePriceForm";
-import RecipeDish from "../component/Dishes/recipeDish.js";
+import RecipeDish from "./recipeDishForm.js";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {

@@ -129,6 +129,7 @@ const RequestModal = () => {
         name: data.name,
         idUser: data.id,
         done: true,
+        // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
         request: data.request,
         finalPriceRequest: finalPriceRequest,

@@ -20,10 +20,13 @@ const DishesModal = ({ item, setModal }) => {
   const [currentUser, setCurrentUser] = React.useState("");
   const [disabledSelect, setDisabledSelect] = React.useState(true);
   const [form, setForm] = React.useState({
+    //this object is regarding  to all dishes inside of request
     name: item.title,
     id: item.id,
+    recipeOpenCloseModal: false,
     finalPrice: Number(item.price),
     image: item.image,
+    recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
   });
   const [itemOnScreen, setItemOnScreen] = React.useState("");
@@ -40,6 +43,7 @@ const DishesModal = ({ item, setModal }) => {
       const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
       setCurrentUser(currentUserNew.id);
     }
+    console.log("prato   ", item);
   }, [item]);
 
   //load side dishes on  screen

@@ -14,6 +14,7 @@ const CloseBtn = ({ setClose }) => {
     display: "flex",
     justifyContent: "end",
   };
+
   return (
     <div style={container}>
       {" "}

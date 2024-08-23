@@ -10,3 +10,10 @@
     margin:10px auto;
     background: var(--bg-color)!important;
 }
+
+ @media (min-width: 1000px){
+    .order-queue-container {
+        max-width:1500px !important;
+        width: 100%;
+    }
+} 

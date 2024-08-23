@@ -2,10 +2,12 @@ import React from "react";
 import { getBtnData } from "../api/Api";
 import { GlobalContext } from "../GlobalContext";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "../assets/styles/header.css";
 
 function Header() {
   const global = React.useContext(GlobalContext);
+  const location = useLocation();
   const [url, setUrl] = React.useState("");
 
   React.useEffect(() => {
@@ -19,8 +21,13 @@ function Header() {
     };
     fetchData();
   }, []);
+
+  const headerClass = location.pathname.includes("/orderqueue")
+    ? "main_header orderqueue"
+    : "main_header";
+
   return (
-    <header className="main_header">
+    <header className={headerClass}>
       <nav>
         <Link to="/">
           {" "}

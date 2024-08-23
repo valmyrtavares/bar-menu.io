@@ -19,7 +19,7 @@ import WelcomeSaluteForm from "./Forms/WelcomeSaluteForm";
 import RequestListToBePrepared from "./component/Request/RequestListToBePrepared";
 import OrderQueue from "./component/orderQueue";
 import RequestList from "./component/Request/RequestList";
-import RecipeDish from "./component/Dishes/recipeDish";
+import RecipeDish from "./Forms/recipeDishForm";
 
 import "./style.css";
 

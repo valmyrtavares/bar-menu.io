@@ -41,7 +41,6 @@ const OrderQueue = () => {
                     <span>Pedido</span>: {getFirstFourLetters(item.id)} ;{" "}
                   </p>
                 </div>
-                <p className="date">{item.dateTime}</p>
               </div>
             ))}
         </div>
@@ -56,7 +55,6 @@ const OrderQueue = () => {
                     <span>Pedido</span>: {getFirstFourLetters(item.id)} ;
                   </p>
                 </div>
-                <p className="date">{item.dateTime}</p>
               </div>
             ))}
         </div>

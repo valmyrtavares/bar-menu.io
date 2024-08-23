@@ -7,11 +7,13 @@ import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 import { Link } from "react-router-dom";
 import { getFirstFourLetters } from "../../Helpers/Helpers.js";
+import RecipeModal from "./RecipeModal";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
+  const [recipeModal, setRecipeModal] = React.useState(false);
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
@@ -27,7 +29,6 @@ const RequestListToBePrepared = () => {
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
-    console.log("Objeto inteiro   ", requestList);
     requestList = requestList.filter((item) => item.orderDelivered == false);
     setRequestDoneList(requestList);
   };
@@ -65,6 +66,10 @@ const RequestListToBePrepared = () => {
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const openRecipeModal = () => {
+    console.log(requestsDoneList);
   };
 
   return (
@@ -119,6 +124,9 @@ const RequestListToBePrepared = () => {
             {item.request &&
               item.request.map((item) => (
                 <div className="request-item">
+                  {item.recipeOpenCloseModal && item && (
+                    <RecipeModal setRecipeModal={setRecipeModal} item={item} />
+                  )}
                   <div>
                     <h5>{item.name}</h5>
                     <h5>Acompanhamento</h5>
@@ -132,7 +140,12 @@ const RequestListToBePrepared = () => {
                   </div>
                   <div>
                     <img src={item.image} alt="123" />
-                    <button className="btn btn-warning">Receita</button>
+                    <button
+                      onClick={openRecipeModal}
+                      className="btn btn-warning"
+                    >
+                      Receita
+                    </button>
                   </div>
                 </div>
               ))}

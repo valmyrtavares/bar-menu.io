@@ -1,7 +1,7 @@
 import React from "react";
-import "../../assets/styles/recipeDish.css";
-import Input from "../Input";
-import CloseBtn from "../closeBtn";
+import "../assets/styles/recipeDish.css";
+import Input from "../component/Input";
+import CloseBtn from "../component/closeBtn";
 
 const RecipeDish = ({ setRecipeModal, setRecipe }) => {
   const [ingridients, setIngridients] = React.useState("");
