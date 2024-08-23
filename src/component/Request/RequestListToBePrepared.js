@@ -128,8 +128,9 @@ const RequestListToBePrepared = () => {
             {item.request &&
               item.request.map((item, recipeIndex) => (
                 <div className="request-item">
-                  {isOpen(`${item.id}-${recipeIndex}`) && (
+                  {isOpen(`${item.id}-${recipeIndex}`) && item && (
                     <RecipeModal
+                      item={item}
                       closeModal={() => toggle(`${item.id}-${recipeIndex}`)}
                     />
                   )}
