@@ -9,8 +9,12 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
   const [recipeExplanation, setRecipeExplanation] = React.useState("");
   const fieldFocus = React.useRef();
   React.useEffect(() => {
+    debugger;
     if (recipe) {
-      console.log(recipe);
+      if (!recipe.Explanation && !recipe.FinalingridientsList) {
+        recipe.Explanation = "";
+        recipe.FinalingridientsList = [];
+      }
       setIngridientsGroup(recipe.FinalingridientsList);
       setRecipeExplanation(recipe.Explanation);
     }
