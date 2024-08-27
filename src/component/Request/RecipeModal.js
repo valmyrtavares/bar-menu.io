@@ -1,20 +1,59 @@
 import React from "react";
+import "../../assets/styles/RecipeModal.css";
+import CloseBtn from "../closeBtn";
+import { getOneItemColleciton } from "../../api/Api";
 
-const RecipeModal = ({ closeModal, item }) => {
+const RecipeModal = ({ recipeModal, setRecipeModal }) => {
+  const [recipeDishDisplayed, setRecipeDishDisplayed] = React.useState({});
+  const [imageDish, setImageDish] = React.useState("");
+  const [TitleDish, setTitleDish] = React.useState("");
+
   React.useEffect(() => {
-    if (item) {
-      console.log(item);
-    }
-  }, [item]);
+    const fetchOneDish = async () => {
+      const data = await getOneItemColleciton("item", recipeModal.id);
+      const { recipe, image, title } = data;
+      if (recipe) {
+        setRecipeDishDisplayed(recipe);
+      }
+      if (image && title) {
+        setImageDish(image);
+        setTitleDish(title);
+      }
+    };
+    fetchOneDish();
+  }, []);
 
-  const hasRecipe = item && item.recipe && Object.keys(item.recipe).length > 0;
   return (
-    <div>
-      <button onClick={closeModal}>x</button>
-      {!hasRecipe ? (
-        <p>Não existe nenhuma receita</p>
+    <div className="recipe-global-container">
+      <div className="btn-container">
+        <button
+          onClick={() =>
+            setRecipeModal((prev) => ({ ...prev, openModal: false }))
+          }
+        >
+          x
+        </button>
+      </div>
+      {recipeDishDisplayed.FinalingridientsList &&
+      recipeDishDisplayed.FinalingridientsList.length > 0 ? (
+        <div className="current-recipe">
+          <div className="image-recipe-container">
+            {imageDish && <img src={imageDish} alt="image" />}
+          </div>
+          <h3>ingredientes</h3>
+          <ul>
+            {recipeDishDisplayed.FinalingridientsList &&
+              recipeDishDisplayed.FinalingridientsList.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+          </ul>
+          <h3>Preparo do {TitleDish}</h3>
+          <p>{recipeDishDisplayed.Explanation}</p>
+        </div>
       ) : (
-        <p>Essa é a nossa receita </p>
+        <div className="no-recipe">
+          <p>Não temos uma receita</p>
+        </div>
       )}
     </div>
   );

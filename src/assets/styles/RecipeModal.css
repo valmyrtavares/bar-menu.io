@@ -1,0 +1,35 @@
+.recipe-global-container{
+    border:solid black 2px;
+    position: fixed;
+    top:8vh;
+    left:24%;
+    background-color:white;
+    width: 50%;
+
+}
+.recipe-global-container .no-recipe {
+    padding:5%;
+    color:red;
+    text-align: center;
+
+}
+.recipe-global-container .btn-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end; /* Use flex-end, que é mais comum, mas end também deve funcionar */
+}
+.recipe-global-container .btn-container button{
+    max-width: 30px;
+    background-color: transparent;
+    border:none;
+
+}
+.recipe-global-container .current-recipe .image-recipe-container{
+    display:flex;
+    flex-direction: row;
+    justify-content:center;
+}
+.recipe-global-container .current-recipe p{
+padding:4%;
+font-family:arial;
+}

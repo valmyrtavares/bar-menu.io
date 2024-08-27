@@ -14,7 +14,6 @@ const RequestList = () => {
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
       setRequestDoneList(data);
-      console.log(data);
     });
     return () => unsubscribe();
   }, []);

@@ -13,9 +13,12 @@ const RequestListToBePrepared = () => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
-  const [recipeModal, setRecipeModal] = React.useState(false);
+  const [recipeModal, setRecipeModal] = React.useState({
+    openModal: false,
+    id: "",
+  });
 
-  const { isOpen, toggle } = useModal();
+  // const { isOpen, toggle } = useModal();
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
@@ -24,10 +27,6 @@ const RequestListToBePrepared = () => {
     });
     return () => unsubscribe();
   }, []);
-
-  // function getFirstFourLetters(inputString) {
-  //   return inputString.slice(0, 4);
-  // }
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
@@ -70,11 +69,11 @@ const RequestListToBePrepared = () => {
       });
   };
 
-  const openRecipeModal = (itemIndex, recipeIndex) => {
-    const updateRequests = [...requestsDoneList];
-    updateRequests[itemIndex].request[recipeIndex].recipeOpenCloseModal = true;
-    setRequestDoneList(updateRequests);
-  };
+  // const openRecipeModal = (itemIndex, recipeIndex) => {
+  //   const updateRequests = [...requestsDoneList];
+  //   updateRequests[itemIndex].request[recipeIndex].recipeOpenCloseModal = true;
+  //   setRequestDoneList(updateRequests);
+  // };
 
   return (
     <div>
@@ -128,10 +127,10 @@ const RequestListToBePrepared = () => {
             {item.request &&
               item.request.map((item, recipeIndex) => (
                 <div className="request-item">
-                  {isOpen(`${item.id}-${recipeIndex}`) && item && (
+                  {recipeModal.openModal && (
                     <RecipeModal
-                      item={item}
-                      closeModal={() => toggle(`${item.id}-${recipeIndex}`)}
+                      setRecipeModal={setRecipeModal}
+                      recipeModal={recipeModal}
                     />
                   )}
                   <div>
@@ -148,7 +147,10 @@ const RequestListToBePrepared = () => {
                   <div>
                     <img src={item.image} alt="123" />
                     <button
-                      onClick={() => toggle(`${item.id}-${recipeIndex}`)}
+                      // onClick={() => toggle(`${item.id}-${recipeIndex}`)}
+                      onClick={() =>
+                        setRecipeModal({ openModal: true, id: item.id })
+                      }
                       className="btn btn-warning"
                     >
                       Receita
