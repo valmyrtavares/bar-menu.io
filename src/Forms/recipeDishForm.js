@@ -3,11 +3,18 @@ import "../assets/styles/recipeDish.css";
 import Input from "../component/Input";
 import CloseBtn from "../component/closeBtn";
 
-const RecipeDish = ({ setRecipeModal, setRecipe }) => {
+const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
   const [ingridients, setIngridients] = React.useState("");
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
   const [recipeExplanation, setRecipeExplanation] = React.useState("");
   const fieldFocus = React.useRef();
+  React.useEffect(() => {
+    if (recipe) {
+      console.log(recipe);
+      setIngridientsGroup(recipe.FinalingridientsList);
+      setRecipeExplanation(recipe.Explanation);
+    }
+  }, [recipe]);
 
   const addIngredient = () => {
     setIngridientsGroup([...IngridientsGroup, ingridients]);

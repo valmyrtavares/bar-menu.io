@@ -76,7 +76,6 @@ const EditFormButton = () => {
 
   //Open All Edit pop forms
   function openModal(item, type) {
-    console.log(item);
     if (type === "button") {
       setModalEditButton(true);
       setDataObj(item);
