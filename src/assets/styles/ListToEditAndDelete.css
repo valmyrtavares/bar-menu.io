@@ -1,12 +1,16 @@
+@import "variables";
+
 .title-dishes {
     color: black;
     font-size: 17px;
 }
 
 .form-position {
-    position: absolute;
-    top: 100px;
-    left: 15%;
+    position: fixed;
+    top: 35px;
+    left: 18%;
+    background-color: var(--bg-color);
+   border:solid 3px var( --secundary-bg-color)
 }
 @media(max-width: 450px) {
     .form-position {

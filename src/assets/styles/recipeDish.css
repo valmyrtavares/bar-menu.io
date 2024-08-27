@@ -1,7 +1,10 @@
+@import "variables";
 .recipeDish-container{
     background-color:gray;
     max-height: 50vh;
     overflow-y:auto;
+    background-color: var(--bg-color);
+    border:solid 3px var( --secundary-bg-color)
     
 }
 .recipeDish-container .ingridients{
