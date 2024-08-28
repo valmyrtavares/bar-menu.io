@@ -4,7 +4,7 @@ import { getBtnData } from "../api/Api";
 import { GlobalContext } from "../GlobalContext";
 
 const ProtectedUser = () => {
-  const [isAuthenticated, setIsAuthencicated] = React.useState(false);
+  const [isAuthenticated, setIsAuthencicated] = React.useState(null);
   const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -16,6 +16,7 @@ const ProtectedUser = () => {
         global.setAuthorizated(true); //That is a global variable that indicates normal user conditions. It will be use in mainMenu Component
       } else {
         setIsAuthencicated(false);
+        global.setAuthorizated(false);
       }
     };
     fetchData();
@@ -27,7 +28,7 @@ const ProtectedUser = () => {
     return token;
   };
 
-  if (isAuthenticated === null) {
+  if (isAuthenticated === false) {
     // Você pode renderizar um spinner ou algo enquanto espera o resultado da autenticação
     return <div>Loading...</div>;
   }
