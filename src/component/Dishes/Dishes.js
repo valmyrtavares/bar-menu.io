@@ -43,7 +43,9 @@ function Dishes({ newItem }) {
           </div>
           <div className="container-request-button">
             <button className="request-client">Faça o seu pedido</button>
-            {item && <p className="price float-end fw-bold">{item.price}</p>}
+            {item && (
+              <p className="price float-end fw-bold">R${item.price},00</p>
+            )}
           </div>
         </div>
       )}

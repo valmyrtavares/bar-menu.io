@@ -116,6 +116,7 @@ const RequestListToBePrepared = () => {
                   Pronto
                 </button>
                 <button
+                  disabled={item.done}
                   className={item.orderDelivered ? "done" : "pendent"}
                   onClick={() => orderDelivery(item)}
                 >

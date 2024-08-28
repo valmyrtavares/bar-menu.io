@@ -1,8 +1,15 @@
 @import  "./variables";
 
+.order-queue-container .title-btn-container{
+    display:grid;
+    grid-template-columns: 8fr 46px;
+    justify-content: space-between;
+}
+.order-queue-container .title-btn-container button{
+    border:solid 2px var(--title-font-color);
+}
 
-
-.order-queue-container h1{
+.order-queue-container .title-btn-container h1{
 text-align: center;
 font-family: var(--title-font);
 color: var(--title-font-color);
