@@ -4,9 +4,10 @@ import NestedBtn from "../component/nestedBtn";
 import { getBtnData } from "../api/Api";
 import MenuButton from "../component/menuHamburguerButton";
 import RequestModal from "../component/Request/requestModal.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";
+import { GlobalContext } from "../GlobalContext";
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -14,8 +15,13 @@ function MainMenu() {
   const [dishes, setDishes] = React.useState([]);
   const [nameClient, serNameClient] = React.useState("");
   const containerRef = React.useRef(null);
+  const global = React.useContext(GlobalContext);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
+    if (!global.authorizated) {
+      navigate("/create-customer");
+    }
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
