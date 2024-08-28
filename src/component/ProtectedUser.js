@@ -4,7 +4,7 @@ import { getBtnData } from "../api/Api";
 import { GlobalContext } from "../GlobalContext";
 
 const ProtectedUser = () => {
-  const [isAuthenticated, setIsAuthencicated] = React.useState(null);
+  const [isAuthenticated, setIsAuthencicated] = React.useState(false);
   const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
