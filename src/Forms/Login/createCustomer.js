@@ -8,6 +8,7 @@ import "../../assets/styles/createCustomer.css";
 import { Link } from "react-router-dom";
 import { getBtnData } from "../../api/Api.js";
 import { FormControlLabel } from "@mui/material";
+import { CheckUser } from "../../Helpers/Helpers.js";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
@@ -42,14 +43,15 @@ const CreateCustomer = () => {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    const fetchDatafunction = async () => {
-      const data = await getBtnData("welcomeCustomer");
-      if (data) {
-        setWelcome(data[0]);
+    async function CheckLogin() {
+      const userId = await CheckUser("userMenu");
+      if (userId === "/") {
+        global.setAuthorizated(true);
+        navigate(userId);
       }
-    };
-    fetchDatafunction();
-  }, []); // Adiciona [] para garantir que a função execute apenas uma vez na montagem
+    }
+    CheckLogin();
+  }, []);
 
   function handleSubmit(event) {
     event.preventDefault();

@@ -11,7 +11,7 @@ import Admin from "./Pages/FormMenu";
 import Protected from "./component/Protected";
 import FormFrontImage from "./Forms/formFrontImage";
 import ListToEditAndDelete from "./Forms/ListToEditAndDelete";
-import ProtectedUser from "./component/ProtectedUser";
+// import ProtectedUser from "./component/ProtectedUser";
 import CreateCustomer from "./Forms/Login/createCustomer";
 import RequestModal from "./component/Request/requestModal";
 import ScreenStylesForm from "./Forms/ScreenStylesForm";
@@ -24,16 +24,16 @@ import RecipeDish from "./Forms/recipeDishForm";
 import "./style.css";
 
 function App() {
-  //const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = "/bar-menu.io";
+  //const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
         {true && <Header />}
 
         <Routes>
-          <Route path="/menu" element={<MainMenu />} />
-          <Route path="/" element={<ProtectedUser />} />
+          <Route path="/" element={<MainMenu />} />
+          {/* <Route path="/menu" element={<ProtectedUser />} /> */}
           <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/request" element={<RequestModal />} />
           <Route path="/orderqueue" element={<OrderQueue />} />

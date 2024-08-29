@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";
 import { GlobalContext } from "../GlobalContext";
+import { CheckUser } from "../Helpers/Helpers.js";
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -19,8 +20,14 @@ function MainMenu() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
+    async function ChecLogin() {
+      const userId = await CheckUser("userMenu");
+      console.log(userId);
+      navigate(userId);
+    }
+
     if (!global.authorizated) {
-      navigate("/create-customer");
+      ChecLogin();
     }
     const fetchData = async () => {
       try {

@@ -1,24 +1,22 @@
 import React from "react";
+import { getBtnData } from "../api/Api";
 
 export function getFirstFourLetters(inputString) {
   return inputString.slice(0, 4);
 }
 
-export function useModal() {
-  const [openModals, setOpenModals] = React.useState({});
-
-  const toggle = (id) => {
-    console.log("ID:", id);
-    setOpenModals((prev) => {
-      console.log("Previous State:", prev);
-      console.log("Toggling:", id, "Current Value:", prev[id]);
-      return {
-        ...prev,
-        [id]: !prev[id],
-      };
-    });
-  };
-
-  const isOpen = (id) => !!openModals[id];
-  return { isOpen, toggle };
+export async function CheckUser(check) {
+  if (localStorage.hasOwnProperty(check)) {
+    const userMenu = JSON.parse(localStorage.getItem(check));
+    const userList = await getBtnData("user");
+    const currentUser = userList.filter((item) => item.id === userMenu.id);
+    if (currentUser && currentUser.length > 0 && currentUser[0].name) {
+      console.log(currentUser);
+      return "/";
+    } else {
+      return "/create-customer";
+    }
+  } else {
+    return "/create-customer";
+  }
 }
