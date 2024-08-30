@@ -95,11 +95,18 @@ const useFormValidation = (initialValue = "") => {
     }
   };
 
+  const handleBlur = (e) => {
+    const { id, value } = e.target;
+    console.log("value no useForm  ", value);
+    return value.split(".")[0];
+  };
+
   return {
     form,
     error,
     handleChange,
     setForm,
+    handleBlur,
   };
 };
 export default useFormValidation;

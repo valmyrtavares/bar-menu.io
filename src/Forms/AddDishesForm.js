@@ -17,6 +17,7 @@ import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import "../assets/styles/form.css";
 import CustomizePrice from "./CustomizePriceForm";
 import RecipeDish from "./recipeDishForm.js";
+import useFormValidation from "../Hooks/useFormValidation.js";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -45,6 +46,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
+  const { handleBlur } = useFormValidation();
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -89,8 +91,14 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   function handleChange({ target }) {
     const { id, value, type, checked } = target;
-
-    if (type === "checkbox") {
+    if (id === "price") {
+      const formattedValue = value.split(".")[0];
+      console.log(formattedValue);
+      setForm({
+        ...form,
+        [id]: formattedValue,
+      });
+    } else if (type === "checkbox") {
       setForm({
         ...form,
         [id]: checked, // Use checked diretamente, que já é um booleano
@@ -132,24 +140,25 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (!dataObj) {
-      addDoc(collection(db, "item"), form)
-        .then((docRef) => {
-          navigate("/");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } else {
-      setDoc(doc(db, "item", dataObj.id), form)
-        .then(() => {
-          navigate("/");
-          console.log("Document successfully updated !");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+    console.log(form);
+    // if (!dataObj) {
+    //   addDoc(collection(db, "item"), form)
+    //     .then((docRef) => {
+    //       navigate("/");
+    //     })
+    //     .catch((error) => {
+    //       console.log(error);
+    //     });
+    // } else {
+    //   setDoc(doc(db, "item", dataObj.id), form)
+    //     .then(() => {
+    //       navigate("/");
+    //       console.log("Document successfully updated !");
+    //     })
+    //     .catch((error) => {
+    //       console.log(error);
+    //     });
+    // }
   }
 
   const openModalSideDishes = () => {
@@ -202,6 +211,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         <Input
           id="title"
           label="Titulo"
+          required
           value={form.title}
           type="text"
           onChange={handleChange}
@@ -210,6 +220,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <label className="form-label">Categoria</label>
           <select
             id="category"
+            required
             value={form.category}
             className="form-select"
             onChange={handleChange}
@@ -224,6 +235,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         </div>
         <Input
           id="comment"
+          required
           label="Comentário"
           value={form.comment}
           type="text"
@@ -234,8 +246,10 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             id="price"
             label="Preço"
             value={form.price}
+            required
             type="number"
             onChange={handleChange}
+            onBlur={handleBlur}
           />
           <button
             className="btn btn-success"
