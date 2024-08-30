@@ -5,9 +5,10 @@ import { app } from "../../config-firebase/firebase.js";
 import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../GlobalContext";
 import "../../assets/styles/createCustomer.css";
-import { Link } from "react-router-dom";
-import { getBtnData } from "../../api/Api.js";
-import { FormControlLabel } from "@mui/material";
+import useFormValidation from "../../Hooks/useFormValidation.js";
+// import { Link } from "react-router-dom";
+// import { getBtnData } from "../../api/Api.js";
+// import { FormControlLabel } from "@mui/material";
 import { CheckUser } from "../../Helpers/Helpers.js";
 
 const CreateCustomer = () => {
@@ -15,12 +16,19 @@ const CreateCustomer = () => {
   const global = React.useContext(GlobalContext);
   const anonymousClient = React.useRef(null);
 
-  const [form, setForm] = React.useState({
+  const { form, setForm, error, handleChange } = useFormValidation({
     name: "",
     phone: "",
     birthday: "",
     email: "",
   });
+
+  // const [form, setForm] = React.useState({
+  //   name: "",
+  //   phone: phone,
+  //   birthday: "",
+  //   email: "",
+  // });
 
   const [welcome, setWelcome] = React.useState({
     salute: "",
@@ -91,13 +99,24 @@ const CreateCustomer = () => {
       });
   }
 
-  function handleChange({ target }) {
-    const { id, value } = target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [id]: value,
-    }));
-  }
+  // function handleChange({ target }) {
+  //   const { id, value } = target;
+
+  //   // Chama handlePhoneChange para formatar e validar em tempo real
+  //   if (id === "phone") {
+  //     handlePhoneChange(value); // Formata o telefone em tempo real
+  //     setForm((prevForm) => ({
+  //       ...prevForm,
+  //       [id]: value, // Atualiza o valor de phone no estado do formulário, se necessário
+  //     }));
+  //   }
+
+  //   // Atualiza o estado do formulário com o valor formatado
+  //   setForm((prevForm) => ({
+  //     ...prevForm,
+  //     [id]: value,
+  //   }));
+  // }
 
   function handleAnonymousSubmit(event) {
     event.preventDefault();
@@ -143,6 +162,7 @@ const CreateCustomer = () => {
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="name"
+          required
           label="Nome"
           value={form.name}
           type="text"
@@ -151,20 +171,26 @@ const CreateCustomer = () => {
 
         <Input
           id="phone"
+          required
           label="Celular"
           value={form.phone}
           type="text"
           onChange={handleChange}
         />
+
+        {error.phone && <div>{error.phone}</div>}
         <Input
           id="birthday"
+          required
           label="Aniversário"
           value={form.birthday}
-          type="text"
+          type="date"
           onChange={handleChange}
         />
+        {error.birthday && <div>{error.birthday}</div>}
         <Input
           id="email"
+          required
           label="Email"
           value={form.email}
           type="email"
