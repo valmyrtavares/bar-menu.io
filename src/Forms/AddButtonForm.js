@@ -123,6 +123,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"
+          required
           label="Título"
           value={form.title}
           type="text"
@@ -134,8 +135,12 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
             id="category"
             className="form-select custom-select"
             value={form.category}
+            required
             onChange={handleChange}
           >
+            <option value="" disabled hidden>
+              Selecione uma categoria
+            </option>
             {categories &&
               categories.map((category, index) => (
                 <option key={index} value={category}>
