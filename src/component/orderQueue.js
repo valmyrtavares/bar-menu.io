@@ -4,6 +4,7 @@ import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import { fetchInDataChanges } from "../api/Api.js";
 import "../assets/styles/orderQueue.css";
 import { getFirstFourLetters } from "../Helpers/Helpers.js";
+import { requestSorter } from "../Helpers/Helpers.js";
 import { Link } from "react-router-dom";
 
 const OrderQueue = () => {
@@ -14,7 +15,8 @@ const OrderQueue = () => {
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
       // Separando os dados em duas listas com base no campo `done`
-      const waitingLineData = data.filter((item) => item.done);
+      let waitingLineData = data.filter((item) => item.done);
+      waitingLineData = requestSorter(waitingLineData);
       const doneLineData = data.filter(
         (item) => !item.done && !item.orderDelivered
       );

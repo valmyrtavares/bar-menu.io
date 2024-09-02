@@ -6,8 +6,9 @@ import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 import { Link } from "react-router-dom";
-import { getFirstFourLetters, useModal } from "../../Helpers/Helpers.js";
+import { getFirstFourLetters, requestSorter } from "../../Helpers/Helpers.js";
 import RecipeModal from "./RecipeModal";
+import { cardClasses } from "@mui/material";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -22,7 +23,8 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
-      const requestList = data.filter((item) => item.orderDelivered == false);
+      let requestList = data.filter((item) => item.orderDelivered == false);
+      requestList = requestSorter(requestList);
       setRequestDoneList(requestList);
     });
     return () => unsubscribe();
@@ -31,6 +33,7 @@ const RequestListToBePrepared = () => {
   const fetchUserRequests = async () => {
     let requestList = await getBtnData("request");
     requestList = requestList.filter((item) => item.orderDelivered == false);
+    requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
   };
 
@@ -69,12 +72,6 @@ const RequestListToBePrepared = () => {
       });
   };
 
-  // const openRecipeModal = (itemIndex, recipeIndex) => {
-  //   const updateRequests = [...requestsDoneList];
-  //   updateRequests[itemIndex].request[recipeIndex].recipeOpenCloseModal = true;
-  //   setRequestDoneList(updateRequests);
-  // };
-
   return (
     <div>
       <div className="container-btn-request">
@@ -84,7 +81,7 @@ const RequestListToBePrepared = () => {
       </div>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => (
-          <div className="container-requestListToBePrepared">
+          <div className="container-requestListToBePrepared" key={item.id}>
             <div className="user-container">
               <div>
                 <p>
@@ -127,7 +124,7 @@ const RequestListToBePrepared = () => {
 
             {item.request &&
               item.request.map((item, recipeIndex) => (
-                <div className="request-item">
+                <div className="request-item" key={recipeIndex}>
                   {recipeModal.openModal && (
                     <RecipeModal
                       setRecipeModal={setRecipeModal}
@@ -139,7 +136,9 @@ const RequestListToBePrepared = () => {
                     <h5>Acompanhamento</h5>
                     <div className="sideDishes-list">
                       {item.sideDishes && item.sideDishes.length > 0 ? (
-                        item.sideDishes.map((item) => <p>{item},</p>)
+                        item.sideDishes.map((item, index) => (
+                          <p key={index}>{item},</p>
+                        ))
                       ) : (
                         <p>Não tem acompanhamento</p>
                       )}

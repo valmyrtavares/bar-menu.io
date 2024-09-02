@@ -186,7 +186,7 @@ const RequestModal = () => {
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
       <div className="btnFinalRequest">
-        <Link className="keep-shopping" to="/menu">
+        <Link className="keep-shopping" to="/">
           Continue Comprando
         </Link>
       </div>
