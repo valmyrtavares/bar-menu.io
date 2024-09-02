@@ -24,6 +24,7 @@ const RequestModal = () => {
   const [modal, setModal] = React.useState(false);
   const [disabledBtn, setDisabledBtn] = React.useState(false);
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
+  const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const navigate = useNavigate();
   // const global = React.useContext(GlobalContext); 15-08
@@ -32,6 +33,10 @@ const RequestModal = () => {
     if (localStorage.hasOwnProperty("userMenu")) {
       const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
       setCurrentUser(currentUserNew.id);
+    }
+    if (localStorage.hasOwnProperty("isToten")) {
+      const toten = JSON.parse(localStorage.getItem("isToten"));
+      if (toten.isToten) setIsToten(true);
     }
   }, []);
 
@@ -101,7 +106,15 @@ const RequestModal = () => {
       setWarningMsg(true);
     } else {
       addRequestUser(currentUser);
-      navigate("/orderqueue");
+      if (isToten) {
+        console.log("É toten tem que deslogar o usuario");
+        localStorage.removeItem("userMenu");
+
+        navigate("/createCutomer");
+      } else {
+        console.log("Não é totem mantem tudo igual");
+        navigate("/orderqueue");
+      }
     }
   };
 
