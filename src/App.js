@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  HashRouter,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import MainMenu from "./Pages/MainMenu";
 import AddButtonForm from "./Forms/AddButtonForm";
 import AddSideDishesForm from "./Forms/AddSideDishesForm";
@@ -61,6 +67,7 @@ function App() {
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
           <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </div>
