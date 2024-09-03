@@ -107,12 +107,9 @@ const RequestModal = () => {
     } else {
       addRequestUser(currentUser);
       if (isToten) {
-        console.log("É toten tem que deslogar o usuario");
         localStorage.removeItem("userMenu");
-
-        navigate("/createCutomer");
+        navigate("/create-customer");
       } else {
-        console.log("Não é totem mantem tudo igual");
         navigate("/orderqueue");
       }
     }

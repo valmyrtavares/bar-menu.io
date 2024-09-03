@@ -151,6 +151,13 @@ const CreateCustomer = () => {
         console.log(error);
       });
   }
+  // const handleFocus = () => {
+  //   // Tenta abrir o teclado virtual
+  //   const oskPath = "C:\\Windows\\System32\\osk.exe";
+  //   window.open(oskPath); // Tenta abrir o teclado virtual
+
+  //   // Adicionalmente, você pode tentar uma abordagem mais direta:
+  // };
 
   return (
     <section className="welcome-message">
@@ -166,6 +173,7 @@ const CreateCustomer = () => {
           label="Nome"
           value={form.name}
           type="text"
+          // onFocus={handleFocus}
           onChange={handleChange}
         />
 
