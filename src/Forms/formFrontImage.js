@@ -83,7 +83,10 @@ const FormFrontImage = () => {
           checked={publicStatement}
           onChange={changePublicStatement}
         />
-        <label className="form-check-label">Adicionar item ao carrossel</label>
+        <label className="form-check-label">
+          Manter selecionado para que o cliente seja deslogado logo após o envio
+          do pedido
+        </label>
       </div>
     </>
   );
