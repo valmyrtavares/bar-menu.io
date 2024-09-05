@@ -98,6 +98,7 @@ function AddSideDishesForm({
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="sideDishes"
+          required
           label="Acompanhamento"
           value={form.sideDishes}
           type="text"

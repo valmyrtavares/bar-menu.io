@@ -36,7 +36,7 @@ const RequestModal = () => {
     }
     if (localStorage.hasOwnProperty("isToten")) {
       const toten = JSON.parse(localStorage.getItem("isToten"));
-      if (toten.isToten) setIsToten(true);
+      if (toten) setIsToten(true);
     }
   }, []);
 
