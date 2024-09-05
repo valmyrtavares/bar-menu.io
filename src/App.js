@@ -30,8 +30,8 @@ import RecipeDish from "./Forms/recipeDishForm";
 import "./style.css";
 
 function App() {
-  //const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = "/bar-menu.io";
+  //const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -67,7 +67,7 @@ function App() {
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
           <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
         </Routes>
       </BrowserRouter>
     </div>
