@@ -24,6 +24,17 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
     }
   };
 
+  // Rolagem automática para o final do contêiner quando o display muda (itens são exibidos)
+  React.useEffect(() => {
+    if (display && containerRef.current) {
+      const container = containerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight, // Rola até o fim do contêiner
+        behavior: "smooth",
+      });
+    }
+  }, [display, childCategory, childItem]);
+
   React.useEffect(() => {
     if (menuButton) {
       setChildCategory(menuButton.filter((btn) => item.parent == btn.category));
