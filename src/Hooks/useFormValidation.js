@@ -21,7 +21,7 @@ const useFormValidation = (initialValue = "") => {
     }));
 
     // Validação: se o comprimento não for 11, mostra o erro
-    if (digits.length > 11) {
+    if (digits.length >= 11) {
       setError((prevError) => ({
         ...prevError,
         phone: "", // Limpa o erro do campo phone

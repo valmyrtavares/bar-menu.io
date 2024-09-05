@@ -10,12 +10,13 @@ import useFormValidation from "../../Hooks/useFormValidation.js";
 // import { getBtnData } from "../../api/Api.js";
 // import { FormControlLabel } from "@mui/material";
 import { CheckUser } from "../../Helpers/Helpers.js";
+import Error from "../../component/error.js";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const anonymousClient = React.useRef(null);
-
+  const [errorPopup, setErrorPopup] = React.useState(false);
   const { form, setForm, error, handleChange } = useFormValidation({
     name: "",
     phone: "",
@@ -67,30 +68,32 @@ const CreateCustomer = () => {
             email: "anonimo@anonimo.com",
           }
         : form;
-
-    // Envia o formulário para o Firestore
-    addDoc(collection(db, "user"), formToSubmit)
-      .then((docRef) => {
-        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-        const currentUser = {
-          id: docRef.id,
-          name: formToSubmit.name,
-        };
-        localStorage.setItem("userMenu", JSON.stringify(currentUser));
-
-        setForm({
-          name: "",
-          phone: "",
-          birthday: "",
-          email: "",
+    if (error.birthday || error.phone) {
+      setErrorPopup(true);
+    } else {
+      // Envia o formulário para o Firestore
+      addDoc(collection(db, "user"), formToSubmit)
+        .then((docRef) => {
+          global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+          const currentUser = {
+            id: docRef.id,
+            name: formToSubmit.name,
+          };
+          localStorage.setItem("userMenu", JSON.stringify(currentUser));
+          setForm({
+            name: "",
+            phone: "",
+            birthday: "",
+            email: "",
+          });
+        })
+        .then(() => {
+          navigate("/");
+        })
+        .catch((error) => {
+          console.log(error);
         });
-      })
-      .then(() => {
-        navigate("/");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    }
   }
 
   // function handleChange({ target }) {
@@ -160,6 +163,7 @@ const CreateCustomer = () => {
         <p>{welcome.salute}</p>
         <p>{welcome.gift}</p>
       </main>
+      {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="name"
@@ -220,3 +224,4 @@ const CreateCustomer = () => {
 };
 
 export default CreateCustomer;
+//userMenu {"id":"quU8L2vdSlQUdsMYKO0K","name":"Henrrique"}

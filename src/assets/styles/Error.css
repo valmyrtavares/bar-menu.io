@@ -1,0 +1,28 @@
+@import 'variables';
+.container-error{
+display: grid;
+row-gap: 10px;
+justify-items: center;
+padding: 10px;
+    background: white;
+    border:solid 3px var(--secundary-bg-color);
+    position: fixed;
+    left: 17%;
+    top:200px;
+}
+.container-error p{
+    border:solid 3px var(--secundary-bg-color);
+}
+
+.container-error button{
+   width: 50%;  
+   border-radius: 10px;
+   padding: 10px 20px;
+   margin: 20px 10%;
+   font-family: var(--title-font) !important;
+   font-size: 1.2rem;
+   font-weight: bold;
+   color: var(--title-font-color);
+   background: var(--btn-color);
+
+}
