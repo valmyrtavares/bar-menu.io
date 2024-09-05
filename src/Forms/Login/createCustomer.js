@@ -23,13 +23,6 @@ const CreateCustomer = () => {
     email: "",
   });
 
-  // const [form, setForm] = React.useState({
-  //   name: "",
-  //   phone: phone,
-  //   birthday: "",
-  //   email: "",
-  // });
-
   const [welcome, setWelcome] = React.useState({
     salute: "",
     gift: "",
@@ -84,6 +77,7 @@ const CreateCustomer = () => {
           name: formToSubmit.name,
         };
         localStorage.setItem("userMenu", JSON.stringify(currentUser));
+
         setForm({
           name: "",
           phone: "",

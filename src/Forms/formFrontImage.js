@@ -6,13 +6,17 @@ import { setDoc, doc, getFirestore } from "firebase/firestore";
 import { GlobalContext } from "../GlobalContext.js";
 import "../assets/styles/form.css";
 import { useNavigate } from "react-router-dom";
-import { cardClasses } from "@mui/material";
+//import { cardClasses } from "@mui/material";
+import useLocalStorage from "../Hooks/useLocalStorage.js";
 
 const FormFrontImage = () => {
   const [url, setUrl] = React.useState("");
   const [progress, setProgress] = React.useState("");
   const global = React.useContext(GlobalContext);
-  const [publicStatement, setPublicStatement] = React.useState(false);
+  const [publicStatement, setPublicStatement] = useLocalStorage(
+    "isToten",
+    false
+  );
 
   //Navigate
   const navigate = useNavigate();
@@ -22,14 +26,11 @@ const FormFrontImage = () => {
 
   const changePublicStatement = () => {
     setPublicStatement((prev) => !prev);
-    if (!publicStatement) {
-      const toten = { isToten: true };
-      localStorage.setItem("isToten", JSON.stringify(toten));
-    } else {
-      const toten = { isToten: false };
-      localStorage.setItem("isToten", JSON.stringify(toten));
-    }
   };
+
+  React.useState(() => {
+    console.log("publicStatement   ", publicStatement);
+  }, [publicStatement]);
 
   const onfileChange = async (e) => {
     const file = e.target.files[0];
