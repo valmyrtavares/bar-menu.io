@@ -1,0 +1,7 @@
+@import 'variables';
+.tete h3 {
+    font-family:var(--title-font);
+    color: var(--title-font-color);
+   
+
+}

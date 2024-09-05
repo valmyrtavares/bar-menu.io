@@ -1,16 +1,16 @@
-import React from 'react';
-import Input from '../../component/Input.js';
-import '../../assets/styles/form.css';
-import Title from '../../component/title.js';
-import { auth } from '../../config-firebase/firebase.js';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import Input from "../../component/Input.js";
+import "../../assets/styles/form.css";
+import Title from "../../component/title.js";
+import { auth } from "../../config-firebase/firebase.js";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   function handleChange({ target }) {
@@ -28,9 +28,9 @@ function Signup() {
         form.password
       );
       const user = userCredential.user;
-      localStorage.setItem('token', user.accessToken);
-      localStorage.setItem('user', JSON.stringify(user));
-      navigate('/');
+      localStorage.setItem("token", JSON.stringify(user.accessToken));
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate("/");
     } catch (error) {
       console.log(error);
     }

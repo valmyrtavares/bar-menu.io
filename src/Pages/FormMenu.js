@@ -1,10 +1,23 @@
-//import React, { useLayoutEffect } from 'react';
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Title from "../component/title.js";
-
+//import UseLocalStorage from "../Hooks/useLocalStorage.js";
 import "../assets/styles/FormMenu.css";
 
 const FormMenu = () => {
+  const navigate = useNavigate();
+  // const [admin, setAdmin] = UseLocalStorage("token", "");
+
+  React.useEffect(() => {
+    if (!localStorage.hasOwnProperty("token")) {
+      navigate("/admin/login");
+    } else {
+      const token = JSON.parse(localStorage.getItem("token"));
+
+      console.log(" token   ", token);
+    }
+  }, []);
+
   return (
     <div className="form-menu-container">
       <Title title="Menu de Formulários" />

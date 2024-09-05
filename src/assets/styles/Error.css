@@ -1,17 +1,24 @@
 @import 'variables';
 .container-error{
 display: grid;
+min-width: 65%;
 row-gap: 10px;
 justify-items: center;
 padding: 10px;
-    background: white;
-    border:solid 3px var(--secundary-bg-color);
-    position: fixed;
-    left: 17%;
-    top:200px;
+background: white;
+border:solid 3px var(--secundary-bg-color);
+position: fixed;
+left: 17%;
+top:200px;
+}
+
+.container-error h1{
+    color: var(--title-font-color);
+    font-family: var(--title-font);
 }
 .container-error p{
-    border:solid 3px var(--secundary-bg-color);
+    border:solid 3px var(--bg-color);
+    padding: 8px;
 }
 
 .container-error button{
