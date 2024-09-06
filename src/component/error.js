@@ -7,7 +7,7 @@ const Error = ({ error, setErrorPopup }) => {
       <h1>Mensagem de erro</h1>
       {error.birthday && <p>{error?.birthday}</p>}
       {error.phone && <p>{error?.phone}</p>}
-      {error && <p>{error}</p>}
+      {error.login && <p>{error.login}</p>}
       <button onClick={() => setErrorPopup(false)}>Fechar Mensagem</button>
     </div>
   );

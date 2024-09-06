@@ -75,6 +75,20 @@ const FormMenu = () => {
           </Link>
         </div>
       </div>
+      <h3>Gerenciando Clientes</h3>
+      <div className="sub-container">
+        <div className="btn-text">
+          <p>
+            Use essa seção para criar acompanhar todos os clientes pedidos, por
+            nome, data, e preferências. E criar uma rede te interação{" "}
+          </p>
+        </div>
+        <div className="btn-form">
+          <Link to="/admin/customer" className=" btn btn-success sidedishe">
+            Lista de Clientes
+          </Link>
+        </div>
+      </div>
       <h3>Adicione sua marca</h3>
       <div className="sub-container">
         <div className="btn-text">

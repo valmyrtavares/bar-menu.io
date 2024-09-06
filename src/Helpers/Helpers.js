@@ -1,8 +1,10 @@
 import React from "react";
 import { getBtnData } from "../api/Api";
 
-export function getFirstFourLetters(inputString) {
-  return inputString.slice(0, 4);
+export function getFirstFourLetters(inputString, max) {
+  return inputString ? inputString.slice(0, max) : "";
+
+  console.log("inputString   ", inputString);
 }
 
 export async function CheckUser(check) {
@@ -21,7 +23,6 @@ export async function CheckUser(check) {
 }
 
 export const requestSorter = (ObjList) => {
-  console.log("ObjList   ", ObjList);
   const sortedList = [...ObjList];
   sortedList.sort((a, b) => {
     // Converte as strings 'dateTime' em objetos Date para comparação

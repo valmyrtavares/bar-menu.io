@@ -1,0 +1,16 @@
+.customerList-container table{
+   width: 90%;
+   margin: 3px 5%;
+}
+.customerList-container .search-container{
+    display:flex;
+    justify-content: center;
+    margin:10px 0;
+   
+}
+.customerList-container .search-container input{
+width: 60%;
+border-radius: 10px;
+min-height: 40px;
+border:none;
+}

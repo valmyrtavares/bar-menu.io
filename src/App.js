@@ -26,12 +26,13 @@ import RequestListToBePrepared from "./component/Request/RequestListToBePrepared
 import OrderQueue from "./component/orderQueue";
 import RequestList from "./component/Request/RequestList";
 import RecipeDish from "./Forms/recipeDishForm";
+import CustomerList from "./component/Customers/customerList";
 
 import "./style.css";
 
 function App() {
-  //const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = "/bar-menu.io";
+  //const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -54,6 +55,7 @@ function App() {
           <Route path="/admin/item" element={<FormItem />} />
           <Route path="/admin/recipedish" element={<RecipeDish />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
+          <Route path="/admin/customer" element={<CustomerList />} />
           {/* <Route
             path="/admin/SideDisehsInDishes"
             element={<NoNameSideDisehsInDishes />}
@@ -67,8 +69,8 @@ function App() {
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
           <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
-          {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
+          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </BrowserRouter>
     </div>

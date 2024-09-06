@@ -45,7 +45,7 @@ function Login() {
       {errorMessage && (
         <Error
           setErrorPopup={setErrorMessage}
-          error="Sua senha ou email estão incorretos"
+          error={{ login: "Sua senha ou email estão incorretos" }}
         />
       )}
       <form onSubmit={handleSubmit} className="m-1">
