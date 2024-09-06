@@ -22,7 +22,7 @@ const RequestModal = () => {
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
-  const [disabledBtn, setDisabledBtn] = React.useState(false);
+  const [disabledBtn, setDisabledBtn] = React.useState(true);
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
   const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
