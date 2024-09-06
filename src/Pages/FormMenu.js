@@ -13,8 +13,6 @@ const FormMenu = () => {
       navigate("/admin/login");
     } else {
       const token = JSON.parse(localStorage.getItem("token"));
-
-      console.log(" token   ", token);
     }
   }, []);
 

@@ -11,7 +11,6 @@ export async function CheckUser(check) {
     const userList = await getBtnData("user");
     const currentUser = userList.filter((item) => item.id === userMenu.id);
     if (currentUser && currentUser.length > 0 && currentUser[0].name) {
-      console.log(currentUser);
       return "/";
     } else {
       return "/create-customer";

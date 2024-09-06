@@ -31,7 +31,6 @@ const EditFormButton = () => {
         ]);
         setMenuButton(data);
         setDishes(dataItem);
-        console.log(dataItem);
         setSideDishes(sideDishes);
       } catch (error) {
         console.error("Error fetching data", error);

@@ -22,7 +22,6 @@ function MainMenu() {
   React.useEffect(() => {
     async function ChecLogin() {
       const userId = await CheckUser("userMenu");
-      console.log(userId);
       navigate(userId);
     }
 
