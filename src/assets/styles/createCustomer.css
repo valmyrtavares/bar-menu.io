@@ -33,3 +33,7 @@
     padding: 10px 14px;
     margin: 20px 10%;
 }
+.welcome-message .error-form{
+    color:#a11f1f;
+    font-weight: 700;
+}

@@ -76,7 +76,7 @@ const CreateCustomer = () => {
             email: "anonimo@anonimo.com",
           }
         : form;
-    if (error.birthday || error.phone) {
+    if (error.birthday || error.phone || error.cpf) {
       setErrorPopup(true);
     } else {
       // Envia o formulário para o Firestore
@@ -192,6 +192,7 @@ const CreateCustomer = () => {
           type="text"
           onChange={handleChange}
         />
+        {error.phone && <div className="error-form">{error.phone}</div>}
         <Input
           id="cpf"
           required
@@ -200,8 +201,8 @@ const CreateCustomer = () => {
           type="text"
           onChange={handleChange}
         />
+        {error.cpf && <div className="error-form">{error.cpf}</div>}
 
-        {error.phone && <div>{error.phone}</div>}
         <Input
           id="birthday"
           required
@@ -210,7 +211,7 @@ const CreateCustomer = () => {
           type="date"
           onChange={handleChange}
         />
-        {error.birthday && <div>{error.birthday}</div>}
+        {error.birthday && <div className="error-form">{error.birthday}</div>}
         <Input
           id="email"
           required

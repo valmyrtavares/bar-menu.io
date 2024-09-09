@@ -66,7 +66,7 @@ const useFormValidation = (initialValue = "") => {
     }));
 
     // Validação: se o comprimento não for 11, mostra o erro
-    if (digits.length === 11) {
+    if (digits.length === 11 && isValidCpf(digits)) {
       setError((prevError) => ({
         ...prevError,
         cpf: "", // Limpa o erro do campo CPF
@@ -74,9 +74,46 @@ const useFormValidation = (initialValue = "") => {
     } else {
       setError((prevError) => ({
         ...prevError,
-        cpf: "Por favor, insira um CPF válido com 11 dígitos",
+        cpf: "Por favor, insira um CPF válido.",
       }));
     }
+  };
+
+  const isValidCpf = (cpf) => {
+    console.log("Entrei no isValid   ");
+
+    // Remove caracteres não numéricos
+    const digits = cpf.replace(/\D/g, "");
+
+    // Verifica se o CPF tem 11 dígitos
+    if (digits.length !== 11) return false;
+
+    // Verifica se todos os dígitos são iguais (como 111.111.111-11, o que é inválido)
+    if (/^(\d)\1+$/.test(digits)) return false;
+
+    // Função para calcular o dígito verificador
+    const calculateDigit = (base) => {
+      let sum = 0;
+      for (let i = 0; i < base.length; i++) {
+        sum += base[i] * (base.length + 1 - i);
+      }
+      const remainder = (sum * 10) % 11;
+      return remainder === 10 ? 0 : remainder;
+    };
+
+    // Pega os primeiros 9 dígitos e calcula o primeiro dígito verificador
+    const firstNineDigits = digits.substring(0, 9);
+    const firstVerifier = calculateDigit(firstNineDigits);
+
+    // Pega os primeiros 10 dígitos e calcula o segundo dígito verificador
+    const firstTenDigits = digits.substring(0, 10);
+    const secondVerifier = calculateDigit(firstTenDigits);
+
+    // Verifica se os dígitos calculados batem com os dígitos verificadores informados
+    return (
+      firstVerifier === parseInt(digits[9], 10) &&
+      secondVerifier === parseInt(digits[10], 10)
+    );
   };
 
   const isValidDate = (dateString) => {
