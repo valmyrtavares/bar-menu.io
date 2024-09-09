@@ -7,7 +7,7 @@ import { GlobalContext } from "../../GlobalContext";
 import "../../assets/styles/createCustomer.css";
 import useFormValidation from "../../Hooks/useFormValidation.js";
 // import { Link } from "react-router-dom";
-// import { getBtnData } from "../../api/Api.js";
+import { getBtnData } from "../../api/Api.js";
 // import { FormControlLabel } from "@mui/material";
 import { CheckUser } from "../../Helpers/Helpers.js";
 import Error from "../../component/error.js";
@@ -20,6 +20,7 @@ const CreateCustomer = () => {
   const { form, setForm, error, handleChange } = useFormValidation({
     name: "",
     phone: "",
+    cpf: "",
     birthday: "",
     email: "",
   });
@@ -28,6 +29,8 @@ const CreateCustomer = () => {
     salute: "",
     gift: "",
   });
+
+  React.useEffect(() => {});
 
   React.useEffect(() => {
     if (form.name === "") {
@@ -52,7 +55,12 @@ const CreateCustomer = () => {
         navigate(userId);
       }
     }
+    const fetchSalut = async () => {
+      const data = await getBtnData("welcomeCustomer");
+      setWelcome(data[0]);
+    };
     CheckLogin();
+    fetchSalut();
   }, []);
 
   function handleSubmit(event) {
@@ -139,6 +147,7 @@ const CreateCustomer = () => {
           phone: "",
           birthday: "",
           email: "",
+          cpf: "",
         });
       })
       .then(() => {
@@ -160,8 +169,8 @@ const CreateCustomer = () => {
     <section className="welcome-message">
       <main>
         <h1>Seja bem vindo</h1>
-        <p>{welcome.salute}</p>
-        <p>{welcome.gift}</p>
+        {welcome.salute && <p>{welcome.salute}</p>}
+        {welcome.gift && <p>{welcome.gift}</p>}
       </main>
       {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
       <form onSubmit={handleSubmit} className="m-1">
@@ -180,6 +189,14 @@ const CreateCustomer = () => {
           required
           label="Celular"
           value={form.phone}
+          type="text"
+          onChange={handleChange}
+        />
+        <Input
+          id="cpf"
+          required
+          label="CPF"
+          value={form.cpf}
           type="text"
           onChange={handleChange}
         />

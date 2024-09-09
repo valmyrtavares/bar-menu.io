@@ -34,6 +34,51 @@ const useFormValidation = (initialValue = "") => {
     }
   };
 
+  const handleCpfChange = (value) => {
+    // Remove todos os caracteres não numéricos
+    const digits = value.replace(/\D/g, "");
+
+    // Formata o CPF conforme o usuário digita
+    let formattedCpf = digits;
+
+    // Adiciona o primeiro hífen após 3 dígitos
+    if (digits.length > 3)
+      formattedCpf = `${digits.substring(0, 3)}-${digits.substring(3)}`;
+
+    // Adiciona o segundo hífen após 6 dígitos
+    if (digits.length > 6)
+      formattedCpf = `${digits.substring(0, 3)}-${digits.substring(
+        3,
+        6
+      )}-${digits.substring(6)}`;
+
+    // Adiciona a barra após 9 dígitos
+    if (digits.length > 9)
+      formattedCpf = `${digits.substring(0, 3)}-${digits.substring(
+        3,
+        6
+      )}-${digits.substring(6, 9)}/${digits.substring(9, 11)}`;
+
+    // Atualiza o estado com o CPF formatado
+    setForm((prev) => ({
+      ...prev,
+      cpf: formattedCpf,
+    }));
+
+    // Validação: se o comprimento não for 11, mostra o erro
+    if (digits.length === 11) {
+      setError((prevError) => ({
+        ...prevError,
+        cpf: "", // Limpa o erro do campo CPF
+      }));
+    } else {
+      setError((prevError) => ({
+        ...prevError,
+        cpf: "Por favor, insira um CPF válido com 11 dígitos",
+      }));
+    }
+  };
+
   const isValidDate = (dateString) => {
     const dateParts = dateString.split("-");
     const inputYear = parseInt(dateParts[0], 10);
@@ -82,8 +127,11 @@ const useFormValidation = (initialValue = "") => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
+    console.log("id   ", id);
 
-    if (id === "phone") {
+    if (id === "cpf") {
+      handleCpfChange(value);
+    } else if (id === "phone") {
       handlePhoneChange(value);
     } else if (id === "birthday") {
       handleBirthdayChange(value);
