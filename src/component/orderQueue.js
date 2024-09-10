@@ -3,7 +3,7 @@ import { app } from "../config-firebase/firebase.js";
 import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import { fetchInDataChanges } from "../api/Api.js";
 import "../assets/styles/orderQueue.css";
-import { getFirstFourLetters } from "../Helpers/Helpers.js";
+import { getFirstFourLetters, firstNameClient } from "../Helpers/Helpers.js";
 import { requestSorter } from "../Helpers/Helpers.js";
 import { Link } from "react-router-dom";
 
@@ -42,9 +42,9 @@ const OrderQueue = () => {
             waitingLine.map((item, index) => (
               <div className="border-red">
                 <div key={item.id} className="horizont-line-queue ">
-                  <p>Nome: {item.name}</p>
+                  <p>Nome: {firstNameClient(item.name)}</p>
                   <p>
-                    <span>Pedido</span>: {getFirstFourLetters(item.id)} ;{" "}
+                    <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;{" "}
                   </p>
                 </div>
               </div>

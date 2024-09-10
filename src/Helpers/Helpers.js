@@ -1,6 +1,11 @@
 import React from "react";
 import { getBtnData } from "../api/Api";
 
+export function firstNameClient(nameCustomer) {
+  let firstName = nameCustomer.split(" ")[0];
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+}
+
 export function getFirstFourLetters(inputString, max) {
   return inputString ? inputString.slice(0, max) : "";
 
