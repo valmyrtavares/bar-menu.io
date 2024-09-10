@@ -1,7 +1,7 @@
 import React from "react";
 import "../../assets/styles/customerList.css";
 import { getBtnData } from "../../api/Api";
-import { getFirstFourLetters } from "../../Helpers/Helpers";
+import { getFirstFourLetters, firstNameClient } from "../../Helpers/Helpers";
 
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
@@ -45,19 +45,17 @@ const CustomerList = () => {
       <h1>Lista de Clientes</h1>
       <table striped bordered hover>
         <tr>
-          <th>id</th>
           <th>Nome</th>
-          <th>phone</th>
-          <th>email</th>
+          <th>CPF</th>
+          <th>Celular</th>
         </tr>
         {customerList &&
           customerList.length > 0 &&
           customerList.map((item, index) => (
             <tr>
-              <td>{getFirstFourLetters(item.id, 4)}</td>
-              <td>{getFirstFourLetters(item.name, 8)}</td>
+              <td>{firstNameClient(item.name)}</td>
+              <td>{item.cpf}</td>
               <td>{item.phone}</td>
-              <td>{item.email}</td>
             </tr>
           ))}
       </table>

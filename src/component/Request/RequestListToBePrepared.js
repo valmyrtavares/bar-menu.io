@@ -1,5 +1,5 @@
 import React from "react";
-import { getBtnData } from "../../api/Api.js";
+import { getBtnData, deleteData } from "../../api/Api.js";
 import { app } from "../../config-firebase/firebase.js";
 
 import { fetchInDataChanges } from "../../api/Api.js";
@@ -65,6 +65,10 @@ const RequestListToBePrepared = () => {
       });
   };
   const orderDelivery = (item) => {
+    if (item.name === "anonimo") {
+      deleteData("user", item.idUser);
+    }
+
     item.orderDelivered = true;
     setDoc(doc(db, "request", item.id), item)
       .then(() => {
