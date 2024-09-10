@@ -6,7 +6,11 @@ import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
 import { Link } from "react-router-dom";
-import { getFirstFourLetters, requestSorter } from "../../Helpers/Helpers.js";
+import {
+  getFirstFourLetters,
+  requestSorter,
+  firstNameClient,
+} from "../../Helpers/Helpers.js";
 import RecipeModal from "./RecipeModal";
 import { cardClasses } from "@mui/material";
 
@@ -85,10 +89,10 @@ const RequestListToBePrepared = () => {
             <div className="user-container">
               <div>
                 <p>
-                  <span>Nome</span> {item.name}
+                  <span>Nome</span> {firstNameClient(item.name)}
                 </p>
                 <p>
-                  <span>Pedido</span>: {getFirstFourLetters(item.id)} ;
+                  <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
                 </p>
                 <p>
                   <span>Mesa</span>: 12
