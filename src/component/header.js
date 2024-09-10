@@ -22,9 +22,11 @@ function Header() {
     fetchData();
   }, []);
 
-  const headerClass = location.pathname.includes("/orderqueue")
-    ? "main_header orderqueue"
-    : "main_header";
+  const headerClass =
+    location.pathname.includes("/orderqueue") ||
+    location.pathname.includes("/create-customer")
+      ? "main_header orderqueue"
+      : "main_header";
 
   return (
     <header className={headerClass}>

@@ -171,12 +171,40 @@ const CreateCustomer = () => {
   return (
     <section className="welcome-message">
       <main>
-        <h1>Seja bem vindo</h1>
+        {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
         {welcome.salute && <p>{welcome.salute}</p>}
         {welcome.gift && <p>{welcome.gift}</p>}
       </main>
+      <div className="create-new-customer-btns">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleAnonymousSubmit}
+          ref={anonymousClient}
+        >
+          Não quero deixar meus dados
+        </button>
+      </div>
       {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
       <form onSubmit={handleSubmit} className="m-1">
+        <Input
+          id="cpf"
+          required
+          label="CPF"
+          value={form.cpf}
+          type="text"
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
+
+        {error.cpf && <div className="error-form">{error.cpf}</div>}
+        {clientFinded.length > 0 && cpfModal && (
+          <CpfMessage
+            clientFinded={clientFinded}
+            cpf={form.cpf}
+            setCpfModal={setCpfModal}
+          />
+        )}
         <Input
           id="name"
           required
@@ -196,24 +224,6 @@ const CreateCustomer = () => {
           onChange={handleChange}
         />
         {error.phone && <div className="error-form">{error.phone}</div>}
-        <Input
-          id="cpf"
-          required
-          label="CPF"
-          value={form.cpf}
-          type="text"
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-
-        {error.cpf && <div className="error-form">{error.cpf}</div>}
-        {clientFinded.length > 0 && cpfModal && (
-          <CpfMessage
-            clientFinded={clientFinded}
-            cpf={form.cpf}
-            setCpfModal={setCpfModal}
-          />
-        )}
 
         <Input
           id="birthday"
@@ -235,14 +245,6 @@ const CreateCustomer = () => {
         <div className="create-new-customer-btns">
           <button type="submit" className="btn btn-primary">
             Enviar
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleAnonymousSubmit}
-            ref={anonymousClient}
-          >
-            Não quero deixar meus dados
           </button>
         </div>
       </form>
