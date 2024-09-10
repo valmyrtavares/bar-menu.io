@@ -70,9 +70,9 @@ function App() {
           <Route path="/admin/admin" element={<Admin />} />
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
-          {/* <Route path="/admin/welcome" element={<WelcomeSaluteForm />} /> */}
+          <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
           <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </BrowserRouter>
     </div>
