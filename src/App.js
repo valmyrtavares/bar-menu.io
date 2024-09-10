@@ -32,8 +32,8 @@ import NoLog from "./Forms/Login/NoLog";
 import "./style.css";
 
 function App() {
-  // const basename = "/bar-menu.io";
-  const basename = "/";
+  const basename = "/bar-menu.io";
+  // const basename = "/";
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -71,8 +71,8 @@ function App() {
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
           <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
-          {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
+          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </BrowserRouter>
     </div>
@@ -80,13 +80,3 @@ function App() {
 }
 
 export default App;
-
-//MainMenu    tela principal       /
-//EditFormButton sem dia não existe
-//EditFormButton   editar ambas telas de pratos e botões
-//FormItem adicionar um novo prato
-//Form   Adicionar um novo botão
-//Login é a tela igual a de singup protegida
-// Signup Não existe link diponivel mas a tela já existe
-//Protected vai para a escolha entre o menu administrador e a tela de login
-//Admin vai para menu do administrador
