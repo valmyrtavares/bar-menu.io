@@ -1,7 +1,7 @@
 .main_header nav{
     position: relative;
     width: 100%;
-    max-width: 624px; /* Ajuste conforme necessário */
+    max-width: 100%; /* Ajuste conforme necessário */
     height: auto;
     overflow: hidden;
 }
@@ -20,13 +20,13 @@ transform: translate(-50%, -17%);
 top: 20%;
 }
 
-.main_header nav img{
+.main_header nav img {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 100%;
-    max-height: 100%;
+    top: 34%;
+    left: 33%;
+    transform: translate(-5%, -53%);
+    max-width: 64%;
+    max-height: 62%;
     width: auto;
     height: auto;
 }
