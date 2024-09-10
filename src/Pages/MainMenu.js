@@ -17,6 +17,7 @@ function MainMenu() {
   const [nameClient, serNameClient] = React.useState("");
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
+
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -24,7 +25,6 @@ function MainMenu() {
       const userId = await CheckUser("userMenu");
       navigate(userId);
     }
-
     if (!global.authorizated) {
       ChecLogin();
     }

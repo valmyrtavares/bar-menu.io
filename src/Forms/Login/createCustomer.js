@@ -11,19 +11,22 @@ import { getBtnData } from "../../api/Api.js";
 // import { FormControlLabel } from "@mui/material";
 import { CheckUser } from "../../Helpers/Helpers.js";
 import Error from "../../component/error.js";
+import CpfMessage from "../../component/CpfMessage";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const anonymousClient = React.useRef(null);
+  const [cpfModal, setCpfModal] = React.useState(true);
   const [errorPopup, setErrorPopup] = React.useState(false);
-  const { form, setForm, error, handleChange } = useFormValidation({
-    name: "",
-    phone: "",
-    cpf: "",
-    birthday: "",
-    email: "",
-  });
+  const { form, setForm, error, handleChange, handleBlur, clientFinded } =
+    useFormValidation({
+      name: "",
+      phone: "",
+      cpf: "",
+      birthday: "",
+      email: "",
+    });
 
   const [welcome, setWelcome] = React.useState({
     salute: "",
@@ -200,8 +203,17 @@ const CreateCustomer = () => {
           value={form.cpf}
           type="text"
           onChange={handleChange}
+          onBlur={handleBlur}
         />
+
         {error.cpf && <div className="error-form">{error.cpf}</div>}
+        {clientFinded.length > 0 && cpfModal && (
+          <CpfMessage
+            clientFinded={clientFinded}
+            cpf={form.cpf}
+            setCpfModal={setCpfModal}
+          />
+        )}
 
         <Input
           id="birthday"

@@ -37,3 +37,7 @@
     color:#a11f1f;
     font-weight: 700;
 }
+.welcome-message .cpf-input{
+    width: 80%;
+    margin:0px 10% 
+}

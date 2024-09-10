@@ -27,6 +27,7 @@ import OrderQueue from "./component/orderQueue";
 import RequestList from "./component/Request/RequestList";
 import RecipeDish from "./Forms/recipeDishForm";
 import CustomerList from "./component/Customers/customerList";
+import NoLog from "./Forms/Login/NoLog";
 
 import "./style.css";
 
@@ -62,15 +63,16 @@ function App() {
           /> */}
           <Route path="/admin/sidedishes" element={<AddSideDishesForm />} />
           <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/check-customer-nolog" element={<NoLog />} />
           <Route path="/admin/signup" element={<Signup />} />
           <Route path="/admin" element={<Protected />} />
           <Route path="/admin/signup" element={<Signup />} />
           <Route path="/admin/admin" element={<Admin />} />
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
-          <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
+          {/* <Route path="/admin/welcome" element={<WelcomeSaluteForm />} /> */}
           <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
-          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,0 +1,14 @@
+@import "./variables";
+
+.container-cpf-message{
+    background-color: var(--secundary-bg-color);
+    border:solid 2px var(--btn-color);
+    border-radius: 5%;
+    width: 435px;
+    margin: 10px 10%;
+    position: fixed;
+    top: 20%;
+}
+.container-cpf-message h1 {
+    font-family: var(--title-font-color);
+}

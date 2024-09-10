@@ -1,8 +1,10 @@
 import React from "react";
+import { getBtnData } from "../api/Api";
 
 const useFormValidation = (initialValue = "") => {
   const [form, setForm] = React.useState(initialValue);
   const [error, setError] = React.useState({});
+  const [clientFinded, setClientFinded] = React.useState({});
 
   const handlePhoneChange = (value) => {
     // Remove todos os caracteres não numéricos
@@ -76,6 +78,39 @@ const useFormValidation = (initialValue = "") => {
         ...prevError,
         cpf: "Por favor, insira um CPF válido.",
       }));
+    }
+  };
+
+  const checkCpfRepeated = async (cpf) => {
+    const data = await getBtnData("user");
+    const repeatedCpf = data.some((item) => item.cpf === cpf);
+    if (repeatedCpf) {
+      const customer = data.filter((item) => item.cpf === cpf);
+      setClientFinded(customer);
+    }
+
+    return repeatedCpf;
+  };
+
+  const handleCpfCheck = async (digits) => {
+    if (digits.length > 11) {
+      // Faz a verificação de CPF repetido
+      const isRepeated = await checkCpfRepeated(digits);
+      console.log("sRepeated ", isRepeated);
+
+      if (isRepeated) {
+        // Se o CPF for repetido, mostra o erro
+        setError((prevError) => ({
+          ...prevError,
+          cpf: "Esse número de CPF já foi usado",
+        }));
+      } else {
+        // Se não for repetido, remove o erro de CPF
+        setError((prevError) => ({
+          ...prevError,
+          cpf: "",
+        }));
+      }
     }
   };
 
@@ -182,7 +217,7 @@ const useFormValidation = (initialValue = "") => {
 
   const handleBlur = (e) => {
     const { id, value } = e.target;
-    console.log("value no useForm  ", value);
+    handleCpfCheck(value);
     return value.split(".")[0];
   };
 
@@ -192,6 +227,7 @@ const useFormValidation = (initialValue = "") => {
     handleChange,
     setForm,
     handleBlur,
+    clientFinded,
   };
 };
 export default useFormValidation;

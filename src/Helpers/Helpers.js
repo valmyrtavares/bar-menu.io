@@ -18,7 +18,7 @@ export async function CheckUser(check) {
       return "/create-customer";
     }
   } else {
-    return "/create-customer";
+    return "/admin/check-customer-nolog";
   }
 }
 
