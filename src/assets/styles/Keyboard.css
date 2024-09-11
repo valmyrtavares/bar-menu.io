@@ -1,0 +1,18 @@
+ .character-container{
+    max-width: 324px;
+    border:solid 2px black;
+    justify-items:center ;
+    padding: 5px;
+    gap: 5px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    
+ }
+ .character-container .character{
+    width: 100px;
+    height: 100px;
+    border:solid 1px black;
+    display: grid;
+    place-items: center;
+
+ }

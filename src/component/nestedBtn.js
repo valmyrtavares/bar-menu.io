@@ -15,11 +15,16 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
       const button = buttonRef.current;
       const container = containerRef.current;
 
-      // Rola o contêiner para o botão clicado
-      button.scrollIntoView({
+      // Obtém a posição atual do botão em relação ao topo do contêiner
+      const buttonOffsetTop = button.offsetTop;
+
+      // Define um deslocamento menor manualmente para suavizar a rolagem
+      const offset = 10; // Ajuste esse valor para controlar o quanto você quer rolar
+
+      // Rola o contêiner para uma posição personalizada, movendo menos que o total
+      container.scrollTo({
+        top: buttonOffsetTop - offset, // Subtraia o offset para limitar o quanto ele rola
         behavior: "smooth",
-        block: "start", // Ajusta para que o botão fique visível e também permita ver os itens abaixo
-        inline: "nearest",
       });
     }
   };

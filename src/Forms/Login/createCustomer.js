@@ -12,6 +12,7 @@ import { getBtnData } from "../../api/Api.js";
 import { CheckUser } from "../../Helpers/Helpers.js";
 import Error from "../../component/error.js";
 import CpfMessage from "../../component/CpfMessage";
+import Keyboard from "../../component/Keyboard";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
@@ -32,6 +33,12 @@ const CreateCustomer = () => {
     salute: "",
     gift: "",
   });
+
+  // *****************************IMPLEMENTAÇÃO DO TECLADO VIRTUAL
+
+  // const [forms, setForms] = React.useState({ cpf: "" });
+  const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
+  //*************************************************************** */
 
   React.useEffect(() => {});
 
@@ -168,6 +175,41 @@ const CreateCustomer = () => {
   //   // Adicionalmente, você pode tentar uma abordagem mais direta:
   // };
 
+  // IMPLEMENTANDO TECLADO VIRTUAL  ********************************************************** */
+  // const handleChanges = (e) => {
+  //   const { value } = e.target;
+  //   setForms((prevForm) => ({ ...prevForm, cpf: value }));
+  // };
+
+  const handleFocus = () => {
+    setShowCpfKeyboard(true);
+  };
+
+  // Função chamada quando um número é clicado no teclado
+  const addCharacterToCPF = (char) => {
+    const newValue = form.cpf + char;
+    const syntheticEvent = {
+      target: {
+        id: "cpf",
+        value: newValue,
+      },
+    };
+    handleChange(syntheticEvent);
+  };
+
+  const closeKeyboard = (cpfValue) => {
+    setShowCpfKeyboard(false);
+    const syntheticEvent = {
+      target: {
+        id: "cpf",
+        value: cpfValue,
+      },
+    };
+    handleBlur(syntheticEvent);
+  };
+
+  //******************************************************************
+
   return (
     <section className="welcome-message">
       <main>
@@ -194,8 +236,17 @@ const CreateCustomer = () => {
           value={form.cpf}
           type="text"
           onChange={handleChange}
+          onFocus={handleFocus}
           onBlur={handleBlur}
         />
+        {showCpfKeyboard && (
+          <Keyboard
+            handleBlur={handleBlur}
+            addCharacter={addCharacterToCPF}
+            setShowCpfKeyboard={setShowCpfKeyboard}
+            closeKeyboard={() => closeKeyboard(form.cpf)}
+          />
+        )}
 
         {error.cpf && <div className="error-form">{error.cpf}</div>}
         {clientFinded.length > 0 && cpfModal && (
