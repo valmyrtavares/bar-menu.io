@@ -187,7 +187,25 @@ const CreateCustomer = () => {
 
   // Função chamada quando um número é clicado no teclado
   const addCharacterToCPF = (char) => {
+    if (char === "clearField") {
+      // Limpar o campo CPF
+      setForm((prev) => ({ ...prev, cpf: "" }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: "cpf",
+          value: "", // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
+    // Adicionar o novo caractere ao valor atual do CPF
     const newValue = form.cpf + char;
+
+    // Criar e passar o evento sintético para handleChange com o novo valor
     const syntheticEvent = {
       target: {
         id: "cpf",

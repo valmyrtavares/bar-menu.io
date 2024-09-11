@@ -42,6 +42,12 @@ const Keyboard = ({ addCharacter, closeKeyboard }) => {
         <div className="character" onClick={closeKeyboard}>
           Enter
         </div>
+        <div
+          className="character"
+          onClick={() => handleCharacterClick("clearField")}
+        >
+          Limpar Campo
+        </div>
       </div>
     </div>
   );
