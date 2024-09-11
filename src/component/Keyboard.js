@@ -1,9 +1,9 @@
 import React from "react";
 import "../assets/styles/Keyboard.css";
 
-const Keyboard = ({ addCharacter, closeKeyboard }) => {
+const Keyboard = ({ addCharacter, closeKeyboard, id }) => {
   const handleCharacterClick = (char) => {
-    addCharacter(char);
+    addCharacter(char, id);
   };
 
   return (

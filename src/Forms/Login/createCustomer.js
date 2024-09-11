@@ -38,6 +38,9 @@ const CreateCustomer = () => {
 
   // const [forms, setForms] = React.useState({ cpf: "" });
   const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
+  const [showPhoneKeyboard, setShowPhoneKeyboard] = React.useState(false);
+  // const [showBirthdateKeyboard, setShowBirthdateKeyboard] =
+  //   React.useState(false);
   //*************************************************************** */
 
   React.useEffect(() => {});
@@ -114,25 +117,6 @@ const CreateCustomer = () => {
     }
   }
 
-  // function handleChange({ target }) {
-  //   const { id, value } = target;
-
-  //   // Chama handlePhoneChange para formatar e validar em tempo real
-  //   if (id === "phone") {
-  //     handlePhoneChange(value); // Formata o telefone em tempo real
-  //     setForm((prevForm) => ({
-  //       ...prevForm,
-  //       [id]: value, // Atualiza o valor de phone no estado do formulário, se necessário
-  //     }));
-  //   }
-
-  //   // Atualiza o estado do formulário com o valor formatado
-  //   setForm((prevForm) => ({
-  //     ...prevForm,
-  //     [id]: value,
-  //   }));
-  // }
-
   function handleAnonymousSubmit(event) {
     event.preventDefault();
 
@@ -167,34 +151,37 @@ const CreateCustomer = () => {
         console.log(error);
       });
   }
-  // const handleFocus = () => {
-  //   // Tenta abrir o teclado virtual
-  //   const oskPath = "C:\\Windows\\System32\\osk.exe";
-  //   window.open(oskPath); // Tenta abrir o teclado virtual
-
-  //   // Adicionalmente, você pode tentar uma abordagem mais direta:
-  // };
 
   // IMPLEMENTANDO TECLADO VIRTUAL  ********************************************************** */
-  // const handleChanges = (e) => {
-  //   const { value } = e.target;
-  //   setForms((prevForm) => ({ ...prevForm, cpf: value }));
-  // };
 
-  const handleFocus = () => {
-    setShowCpfKeyboard(true);
+  const handleFocus = (e) => {
+    const { id, value } = e.target;
+    if (id === "cpf") {
+      setShowCpfKeyboard(true);
+      setShowPhoneKeyboard(false);
+      // setShowBirthdateKeyboard(false);
+    } else if (id === "phone") {
+      setShowCpfKeyboard(false);
+      setShowPhoneKeyboard(true);
+      // setShowBirthdateKeyboard(false);
+    }
+    //  else if (id === "birthday") {
+    //   setShowBirthdateKeyboard(true);
+    //   setShowCpfKeyboard(false);
+    //    setShowPhoneKeyboard(false);
+    // }
   };
 
   // Função chamada quando um número é clicado no teclado
-  const addCharacterToCPF = (char) => {
+  const addCharacter = (char, id) => {
     if (char === "clearField") {
       // Limpar o campo CPF
-      setForm((prev) => ({ ...prev, cpf: "" }));
+      setForm((prev) => ({ ...prev, id: "" }));
 
       // Criar e passar o evento sintético para handleChange com o campo vazio
       const syntheticEvent = {
         target: {
-          id: "cpf",
+          id: id,
           value: "", // Campo vazio
         },
       };
@@ -202,28 +189,59 @@ const CreateCustomer = () => {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
+    let newValue = "";
     // Adicionar o novo caractere ao valor atual do CPF
-    const newValue = form.cpf + char;
+    if (id === "phone") {
+      newValue = form.phone + char;
+    } else if (id === "cpf") {
+      newValue = form.cpf + char;
+    }
+    // else if (id === "birthday") {
+    //   newValue = form.birthday + char;
+    // }
 
     // Criar e passar o evento sintético para handleChange com o novo valor
     const syntheticEvent = {
       target: {
-        id: "cpf",
+        id: id,
         value: newValue,
       },
     };
+
     handleChange(syntheticEvent);
   };
 
-  const closeKeyboard = (cpfValue) => {
-    setShowCpfKeyboard(false);
-    const syntheticEvent = {
-      target: {
-        id: "cpf",
-        value: cpfValue,
-      },
-    };
-    handleBlur(syntheticEvent);
+  const closeKeyboard = (cpfValue, id) => {
+    if (id === "cpf") {
+      setShowCpfKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "cpf",
+          value: cpfValue,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+    if (id === "phone") {
+      setShowPhoneKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "phone",
+          value: cpfValue,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+    // if (id === "birthday") {
+    //   setShowBirthdateKeyboard(false);
+    //   const syntheticEvent = {
+    //     target: {
+    //       id: "birthday",
+    //       value: cpfValue,
+    //     },
+    //   };
+    //   handleBlur(syntheticEvent);
+    // }
   };
 
   //******************************************************************
@@ -260,9 +278,9 @@ const CreateCustomer = () => {
         {showCpfKeyboard && (
           <Keyboard
             handleBlur={handleBlur}
-            addCharacter={addCharacterToCPF}
-            setShowCpfKeyboard={setShowCpfKeyboard}
-            closeKeyboard={() => closeKeyboard(form.cpf)}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.cpf, "cpf")}
+            id="cpf"
           />
         )}
 
@@ -290,8 +308,18 @@ const CreateCustomer = () => {
           label="Celular"
           value={form.phone}
           type="text"
+          onFocus={handleFocus}
           onChange={handleChange}
         />
+
+        {showPhoneKeyboard && (
+          <Keyboard
+            handleBlur={handleBlur}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.cpf, "phone")}
+            id="phone"
+          />
+        )}
         {error.phone && <div className="error-form">{error.phone}</div>}
 
         <Input
@@ -300,9 +328,18 @@ const CreateCustomer = () => {
           label="Aniversário"
           value={form.birthday}
           type="date"
+          onFocus={handleFocus}
           onChange={handleChange}
         />
         {error.birthday && <div className="error-form">{error.birthday}</div>}
+        {/* {showBirthdateKeyboard && (
+          <Keyboard
+            handleBlur={handleBlur}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.cpf, "phone")}
+            id="birthday"
+          />
+        )} */}
         <Input
           id="email"
           required
