@@ -13,6 +13,7 @@ import { CheckUser } from "../../Helpers/Helpers.js";
 import Error from "../../component/error.js";
 import CpfMessage from "../../component/CpfMessage";
 import Keyboard from "../../component/Keyboard";
+import TextKeyboard from "../../component/Textkeyboard.js";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
@@ -39,8 +40,7 @@ const CreateCustomer = () => {
   // const [forms, setForms] = React.useState({ cpf: "" });
   const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
   const [showPhoneKeyboard, setShowPhoneKeyboard] = React.useState(false);
-  // const [showBirthdateKeyboard, setShowBirthdateKeyboard] =
-  //   React.useState(false);
+  const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
   //*************************************************************** */
 
   React.useEffect(() => {});
@@ -159,9 +159,15 @@ const CreateCustomer = () => {
     if (id === "cpf") {
       setShowCpfKeyboard(true);
       setShowPhoneKeyboard(false);
+      setShowNameKeyboard(false);
     } else if (id === "phone") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
+      setShowNameKeyboard(false);
+    } else if (id === "name") {
+      setShowCpfKeyboard(false);
+      setShowPhoneKeyboard(false);
+      setShowNameKeyboard(true);
     }
   };
 
@@ -188,10 +194,9 @@ const CreateCustomer = () => {
       newValue = form.phone + char;
     } else if (id === "cpf") {
       newValue = form.cpf + char;
+    } else if (id === "name") {
+      newValue = form.name + char;
     }
-    // else if (id === "birthday") {
-    //   newValue = form.birthday + char;
-    // }
 
     // Criar e passar o evento sintético para handleChange com o novo valor
     const syntheticEvent = {
@@ -220,6 +225,16 @@ const CreateCustomer = () => {
       const syntheticEvent = {
         target: {
           id: "phone",
+          value: cpfValue,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+    if (id === "name") {
+      setShowNameKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "name",
           value: cpfValue,
         },
       };
@@ -266,7 +281,6 @@ const CreateCustomer = () => {
             id="cpf"
           />
         )}
-
         {error.cpf && <div className="error-form">{error.cpf}</div>}
         {clientFinded.length > 0 && cpfModal && (
           <CpfMessage
@@ -281,10 +295,16 @@ const CreateCustomer = () => {
           label="Nome"
           value={form.name}
           type="text"
-          // onFocus={handleFocus}
+          onFocus={handleFocus}
           onChange={handleChange}
         />
-
+        {showNameKeyboard && (
+          <TextKeyboard
+            addCharacter={addCharacter}
+            id="name"
+            closeKeyboard={() => closeKeyboard(form.name, "name")}
+          />
+        )}
         <Input
           id="phone"
           required
@@ -294,7 +314,6 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-
         {showPhoneKeyboard && (
           <Keyboard
             handleBlur={handleBlur}
@@ -304,7 +323,6 @@ const CreateCustomer = () => {
           />
         )}
         {error.phone && <div className="error-form">{error.phone}</div>}
-
         <Input
           id="birthday"
           required
