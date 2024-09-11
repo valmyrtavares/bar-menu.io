@@ -5,16 +5,18 @@ import "../../assets/styles/createCustomer.css";
 import { useNavigate } from "react-router-dom";
 import { getBtnData } from "../../api/Api.js";
 import { GlobalContext } from "../../GlobalContext";
+import Keyboard from "../../component/Keyboard";
 // import useLocalStorage from "../../Hooks/useLocalStorage.js";
 
 const NoLog = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
+  const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
   //   const [recoveredClientStore, setRecoveredClientStore] = useLocalStorage(
   //     "userMenu",
   //     null
   //   );
-  const { form, setForm, error, handleChange } = useFormValidation({
+  const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
     name: "",
     phone: "",
     cpf: "",
@@ -42,21 +44,60 @@ const NoLog = () => {
       navigate("/create-customer");
     }
   };
-  //   React.useEffect(() => {
-  //     if (recoveredClientStore !== null) {
-  //       console.log("RecoveredClientStore atualizado:", recoveredClientStore);
-  //     }
-  //   }, [recoveredClientStore]);
+
+  const handleFocus = (e) => {
+    const { id, value } = e.target;
+    if (id === "cpf") {
+      setShowCpfKeyboard(true);
+    }
+  };
+
+  // Função chamada quando um número é clicado no teclado
+  const addCharacter = (char, id) => {
+    if (char === "clearField") {
+      // Limpar o campo CPF
+      setForm((prev) => ({ ...prev, id: "" }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: id,
+          value: "", // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
+    const newValue = form.cpf + char;
+
+    // Criar e passar o evento sintético para handleChange com o novo valor
+    const syntheticEvent = {
+      target: {
+        id: id,
+        value: newValue,
+      },
+    };
+
+    handleChange(syntheticEvent);
+  };
+
+  const closeKeyboard = (cpfValue, id) => {
+    if (id === "cpf") {
+      setShowCpfKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "cpf",
+          value: cpfValue,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+  };
 
   return (
     <div className="welcome-message">
-      <p>
-        {" "}
-        Não achamos o seu registro neste celular, pode ser que esteja com um
-        aparelho novo ou ou simplesmente perdido o nosso registro. Digite o seu
-        aproveitar o seu antigo cadastro e CPF ou se é um novo cliente faça o
-        seu registro para que possamos melhor serví-lo
-      </p>
+      <h3> Não achamos o seu registro. Digite o seu CPF</h3>
       <div className="cpf-input">
         <Input
           id="cpf"
@@ -65,7 +106,17 @@ const NoLog = () => {
           value={form.cpf}
           type="text"
           onChange={handleChange}
+          onFocus={handleFocus}
+          // onBlur={handleBlur}
         />
+        {showCpfKeyboard && (
+          <Keyboard
+            // handleBlur={handleBlur}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.cpf, "cpf")}
+            id="cpf"
+          />
+        )}
       </div>
       {error.cpf && <div className="error-form">{error.cpf}</div>}
       <div className="create-new-customer-btns">

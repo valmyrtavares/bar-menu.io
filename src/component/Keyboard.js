@@ -36,17 +36,18 @@ const Keyboard = ({ addCharacter, closeKeyboard, id }) => {
         <div className="character" onClick={() => handleCharacterClick("9")}>
           9
         </div>
-        <div className="character" onClick={() => handleCharacterClick("0")}>
-          0
-        </div>
-        <div className="character" onClick={closeKeyboard}>
-          Enter
-        </div>
         <div
           className="character"
           onClick={() => handleCharacterClick("clearField")}
         >
-          Limpar Campo
+          Limpar
+        </div>
+        <div className="character" onClick={() => handleCharacterClick("0")}>
+          0
+        </div>
+
+        <div className="character" onClick={closeKeyboard}>
+          Enter
         </div>
       </div>
     </div>

@@ -159,17 +159,10 @@ const CreateCustomer = () => {
     if (id === "cpf") {
       setShowCpfKeyboard(true);
       setShowPhoneKeyboard(false);
-      // setShowBirthdateKeyboard(false);
     } else if (id === "phone") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
-      // setShowBirthdateKeyboard(false);
     }
-    //  else if (id === "birthday") {
-    //   setShowBirthdateKeyboard(true);
-    //   setShowCpfKeyboard(false);
-    //    setShowPhoneKeyboard(false);
-    // }
   };
 
   // Função chamada quando um número é clicado no teclado
@@ -232,16 +225,6 @@ const CreateCustomer = () => {
       };
       handleBlur(syntheticEvent);
     }
-    // if (id === "birthday") {
-    //   setShowBirthdateKeyboard(false);
-    //   const syntheticEvent = {
-    //     target: {
-    //       id: "birthday",
-    //       value: cpfValue,
-    //     },
-    //   };
-    //   handleBlur(syntheticEvent);
-    // }
   };
 
   //******************************************************************
