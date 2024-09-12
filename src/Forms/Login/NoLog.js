@@ -69,7 +69,35 @@ const NoLog = () => {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    const newValue = form.cpf + char;
+    if (char === "Bcksp") {
+      // Limpar o campo CPF
+      setForm((prev) => ({
+        ...prev,
+        [id]: prev[id].slice(0, -1), // Remove a última letra
+      }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: id,
+          value: form[id].slice(0, -1), // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
+    let newValue = "";
+    // Adicionar o novo caractere ao valor atual do CPF
+    if (id === "phone") {
+      newValue = form.phone + char;
+    } else if (id === "cpf") {
+      newValue = form.cpf + char;
+    } else if (id === "name") {
+      newValue = form.name + char;
+    } else if (id === "email") {
+      newValue = form.email + char;
+    }
 
     // Criar e passar o evento sintético para handleChange com o novo valor
     const syntheticEvent = {
