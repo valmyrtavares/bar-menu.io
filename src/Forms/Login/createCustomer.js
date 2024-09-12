@@ -41,6 +41,7 @@ const CreateCustomer = () => {
   const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
   const [showPhoneKeyboard, setShowPhoneKeyboard] = React.useState(false);
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
+  const [showEmailKeyboard, setShowEmailKeyboard] = React.useState(false);
   //*************************************************************** */
 
   React.useEffect(() => {});
@@ -160,14 +161,22 @@ const CreateCustomer = () => {
       setShowCpfKeyboard(true);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
+      setShowEmailKeyboard(false);
     } else if (id === "phone") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
       setShowNameKeyboard(false);
+      setShowEmailKeyboard(false);
     } else if (id === "name") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(true);
+      setShowEmailKeyboard(false);
+    } else if (id === "email") {
+      setShowCpfKeyboard(false);
+      setShowPhoneKeyboard(false);
+      setShowNameKeyboard(false);
+      setShowEmailKeyboard(true);
     }
   };
 
@@ -196,6 +205,8 @@ const CreateCustomer = () => {
       newValue = form.cpf + char;
     } else if (id === "name") {
       newValue = form.name + char;
+    } else if (id === "email") {
+      newValue = form.email + char;
     }
 
     // Criar e passar o evento sintético para handleChange com o novo valor
@@ -209,13 +220,13 @@ const CreateCustomer = () => {
     handleChange(syntheticEvent);
   };
 
-  const closeKeyboard = (cpfValue, id) => {
+  const closeKeyboard = (Value, id) => {
     if (id === "cpf") {
       setShowCpfKeyboard(false);
       const syntheticEvent = {
         target: {
           id: "cpf",
-          value: cpfValue,
+          value: Value,
         },
       };
       handleBlur(syntheticEvent);
@@ -225,7 +236,7 @@ const CreateCustomer = () => {
       const syntheticEvent = {
         target: {
           id: "phone",
-          value: cpfValue,
+          value: Value,
         },
       };
       handleBlur(syntheticEvent);
@@ -235,7 +246,17 @@ const CreateCustomer = () => {
       const syntheticEvent = {
         target: {
           id: "name",
-          value: cpfValue,
+          value: Value,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+    if (id === "email") {
+      setShowNameKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "email",
+          value: Value,
         },
       };
       handleBlur(syntheticEvent);
@@ -347,8 +368,16 @@ const CreateCustomer = () => {
           label="Email"
           value={form.email}
           type="email"
+          onFocus={handleFocus}
           onChange={handleChange}
         />
+        {showEmailKeyboard && (
+          <TextKeyboard
+            addCharacter={addCharacter}
+            id="email"
+            closeKeyboard={() => closeKeyboard(form.name, "email")}
+          />
+        )}
         <div className="create-new-customer-btns">
           <button type="submit" className="btn btn-primary">
             Enviar
