@@ -24,7 +24,7 @@ top: 20%;
     position: absolute;
     top: 34%;
     left: 33%;
-    transform: translate(-5%, -53%);
+    transform: translate(36%, -53%);
     max-width: 64%;
     max-height: 62%;
     width: auto;
@@ -33,6 +33,6 @@ top: 20%;
 .main_header nav::after{
     content: '';
     display: block;
-    padding-bottom: 55%;
+    padding-bottom: 25%;
 }
 
