@@ -1,20 +1,26 @@
-.text-keyboard-container{
+@import 'variables';
+.text-keyboard-line-container{
     margin:auto;
      max-width: 800px;
-     border:solid 2px black;
+     border:solid 2px var( --secundary-bg-color);
      justify-items:center ;
      padding: 5px;
      gap: 5px;
      display: grid;
-     grid-template-columns: repeat(auto-fill, 50px);
+     grid-auto-flow: column;
+     grid-auto-columns: min-content;;
+     justify-content: center;
      
      
   }
-  .text-keyboard-container .text-character{
+  .text-keyboard-line-container .text-character{
      width: 50px;
      height: 50px;    
      display: grid;
-     border:solid 1px red;
+     background-color: var(--btn-color);
      place-items: center;
  
+  }
+  .space{
+   width: 100px !important;
   }
