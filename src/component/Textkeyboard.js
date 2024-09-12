@@ -151,7 +151,7 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
         </div>
         <div
           className="text-character"
-          onClick={() => handleCharacterClick("p")}
+          onClick={() => handleCharacterClick("Bcksp")}
         >
           Bcksp
         </div>

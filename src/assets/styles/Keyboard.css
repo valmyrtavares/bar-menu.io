@@ -17,3 +17,10 @@
     place-items: center;
 
  }
+
+ .character-container .bcksp {
+   grid-column: span 3; /* O item ocupa 3 colunas */
+   justify-self: center; /* Centraliza o item dentro das 3 colunas */
+   width: 250px; /* Largura personalizada para o item */
+   height: 40px; /* Altura do item */
+ }

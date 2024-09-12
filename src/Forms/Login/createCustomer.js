@@ -197,6 +197,24 @@ const CreateCustomer = () => {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
+    if (char === "Bcksp") {
+      // Limpar o campo CPF
+      setForm((prev) => ({
+        ...prev,
+        [id]: prev[id].slice(0, -1), // Remove a última letra
+      }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: id,
+          value: form[id].slice(0, -1), // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
     let newValue = "";
     // Adicionar o novo caractere ao valor atual do CPF
     if (id === "phone") {
