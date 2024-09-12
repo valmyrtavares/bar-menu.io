@@ -83,7 +83,12 @@ const DishesModal = ({ item, setModal }) => {
     const selectedItem = item.sideDishesElementList[id];
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
-    setItemOnScreen(selectedItem.sideDishes);
+    setItemOnScreen({
+      name: selectedItem.sideDishes,
+      price: selectedItem.price,
+    });
+    console.log("nome   ", selectedItem.sideDishes);
+    console.log("preço   ", selectedItem.price);
   };
 
   //Check number of side dishes to disabled select
@@ -165,7 +170,7 @@ const DishesModal = ({ item, setModal }) => {
 
     const oneSideDishe = item.sideDishesElementList.filter(
       //Seleciona o objeto
-      (item) => item.sideDishes == itemSelected
+      (item) => item.sideDishes == itemSelected.name
     );
     const nameOnScreen = sideDishesListOnScreen.filter(
       (item) => item != itemSelected
@@ -261,7 +266,7 @@ const DishesModal = ({ item, setModal }) => {
           {sideDishesListOnScreen &&
             sideDishesListOnScreen.map((item, index) => (
               <div className="side-dishe">
-                <p>{item}</p>{" "}
+                <p>{item.name}</p> <p> {item.price},00</p>{" "}
                 <button
                   type="button"
                   className="btn-close-side-dishes"
