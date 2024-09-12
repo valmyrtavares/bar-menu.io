@@ -5,6 +5,7 @@ export const GlobalContext = React.createContext();
 export const GlobalStorage = ({ children }) => {
   const [image, setImage] = React.useState("");
   const [id, setId] = React.useState("");
+  const [isToten, setIsToten] = React.useState(null);
   const [authorizated, setAuthorizated] = React.useState(false);
   const [styles, setStyles] = React.useState({
     btnColor: "#b02121",
@@ -27,6 +28,8 @@ export const GlobalStorage = ({ children }) => {
         setStyles,
         authorizated,
         setAuthorizated,
+        setIsToten,
+        isToten,
       }}
     >
       {children}

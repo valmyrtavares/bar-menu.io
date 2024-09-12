@@ -42,9 +42,8 @@ const CreateCustomer = () => {
   const [showPhoneKeyboard, setShowPhoneKeyboard] = React.useState(false);
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
   const [showEmailKeyboard, setShowEmailKeyboard] = React.useState(false);
-  //*************************************************************** */
 
-  React.useEffect(() => {});
+  //*************************************************************** */
 
   React.useEffect(() => {
     if (form.name === "") {
@@ -297,7 +296,7 @@ const CreateCustomer = () => {
           onClick={handleAnonymousSubmit}
           ref={anonymousClient}
         >
-          Não quero deixar meus dados
+          Continuar sem os meus dados
         </button>
       </div>
       {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
@@ -312,7 +311,7 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
-        {showCpfKeyboard && (
+        {showCpfKeyboard && global.isToten && (
           <Keyboard
             handleBlur={handleBlur}
             addCharacter={addCharacter}
@@ -337,7 +336,7 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-        {showNameKeyboard && (
+        {showNameKeyboard && global.isToten && (
           <TextKeyboard
             addCharacter={addCharacter}
             id="name"
@@ -353,7 +352,7 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-        {showPhoneKeyboard && (
+        {showPhoneKeyboard && global.isToten && (
           <Keyboard
             handleBlur={handleBlur}
             addCharacter={addCharacter}
@@ -372,14 +371,7 @@ const CreateCustomer = () => {
           onChange={handleChange}
         />
         {error.birthday && <div className="error-form">{error.birthday}</div>}
-        {/* {showBirthdateKeyboard && (
-          <Keyboard
-            handleBlur={handleBlur}
-            addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, "phone")}
-            id="birthday"
-          />
-        )} */}
+
         <Input
           id="email"
           required
@@ -389,7 +381,7 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-        {showEmailKeyboard && (
+        {showEmailKeyboard && global.isToten && (
           <TextKeyboard
             addCharacter={addCharacter}
             id="email"

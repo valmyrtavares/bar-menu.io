@@ -19,6 +19,10 @@ function Header() {
         console.error("Error fetching data", error);
       }
     };
+    if (localStorage.hasOwnProperty("isToten")) {
+      const toten = JSON.parse(localStorage.getItem("isToten"));
+      if (toten) global.setIsToten(true);
+    }
     fetchData();
   }, []);
 

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getBtnData } from "../../api/Api.js";
 import { GlobalContext } from "../../GlobalContext";
 import Keyboard from "../../component/Keyboard";
+
 // import useLocalStorage from "../../Hooks/useLocalStorage.js";
 
 const NoLog = () => {
@@ -137,7 +138,7 @@ const NoLog = () => {
           onFocus={handleFocus}
           // onBlur={handleBlur}
         />
-        {showCpfKeyboard && (
+        {showCpfKeyboard && global.isToten && (
           <Keyboard
             // handleBlur={handleBlur}
             addCharacter={addCharacter}

@@ -155,6 +155,12 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
         >
           Bcksp
         </div>
+        <div
+          className="text-character"
+          onClick={() => handleCharacterClick(".")}
+        >
+          .
+        </div>
       </div>
       <div className="text-keyboard-line-container">
         <div
