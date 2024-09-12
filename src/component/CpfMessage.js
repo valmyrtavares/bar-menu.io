@@ -18,6 +18,9 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
     navigate("/");
     setCpfModal(false);
   };
+  const backToCreateProfile = () => {
+    setCpfModal(false);
+  };
 
   return (
     <div className="container-cpf-message">
@@ -25,7 +28,9 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
       <p> Confirme seu número de cpf e vamos em frente</p>
       <h3>{cpf}</h3>
       <div className="create-new-customer-btns">
-        <button className="btn btn-primary">Corrigir</button>
+        <button className="btn btn-primary" onClick={backToCreateProfile}>
+          Corrigir
+        </button>
         <button
           onClick={startService}
           type="button"

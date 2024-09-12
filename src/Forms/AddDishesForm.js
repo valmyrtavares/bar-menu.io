@@ -140,25 +140,25 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(form);
-    // if (!dataObj) {
-    //   addDoc(collection(db, "item"), form)
-    //     .then((docRef) => {
-    //       navigate("/");
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // } else {
-    //   setDoc(doc(db, "item", dataObj.id), form)
-    //     .then(() => {
-    //       navigate("/");
-    //       console.log("Document successfully updated !");
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // }
+
+    if (!dataObj) {
+      addDoc(collection(db, "item"), form)
+        .then((docRef) => {
+          navigate("/");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      setDoc(doc(db, "item", dataObj.id), form)
+        .then(() => {
+          navigate("/");
+          console.log("Document successfully updated !");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
 
   const openModalSideDishes = () => {
