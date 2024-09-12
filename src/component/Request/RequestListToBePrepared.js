@@ -145,7 +145,7 @@ const RequestListToBePrepared = () => {
                     <div className="sideDishes-list">
                       {item.sideDishes && item.sideDishes.length > 0 ? (
                         item.sideDishes.map((item, index) => (
-                          <p key={index}>{item},</p>
+                          <p key={index}>{item.name},</p>
                         ))
                       ) : (
                         <p>Não tem acompanhamento</p>
