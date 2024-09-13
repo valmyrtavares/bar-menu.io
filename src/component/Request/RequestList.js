@@ -13,6 +13,10 @@ const RequestList = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
+      console.log("data   ", data);
+
+      debugger;
+
       setRequestDoneList(data);
     });
     return () => unsubscribe();
@@ -59,7 +63,7 @@ const RequestList = () => {
                       {dishe.sideDishes &&
                         dishe.sideDishes.map((sidedishe, index) => (
                           <div>
-                            <p>{sidedishe}</p>
+                            <p>{sidedishe.name}</p>
                           </div>
                         ))}
                     </div>
