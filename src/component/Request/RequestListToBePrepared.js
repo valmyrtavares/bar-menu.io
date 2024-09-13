@@ -13,11 +13,14 @@ import {
 } from "../../Helpers/Helpers.js";
 import RecipeModal from "./RecipeModal";
 import { cardClasses } from "@mui/material";
+import DefaultComumMessage from "../Messages/DefaultComumMessage";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
+  const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
+
   const [recipeModal, setRecipeModal] = React.useState({
     openModal: false,
     id: "",
@@ -39,6 +42,20 @@ const RequestListToBePrepared = () => {
     requestList = requestList.filter((item) => item.orderDelivered == false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
+  };
+
+  const handleDeleteRequest = (id) => {
+    deleteData("request", id);
+    console.log("Pedido excluído:", id);
+    setShowDefaultMessage(false); // Fecha o modal após excluir
+  };
+
+  const openModal = () => setShowDefaultMessage(true);
+
+  const closeModal = () => {
+    console.log("Estou chegando   ");
+
+    setShowDefaultMessage(false);
   };
 
   const RequestDone = (item) => {
@@ -107,6 +124,18 @@ const RequestListToBePrepared = () => {
                 <h2>Valor final {item.finalPriceRequest}</h2>
               </div>
               <div className="btn-status">
+                <button onClick={openModal} className="pendent">
+                  Cancelar pedido
+                </button>
+                <div>
+                  {ShowDefaultMessage && (
+                    <DefaultComumMessage
+                      msg="Você está prestes a excluir esse pedido"
+                      onClose={closeModal}
+                      onConfirm={() => handleDeleteRequest(item.id)}
+                    />
+                  )}
+                </div>
                 <button
                   className={item.paymentDone ? "done" : "pendent"}
                   onClick={() => changeStatusPaid(item)}
@@ -141,6 +170,7 @@ const RequestListToBePrepared = () => {
                   )}
                   <div>
                     <h5>{item.name}</h5>
+                    <p>{getFirstFourLetters(item.id, 4)}</p>
                     <h5>Acompanhamento</h5>
                     <div className="sideDishes-list">
                       {item.sideDishes && item.sideDishes.length > 0 ? (

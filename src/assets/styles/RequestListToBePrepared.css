@@ -97,9 +97,11 @@ flex-direction: column;
 justify-content: center;
 gap: 10px; 
 }
-.request-item div h5{
- text-align: center;
+.request-item div h5,
+.request-item div p {
+  text-align: center;
 }
+
 .request-item div .sideDishes-list{
     display:flex;
     flex-direction: row;

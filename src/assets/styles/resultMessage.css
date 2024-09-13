@@ -1,0 +1,29 @@
+@import "variables";
+.default-comum-message-container{
+max-width: 400px;
+text-align: center;
+border:solid 2px red;
+padding:10px;
+background-color: var(--secundary-bg-color);
+position: fixed;
+left: 36%;
+}
+.default-comum-message-container h1{
+    color:#d72b2b;
+}
+.default-comum-message-container .container-button{
+    display: flex;
+    justify-content: space-between;
+}
+.default-comum-message-container .container-button button{
+    width: 80%;
+    border-radius: 10px;
+    border:none;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
