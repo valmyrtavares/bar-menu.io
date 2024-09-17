@@ -1,0 +1,40 @@
+/* Inicialmente, o popup está oculto com escala zero */
+.popup {
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    background-color: blueviolet;
+    border:solid 2px blue;
+  }
+  
+  /* Quando o popup está visível, ele cresce */
+  .popup.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  /* Keyframes para controlar a animação */
+  @keyframes popupAnimation {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    30% {
+      opacity: 1;
+      transform: scale(1.4); /* Leve crescimento além de 100% */
+    }
+    90% {
+      opacity: 1;
+      transform: scale(1); /* Volta para o tamanho original */
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0); /* Diminui de volta e desaparece */
+    }
+  }
+  
+  /* Aplicando a animação com tempo configurado */
+  .popup-animate {
+    animation: popupAnimation 3s ease-in-out; /* 3 segundos, ajuste conforme necessário */
+  }
+  

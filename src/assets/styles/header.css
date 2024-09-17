@@ -8,7 +8,8 @@
 .main_header.orderqueue nav {
     /* Estilos específicos para o header quando a URL contém /orderqueue */
     max-width: 650px; 
-    max-height: 145px;
+    max-height: 100px;
+   
      /* Exemplo: tamanho reduzido do logotipo */
     /* Adicione outros estilos conforme necessário */
   }
@@ -16,7 +17,7 @@
 
   .main_header.orderqueue nav img{
 max-width: 150px;
-transform: translate(-50%, -17%);
+transform: translate(337%, -17%);
 top: 20%;
 }
 
@@ -35,4 +36,5 @@ top: 20%;
     display: block;
     padding-bottom: 25%;
 }
+
 

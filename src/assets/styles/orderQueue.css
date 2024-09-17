@@ -13,22 +13,23 @@
 text-align: center;
 font-family: var(--title-font);
 color: var(--title-font-color);
-font-size:25px;
+font-size:33px;
 }
 
 .order-queue-container .list-columns h3{
-    font-size:13px;
+    font-size:23px;
     margin:0px;
 }
 
 .order-queue-container .list-columns .horizont-line-queue {
     display:flex; 
     justify-content: space-around;
+    padding: 5px;
+    margin-bottom: 3px;
    
 }
 .order-queue-container .list-columns .horizont-line-queue p{
-    font-size: 12px;
-    
+    font-size: 20px;    
 }
 
 .order-queue-container p{
@@ -58,8 +59,16 @@ font-size:15px;
 
 .order-queue-container .list-columns .border-red{
     border: solid 2px red;
+    margin: 5px;
 }
 
 .order-queue-container .list-columns .border-green{
-    border: solid 2px green
+    border: solid 2px green;
+    margin: 5px;
 }
+
+/* *********************ANIMAÇÃO **************************** */
+
+/* Animação para itens que estão saindo da lista */
+
+  

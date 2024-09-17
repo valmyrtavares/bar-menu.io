@@ -36,6 +36,5 @@ export const requestSorter = (ObjList) => {
     // Ordena em ordem decrescente
     return dateB - dateA;
   });
-  console.log("sortedList   ", sortedList);
   return sortedList;
 };
