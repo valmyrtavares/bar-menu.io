@@ -1,10 +1,21 @@
+@import './variables.css';
+
 /* Inicialmente, o popup está oculto com escala zero */
 .popup {
     opacity: 0;
     transform: scale(0);
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    background-color: blueviolet;
-    border:solid 2px blue;
+    background-color: var(--btn-color);
+    border:solid 2px var(--secundary-bg-color);
+    color: var(--title-font-color);
+    max-width: 80%;
+    margin:0 10%
+  }
+  .popup .bord{
+    border:solid 2px var(--secundary-bg-color);
+    width: 20%;
+    margin:10px 40%;
+    padding:6px;
   }
   
   /* Quando o popup está visível, ele cresce */
@@ -21,7 +32,7 @@
     }
     30% {
       opacity: 1;
-      transform: scale(1.4); /* Leve crescimento além de 100% */
+      transform: scale(1.2); /* Leve crescimento além de 100% */
     }
     90% {
       opacity: 1;
@@ -35,6 +46,6 @@
   
   /* Aplicando a animação com tempo configurado */
   .popup-animate {
-    animation: popupAnimation 3s ease-in-out; /* 3 segundos, ajuste conforme necessário */
+    animation: popupAnimation 7s ease-in-out; /* 3 segundos, ajuste conforme necessário */
   }
   

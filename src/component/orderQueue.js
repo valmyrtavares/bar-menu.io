@@ -13,8 +13,9 @@ const OrderQueue = () => {
   const [doneLine, setDoneLine] = React.useState([]);
   const [movingItem, setMovingItem] = React.useState(null);
 
-  const prevDoneLineLength = React.useRef(doneLine.length);
-  const prevWaitingLineLength = React.useRef(waitingLine.length);
+  // Guardar os estados anteriores das listas
+  const prevDoneLine = React.useRef(doneLine);
+  const prevWaitingLine = React.useRef(waitingLine);
 
   const db = getFirestore(app);
 
@@ -36,29 +37,35 @@ const OrderQueue = () => {
   }, [db]);
 
   React.useEffect(() => {
-    debugger;
-    console.log("FUI CHAMADO    ");
-
-    const doneLineChanged = doneLine.length !== prevDoneLineLength.current;
+    const doneLineChanged = doneLine.length !== prevDoneLine.current.length;
     const waitingLineChanged =
-      waitingLine.length !== prevWaitingLineLength.current;
+      waitingLine.length !== prevWaitingLine.current.length;
+    console.log("doneLineChanged   ", doneLineChanged);
+    console.log("waitingLineChanged   ", waitingLineChanged);
 
     if (doneLineChanged && waitingLineChanged) {
       console.log("Ambas as listas mudaram simultaneamente!");
-      console.log("doneLine   ", doneLine[0]);
 
-      // Atualiza os valores anteriores com os novos tamanhos
-      prevDoneLineLength.current = doneLine.length;
-      prevWaitingLineLength.current = waitingLine.length;
+      // Identificando o item movido (do waitingLine para doneLine)
+      const movedItem = prevWaitingLine.current.find(
+        (item) => !waitingLine.includes(item)
+      );
 
-      // Sua lógica adicional aqui
+      if (movedItem) {
+        setMovingItem(movedItem);
+        console.log("Objeto movido:", movedItem);
+      }
+
+      // Atualizar os estados anteriores com os novos estados
+      prevDoneLine.current = doneLine;
+      prevWaitingLine.current = waitingLine;
     }
 
     if (doneLineChanged) {
-      prevDoneLineLength.current = doneLine.length;
+      prevDoneLine.current = doneLine;
     }
     if (waitingLineChanged) {
-      prevWaitingLineLength.current = waitingLine.length;
+      prevWaitingLine.current = waitingLine;
     }
   }, [doneLine.length, waitingLine.length]);
 
@@ -69,7 +76,7 @@ const OrderQueue = () => {
         <Link to="/">X</Link>
       </div>
       <p>Acompanhe abaixo o andamento e o status do seu pedido</p>
-      {/* {movingItem && <TransitionPopup movingItem={movingItem} />} */}
+      {movingItem && <TransitionPopup movingItem={movingItem} />}
 
       <div className="list-columns">
         <div>
