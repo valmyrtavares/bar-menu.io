@@ -11,7 +11,11 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import CheckDishesModal from "../Dishes/CheckdishesModal.js";
 import "../../assets/styles/requestModal.css";
-import { deleteRequestItem, getOneItemColleciton } from "../../api/Api.js";
+import {
+  deleteRequestItem,
+  getOneItemColleciton,
+  getBtnData,
+} from "../../api/Api.js";
 import WarningMessages from "../WarningMessages";
 //import { GlobalContext } from "../../GlobalContext"; 15 08
 //import { cardClasses } from "@mui/material";
@@ -144,7 +148,9 @@ const RequestModal = () => {
         request: data.request,
         finalPriceRequest: finalPriceRequest,
         dateTime: takeDataTime(),
+        countRequest: await countingRequest(),
       };
+      console.log("userNewRequest   ", userNewRequest);
 
       if (userNewRequest) {
         addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
@@ -155,6 +161,11 @@ const RequestModal = () => {
         });
       }
     }
+  };
+  const countingRequest = async () => {
+    const requestNumber = await getBtnData("request");
+    console.log("requenst Number   ", requestNumber.length);
+    return requestNumber.length + 1;
   };
 
   return (
