@@ -13,11 +13,25 @@
     align-items: center;
     padding: 22px 27px 10px 22px;
 }
+
+@media (min-width: 600px) {
+    
+    .container-btn section div p,
+    .container-btn section  button a{
+      font-size: 25px !important;
+    }
+}
+
+
+
 .container-btn section div{
 max-width: 139px;
 margin:0 auto;
 }
 
+.container-btn section div p {
+    color:var(--btn-color);
+}
   
 .container-btn section button, 
 .container-btn section div p {

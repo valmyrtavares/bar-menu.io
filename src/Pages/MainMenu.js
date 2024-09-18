@@ -63,7 +63,9 @@ function MainMenu() {
           {nameClient && (
             <section>
               <div>
-                <p>Bem vindo {nameClient}</p>
+                <p>
+                  Bem vindo <span>{nameClient}</span>
+                </p>
               </div>
               <button>
                 <Link to="/request">Seus Pedidos</Link>
