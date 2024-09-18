@@ -40,15 +40,16 @@ const OrderQueue = () => {
     const doneLineChanged = doneLine.length !== prevDoneLine.current.length;
     const waitingLineChanged =
       waitingLine.length !== prevWaitingLine.current.length;
-    console.log("doneLineChanged   ", doneLineChanged);
-    console.log("waitingLineChanged   ", waitingLineChanged);
 
     if (doneLineChanged && waitingLineChanged) {
       console.log("Ambas as listas mudaram simultaneamente!");
+      console.log("prevWaitingLine  + current ", prevWaitingLine.current);
+      console.log("waitingLine  + current ", waitingLine);
 
       // Identificando o item movido (do waitingLine para doneLine)
+
       const movedItem = prevWaitingLine.current.find(
-        (item) => !waitingLine.includes(item)
+        (item) => !waitingLine.some((waitingItem) => waitingItem.id === item.id)
       );
 
       if (movedItem) {
