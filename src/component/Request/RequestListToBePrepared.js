@@ -20,6 +20,7 @@ const RequestListToBePrepared = () => {
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
+  const [selectedRequestId, setSelectedRequestId] = React.useState(null);
 
   const [recipeModal, setRecipeModal] = React.useState({
     openModal: false,
@@ -46,15 +47,15 @@ const RequestListToBePrepared = () => {
 
   const handleDeleteRequest = (id) => {
     deleteData("request", id);
-    console.log("Pedido excluído:", id);
     setShowDefaultMessage(false); // Fecha o modal após excluir
   };
 
-  const openModal = () => setShowDefaultMessage(true);
+  const openShowModal = (id) => {
+    setShowDefaultMessage(true);
+    setSelectedRequestId(id);
+  };
 
   const closeModal = () => {
-    console.log("Estou chegando   ");
-
     setShowDefaultMessage(false);
   };
 
@@ -124,15 +125,18 @@ const RequestListToBePrepared = () => {
                 <h2>Valor final {item.finalPriceRequest}</h2>
               </div>
               <div className="btn-status">
-                <button onClick={openModal} className="pendent">
+                <button
+                  onClick={() => openShowModal(item.id)}
+                  className="pendent"
+                >
                   Cancelar pedido
                 </button>
                 <div>
                   {ShowDefaultMessage && (
                     <DefaultComumMessage
-                      msg="Você está prestes a excluir esse pedido"
+                      msg="Você está prestes a excluir esse pedido 123"
                       onClose={closeModal}
-                      onConfirm={() => handleDeleteRequest(item.id)}
+                      onConfirm={() => handleDeleteRequest(selectedRequestId)}
                     />
                   )}
                 </div>
