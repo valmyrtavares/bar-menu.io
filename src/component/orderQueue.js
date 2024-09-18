@@ -90,6 +90,9 @@ const OrderQueue = () => {
                   <p>
                     <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;{" "}
                   </p>
+                  <p>
+                    <span>Ord</span>: {item.countRequest} ;{" "}
+                  </p>
                 </div>
               </div>
             ))}
@@ -103,6 +106,9 @@ const OrderQueue = () => {
                   <p>{firstNameClient(item.name)}</p>
                   <p>
                     <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
+                  </p>
+                  <p>
+                    <span>Ord</span>: {item.countRequest} ;{" "}
                   </p>
                 </div>
               </div>

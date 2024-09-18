@@ -30,11 +30,8 @@ export async function CheckUser(check) {
 export const requestSorter = (ObjList) => {
   const sortedList = [...ObjList];
   sortedList.sort((a, b) => {
-    // Converte as strings 'dateTime' em objetos Date para comparação
-    const dateA = new Date(a.dateTime.split(" - ").reverse().join(" "));
-    const dateB = new Date(b.dateTime.split(" - ").reverse().join(" "));
-    // Ordena em ordem decrescente
-    return dateB - dateA;
+    return a.countRequest - b.countRequest;
   });
+
   return sortedList;
 };

@@ -163,9 +163,15 @@ const RequestModal = () => {
     }
   };
   const countingRequest = async () => {
-    const requestNumber = await getBtnData("request");
-    console.log("requenst Number   ", requestNumber.length);
-    return requestNumber.length + 1;
+    const requestData = await getBtnData("request");
+    const requestNumbers = requestData
+      .filter((item) => item.countRequest !== undefined)
+      .map((item) => item.countRequest);
+
+    const maxRequestNumber =
+      requestNumbers.length > 0 ? Math.max(...requestNumbers) : 0;
+
+    return maxRequestNumber + 1;
   };
 
   return (

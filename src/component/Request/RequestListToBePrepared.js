@@ -33,6 +33,8 @@ const RequestListToBePrepared = () => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
       let requestList = data.filter((item) => item.orderDelivered == false);
       requestList = requestSorter(requestList);
+      console.log("requestList   ", requestList);
+
       setRequestDoneList(requestList);
     });
     return () => unsubscribe();
@@ -117,7 +119,7 @@ const RequestListToBePrepared = () => {
                   <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
                 </p>
                 <p>
-                  <span>Mesa</span>: 12
+                  <span>Ordenação</span>: {item.countRequest}
                 </p>
                 <p>
                   <span>Data</span> {item.dateTime}
