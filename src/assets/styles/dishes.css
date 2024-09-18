@@ -12,6 +12,8 @@
   font-weight: bold;
 }
 
+
+
 .item-container .comments {
   font-size: 12px;
   color: var(--font-color);
@@ -42,6 +44,15 @@
   margin: 0;
 }
 
-
+@media (min-width: 600px) {
+  .item-container h2 {
+    color: var(--title-font-color);
+    font-size: 33px;
+    font-weight: bold;
+  }
+  .item-container .comments{
+    font-size: 20px;
+  }
+}
 
 

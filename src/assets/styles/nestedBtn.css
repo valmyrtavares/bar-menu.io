@@ -31,3 +31,9 @@
 .nested-btn .naoalcoolicos {
   background: rgba(129, 12, 129, 0.267);
 }
+
+@media (min-width: 600px) {    
+  .nested-btn button{
+    font-size: 25px !important;
+  }
+}
