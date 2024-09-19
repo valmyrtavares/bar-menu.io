@@ -136,7 +136,7 @@ const RequestListToBePrepared = () => {
                 <div>
                   {ShowDefaultMessage && (
                     <DefaultComumMessage
-                      msg="Você está prestes a excluir esse pedido 123"
+                      msg="Você está prestes a excluir esse pedido "
                       onClose={closeModal}
                       onConfirm={() => handleDeleteRequest(selectedRequestId)}
                     />

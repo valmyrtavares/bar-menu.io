@@ -2,6 +2,7 @@ import React from "react";
 import "../../assets/styles/RequestList.css";
 import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirstFourLetters } from "../../Helpers/Helpers.js";
+import { requestSorter } from "../../Helpers/Helpers.js";
 // import Input from "../Input.js";
 
 const RequestList = () => {
@@ -13,11 +14,9 @@ const RequestList = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
-      console.log("data   ", data);
+      const dataSorted = requestSorter(data);
 
-      debugger;
-
-      setRequestDoneList(data);
+      setRequestDoneList(dataSorted);
     });
     return () => unsubscribe();
   }, []);
@@ -33,8 +32,9 @@ const RequestList = () => {
               <p className="customer-name">
                 <span>Nome</span> {item.name}
               </p>
-              <p>
-                <span>Pedido</span> {getFirstFourLetters(item.id)}
+              <p className="customer-request">
+                <span>Pedido</span> {getFirstFourLetters(item.id, 5)}/
+                <strong>{item.countRequest}</strong>
               </p>
               <p>
                 <span>Valor Total R$ </span> {item.finalPriceRequest},00
