@@ -6,10 +6,10 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   const [showCustomizedPrice, setShowCustomizedPrice] = React.useState(true);
 
   const handleChange = (e) => {
-    const price = e.target.value;
+    const [price, label] = e.target.value.split("-");
     setFormPriceOnScreen(price);
-    console.log(price);
-    onPriceChange(price);
+    console.log("item   ", item);
+    onPriceChange({ price, label });
   };
 
   React.useEffect(() => {
@@ -31,7 +31,7 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               disabled={radioDisabled}
               className="form-check-input"
               id="carrossel"
-              value={item.firstPrice}
+              value={`${item.firstPrice}-${item.firstLabel}`}
               name="options"
               type="radio"
               checked={formPriceOnScreen === item.firstPrice}
@@ -46,7 +46,7 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               className="form-check-input"
               id="carrossel"
               name="options"
-              value={item.secondPrice}
+              value={`${item.secondPrice}-${item.secondLabel}`}
               checked={formPriceOnScreen === item.secondPrice}
               type="radio"
               onChange={handleChange}
@@ -59,7 +59,7 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               disabled={radioDisabled}
               className="form-check-input"
               id="carrossel"
-              value={item.thirdPrice}
+              value={`${item.thirdPrice}-${item.thirdLabel}`}
               name="options"
               type="radio"
               checked={formPriceOnScreen === item.thirdPrice}

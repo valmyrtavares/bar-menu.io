@@ -28,6 +28,7 @@ const DishesModal = ({ item, setModal }) => {
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
+    size: "",
   });
   const [itemOnScreen, setItemOnScreen] = React.useState("");
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
@@ -161,8 +162,10 @@ const DishesModal = ({ item, setModal }) => {
     }
   }
 
-  function onPriceChange(price) {
-    setTotalPrice(Number(price));
+  function onPriceChange(item) {
+    form.size = item.label;
+
+    setTotalPrice(Number(item.price));
   }
 
   const removeSideDish = (index) => {

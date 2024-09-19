@@ -177,6 +177,11 @@ const RequestListToBePrepared = () => {
                   <div>
                     <h5>{item.name}</h5>
                     <p>{getFirstFourLetters(item.id, 4)}</p>
+                    {item.size && (
+                      <p>
+                        Tamanho:<strong>{item.size}</strong>
+                      </p>
+                    )}
                     <h5>Acompanhamento</h5>
                     <div className="sideDishes-list">
                       {item.sideDishes && item.sideDishes.length > 0 ? (

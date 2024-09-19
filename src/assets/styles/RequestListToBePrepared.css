@@ -95,7 +95,7 @@ justify-content: end;
 display:flex;
 flex-direction: column;
 justify-content: center;
-gap: 10px; 
+gap: 1px; 
 }
 .request-item div h5,
 .request-item div p {
