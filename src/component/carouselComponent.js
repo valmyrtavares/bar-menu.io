@@ -36,9 +36,6 @@ const CarouselComponent = () => {
   const callDishesModal = (item) => {
     if (item) {
       console.log("item   ", item);
-
-      debugger;
-
       setItem(item);
       setModal(true);
     }

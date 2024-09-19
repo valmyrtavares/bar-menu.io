@@ -223,7 +223,7 @@ const RequestModal = () => {
           className="send-request"
           onClick={sendRequestToKitchen}
         >
-          Enviar pedido para cozinha
+          Finalizar
         </button>
       </div>
     </section>
