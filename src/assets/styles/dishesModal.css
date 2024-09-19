@@ -11,7 +11,11 @@
     max-width: 300px;
     z-index: 50;
   }
-
+  @media (min-width: 600px) {
+    .content-modal-dishes {    
+      max-width: 400px;    
+    }
+  }
   .content-modal-dishes .label-side-dishes{
     color: var(--title-font-color)!important;
     font-family: var(--title-font)!important
@@ -45,6 +49,11 @@
         color: var(--font-color)!important;
         font-family: var(--text-font)!important
       }
+      @media (min-width: 600px) {
+        .content-modal-dishes h4 {    
+          font-size: 20px;   
+        }
+      }
       .content-modal-dishes .close-btn {
         display: flex;
         justify-content: end;
@@ -77,6 +86,15 @@
         color: var(--font-color)!important;
         font-family: var(--text-font)!important
       }
+
+
+      @media (min-width: 600px) {
+    
+        .content-modal-dishes p {
+          font-size: 25px;
+        }
+    }
+
       .content-modal-dishes h3 {
         padding-bottom: 50px;
         color: black;
@@ -117,6 +135,11 @@
         border: solid 1px var(--font-color);
         font-family: var(--title-font);
         color: var(--font-color)
+      }
+      @media (min-width: 600px) {
+        .limit-dishes .select-limit-sidedishes .form-select {  
+          font-size: 20px;   
+        }
       }
 
       .limit-dishes .select-limit-sidedishes p {
