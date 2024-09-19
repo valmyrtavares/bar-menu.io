@@ -13,12 +13,13 @@ const WarningMessage = ({
   }, []);
   return (
     <div className="container-warning-message">
-      <h3>{customer}</h3>
-      <p>{message}</p>
+      <h1>{customer}</h1>
+      <h1>Parabéns!</h1>
+      <h1>{message}</h1>
       {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
       <div className="container-btn">
-        <button onClick={sendRequestToKitchen}>Continuar</button>
         <button onClick={() => setWarningMsg(false)}>Cancelar</button>
+        <button onClick={sendRequestToKitchen}>Continuar</button>
       </div>
     </div>
   );

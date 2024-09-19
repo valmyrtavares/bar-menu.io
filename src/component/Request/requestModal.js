@@ -182,7 +182,7 @@ const RequestModal = () => {
 
       {warningMsg && (
         <WarningMessages
-          message="Se tiver dúvidas em relação ao seu pedido, clique em cancelar e retorne a tela anterior. Caso contrário clique em continuar e efetue o seu pagamento no caixa a frente "
+          message="Agora você pode ir ao caixa "
           customer={userData?.name}
           finalPriceRequest={finalPriceRequest}
           sendRequestToKitchen={sendRequestToKitchen}
