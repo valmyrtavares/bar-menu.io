@@ -5,8 +5,9 @@
     grid-template-columns: 8fr 46px;
     justify-content: space-between;
 }
-.order-queue-container .title-btn-container button{
-    border:solid 2px var(--title-font-color);
+.order-queue-container .title-btn-container a{
+    color:var(--title-font-color);
+    font-size: 22px;;
 }
 
 .order-queue-container .title-btn-container h1{
@@ -33,10 +34,18 @@ font-size:33px;
 }
 
 .order-queue-container p{
-text-align: center;
-font-family: var(--text-font);
-color:var(--font-color);
-font-size:15px;
+    text-align: center;
+    font-family: var(--text-font);
+    color:var(--font-color);
+    font-size:15px;
+}
+@media (min-width: 600px) {
+    .order-queue-container p{    
+        font-size:20px;   
+    }
+    .order-queue-container .title-btn-container h1 {
+        font-size:42px
+    }
 }
 
 .order-queue-container .horizont-line-queue p{
