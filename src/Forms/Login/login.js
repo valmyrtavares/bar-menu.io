@@ -4,21 +4,118 @@ import "../../assets/styles/form.css";
 import Title from "../../component/title.js";
 import { auth } from "../../config-firebase/firebase.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { GlobalContext } from "../../GlobalContext";
 import { useNavigate } from "react-router-dom";
 import Error from "../../component/error.js";
+import TextKeyboard from "../../component/Textkeyboard.js";
+import useFormValidation from "../../Hooks/useFormValidation.js";
 
 function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = React.useState({
-    email: "",
-    password: "",
-  });
-  const [errorMessage, setErrorMessage] = React.useState(false);
 
-  function handleChange({ target }) {
-    const { id, value } = target;
-    setForm({ ...form, [id]: value, [id]: value });
-  }
+  const [errorMessage, setErrorMessage] = React.useState(false);
+  const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
+  const [showEmailKeyboard, setShowEmailKeyboard] = React.useState(false);
+  const [showPasswordlKeyboard, setShowPasswordKeyboard] =
+    React.useState(false);
+  const global = React.useContext(GlobalContext);
+  const { form, setForm, error, handleChange, handleBlur, clientFinded } =
+    useFormValidation({
+      email: "",
+      password: "",
+    });
+
+  const handleFocus = (e) => {
+    const { id, value } = e.target;
+    if (id === "password") {
+      setShowPasswordKeyboard(true);
+      setShowEmailKeyboard(false);
+    } else if (id === "email") {
+      setShowPasswordKeyboard(false);
+      setShowEmailKeyboard(true);
+    }
+  };
+  const addCharacter = (char, id) => {
+    if (char === "clearField") {
+      // Limpar o campo CPF
+      setForm((prev) => ({ ...prev, id: "" }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: id,
+          value: "", // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
+    if (char === "Bcksp") {
+      // Limpar o campo CPF
+      setForm((prev) => ({
+        ...prev,
+        [id]: prev[id].slice(0, -1), // Remove a última letra
+      }));
+
+      // Criar e passar o evento sintético para handleChange com o campo vazio
+      const syntheticEvent = {
+        target: {
+          id: id,
+          value: form[id].slice(0, -1), // Campo vazio
+        },
+      };
+      handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
+      return; // Evitar adicionar mais caracteres após limpar o campo
+    }
+
+    let newValue = "";
+    // Adicionar o novo caractere ao valor atual do CPF
+    if (id === "password") {
+      newValue = form.password + char;
+    } else if (id === "email") {
+      newValue = form.email + char;
+    }
+
+    // Criar e passar o evento sintético para handleChange com o novo valor
+    const syntheticEvent = {
+      target: {
+        id: id,
+        value: newValue,
+      },
+    };
+
+    handleChange(syntheticEvent);
+  };
+
+  const closeKeyboard = (Value, id) => {
+    if (id === "password") {
+      showPasswordlKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "password",
+          value: Value,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+
+    if (id === "email") {
+      showEmailKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "email",
+          value: Value,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+  };
+
+  // function handleChange({ target }) {
+  //   const { id, value } = target;
+  //   setForm({ ...form, [id]: value, [id]: value });
+  // }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -54,16 +151,32 @@ function Login() {
           label="email"
           value={form.email}
           type="email"
+          onFocus={handleFocus}
           onChange={handleChange}
         />
+        {showEmailKeyboard && global.isToten && (
+          <TextKeyboard
+            addCharacter={addCharacter}
+            id="email"
+            closeKeyboard={() => closeKeyboard(form.email, "email")}
+          />
+        )}
 
         <Input
           id="password"
           label="Password"
           value={form.password}
           type="password"
+          onFocus={handleFocus}
           onChange={handleChange}
         />
+        {showPasswordlKeyboard && global.isToten && (
+          <TextKeyboard
+            addCharacter={addCharacter}
+            id="password"
+            closeKeyboard={() => closeKeyboard(form.password, "password")}
+          />
+        )}
 
         <button className="btn btn-primary">Enviar</button>
       </form>
