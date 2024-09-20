@@ -1,0 +1,64 @@
+@import 'variables';
+
+/* Estilos gerais */
+.print-request-container {
+    background-color: white;
+    width: 100%;
+    text-align: center;
+}
+
+/* Remove espaçamento desnecessário */
+.print-request-container h3, 
+.print-request-container p, 
+.print-request-container span {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+.print-request-container .each-item {
+    width: 100%;
+    border: solid 1px var(--secundary-bg-color);
+    margin-bottom: 10px;
+}
+
+.print-request-container .each-item .sidedishes-print {
+    display: flex;
+    justify-content: space-around;
+}
+
+/* Estilos específicos para impressão */
+@media print {
+    /* Ajusta o tamanho da página para 72mm de largura */
+    @page {
+        size: 72mm auto; /* Define a largura do recibo */
+        margin: 0; /* Remove margens na impressão */
+    }
+
+    /* Remove margens e espaçamentos extras */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Garante que o conteúdo ocupe apenas o necessário */
+    .print-request-container {
+        max-height: 100vh; /* Limita a altura ao tamanho da tela de impressão */
+        overflow: hidden;  /* Evita rolagem */
+        page-break-after: avoid; /* Evita quebras de página desnecessárias */
+    }
+
+    .print-request-container .each-item {
+        page-break-inside: avoid; /* Evita quebras de página dentro de cada item */
+    }
+
+    /* Evita que o conteúdo se estenda além do tamanho da página */
+    .print-request-container {
+        width: 72mm; /* Largura do recibo */
+    }
+
+    /* Esconde qualquer elemento desnecessário na impressão */
+    .no-print {
+        display: none !important;
+    }
+}

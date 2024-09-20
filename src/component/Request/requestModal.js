@@ -17,7 +17,8 @@ import {
   getBtnData,
 } from "../../api/Api.js";
 import WarningMessages from "../WarningMessages";
-//import { GlobalContext } from "../../GlobalContext"; 15 08
+import PrintRequestCustomer from "./PrintRequestCustomer";
+import { GlobalContext } from "../../GlobalContext";
 //import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
@@ -30,8 +31,9 @@ const RequestModal = () => {
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
   const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
+
   const navigate = useNavigate();
-  // const global = React.useContext(GlobalContext); 15-08
+  const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty("userMenu")) {
@@ -112,9 +114,9 @@ const RequestModal = () => {
       addRequestUser(currentUser);
       if (isToten) {
         localStorage.removeItem("userMenu");
-        navigate("/create-customer");
+        navigate("/request");
       } else {
-        navigate("/orderqueue");
+        navigate("/print");
       }
     }
   };
@@ -136,6 +138,7 @@ const RequestModal = () => {
 
   //send request with finel price
   const addRequestUser = async (id) => {
+    debugger;
     if (id) {
       const data = await getOneItemColleciton("user", id);
 
@@ -150,7 +153,7 @@ const RequestModal = () => {
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
-      console.log("userNewRequest   ", userNewRequest);
+      global.setUserNewRequest(userNewRequest);
 
       if (userNewRequest) {
         addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
@@ -173,6 +176,7 @@ const RequestModal = () => {
 
     return maxRequestNumber + 1;
   };
+  //const userNewRequest = addRequestUser(currentUser);
 
   return (
     <section className="container-modal-request">
@@ -189,6 +193,7 @@ const RequestModal = () => {
           setWarningMsg={setWarningMsg}
         />
       )}
+
       <p className="current-client">
         <span>Cliente: </span>
         {userData?.name}

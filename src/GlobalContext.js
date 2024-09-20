@@ -7,6 +7,7 @@ export const GlobalStorage = ({ children }) => {
   const [id, setId] = React.useState("");
   const [isToten, setIsToten] = React.useState(null);
   const [authorizated, setAuthorizated] = React.useState(false);
+  const [userNewRequest, setUserNewRequest] = React.useState({});
   const [styles, setStyles] = React.useState({
     btnColor: "#b02121",
     secundaryBgColor: "#b02121",
@@ -30,6 +31,8 @@ export const GlobalStorage = ({ children }) => {
         setAuthorizated,
         setIsToten,
         isToten,
+        userNewRequest,
+        setUserNewRequest,
       }}
     >
       {children}

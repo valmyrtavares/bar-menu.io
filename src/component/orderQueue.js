@@ -42,10 +42,6 @@ const OrderQueue = () => {
       waitingLine.length !== prevWaitingLine.current.length;
 
     if (doneLineChanged && waitingLineChanged) {
-      console.log("Ambas as listas mudaram simultaneamente!");
-      console.log("prevWaitingLine  + current ", prevWaitingLine.current);
-      console.log("waitingLine  + current ", waitingLine);
-
       // Identificando o item movido (do waitingLine para doneLine)
 
       const movedItem = prevWaitingLine.current.find(
