@@ -149,6 +149,7 @@ function Login() {
         <Input
           id="email"
           label="email"
+          autocomplete="off"
           value={form.email}
           type="email"
           onFocus={handleFocus}
@@ -164,6 +165,7 @@ function Login() {
 
         <Input
           id="password"
+          autocomplete="off"
           label="Password"
           value={form.password}
           type="password"

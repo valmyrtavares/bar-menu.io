@@ -130,6 +130,7 @@ const NoLog = () => {
       <div className="cpf-input">
         <Input
           id="cpf"
+          autocomplete="off"
           required
           label="CPF"
           value={form.cpf}

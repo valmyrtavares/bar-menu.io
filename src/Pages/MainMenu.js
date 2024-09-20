@@ -9,6 +9,7 @@ import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";
 import { GlobalContext } from "../GlobalContext";
 import { CheckUser } from "../Helpers/Helpers.js";
+import WarningMessage from "../component/WarningMessages";
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -17,6 +18,7 @@ function MainMenu() {
   const [nameClient, serNameClient] = React.useState("");
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
+  const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   const navigate = useNavigate();
 
@@ -44,6 +46,16 @@ function MainMenu() {
     fetchData();
   }, []);
 
+  const logoutCustomer = () => {
+    if (global.isToten) {
+      if (logoutAdminPopup) {
+        localStorage.removeItem("userMenu");
+        navigate("/admin/check-customer-nolog");
+      }
+      setLogoutAdminPopup(true);
+    }
+  };
+
   function grabClient() {
     if (localStorage.hasOwnProperty("userMenu")) {
       const nameCustomer = JSON.parse(localStorage.getItem("userMenu"));
@@ -56,14 +68,23 @@ function MainMenu() {
 
   return (
     <>
+      <div className="WarningMessage-container">
+        {logoutAdminPopup && (
+          <WarningMessage
+            message="Você está prestes a sair do sistema"
+            setWarningMsg={setLogoutAdminPopup}
+            sendRequestToKitchen={logoutCustomer}
+          />
+        )}
+      </div>
+
       <div ref={containerRef} style={{ height: "500px", overflowY: "auto" }}>
-        {/* <MenuButton /> */}
         {true && <CarrosselImages />}
         <div className="container-btn">
           {nameClient && (
             <section>
               <div>
-                <p>
+                <p onClick={logoutCustomer}>
                   Bem vindo <span>{nameClient}</span>
                 </p>
               </div>

@@ -303,6 +303,7 @@ const CreateCustomer = () => {
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="cpf"
+          autocomplete="off"
           required
           label="CPF"
           value={form.cpf}
@@ -329,6 +330,7 @@ const CreateCustomer = () => {
         )}
         <Input
           id="name"
+          autocomplete="off"
           required
           label="Nome"
           value={form.name}
@@ -347,6 +349,7 @@ const CreateCustomer = () => {
           id="phone"
           required
           label="Celular"
+          autocomplete="off"
           value={form.phone}
           type="text"
           onFocus={handleFocus}
@@ -375,6 +378,7 @@ const CreateCustomer = () => {
         <Input
           id="email"
           required
+          autocomplete="off"
           label="Email"
           value={form.email}
           type="email"
