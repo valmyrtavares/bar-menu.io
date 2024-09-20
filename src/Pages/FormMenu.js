@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import Title from "../component/title.js";
 //import UseLocalStorage from "../Hooks/useLocalStorage.js";
 import "../assets/styles/FormMenu.css";
+import WarningMessage from "../component/WarningMessages";
 
 const FormMenu = () => {
   const navigate = useNavigate();
-  // const [admin, setAdmin] = UseLocalStorage("token", "");
+  const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   React.useEffect(() => {
     if (!localStorage.hasOwnProperty("token")) {
@@ -16,8 +17,25 @@ const FormMenu = () => {
     }
   }, []);
 
+  const logoutAdmin = () => {
+    if (logoutAdminPopup) {
+      localStorage.removeItem("token");
+      navigate("/");
+    }
+    setLogoutAdminPopup(true);
+  };
+
   return (
     <div className="form-menu-container">
+      <div className="WarningMessage-container">
+        {logoutAdminPopup && (
+          <WarningMessage
+            message="Você está prestes a sair do sistema"
+            setWarningMsg={setLogoutAdminPopup}
+            sendRequestToKitchen={logoutAdmin}
+          />
+        )}
+      </div>
       <Title title="Menu de Formulários" />
       <h3>Novas categorias</h3>
       <div className="sub-container">
@@ -145,6 +163,7 @@ const FormMenu = () => {
         >
           Pedidos da Cozinha
         </Link>
+        <button onClick={logoutAdmin}>Log out</button>
       </div>
     </div>
   );

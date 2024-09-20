@@ -138,7 +138,7 @@ function Login() {
 
   return (
     <div className="container mt-5 p-3 bg-body-tertiar">
-      <Title mainTitle="Login" />
+      <Title mainTitle="Login Administrador" />
       {errorMessage && (
         <Error
           setErrorPopup={setErrorMessage}
