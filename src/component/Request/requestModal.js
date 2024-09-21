@@ -116,7 +116,7 @@ const RequestModal = () => {
         localStorage.removeItem("userMenu");
         navigate("/request");
       } else {
-        navigate("/print");
+        navigate("/orderqueue");
       }
     }
   };
@@ -138,7 +138,6 @@ const RequestModal = () => {
 
   //send request with finel price
   const addRequestUser = async (id) => {
-    debugger;
     if (id) {
       const data = await getOneItemColleciton("user", id);
 
@@ -153,7 +152,7 @@ const RequestModal = () => {
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
-      global.setUserNewRequest(userNewRequest);
+      //global.setUserNewRequest(userNewRequest);
 
       if (userNewRequest) {
         addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto

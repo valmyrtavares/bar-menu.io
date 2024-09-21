@@ -7,6 +7,14 @@
     text-align: center;
 }
 
+.print-request-container .container-link {
+    display: flex;
+    justify-content: end;
+    width: 80%;
+    margin: 15px 10%;
+    font-size:20px;
+}
+
 /* Remove espaçamento desnecessário */
 .print-request-container h3, 
 .print-request-container p, 

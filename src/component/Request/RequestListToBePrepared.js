@@ -14,6 +14,8 @@ import {
 import RecipeModal from "./RecipeModal";
 import { cardClasses } from "@mui/material";
 import DefaultComumMessage from "../Messages/DefaultComumMessage";
+import { GlobalContext } from "../../GlobalContext";
+import { useNavigate } from "react-router-dom";
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -21,7 +23,8 @@ const RequestListToBePrepared = () => {
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);
-
+  const global = React.useContext(GlobalContext);
+  const navigate = useNavigate();
   const [recipeModal, setRecipeModal] = React.useState({
     openModal: false,
     id: "",
@@ -79,6 +82,8 @@ const RequestListToBePrepared = () => {
       .then(() => {
         console.log("Document successfully updated !");
         fetchUserRequests();
+        global.setUserNewRequest(item);
+        navigate("/print");
       })
       .catch((error) => {
         console.log(error);

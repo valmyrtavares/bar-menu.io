@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { GlobalContext } from "../../GlobalContext";
 import "../../assets/styles/PrintRequestCustomer.css";
+import { Link } from "react-router-dom";
 
 const PrintRequestCustomer = () => {
   const global = useContext(GlobalContext);
@@ -25,6 +26,16 @@ const PrintRequestCustomer = () => {
 
   return (
     <div className="print-request-container">
+      <div className="container-link" container-link>
+        <Link to="/requestlist">X</Link>
+      </div>
+      <p>Dragon Computadores Eireli me</p>
+      <p>
+        <span>Rua Alváres Penteado,177 Centro Histórico CEP 01012-001</span>
+      </p>
+      <p>
+        CNPJ<span> 19.337.953/0001-78</span>
+      </p>
       <h3>
         Pedido <span>{countRequest}</span>
       </h3>
@@ -34,11 +45,9 @@ const PrintRequestCustomer = () => {
       <p>
         Horário: <span>{dateTime}</span>
       </p>
-      <p>
-        Preço total a pagar:<span> RS {finalPriceRequest},00</span>
-      </p>
+
       <p>Pedido: {countRequest}</p>
-      <h3>Itens do pedido</h3>
+      <h3>Itens</h3>
       {request &&
         request.length > 0 &&
         request.map((item) => (
@@ -64,6 +73,9 @@ const PrintRequestCustomer = () => {
               ))}
           </div>
         ))}
+      <p>
+        TOTAL:<span> RS {finalPriceRequest},00</span>
+      </p>
     </div>
   );
 };
