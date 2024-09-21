@@ -28,6 +28,7 @@ import RequestList from "./component/Request/RequestList";
 import RecipeDish from "./Forms/recipeDishForm";
 import CustomerList from "./component/Customers/customerList";
 import NoLog from "./Forms/Login/NoLog";
+import PrintRequestCustomer from "./component/Request/PrintRequestCustomer";
 
 import "./style.css";
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/request" element={<RequestModal />} />
           <Route path="/orderqueue" element={<OrderQueue />} />
           <Route path="/requestlistcheck" element={<RequestList />} />
+          <Route path="/print" element={<PrintRequestCustomer />} />
 
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route path="/requestlist" element={<RequestListToBePrepared />} />
