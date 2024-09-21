@@ -114,7 +114,7 @@ const RequestModal = () => {
       addRequestUser(currentUser);
       if (isToten) {
         localStorage.removeItem("userMenu");
-        navigate("/request");
+        navigate("/create-customer");
       } else {
         navigate("/orderqueue");
       }
