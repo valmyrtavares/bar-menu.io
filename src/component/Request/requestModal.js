@@ -153,6 +153,7 @@ const RequestModal = () => {
         countRequest: await countingRequest(),
       };
       //global.setUserNewRequest(userNewRequest);
+      console.log("userNewRequest   ", userNewRequest);
 
       if (userNewRequest) {
         addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto

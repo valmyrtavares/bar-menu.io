@@ -23,6 +23,7 @@ const DishesModal = ({ item, setModal }) => {
     //this object is regarding  to all dishes inside of request
     name: item.title,
     id: item.id,
+    category: item.category,
     recipeOpenCloseModal: false,
     finalPrice: Number(item.price),
     image: item.image,
@@ -134,6 +135,7 @@ const DishesModal = ({ item, setModal }) => {
 
         // Acrescente o novo objeto 'form' ao array 'request'
         currentRequests.push(form);
+        console.log("form   ", form);
 
         // Atualize o documento com o novo array 'request'
         await updateDoc(userDocRef, {
@@ -153,6 +155,7 @@ const DishesModal = ({ item, setModal }) => {
         finalPrice: Number(item.price),
         image: item.image,
         sideDishes: sideDishesListOnScreen,
+        category: item.category,
       });
 
       // Redireciona o usuário para a página de requisições

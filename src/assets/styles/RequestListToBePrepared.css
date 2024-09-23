@@ -100,6 +100,8 @@ gap: 1px;
 .request-item div h5,
 .request-item div p {
   text-align: center;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .request-item div .sideDishes-list{
@@ -111,4 +113,6 @@ gap: 1px;
 }
 .request-item div .sideDishes-list p{
     margin: 1px 2px;
+    font-size: 22px;
+    font-weight: bold;
 }
