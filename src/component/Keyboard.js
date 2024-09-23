@@ -45,14 +45,15 @@ const Keyboard = ({ addCharacter, closeKeyboard, id }) => {
         <div className="character" onClick={() => handleCharacterClick("0")}>
           0
         </div>
-        <div className="character" onClick={closeKeyboard}>
-          Enter
-        </div>
+
         <div
-          className="character bcksp"
+          className="character "
           onClick={() => handleCharacterClick("Bcksp")}
         >
           Bcksp
+        </div>
+        <div className="character enter" onClick={closeKeyboard}>
+          Enter
         </div>
       </div>
     </div>

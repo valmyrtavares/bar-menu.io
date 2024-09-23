@@ -151,18 +151,18 @@ const NoLog = () => {
       {error.cpf && <div className="error-form">{error.cpf}</div>}
       <div className="create-new-customer-btns">
         <button
-          type="submit"
-          className="btn btn-primary"
-          onClick={checkCustomer}
-        >
-          Recupere seu cadastro
-        </button>
-        <button
           type="button"
           className="btn btn-primary"
           onClick={createNewCustomer}
         >
-          Essa é minha primeira vez
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          onClick={checkCustomer}
+        >
+          Continue
         </button>
       </div>
     </div>
