@@ -46,6 +46,7 @@ function MainMenu() {
     if (global.isToten) {
       if (logoutAdminPopup) {
         localStorage.removeItem("userMenu");
+        global.setAuthorizated(false);
         ChecLogin();
       }
       setLogoutAdminPopup(true);
