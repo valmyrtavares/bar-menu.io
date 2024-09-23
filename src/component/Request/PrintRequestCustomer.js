@@ -27,7 +27,9 @@ const PrintRequestCustomer = () => {
   return (
     <div className="print-request-container">
       <div className="container-link" container-link>
-        <Link to="/requestlist">X</Link>
+        <Link to="/requestlist" className="btn btn-success">
+          Cozinha
+        </Link>
       </div>
       <p>Dragon Computadores Eireli me</p>
       <p>

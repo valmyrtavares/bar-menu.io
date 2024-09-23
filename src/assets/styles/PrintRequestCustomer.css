@@ -9,11 +9,13 @@
 
 .print-request-container .container-link {
     display: flex;
-    justify-content: end;
+    justify-content: center;
     width: 80%;
     margin: 15px 10%;
     font-size:20px;
+    padding:5px;
 }
+
 
 /* Remove espaçamento desnecessário */
 .print-request-container h3, 
@@ -22,6 +24,10 @@
     margin: 0;
     padding: 0;
     font-weight: bold;
+}
+
+.print-request-container .container-link a{
+   
 }
 
 .print-request-container .each-item {
