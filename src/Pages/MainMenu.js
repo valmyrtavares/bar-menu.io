@@ -23,10 +23,6 @@ function MainMenu() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    async function ChecLogin() {
-      const userId = await CheckUser("userMenu");
-      navigate(userId);
-    }
     if (!global.authorizated) {
       ChecLogin();
     }
@@ -50,11 +46,15 @@ function MainMenu() {
     if (global.isToten) {
       if (logoutAdminPopup) {
         localStorage.removeItem("userMenu");
-        navigate("/admin/check-customer-nolog");
+        ChecLogin();
       }
       setLogoutAdminPopup(true);
     }
   };
+  async function ChecLogin() {
+    const userId = await CheckUser("userMenu");
+    navigate(userId);
+  }
 
   function grabClient() {
     if (localStorage.hasOwnProperty("userMenu")) {
