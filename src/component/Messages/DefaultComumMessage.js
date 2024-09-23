@@ -8,8 +8,8 @@ const DefaultComumMessage = ({ msg, onClose, onConfirm }) => {
       <h3>{msg}</h3>
 
       <div className="container-button">
-        <button onClick={onClose}>Cancelar</button>
-        <button onClick={onConfirm}>Continuar</button>
+        {onClose && <button onClick={onClose}>Cancelar</button>}
+        {onConfirm && <button onClick={onConfirm}>Continuar</button>}
       </div>
     </div>
   );

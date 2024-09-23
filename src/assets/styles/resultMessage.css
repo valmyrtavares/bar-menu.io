@@ -1,15 +1,19 @@
 @import "variables";
 .default-comum-message-container{
-max-width: 400px;
+max-width: 600px;
 text-align: center;
 border:solid 2px red;
 padding:10px;
 background-color: var(--secundary-bg-color);
 position: fixed;
-left: 36%;
+left: 30%;
 }
 .default-comum-message-container h1{
     color:#d72b2b;
+    margin:30px
+}
+.default-comum-message-container h3{
+    margin:30px 10px;
 }
 .default-comum-message-container .container-button{
     display: flex;

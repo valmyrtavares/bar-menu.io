@@ -19,6 +19,7 @@ import {
 import WarningMessages from "../WarningMessages";
 import PrintRequestCustomer from "./PrintRequestCustomer";
 import { GlobalContext } from "../../GlobalContext";
+import DefaultComumMessage from "../Messages/DefaultComumMessage.js";
 //import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
@@ -31,6 +32,7 @@ const RequestModal = () => {
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
   const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
+  const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
@@ -113,8 +115,12 @@ const RequestModal = () => {
     } else {
       addRequestUser(currentUser);
       if (isToten) {
-        localStorage.removeItem("userMenu");
-        navigate("/create-customer");
+        setTotenMessage(true);
+        setTimeout(() => {
+          setTotenMessage(false);
+          localStorage.removeItem("userMenu");
+          navigate("/create-customer");
+        }, 5000);
       } else {
         navigate("/orderqueue");
       }
@@ -153,7 +159,6 @@ const RequestModal = () => {
         countRequest: await countingRequest(),
       };
       //global.setUserNewRequest(userNewRequest);
-      console.log("userNewRequest   ", userNewRequest);
 
       if (userNewRequest) {
         addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
@@ -180,6 +185,9 @@ const RequestModal = () => {
 
   return (
     <section className="container-modal-request">
+      {totenMessage && (
+        <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos" />
+      )}
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
