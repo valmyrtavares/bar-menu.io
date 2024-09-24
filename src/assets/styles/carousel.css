@@ -8,3 +8,22 @@
   font-family: sans-serif;
   color:black
 }
+/* Container da imagem */
+.slick-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Altura total da viewport */
+}
+
+/* Estilo para as imagens */
+.slick-slide img {
+  max-width: 100%;  /* A imagem nunca será maior que a largura do container */
+  max-height: 100%; /* A imagem nunca será maior que a altura do container */
+  object-fit: contain; /* Mantém a proporção da imagem */
+}
+
+/* Estilo específico para centralizar imagens paisagem */
+.slick-slide img.landscape {
+  margin: auto; /* Centraliza a imagem na vertical */
+}
