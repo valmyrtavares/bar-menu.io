@@ -79,7 +79,7 @@ function MainMenu() {
         )}
       </div>
 
-      <div ref={containerRef} style={{ height: "500px", overflowY: "auto" }}>
+      <div ref={containerRef} style={{ height: "80vh", overflowY: "auto" }}>
         {true && <CarrosselImages />}
         <div className="container-btn">
           {nameClient && (
