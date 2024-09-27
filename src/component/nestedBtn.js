@@ -19,22 +19,23 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
       const buttonOffsetTop = button.offsetTop;
 
       // Define um deslocamento menor manualmente para suavizar a rolagem
-      const offset = 10; // Ajuste esse valor para controlar o quanto você quer rolar
+      const offset = 200; // Ajuste esse valor para controlar o quanto você quer rolar
 
       // Rola o contêiner para uma posição personalizada, movendo menos que o total
       container.scrollTo({
-        top: buttonOffsetTop - offset, // Subtraia o offset para limitar o quanto ele rola
+        top: container.scrollTop + offset, // Subtraia o offset para limitar o quanto ele rola
         behavior: "smooth",
       });
     }
   };
 
-  // Rolagem automática para o final do contêiner quando o display muda (itens são exibidos)
+  //Rolagem automática para o final do contêiner quando o display muda (itens são exibidos)
   React.useEffect(() => {
     if (display && containerRef.current) {
       const container = containerRef.current;
+      const offset = 200;
       container.scrollTo({
-        top: container.scrollHeight, // Rola até o fim do contêiner
+        top: container.scrollTop + offset, // Rola até o fim do contêiner
         behavior: "smooth",
       });
     }
