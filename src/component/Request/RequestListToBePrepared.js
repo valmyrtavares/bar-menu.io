@@ -1,5 +1,5 @@
 import React from "react";
-import { getBtnData, deleteData } from "../../api/Api.js";
+import { getBtnData, deleteData, getOneItemColleciton } from "../../api/Api.js";
 import { app } from "../../config-firebase/firebase.js";
 
 import { fetchInDataChanges } from "../../api/Api.js";
@@ -50,8 +50,12 @@ const RequestListToBePrepared = () => {
     setRequestDoneList(requestList);
   };
 
-  const handleDeleteRequest = (id) => {
-    deleteData("request", id);
+  const handleDeleteRequest = async (id) => {
+    const data = await getOneItemColleciton("request", id);
+    await deleteData("request", id);
+    if (data.name === "anonimo") {
+      await deleteData("user", data.idUser);
+    }
     setShowDefaultMessage(false); // Fecha o modal após excluir
   };
 

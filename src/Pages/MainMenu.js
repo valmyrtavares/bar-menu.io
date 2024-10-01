@@ -74,7 +74,6 @@ function MainMenu() {
 
   const deleteAnonymousWithnoItem = (id) => {
     setTimeout(async () => {
-      debugger;
       try {
         const data = await getOneItemColleciton("user", id);
         if (!data?.request || data?.request.length === 0) {
@@ -86,7 +85,7 @@ function MainMenu() {
       } catch (error) {
         console.error("Erro ao buscar e deletar dados", error);
       }
-    }, 10000);
+    }, 120000);
   };
 
   return (
