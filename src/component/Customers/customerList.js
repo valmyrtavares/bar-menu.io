@@ -36,7 +36,9 @@ const CustomerList = () => {
     } else {
       const filtered = originalCustomerList.filter(
         (customer) =>
-          customer.name && customer.name.toLowerCase().includes(searchValue)
+          (customer.name &&
+            customer.name.toLowerCase().includes(searchValue)) ||
+          (customer.cpf && customer.cpf.toLowerCase().includes(searchValue))
       );
       setCustomerList(filtered);
     }
