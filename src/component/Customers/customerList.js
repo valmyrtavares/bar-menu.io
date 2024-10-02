@@ -1,6 +1,6 @@
 import React from "react";
 import "../../assets/styles/customerList.css";
-import { getBtnData } from "../../api/Api";
+import { getBtnData, deleteData } from "../../api/Api";
 import { getFirstFourLetters, firstNameClient } from "../../Helpers/Helpers";
 
 const CustomerList = () => {
@@ -16,6 +16,16 @@ const CustomerList = () => {
     };
     fetchCustomer();
   }, []);
+
+  const deleteAnonymousCustomer = async () => {
+    const data = await getBtnData("user");
+    const excludeCustomer = data.filter((item) => item.name === "anonimo");
+    if (excludeCustomer.length > 0) {
+      await Promise.all(
+        excludeCustomer.map((item) => deleteData("user", item.id))
+      );
+    }
+  };
 
   const handleChange = ({ target }) => {
     const searchValue = target.value.toLowerCase();
@@ -42,7 +52,10 @@ const CustomerList = () => {
           placeholder="Busque pelo nome "
         />
       </div>
-      <h1>Lista de Clientes</h1>
+      <div className="button-title-container">
+        <h1>Lista de Clientes</h1>
+        <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
+      </div>
       <table striped bordered hover>
         <tr>
           <th>Nome</th>

@@ -73,6 +73,7 @@ function MainMenu() {
   }
 
   const deleteAnonymousWithnoItem = (id) => {
+    //Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
     setTimeout(async () => {
       try {
         const data = await getOneItemColleciton("user", id);

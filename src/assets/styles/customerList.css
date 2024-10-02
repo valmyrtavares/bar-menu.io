@@ -14,3 +14,19 @@ border-radius: 10px;
 min-height: 40px;
 border:none;
 }
+.customerList-container .button-title-container{
+    display:grid;
+    grid-template-columns: 6fr 1fr;
+    align-items: center;
+}
+.customerList-container .button-title-container button{
+    max-width: 140px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
