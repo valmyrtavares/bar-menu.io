@@ -63,6 +63,7 @@ const CustomerList = () => {
           <th>Nome</th>
           <th>CPF</th>
           <th>Celular</th>
+          <th>Email</th>
         </tr>
         {customerList &&
           customerList.length > 0 &&
@@ -71,6 +72,7 @@ const CustomerList = () => {
               <td>{firstNameClient(item.name)}</td>
               <td>{item.cpf}</td>
               <td>{item.phone}</td>
+              <td>{item.email}</td>
             </tr>
           ))}
       </table>
