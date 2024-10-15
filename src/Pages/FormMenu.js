@@ -105,6 +105,9 @@ const FormMenu = () => {
           <Link to="/admin/customer" className=" btn btn-success sidedishe">
             Lista de Clientes
           </Link>
+          <Link to="/admin/request" className=" btn btn-success sidedishe">
+            Lista de Pedidos
+          </Link>
         </div>
       </div>
       <h3>Adicione sua marca</h3>

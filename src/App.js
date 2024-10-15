@@ -29,6 +29,7 @@ import RecipeDish from "./Forms/recipeDishForm";
 import CustomerList from "./component/Customers/customerList";
 import NoLog from "./Forms/Login/NoLog";
 import PrintRequestCustomer from "./component/Request/PrintRequestCustomer";
+import RequestManagementModule from "./component/Request/requestManagementModule";
 
 import "./style.css";
 
@@ -58,6 +59,7 @@ function App() {
           <Route path="/admin/recipedish" element={<RecipeDish />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
           <Route path="/admin/customer" element={<CustomerList />} />
+          <Route path="/admin/request" element={<RequestManagementModule />} />
           {/* <Route
             path="/admin/SideDisehsInDishes"
             element={<NoNameSideDisehsInDishes />}

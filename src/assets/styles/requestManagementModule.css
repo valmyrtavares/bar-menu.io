@@ -1,0 +1,19 @@
+.management-requests{
+   border:solid black 2px;
+}
+.management-requests .container-date{
+    display:flex;
+   justify-content: space-around;
+}
+.management-requests .container-date input{
+    max-width: 150px;
+}
+.management-requests table{
+    width: 90%;
+    margin:auto;
+}
+
+.management-request .empty-message {
+    text-align: center;
+    color:red;
+}
