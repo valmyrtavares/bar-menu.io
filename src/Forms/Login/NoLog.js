@@ -126,7 +126,7 @@ const NoLog = () => {
 
   return (
     <div className="welcome-message">
-      <h3> Não achamos o seu registro. Digite o seu CPF</h3>
+      <h3> Caso já seja cliente. digite o seu CPF</h3>
       <div className="cpf-input">
         <Input
           id="cpf"

@@ -14,12 +14,14 @@ import Error from "../../component/error.js";
 import CpfMessage from "../../component/CpfMessage";
 import Keyboard from "../../component/Keyboard";
 import TextKeyboard from "../../component/Textkeyboard.js";
+import NameForm from './NameForm';
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const anonymousClient = React.useRef(null);
   const [cpfModal, setCpfModal] = React.useState(true);
+  const [popupName, setPopupName] = React.useState(false)
   const [errorPopup, setErrorPopup] = React.useState(false);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
@@ -117,23 +119,39 @@ const CreateCustomer = () => {
     }
   }
 
-  function handleAnonymousSubmit(event) {
-    event.preventDefault();
+  const justNameFantasy = (name)=>{
+   
+    // handleAnonymousSubmit()
+    if(!name){    
+      setPopupName(true)      
+      console.log("Sem nome")
+    }else{
+      handleAnonymousSubmit(name)
+      console.log("Com nome")
+      setPopupName(false)      
+   }
+  }
 
+  function handleAnonymousSubmit(name) {
+   // event.preventDefault();
     // Define dados default e envia para o Firestore
     const formWithDefaults = {
+      fantasyName:"",
       name: "anonimo",
       phone: "777",
       birthday: "77",
       email: "anonimo@anonimo.com",
     };
+    if(name){
+      formWithDefaults.fantasyName = name
+    }
 
     addDoc(collection(db, "user"), formWithDefaults)
       .then((docRef) => {
         global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
         const currentUser = {
           id: docRef.id,
-          name: formWithDefaults.name,
+          name: formWithDefaults.fantasyName,
         };
         localStorage.setItem("userMenu", JSON.stringify(currentUser));
         setForm({
@@ -284,6 +302,7 @@ const CreateCustomer = () => {
 
   return (
     <section className="welcome-message">
+    {popupName &&<NameForm justNameFantasy={justNameFantasy}/>}
       <main>
         {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
         {welcome.salute && <p>{welcome.salute}</p>}
@@ -293,7 +312,7 @@ const CreateCustomer = () => {
         <button
           type="button"
           className="btn btn-primary"
-          onClick={handleAnonymousSubmit}
+          onClick={() => justNameFantasy()}
           ref={anonymousClient}
         >
           Continuar sem os meus dados

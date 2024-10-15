@@ -31,6 +31,7 @@ const RequestList = () => {
               <h3>Cliente</h3>
               <p className="customer-name">
                 <span>Nome</span> {item.name}
+                
               </p>
               <p className="customer-request">
                 <span>Pedido</span> {getFirstFourLetters(item.id, 5)}/

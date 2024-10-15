@@ -75,7 +75,7 @@ const RequestModal = () => {
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
 
-      setUserData(data);
+      setUserData(data);    
 
       if (userData) {
         if (userData.request.length > 0) {
@@ -148,7 +148,7 @@ const RequestModal = () => {
       const data = await getOneItemColleciton("user", id);
 
       const userNewRequest = {
-        name: data.name,
+        name: data.name === "anonimo" ? data.fantasyName:data.name,
         idUser: data.id,
         done: true,
         // recipe: item.recipe ? item.recipe : {},
@@ -204,7 +204,7 @@ const RequestModal = () => {
 
       <p className="current-client">
         <span>Cliente: </span>
-        {userData?.name}
+        {userData?.name === "anonimo" ? userData?.fantasyName : userData?.name}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
