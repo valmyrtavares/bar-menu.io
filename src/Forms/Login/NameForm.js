@@ -102,6 +102,7 @@ const handleFocus = (e) => {
             id="name"           
             required
             label="Nome"
+             autocomplete="off"
             value={form.name}
             type="text"     
             onChange={handleChange}   

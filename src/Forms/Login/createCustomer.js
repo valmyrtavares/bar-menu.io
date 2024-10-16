@@ -413,7 +413,7 @@ const CreateCustomer = () => {
         )}
         <div className="create-new-customer-btns">
           <button type="submit" className="btn btn-primary">
-            Enviar
+            Cadastrar
           </button>
         </div>
       </form>
