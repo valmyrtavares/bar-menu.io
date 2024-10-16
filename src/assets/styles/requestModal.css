@@ -34,9 +34,15 @@ h3 {
     text-align: center;
     font-family: var(--font-title);
     color: var(--title-font-color);
-    font-size: 34px;
+    font-size: 19px;
     font-weight: 700;
 }
+
+@media (min-width: 1000px) {
+    h3 {
+      font-size: 34px; /* Altera o font-size para 26px */
+    }
+  }
 
 .individual-dishes h2 {
     font-size: 16px;

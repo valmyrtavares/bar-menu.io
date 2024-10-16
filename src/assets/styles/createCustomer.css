@@ -32,8 +32,14 @@
     font-family: var(--title-font) !important; border-radius: 10px;
     padding: 10px 14px;
     margin: 20px 10%;
-    font-size:26px;
+    font-size:14px;
 }
+
+@media (min-width: 1000px) {
+    .welcome-message .create-new-customer-btns button {
+      font-size: 26px; /* Altera o font-size para 26px */
+    }
+  }
 .welcome-message .error-form{
     color:#a11f1f;
     font-weight: 700;
