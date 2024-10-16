@@ -5,7 +5,7 @@ import TextKeyboard from '../../component/Textkeyboard';
 import useFormValidation from "../../Hooks/useFormValidation.js";
 import { GlobalContext } from "../../GlobalContext";
 
-const NameForm = ({justNameFantasy})=>{
+const NameForm = ({justNameFantasy, setPopupName})=>{
 //    const [nameFantasey, setNameFantasy] = React.useState("")
 const global = React.useContext(GlobalContext);
 const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
@@ -97,6 +97,9 @@ const handleFocus = (e) => {
  
     return (
         <div className='container-nameform'>
+          <div className="close-btn-container">
+            <button onClick={()=>setPopupName(false)}>X</button>
+          </div>
             <h3>COMO PODEMOS TE CHAMAR...</h3>
           <Input
             id="name"           
@@ -113,7 +116,7 @@ const handleFocus = (e) => {
             id="name"
             closeKeyboard={() => closeKeyboard(form.fantasyName, "name")}
           />}
-        <button onClick={() =>justNameFantasy(form.name) }>Continue</button>
+        <button className="goon-btn" onClick={() =>justNameFantasy(form.name) }>Continue</button>
         </div>
     )
 }

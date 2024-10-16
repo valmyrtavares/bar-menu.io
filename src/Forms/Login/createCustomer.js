@@ -325,7 +325,7 @@ const CreateCustomer = () => {
 
   return (
     <section className="welcome-message">
-    {popupName &&<NameForm justNameFantasy={justNameFantasy}/>}
+    {popupName &&<NameForm justNameFantasy={justNameFantasy} setPopupName={setPopupName}/>}
       <main>
         {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
         {welcome.salute && <p>{welcome.salute}</p>}

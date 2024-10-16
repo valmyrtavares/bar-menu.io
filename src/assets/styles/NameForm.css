@@ -1,3 +1,6 @@
+@import "./variables.css";
+
+
 .container-nameform{
     position: fixed;
     top:20%;
@@ -7,7 +10,7 @@
     padding:5%;
 }
 
-.container-nameform button{ 
+.container-nameform .goon-btn{ 
         width: 80%;
         border-radius: 10px;
         padding: 10px 20px;
@@ -17,4 +20,13 @@
         font-weight: bold;
         color: var(--title-font-color);
         background: var(--btn-color);      
+}
+.container-nameform .close-btn-container{
+    display: flex;
+    justify-content: end;
+}
+.container-nameform .close-btn-container button{
+    background-color: var(--bg-color);
+    padding:5px 15px;
+    border: none;
 }
