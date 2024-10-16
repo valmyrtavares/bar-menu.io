@@ -30,7 +30,7 @@ const CreateCustomer = () => {
       cpf: "",
       birthday: "",
       email: "",
-    });
+  });
 
   const [welcome, setWelcome] = React.useState({
     salute: "",
@@ -119,7 +119,7 @@ const CreateCustomer = () => {
     }
   }
 
-  const justNameFantasy = (name)=>{
+ const justNameFantasy = (name)=>{
    
     // handleAnonymousSubmit()
     if(!name){    
