@@ -3,7 +3,7 @@ import React from "react";
 const Input = ({ label, fieldFocus, id, ...props }) => {
 
   const inputStyle = {
-    fontSize: window.innerWidth > 900 ? '37px' : '16px', // Estilo condicional
+    fontSize: window.innerWidth > 900 ? '33px' : '16px', // Estilo condicional
     padding: '10px',
     borderRadius: '4px',
    

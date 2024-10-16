@@ -42,6 +42,7 @@ const CreateCustomer = () => {
   // const [forms, setForms] = React.useState({ cpf: "" });
   const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
   const [showPhoneKeyboard, setShowPhoneKeyboard] = React.useState(false);
+  const [showBirthdayKeyboard, setShowBirthdayKeyboard] = React.useState(false);
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
   const [showEmailKeyboard, setShowEmailKeyboard] = React.useState(false);
 
@@ -179,26 +180,36 @@ const CreateCustomer = () => {
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
+      setShowBirthdayKeyboard(false)
     } else if (id === "phone") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
+      setShowBirthdayKeyboard(false)
     } else if (id === "name") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(true);
       setShowEmailKeyboard(false);
+      setShowBirthdayKeyboard(false)
     } else if (id === "email") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(true);
+      setShowBirthdayKeyboard(false)
+    }else if (id === "birthday") {
+      setShowCpfKeyboard(false);
+      setShowPhoneKeyboard(false);
+      setShowNameKeyboard(false);
+      setShowEmailKeyboard(false);
+      setShowBirthdayKeyboard(true)
     }
   };
 
   // Função chamada quando um número é clicado no teclado
-  const addCharacter = (char, id) => {
+  const addCharacter = (char, id) => {    
     if (char === "clearField") {
       // Limpar o campo CPF
       setForm((prev) => ({ ...prev, id: "" }));
@@ -242,6 +253,8 @@ const CreateCustomer = () => {
       newValue = form.name + char;
     } else if (id === "email") {
       newValue = form.email + char;
+    } else if (id === "birthday") {
+      newValue = form.birthday + char;
     }
 
     // Criar e passar o evento sintético para handleChange com o novo valor
@@ -291,6 +304,16 @@ const CreateCustomer = () => {
       const syntheticEvent = {
         target: {
           id: "email",
+          value: Value,
+        },
+      };
+      handleBlur(syntheticEvent);
+    }
+    if (id === "birthday") {
+      setShowNameKeyboard(false);
+      const syntheticEvent = {
+        target: {
+          id: "birthday",
           value: Value,
         },
       };
@@ -388,10 +411,18 @@ const CreateCustomer = () => {
           required
           label="Aniversário"
           value={form.birthday}
-          type="date"
+          type="text"
           onFocus={handleFocus}
           onChange={handleChange}
         />
+         {showBirthdayKeyboard && global.isToten && (
+          <Keyboard
+            handleBlur={handleBlur}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.birthday, "birthday")}
+            id="birthday"
+          />
+        )}
         {error.birthday && <div className="error-form">{error.birthday}</div>}
 
         <Input

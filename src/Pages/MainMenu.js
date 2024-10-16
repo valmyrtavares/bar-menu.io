@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../assets/styles/mainMenu.css";
 import { common } from "@mui/material/colors";
 import { GlobalContext } from "../GlobalContext";
-import { CheckUser } from "../Helpers/Helpers.js";
+import { CheckUser, updatingSideDishes } from "../Helpers/Helpers.js";
 import WarningMessage from "../component/WarningMessages";
 
 function MainMenu() {
@@ -38,7 +38,7 @@ function MainMenu() {
       } catch (error) {
         console.error("Erro fetching data", error);
       }
-    };
+    };   
     fetchData();
   }, []);
 

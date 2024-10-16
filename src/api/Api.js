@@ -143,3 +143,53 @@ export async function fetchCategoriesButton(collectionName) {
     ...new Set(btnCategories.filter((item) => !dishesCategories.has(item))),
   ];
 }
+
+export const updateItemsSideDishes = async () => {
+  try {
+    // Pega todos os acompanhamentos da coleção 'sideDishes'
+    const allSideDishes = await getBtnData("sideDishes");
+    
+    // Pega todos os itens da coleção 'item'
+    const allItems = await getBtnData("item");
+
+    // Percorre cada item da coleção 'item'
+    for (const item of allItems) {
+      const updatedSideDishes = [];
+
+      // Percorre o array sideDishesElementList de cada item
+      for (const sideDishElement of item.sideDishesElementList) {
+        // Encontra o acompanhamento correspondente na coleção 'sideDishes'
+        const matchedSideDish = allSideDishes.find(
+          (sideDish) => sideDish.id === sideDishElement.id
+        );
+
+        // Se houver um acompanhamento correspondente, verifica se houve alteração
+        if (matchedSideDish) {
+          const updatedElement = {
+            ...sideDishElement,
+            price: matchedSideDish.price, // Atualiza o preço
+            sideDishes: matchedSideDish.sideDishes, // Atualiza o nome
+          };
+          updatedSideDishes.push(updatedElement);
+        } else {
+          // Caso não encontre o acompanhamento, mantém o original
+          updatedSideDishes.push(sideDishElement);
+        }
+      }
+
+      // Verifica se houve mudanças no sideDishesElementList
+      const itemRef = doc(db, "item", item.id);
+
+      if (JSON.stringify(updatedSideDishes) !== JSON.stringify(item.sideDishesElementList)) {
+        // Se houver mudanças, atualiza o item no Firestore
+        await updateDoc(itemRef, {
+          sideDishesElementList: updatedSideDishes,
+        });
+        console.log(`Item atualizado: ${item.title}`);
+      }
+    }
+    console.log("Atualização concluída.");
+  } catch (error) {
+    console.error("Erro ao atualizar sideDishesElementList: ", error);
+  }
+};

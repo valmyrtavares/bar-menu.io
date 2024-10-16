@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import "../assets/styles/form.css";
+import {updateItemsSideDishes} from "../api/Api"
 //import { cardClasses } from "@mui/material";
 
 function AddSideDishesForm({
@@ -111,7 +112,10 @@ function AddSideDishesForm({
           type="text"
           onChange={handleChange}
         />
+        <div className="sidedishes-btn-container ">
         <button className="btn btn-primary">Enviar</button>
+        <button type="button" className="btn btn-primary" onClick={updateItemsSideDishes}>Atualizar pratos</button>
+        </div>
       </form>{" "}
       {hideShowCheckForm && (
         <div className="form-check my-1">
