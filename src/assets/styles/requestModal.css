@@ -66,8 +66,7 @@ h3 {
 .individual-dishes p {
     background-color: transparent;
     color: var(--font-color);
-    font-family: var(--text-font);
-    font-size: 14px;
+    font-family: var(--text-font);  
     margin-bottom: 0;
 }
 
@@ -94,4 +93,24 @@ h3 {
     font-weight: bold;
     color: var(--title-font-color);
     background: var(--btn-color);
+}
+
+@media (min-width: 1000px) {
+    .individual-dishes h2{
+        font-size: 27px;        
+    }
+    .status-request-pend {
+        font-size: 27px;
+    }
+    .dishes-price {  
+        font-size: 27px;
+        
+    }
+    .cancel {  
+        font-size: 27px;
+        
+    }
+    .individual-dishes {  
+        border: solid 5px var(--secundary-bg-color);   
+    }
 }
