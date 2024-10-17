@@ -1,0 +1,12 @@
+.paymentMethod-container{
+    display: flex;;
+    justify-content: space-around;
+    margin: 50px 10px;
+}
+.paymentMethod-container label{
+    font-size: 23px;
+    margin-left:6px;
+}
+.paymentMethod-container input{
+    font-size: 20px;
+}

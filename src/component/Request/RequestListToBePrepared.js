@@ -1,7 +1,7 @@
 import React from "react";
 import { getBtnData, deleteData, getOneItemColleciton } from "../../api/Api.js";
 import { app } from "../../config-firebase/firebase.js";
-
+import PaymentMethod from "../Payment/PaymentMethod";
 import { fetchInDataChanges } from "../../api/Api.js";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import "../../assets/styles/RequestListToBePrepared.css";
@@ -80,6 +80,18 @@ const RequestListToBePrepared = () => {
       });
   };
 
+  const handlePaymentMethodChange = (method, item) => {
+    item.paymentMethod = method;
+    setDoc(doc(db, "request", item.id), item)
+      .then(() => {
+        console.log("Document successfully updated !");
+        fetchUserRequests();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const changeStatusPaid = (item) => {
     item.paymentDone = true;
     setDoc(doc(db, "request", item.id), item)
@@ -134,6 +146,10 @@ const RequestListToBePrepared = () => {
                   <span>Data</span> {item.dateTime}
                 </p>
                 <h2>Valor final {item.finalPriceRequest}</h2>
+                <PaymentMethod
+                  item={item}
+                  onPaymentMethodChange={handlePaymentMethodChange}
+                />
               </div>
               <div className="btn-status">
                 <button
@@ -152,6 +168,7 @@ const RequestListToBePrepared = () => {
                   )}
                 </div>
                 <button
+                  disabled={!item.paymentMethod}
                   className={item.paymentDone ? "done" : "pendent"}
                   onClick={() => changeStatusPaid(item)}
                 >
