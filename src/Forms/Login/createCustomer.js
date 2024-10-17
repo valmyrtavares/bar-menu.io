@@ -309,6 +309,11 @@ const CreateCustomer = () => {
       };
       handleBlur(syntheticEvent);
     }
+    // let newValue = form[id] + char;
+    // if (id === "birthday" && newValue.length > 10) {
+    //   return;
+    // }
+
     if (id === "birthday") {
       setShowNameKeyboard(false);
       const syntheticEvent = {
@@ -411,18 +416,11 @@ const CreateCustomer = () => {
           required
           label="Aniversário"
           value={form.birthday}
-          type="text"
+          type="date"
           onFocus={handleFocus}
           onChange={handleChange}
         />
-         {showBirthdayKeyboard && global.isToten && (
-          <Keyboard
-            handleBlur={handleBlur}
-            addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.birthday, "birthday")}
-            id="birthday"
-          />
-        )}
+    
         {error.birthday && <div className="error-form">{error.birthday}</div>}
 
         <Input
