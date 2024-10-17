@@ -17,3 +17,9 @@
     text-align: center;
     color:red;
 }
+.score-total{
+    background-color:white;
+    width:100%;
+    display:grid;
+    grid-template-columns: 2fr 1fr 1fr;
+}
