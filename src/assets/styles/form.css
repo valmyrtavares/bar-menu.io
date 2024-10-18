@@ -43,11 +43,17 @@
     padding:2px 60px;
 }
 
+.Edit-Add-Popup {
+   max-height:800px;
+   overflow-y: auto;
+}
+
 .image-preview{
-   max-width: 60px
+   max-width: 60px;
+   overflow: hidden;
 }
 .custom-select {  
-    max-height: 100px;
+    height: 100px;
     /* Ajuste conforme necessário */
     overflow: hidden;
     /* Para evitar que as opções ultrapassem o tamanho do select */
