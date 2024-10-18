@@ -1,0 +1,9 @@
+.Price-cost-container{
+    display:flex;
+    gap: 15px;
+    justify-content: space-around;
+}
+
+.Price-cost-container input{
+    max-width: 100px;
+}

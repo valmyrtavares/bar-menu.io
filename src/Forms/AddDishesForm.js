@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
+import PriceAndExpenseBuilder from "../component/Payment/PriceAndExpenseBuilder";
 import "../assets/styles/form.css";
 import CustomizePrice from "./CustomizePriceForm";
 import RecipeDish from "./recipeDishForm.js";
@@ -190,6 +191,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
+      <PriceAndExpenseBuilder />
       <div className="close-btn">
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
