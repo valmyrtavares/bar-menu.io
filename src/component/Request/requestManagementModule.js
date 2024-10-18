@@ -6,7 +6,6 @@ import { cardClasses } from "@mui/material";
 
 const RequestManagementModule = () => {
   const [requestList, setRequestList] = React.useState(null);
-  const [request, setRequest] = React.useState("");
   const [originalRequestList, setOriginalRequestList] = React.useState([]);
   const [totalParams, setTotalParams] = React.useState({
     amount: 0,
@@ -19,35 +18,26 @@ const RequestManagementModule = () => {
 
   React.useEffect(() => {
     const fetchRequest = async () => {
-      // 1. Faz a chamada para obter os dados da API (lista de pedidos).
       const data = await getBtnData("request");
 
-      // 2. Cria um novo array que vai conter todos os itens de 'request' de todos os pedidos.
       const allRequests = data.reduce((accumulator, currentOrder) => {
-        // 3. Para cada pedido (currentOrder), mapeamos o array 'request' que contém os itens do pedido.
         const requestsWithDate = currentOrder.request.map((item) => {
-          // 4. Para cada item no array 'request', adicionamos o campo 'dateTime' ao item.
           return {
-            ...item, // Mantenha todas as propriedades do item original.
-            dateTime: currentOrder.dateTime, // Adicione a data do pedido (que está no objeto principal) ao item.
+            ...item,
+            dateTime: currentOrder.dateTime,
           };
         });
-
-        // 5. Agora, concatenamos os itens processados no acumulador (accumulator) que contém todos os itens de 'request'.
         return [...accumulator, ...requestsWithDate];
-      }, []); // 6. O valor inicial do acumulador é um array vazio ([]).
+      }, []);
 
-      // 7. Após processar todos os pedidos, atualizamos o estado 'requestList' com o novo array que contém todos os itens de 'request'.
       setRequestList(allRequests);
-
-      // 8. Mantemos também a lista original para outros usos, se necessário.
       setOriginalRequestList(allRequests);
     };
 
-    // 9. Chama a função para buscar os dados e processá-los assim que o componente montar.
     fetchRequest();
   }, []);
 
+  // UseEffect para filtrar as datas
   React.useEffect(() => {
     const filterdDate = () => {
       if (form.startDate && form.endDate) {
@@ -56,22 +46,14 @@ const RequestManagementModule = () => {
         if (startDate > endDate) {
           alert("Data de início não pode ser maior que a data de fim.");
         } else {
-          // 6. Filtra a lista de pedidos para incluir apenas os itens cuja data está entre 'startDate' e 'endDate'.
-          //if(requestList.length>0 && requestList[0].repetitions){ requestList = originalRequestList}
-
           const filteredRequests = originalRequestList.filter((item) => {
-            // 7. Extrai a data do campo 'dateTime' do item e a transforma em um objeto Date.
             const itemDate = new Date(
               item.dateTime?.split(" - ")[0].split("/").reverse().join("-")
             );
-            // 8. Retorna true se 'itemDate' estiver dentro do intervalo entre 'startDate' e 'endDate'.
             return itemDate >= startDate && itemDate <= endDate;
           });
-          console.log("filteredRequests   ", filteredRequests);
-          const statsList = calculateProductsStats(filteredRequests);
-          console.log("statsList   ", statsList);
 
-          // 9. Atualiza o estado com os pedidos filtrados, mostrando apenas os que estão dentro do período selecionado.
+          const statsList = calculateProductsStats(filteredRequests);
           setRequestList(statsList);
         }
       }
@@ -79,40 +61,41 @@ const RequestManagementModule = () => {
     filterdDate();
   }, [form, originalRequestList]);
 
+  // Novo useEffect para calcular o total quando a lista de pedidos mudar
   React.useEffect(() => {
+    totalScore();
+  }, [requestList]); // Executa totalScore sempre que requestList mudar
+
+  const totalScore = () => {
     let price = 0;
     let amount = 0;
 
     if (requestList && requestList.length > 0) {
       requestList.forEach((item) => {
-        // Verifica se item não é null ou undefined e se item.totalSum existe
         if (item && item.totalSum && item.repetitions) {
           price += Number(item.totalSum);
           amount += Number(item.repetitions);
         }
       });
     }
-    setForm({
-      ...form,
+
+    setTotalParams({
       amount: amount,
       totalValue: price,
     });
-  }, [requestList]);
+  };
 
   const calculateProductsStats = (filteredRequests) => {
     const productMap = {};
 
     filteredRequests.forEach((item) => {
       const { name, finalPrice } = item;
-
-      // Garantir que finalPrice é um número
-      const price = Number(finalPrice) || 0; // Se for inválido, tratamos como 0
+      const price = Number(finalPrice) || 0;
 
       if (productMap[name]) {
         productMap[name].repetitions += 1;
         productMap[name].totalSum += price;
       } else {
-        // Se o produto não existe no mapa, adiciona uma nova entrada
         productMap[name] = {
           name: name,
           repetitions: 1,
@@ -121,7 +104,6 @@ const RequestManagementModule = () => {
       }
     });
 
-    // Retorna a lista de produtos com as estatísticas
     return Object.values(productMap);
   };
 
@@ -188,13 +170,14 @@ const RequestManagementModule = () => {
       <div className="score-total">
         <p></p>
         <p>
-          Total de produtos <span>{form.amount}</span>
+          QUANTIDADE <span>{totalParams.amount}</span>
         </p>
         <p>
-          Total vendido<span>{form.totalValue}</span>
+          TOTAL R$<span>{totalParams.totalValue},00</span>
         </p>
       </div>
     </div>
   );
 };
+
 export default RequestManagementModule;
