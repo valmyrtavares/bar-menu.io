@@ -3,15 +3,17 @@ import "../../assets/styles/resultMessage.css";
 
 const DefaultComumMessage = ({ msg, onClose, onConfirm }) => {
   return (
-    <div className="default-comum-message-container">
-      <h1>Mensagem importante</h1>
-      <h3>{msg}</h3>
-
-      <div className="container-button">
-        {onClose && <button onClick={onClose}>Cancelar</button>}
-        {onConfirm && <button onClick={onConfirm}>Continuar</button>}
+    <>
+      <div className="overlay"></div> {/* Overlay para o fundo escuro */}
+      <div className="default-comum-message-container">
+        <h1>Mensagem importante</h1>
+        <h3>{msg}</h3>
+        <div className="container-button">
+          {onClose && <button onClick={onClose}>Cancelar</button>}
+          {onConfirm && <button onClick={onConfirm}>Continuar</button>}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 export default DefaultComumMessage;

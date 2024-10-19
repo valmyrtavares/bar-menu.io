@@ -75,7 +75,7 @@ const RequestModal = () => {
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
 
-      setUserData(data);    
+      setUserData(data);
 
       if (userData) {
         if (userData.request.length > 0) {
@@ -148,7 +148,7 @@ const RequestModal = () => {
       const data = await getOneItemColleciton("user", id);
 
       const userNewRequest = {
-        name: data.name === "anonimo" ? data.fantasyName:data.name,
+        name: data.name === "anonimo" ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
         // recipe: item.recipe ? item.recipe : {},
@@ -186,7 +186,7 @@ const RequestModal = () => {
   return (
     <section className="container-modal-request">
       {totenMessage && (
-        <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos" />
+        <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
       )}
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
