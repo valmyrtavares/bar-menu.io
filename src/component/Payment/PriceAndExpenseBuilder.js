@@ -2,8 +2,9 @@ import React from "react";
 import Input from "../Input";
 import "../../assets/styles/PriceAndExpenseBuilder.css";
 import { cardClasses } from "@mui/material";
+import CloseBtn from "../closeBtn";
 
-const PriceAndExpenseBuilder = () => {
+const PriceAndExpenseBuilder = ({ setShowPopupCostAndPrice }) => {
   const [form, setForm] = React.useState({
     price: 0,
     cost: 0,
@@ -59,30 +60,33 @@ const PriceAndExpenseBuilder = () => {
 
   return (
     <div className="Price-cost-container">
-      <Input
-        id="price"
-        label="Preço"
-        value={form.price}
-        type="number"
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
-      <Input
-        id="cost"
-        label="Custo"
-        value={form.cost}
-        type="number"
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
-      <Input
-        id="percentage"
-        label="Porcentagem"
-        value={form.percentage}
-        type="number"
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
+      <CloseBtn setClose={setShowPopupCostAndPrice} />
+      <div className="inputs-container">
+        <Input
+          id="price"
+          label="Preço"
+          value={form.price}
+          type="number"
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
+        <Input
+          id="cost"
+          label="Custo"
+          value={form.cost}
+          type="number"
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
+        <Input
+          id="percentage"
+          label="Porcentagem"
+          value={form.percentage}
+          type="number"
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
+      </div>
     </div>
   );
 };

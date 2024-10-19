@@ -38,6 +38,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   });
   const [categories, setCategories] = React.useState([]);
   const [url, setUrl] = React.useState("");
+  const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
+    React.useState(false);
   const [progress, setProgress] = React.useState(0);
   const [showPopupSideDishes, setShowPopupSideDisehs] = React.useState(false);
   const [showPopupCustomizePrice, setShowPopupCustomizePrice] =
@@ -191,7 +193,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
-      <PriceAndExpenseBuilder />
+      {showPopupCostAndPrice && (
+        <PriceAndExpenseBuilder
+          setShowPopupCostAndPrice={setShowPopupCostAndPrice}
+        />
+      )}
       <div className="close-btn">
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
@@ -244,15 +250,13 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           onChange={handleChange}
         />
         <div className="box-price">
-          <Input
-            id="price"
-            label="Preço"
-            value={form.price}
-            required
-            type="number"
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
+          <button
+            className="btn btn-success"
+            type="button"
+            onClick={() => setShowPopupCostAndPrice(true)}
+          >
+            Preço/Custo
+          </button>
           <button
             className="btn btn-success"
             type="button"

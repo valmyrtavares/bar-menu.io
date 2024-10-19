@@ -1,7 +1,19 @@
+@import "variables.css";
+
 .Price-cost-container{
+    position: fixed;
+    top:30%;
+    left: 15%;
+    width: 70%;
+    background:var(--bg-color);
+    max-width: 700px;
+    box-shadow: 6px 5px #8888889c;
+}
+.inputs-container{
     display:flex;
     gap: 15px;
     justify-content: space-around;
+
 }
 
 .Price-cost-container input{
