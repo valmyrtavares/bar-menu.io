@@ -30,3 +30,19 @@
     padding:5px 15px;
     border: none;
 }
+.registration-promotion h4{
+    text-align: center;
+    font-size: 35px;
+    color: var(--title-font-color);
+    font-family: var(--title-font) !important;
+}
+.registration-promotion{
+    margin-top: 55px
+}
+.registration-promotion button{
+    max-width: 200px;
+}
+.registration-promotion .container-registration-btn{
+    display: flex;
+    justify-content: center;
+}

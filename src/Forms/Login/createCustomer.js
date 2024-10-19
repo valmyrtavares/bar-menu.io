@@ -14,14 +14,14 @@ import Error from "../../component/error.js";
 import CpfMessage from "../../component/CpfMessage";
 import Keyboard from "../../component/Keyboard";
 import TextKeyboard from "../../component/Textkeyboard.js";
-import NameForm from './NameForm';
+import NameForm from "./NameForm";
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const anonymousClient = React.useRef(null);
   const [cpfModal, setCpfModal] = React.useState(true);
-  const [popupName, setPopupName] = React.useState(false)
+  const [popupName, setPopupName] = React.useState(true);
   const [errorPopup, setErrorPopup] = React.useState(false);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
@@ -30,7 +30,7 @@ const CreateCustomer = () => {
       cpf: "",
       birthday: "",
       email: "",
-  });
+    });
 
   const [welcome, setWelcome] = React.useState({
     salute: "",
@@ -120,31 +120,30 @@ const CreateCustomer = () => {
     }
   }
 
- const justNameFantasy = (name)=>{
-   
+  const justNameFantasy = (name) => {
     // handleAnonymousSubmit()
-    if(!name){    
-      setPopupName(true)      
-      console.log("Sem nome")
-    }else{
-      handleAnonymousSubmit(name)
-      console.log("Com nome")
-      setPopupName(false)      
-   }
-  }
+    if (!name) {
+      setPopupName(true);
+      console.log("Sem nome");
+    } else {
+      handleAnonymousSubmit(name);
+      console.log("Com nome");
+      setPopupName(false);
+    }
+  };
 
   function handleAnonymousSubmit(name) {
-   // event.preventDefault();
+    // event.preventDefault();
     // Define dados default e envia para o Firestore
     const formWithDefaults = {
-      fantasyName:"",
+      fantasyName: "",
       name: "anonimo",
       phone: "777",
       birthday: "77",
       email: "anonimo@anonimo.com",
     };
-    if(name){
-      formWithDefaults.fantasyName = name
+    if (name) {
+      formWithDefaults.fantasyName = name;
     }
 
     addDoc(collection(db, "user"), formWithDefaults)
@@ -180,36 +179,36 @@ const CreateCustomer = () => {
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
-      setShowBirthdayKeyboard(false)
+      setShowBirthdayKeyboard(false);
     } else if (id === "phone") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
-      setShowBirthdayKeyboard(false)
+      setShowBirthdayKeyboard(false);
     } else if (id === "name") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(true);
       setShowEmailKeyboard(false);
-      setShowBirthdayKeyboard(false)
+      setShowBirthdayKeyboard(false);
     } else if (id === "email") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(true);
-      setShowBirthdayKeyboard(false)
-    }else if (id === "birthday") {
+      setShowBirthdayKeyboard(false);
+    } else if (id === "birthday") {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
-      setShowBirthdayKeyboard(true)
+      setShowBirthdayKeyboard(true);
     }
   };
 
   // Função chamada quando um número é clicado no teclado
-  const addCharacter = (char, id) => {    
+  const addCharacter = (char, id) => {
     if (char === "clearField") {
       // Limpar o campo CPF
       setForm((prev) => ({ ...prev, id: "" }));
@@ -330,7 +329,12 @@ const CreateCustomer = () => {
 
   return (
     <section className="welcome-message">
-    {popupName &&<NameForm justNameFantasy={justNameFantasy} setPopupName={setPopupName}/>}
+      {popupName && (
+        <NameForm
+          justNameFantasy={justNameFantasy}
+          setPopupName={setPopupName}
+        />
+      )}
       <main>
         {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
         {welcome.salute && <p>{welcome.salute}</p>}
@@ -420,7 +424,7 @@ const CreateCustomer = () => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-    
+
         {error.birthday && <div className="error-form">{error.birthday}</div>}
 
         <Input

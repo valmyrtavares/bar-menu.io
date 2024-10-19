@@ -21,7 +21,7 @@ export async function CheckUser(check) {
     if (currentUser && currentUser.length > 0 && currentUser[0].name) {
       return "/";
     } else {
-      return "/create-customer";
+      return "/admin/check-customer-nologr";
     }
   } else {
     return "/admin/check-customer-nolog";
@@ -36,9 +36,3 @@ export const requestSorter = (ObjList) => {
 
   return sortedList;
 };
-
-
-
-
-
-
