@@ -61,9 +61,9 @@ function MainMenu() {
     if (localStorage.hasOwnProperty("userMenu")) {
       const nameCustomer = JSON.parse(localStorage.getItem("userMenu"));
       console.log("nameCustomer   ", nameCustomer);
-      // if (nameCustomer.name === "anonimo") {
-      // deleteAnonymousWithnoItem(nameCustomer.id);
-      //}
+      if (nameCustomer.name === "anonimo") {
+        deleteAnonymousWithnoItem(nameCustomer.id);
+      }
 
       let firstName = nameCustomer.name.split(" ")[0];
       firstName =
@@ -72,22 +72,22 @@ function MainMenu() {
     }
   }
 
-  // const deleteAnonymousWithnoItem = (id) => {
-  //Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
-  //   setTimeout(async () => {
-  //     try {
-  //       const data = await getOneItemColleciton("user", id);
-  //       if (!data?.request || data?.request.length === 0) {
-  //         await deleteData("user", id);
-  //         localStorage.removeItem("userMenu");
-  //         global.setAuthorizated(false);
-  //         CheckLogin();
-  //       }
-  //     } catch (error) {
-  //       console.error("Erro ao buscar e deletar dados", error);
-  //     }
-  //   }, 120000);
-  // };
+  const deleteAnonymousWithnoItem = (id) => {
+    // Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
+    setTimeout(async () => {
+      try {
+        const data = await getOneItemColleciton("user", id);
+        if (!data?.request || data?.request.length === 0) {
+          await deleteData("user", id);
+          localStorage.removeItem("userMenu");
+          global.setAuthorizated(false);
+          CheckLogin();
+        }
+      } catch (error) {
+        console.error("Erro ao buscar e deletar dados", error);
+      }
+    }, 1200000);
+  };
 
   return (
     <>
