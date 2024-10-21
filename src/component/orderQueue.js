@@ -8,7 +8,7 @@ import { requestSorter } from "../Helpers/Helpers.js";
 import { Link } from "react-router-dom";
 import TransitionPopup from "./Request/TrasitionPopup";
 // import paris from "/img/paris.jpg";
-import audioFile from "../audio/guitar.mp3";
+import audioFile from "../audio/duelosteve.mp3";
 
 const OrderQueue = () => {
   const [waitingLine, setWaitingLine] = React.useState([]);
