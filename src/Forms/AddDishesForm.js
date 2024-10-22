@@ -19,6 +19,7 @@ import "../assets/styles/form.css";
 import CustomizePrice from "./CustomizePriceForm";
 import RecipeDish from "./recipeDishForm.js";
 import useFormValidation from "../Hooks/useFormValidation.js";
+import { cardClasses } from "@mui/material";
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
@@ -29,6 +30,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     comment: "",
     price: 0,
     image: "",
+    costPriceObj: {},
     recipe: {},
     display: false,
     carrossel: false,
@@ -191,13 +193,25 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     console.log("Preço muda no on Price  ", customizedPriceObj);
   };
 
+  const addPriceObj = (obj) => {
+    console.log(obj);
+    obj.profit = (obj.price - obj.cost).toFixed(2);
+    console.log(obj);
+    setForm({
+      ...form,
+      costPriceObj: obj,
+    });
+  };
+
+  React.useEffect(() => {
+    if (form.costPriceObj) {
+      console.log("form   ", form);
+      console.log("form.costPriceObj   ", form.costPriceObj);
+    }
+  }, [form]);
+
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
-      {showPopupCostAndPrice && (
-        <PriceAndExpenseBuilder
-          setShowPopupCostAndPrice={setShowPopupCostAndPrice}
-        />
-      )}
       <div className="close-btn">
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
@@ -250,13 +264,15 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           onChange={handleChange}
         />
         <div className="box-price">
-          <button
-            className="btn btn-success"
-            type="button"
-            onClick={() => setShowPopupCostAndPrice(true)}
-          >
-            Preço/Custo
-          </button>
+          <Input
+            id="price"
+            label="Preço"
+            value={form.price}
+            required
+            type="number"
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
           <button
             className="btn btn-success"
             type="button"

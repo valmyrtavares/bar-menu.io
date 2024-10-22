@@ -19,3 +19,9 @@
 .Price-cost-container input{
     max-width: 100px;
 }
+
+.Price-cost-container .container-add-btn{
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+}
