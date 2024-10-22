@@ -8,6 +8,7 @@ const PriceAndExpenseBuilder = ({
   setShowPopupCostAndPrice,
   addPriceObj,
   objPriceCost,
+  labelPrice,
 }) => {
   const [form, setForm] = React.useState({
     price: 0,
@@ -24,12 +25,14 @@ const PriceAndExpenseBuilder = ({
     console.log(form);
   };
   React.useEffect(() => {
-    if (objPriceCost) {
-      console.log("objPriceCost", objPriceCost);
+    if (objPriceCost && labelPrice) {
+      const selectedPriceObj = objPriceCost[labelPrice];
+
       setForm({
-        price: objPriceCost.price,
-        cost: objPriceCost.cost,
-        percentage: objPriceCost.percentage,
+        price: selectedPriceObj.price,
+        cost: selectedPriceObj.cost,
+        percentage: selectedPriceObj.percentage,
+        label: selectedPriceObj.label,
       });
     }
   }, []);
