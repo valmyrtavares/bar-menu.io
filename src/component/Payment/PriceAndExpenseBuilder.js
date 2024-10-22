@@ -4,7 +4,11 @@ import "../../assets/styles/PriceAndExpenseBuilder.css";
 import { cardClasses } from "@mui/material";
 import CloseBtn from "../closeBtn";
 
-const PriceAndExpenseBuilder = ({ setShowPopupCostAndPrice }) => {
+const PriceAndExpenseBuilder = ({
+  setShowPopupCostAndPrice,
+  addPriceObj,
+  objPriceCost,
+}) => {
   const [form, setForm] = React.useState({
     price: 0,
     cost: 0,
@@ -19,6 +23,16 @@ const PriceAndExpenseBuilder = ({ setShowPopupCostAndPrice }) => {
     });
     console.log(form);
   };
+  React.useEffect(() => {
+    if (objPriceCost) {
+      console.log("objPriceCost", objPriceCost);
+      setForm({
+        price: objPriceCost.price,
+        cost: objPriceCost.cost,
+        percentage: objPriceCost.percentage,
+      });
+    }
+  }, []);
 
   const handleBlur = (e) => {
     const { id, value } = e.target;
@@ -87,6 +101,13 @@ const PriceAndExpenseBuilder = ({ setShowPopupCostAndPrice }) => {
           onBlur={handleBlur}
         />
       </div>
+      <button
+        onClick={() => {
+          addPriceObj(form);
+        }}
+      >
+        Enviar
+      </button>
     </div>
   );
 };

@@ -30,6 +30,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     price: 0,
     image: "",
     recipe: {},
+    costPriceObj: {},
     display: false,
     carrossel: false,
     sideDishesElementList: [],
@@ -190,11 +191,29 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     setShowPopupCustomizePrice(false);
   };
 
+  const addPriceObj = (obj) => {
+    obj.profit = obj.price - obj.cost;
+
+    // Atualizando o estado de forma correta
+    setForm((prevForm) => ({
+      ...prevForm,
+      costPriceObj: obj,
+    }));
+  };
+  React.useEffect(() => {
+    if (form.costPriceObj) {
+      console.log("form   ", form);
+      console.log("costPriceObj   ", form.costPriceObj);
+    }
+  }, [form]);
+
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
       {showPopupCostAndPrice && (
         <PriceAndExpenseBuilder
           setShowPopupCostAndPrice={setShowPopupCostAndPrice}
+          addPriceObj={addPriceObj}
+          objPriceCost={form.costPriceObj}
         />
       )}
       <div className="close-btn">
@@ -254,7 +273,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             type="button"
             onClick={() => setShowPopupCostAndPrice(true)}
           >
-            Preço/Custo
+            Preço/Custo R${form.price}
           </button>
           <button
             className="btn btn-success"
