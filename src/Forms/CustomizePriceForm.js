@@ -1,5 +1,5 @@
 import React from "react";
-import "../assets/styles/customizePrice.css";
+import "../assets/styles/customizePriceForm.css";
 import Input from "../component/Input.js";
 import Title from "../component/title.js";
 
@@ -89,8 +89,12 @@ function CustomizePrice({
           onChange={handleChange}
         />
       </div>
-      <button type="button" onClick={() => onPriceChange(formPrice)}>
-        Testar
+      <button
+        className="customized-price-btn"
+        type="button"
+        onClick={() => onPriceChange(formPrice)}
+      >
+        Enviar
       </button>
     </div>
   );

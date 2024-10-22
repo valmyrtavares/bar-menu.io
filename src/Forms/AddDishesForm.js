@@ -16,7 +16,7 @@ import { useNavigate, Link } from "react-router-dom";
 import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
 import PriceAndExpenseBuilder from "../component/Payment/PriceAndExpenseBuilder";
 import "../assets/styles/form.css";
-import CustomizePrice from "./CustomizePriceForm";
+import CustomizePriceForm from "./CustomizePriceForm";
 import RecipeDish from "./recipeDishForm.js";
 import useFormValidation from "../Hooks/useFormValidation.js";
 //import { cardClasses } from "@mui/material";
@@ -186,9 +186,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   }, [customizedPriceObj]);
 
   const onPriceChange = (customizedPriceChanged) => {
-    console.log("Objeto de preço enviado   ", customizedPriceChanged);
     setCustomizedPriceObj(customizedPriceChanged);
-    console.log("Preço muda no on Price  ", customizedPriceObj);
+    setShowPopupCustomizePrice(false);
   };
 
   return (
@@ -316,7 +315,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       )}
       <div className="external-container-customize-price">
         {showPopupCustomizePrice && (
-          <CustomizePrice
+          <CustomizePriceForm
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
             onPriceChange={onPriceChange}
             customizedPriceObj={customizedPriceObj}
