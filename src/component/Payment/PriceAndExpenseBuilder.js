@@ -25,15 +25,18 @@ const PriceAndExpenseBuilder = ({
     console.log(form);
   };
   React.useEffect(() => {
+    console.log("OBJETO COMPLETO   ", objPriceCost);
     if (objPriceCost && labelPrice) {
       const selectedPriceObj = objPriceCost[labelPrice];
-
-      setForm({
-        price: selectedPriceObj.price,
-        cost: selectedPriceObj.cost,
-        percentage: selectedPriceObj.percentage,
-        label: selectedPriceObj.label,
-      });
+      console.log(selectedPriceObj);
+      if (selectedPriceObj.price != 0) {
+        setForm({
+          price: selectedPriceObj.price,
+          cost: selectedPriceObj.cost,
+          percentage: selectedPriceObj.percentage,
+          label: selectedPriceObj.label,
+        });
+      }
     }
   }, []);
 

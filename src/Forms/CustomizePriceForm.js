@@ -36,24 +36,20 @@ function CustomizePrice({
   const [showPopupCostPrice, setShowPopupCostAndPrice] = React.useState(false);
 
   React.useEffect(() => {
-    if (customizedPriceObj) {
-      setFormPrice((prevFormPrice) => ({
-        ...prevFormPrice,
-        firstPrice: {
-          ...prevFormPrice.firstPrice,
-          label: customizedPriceObj.firstLabel, // Atualiza apenas o campo label
-        },
-        secondPrice: {
-          ...prevFormPrice.secondPrice,
-          label: customizedPriceObj.secondLabel, // Atualiza apenas o campo label
-        },
-        thirdPrice: {
-          ...prevFormPrice.thirdPrice,
-          label: customizedPriceObj.thirdLabel, // Atualiza apenas o campo label
-        },
-      }));
+    console.log(customizedPriceObj);
+
+    if (
+      customizedPriceObj &&
+      Object.keys(customizedPriceObj).length > 0 &&
+      customizedPriceObj.firstPrice.price
+    ) {
+      setFormPrice(customizedPriceObj);
     }
   }, []);
+
+  const CheckonPriceChange = (obj) => {
+    console.log(obj);
+  };
 
   const close = () => {
     setShowPopupCustomizePrice(false);
@@ -90,44 +86,40 @@ function CustomizePrice({
   };
 
   const sendPriceObj = (obj) => {
+    debugger;
     setLabelPrice(obj);
-    setFormPrice({
-      firstPrice: {
-        price: customizedPriceObj ? customizedPriceObj.firstPrice : 0,
-        cost: 0,
-        percentage: 0,
-        label: customizedPriceObj ? customizedPriceObj.firstLabel : "",
-      },
-
-      secondPrice: {
-        price: customizedPriceObj ? customizedPriceObj.secondPrice : 0,
-        cost: 0,
-        percentage: 0,
-        label: customizedPriceObj ? customizedPriceObj.secondLabel : "",
-      },
-
-      thirdPrice: {
-        price: customizedPriceObj ? customizedPriceObj.thirdPrice : 0,
-        cost: 0,
-        percentage: 0,
-        label: customizedPriceObj ? customizedPriceObj.secondLabel : "",
-      },
-    });
 
     setShowPopupCostAndPrice(true);
   };
 
   const addPriceObj = (priceAndCost) => {
-    console.log(priceAndCost);
+    console.log("COMO CHEGA A DATA DO COMP   ", priceAndCost);
+    console.log("formPrice antes da atualização   ", formPrice);
     setFormPrice({
       ...formPrice,
       [labelPrice]: priceAndCost,
     });
     console.log("FORM PRICE    ", formPrice);
   };
+
   React.useEffect(() => {
-    console.log(formPrice);
-  }, [formPrice]);
+    console.log("FUI CHAMADO COM DADOS DE EDIÇÃO");
+
+    console.log(customizedPriceObj);
+    if (customizedPriceObj.firstPrice.price) {
+      console.log("O objeto é antigo");
+    } else if (customizedPriceObj.firstPrice.price == 0) {
+      console.log("Tem mais pé zero");
+    } else {
+      console.log("Não existe esse formato");
+    }
+  }, [customizedPriceObj]);
+
+  const testando = () => {
+    console.log("FORM PRICE   ", formPrice);
+  };
+
+  //  HTML++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   return (
     <div className="container-custome-price">
@@ -192,10 +184,11 @@ function CustomizePrice({
           onChange={handleChange}
         />
       </div>
+      <button onClick={testando}>Botão de teste</button>
       <button
         className="customized-price-btn"
         type="button"
-        onClick={() => onPriceChange(formPrice)}
+        onClick={() => CheckonPriceChange(formPrice)}
       >
         Enviar
       </button>
