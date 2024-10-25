@@ -14,7 +14,7 @@ const RequestList = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges("request", (data) => {
-      const dataSorted = requestSorter(data);
+      const dataSorted = requestSorter(data, "direction");
 
       setRequestDoneList(dataSorted);
     });

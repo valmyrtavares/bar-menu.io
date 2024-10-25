@@ -28,10 +28,14 @@ export async function CheckUser(check) {
   }
 }
 
-export const requestSorter = (ObjList) => {
+export const requestSorter = (ObjList, direction) => {
   const sortedList = [...ObjList];
   sortedList.sort((a, b) => {
-    return a.countRequest - b.countRequest;
+    if (!direction) {
+      return a.countRequest - b.countRequest;
+    } else {
+      return b.countRequest - a.countRequest;
+    }
   });
 
   return sortedList;
