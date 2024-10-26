@@ -1,8 +1,20 @@
 import React from "react";
 import { GlobalContext } from "../../GlobalContext";
+import Input from "../../component/Input.js";
+import "../../assets/styles/FiscalAttributes.css";
+import useFormValidation from "../../Hooks/useFormValidation.js";
 import { cardClasses } from "@mui/material";
 
 const FiscalAttributes = () => {
+  const { form, setForm, error, handleChange, handleBlur, clientFinded } =
+    useFormValidation({
+      name: "",
+      phone: "",
+      cpf: "",
+      birthday: "",
+      email: "",
+    });
+  const [btnValidation, setBtnValidation] = React.useState(false);
   const global = React.useContext(GlobalContext);
   const {
     name,
@@ -10,67 +22,44 @@ const FiscalAttributes = () => {
     dateTime,
     countRequest,
     request,
+    category,
     paymentMethod,
   } = global.userNewRequest;
+  const [card, setCard] = React.useState("");
+
+  React.useEffect(() => {
+    console.log("Estou no emissor de NFCe     ", global.userNewRequest);
+    cpfAndCardFlagValidation();
+  }, []);
 
   const nfce = {
     cnpj_emitente: "19337953000178",
     data_emissao: "",
-    //indicador_inscricao_estadual_destinatario: "9",
+    indicador_inscricao_estadual_destinatario: "9",
+    cpf_destinatario: form.cpf,
     modalidade_frete: 9,
     local_destino: 1,
     presenca_comprador: 1,
     natureza_operacao: "VENDA AO CONSUMIDOR",
-    // items: [
-    //   {
-    //     numero_item: "1",
-    //     codigo_ncm: "62044200",
-    //     quantidade_comercial: "1.00",
-    //     quantidade_tributavel: "1.00",
-    //     cfop: "5102",
-    //     valor_unitario_tributavel: "79.00",
-    //     valor_unitario_comercial: "79.00",
-    //     valor_desconto: "0.00",
-    //     descricao:
-    //       "NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL",
-    //     codigo_produto: "251887",
-    //     icms_origem: "0",
-    //     icms_situacao_tributaria: "102",
-    //     unidade_comercial: "un",
-    //     unidade_tributavel: "un",
-    //     valor_total_tributos: "24.29",
-    //   },
-    // ],
-    formas_pagamento: [
-      {
-        forma_pagamento: "03",
-        valor_pagamento: "79.00",
-        nome_credenciadora: "Cielo",
-        bandeira_operadora: "02",
-        numero_autorizacao: "R07242",
-      },
-    ],
   };
 
-  const testando = () => {
+  const sendNfceToSefaz = () => {
     nfce.data_emissao = isoDate();
-    console.log(nfce);
-    console.log("global.userNewRequest   ", global.userNewRequest);
-    console.log("request   ", request);
-    console.log("Forma de pagamento   ", paymentMethodWay(paymentMethod));
+    // const ncm = fillingNcmCode(category);
+
     nfce.items = [];
     nfce.formas_pagamento = [];
     nfce.formas_pagamento.push({
       forma_pagamento: paymentMethodWay(paymentMethod),
       valor_pagamento: finalPriceRequest,
-      nome_credenciadora: "Cielo",
-      bandeira_operadora: "02",
-      numero_autorizacao: "R07242",
+      nome_credenciadora:
+        paymentMethodWay(paymentMethod) === "01" ? "" : "Cielo",
+      bandeira_operadora: card,
     });
     for (let i = 0; i < request.length; i++) {
       nfce.items.push({
         numero_item: i + 1,
-        codigo_ncm: "84713012",
+        codigo_ncm: fillingNcmCode(request[i].category),
         quantidade_comercial: 1.0,
         quantidade_tributavel: 1.0,
         descricao: request[i].name,
@@ -99,6 +88,53 @@ const FiscalAttributes = () => {
     return op[method];
   };
 
+  const cpfAndCardFlagValidation = () => {
+    const typePayment = paymentMethodWay(paymentMethod);
+
+    if (typePayment === "04" || typePayment === "05") {
+      if (card) {
+        setBtnValidation(false);
+      } else {
+        setBtnValidation(true);
+        return;
+      }
+    } else {
+      console.log("Não precisa");
+      setBtnValidation(false);
+    }
+
+    if (error.cpf && form.cpf != "") {
+      setBtnValidation(true);
+      console.log("Tem erro");
+    } else {
+      setBtnValidation(false);
+      console.log("Não tem erro");
+    }
+  };
+  React.useEffect(() => {
+    cpfAndCardFlagValidation();
+  }, [card]);
+
+  const handleChanges = (e) => {
+    const { value } = e.target;
+    setCard(value);
+    cpfAndCardFlagValidation();
+  };
+
+  const fillingNcmCode = (category) => {
+    let op = {
+      agua: 20011000,
+      refrigerante: 22021000,
+    };
+    if (!op[category]) {
+      console.log("outros");
+      return "8119000";
+    } else {
+      console.log(op[category]);
+      return op[category];
+    }
+  };
+
   const isoDate = () => {
     const now = new Date();
     const maxDifference = 5 * 60 * 1000; // 5 minutos em milissegundos
@@ -122,15 +158,49 @@ const FiscalAttributes = () => {
     return randomTime;
   };
 
-  React.useState(() => {
-    console.log("Estou no emissor de NFCe     ", global.userNewRequest);
-  }, []);
-
   return (
-    <div>
+    <div className="fiscal-attributes-container">
       <h1>Aqui começa a emissão de NFCe</h1>
-      <button onClick={testando} className="btn btn-success">
-        Nota fiscal
+
+      <div className="input-container">
+        <div>
+          <label className="form-label"></label>
+          <select
+            id="card"
+            className="form-select custom-select"
+            value={card}
+            required
+            onChange={handleChanges}
+          >
+            <option value="" disabled hidden>
+              Selecione a bandeira do cartão
+            </option>
+            <option value="01">Master Card</option>
+            <option value="02"> Visa</option>
+            <option value="03">American Express</option>
+            <option value="04">Sorocred</option>
+            <option value="05">Outros</option>
+          </select>
+        </div>
+        <div>
+          <Input
+            id="cpf"
+            autocomplete="off"
+            placeholder="CPF"
+            value={form.cpf}
+            type="text"
+            onChange={handleChange}
+            onBlur={cpfAndCardFlagValidation}
+          />
+          {error.cpf && <div className="error-form">{error.cpf}</div>}
+        </div>
+      </div>
+      <button
+        disabled={btnValidation}
+        onClick={sendNfceToSefaz}
+        className="btn btn-success"
+      >
+        Gerar Nota fiscal
       </button>
     </div>
   );
