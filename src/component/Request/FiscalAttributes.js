@@ -43,7 +43,7 @@ const FiscalAttributes = () => {
     natureza_operacao: "VENDA AO CONSUMIDOR",
   };
 
-  const sendNfceToSefaz = () => {
+  const sendNfceToSefaz = async () => {
     nfce.data_emissao = isoDate();
     // const ncm = fillingNcmCode(category);
 
@@ -76,6 +76,34 @@ const FiscalAttributes = () => {
       });
     }
     console.log("Com item alterado    ", nfce);
+    const ref = generationUniqueRandomStrig();
+
+    const url = `https://homologacao.focusnfe.com.br/v2/nfce?ref=${ref}`;
+
+    // Transformar nfce em JSON
+    const nfceJson = JSON.stringify(nfce);
+
+    // Token de autenticação recebido do suporte
+    const token = "seu_token_aqui";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${btoa(token + ":")}`, // Basic Auth com token
+        },
+        body: nfceJson,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Resposta da API CEFAZ:", result);
+      } else {
+        console.error("Erro ao enviar NFC-e:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
   };
 
   const paymentMethodWay = (method) => {
@@ -133,6 +161,21 @@ const FiscalAttributes = () => {
       console.log(op[category]);
       return op[category];
     }
+  };
+
+  const generationUniqueRandomStrig = (length = 34) => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomChar = characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
+      result += randomChar;
+    }
+
+    return result;
   };
 
   const isoDate = () => {
