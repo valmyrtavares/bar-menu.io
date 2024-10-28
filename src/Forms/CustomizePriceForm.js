@@ -1,11 +1,11 @@
-import React from "react";
-import "../assets/styles/customizePriceForm.css";
-import Input from "../component/Input.js";
-import Title from "../component/title.js";
-import PriceAndExpenseBuilder from "../component/Payment/PriceAndExpenseBuilder";
-import { cardClasses } from "@mui/material";
+import React from 'react';
+import '../assets/styles/customizePriceForm.css';
+import Input from '../component/Input.js';
+import Title from '../component/title.js';
+import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
+import { cardClasses } from '@mui/material';
 
-function CustomizePrice({
+function CustomizePriceForm({
   setShowPopupCustomizePrice,
   onPriceChange,
   customizedPriceObj,
@@ -15,36 +15,56 @@ function CustomizePrice({
       price: 0,
       cost: 0,
       percentage: 0,
-      label: "",
+      label: '',
     },
-
     secondPrice: {
       price: 0,
       cost: 0,
       percentage: 0,
-      label: "",
+      label: '',
     },
-
     thirdPrice: {
       price: 0,
       cost: 0,
       percentage: 0,
-      label: "",
+      label: '',
     },
   });
-  const [labelPrice, setLabelPrice] = React.useState("");
+  const [labelPrice, setLabelPrice] = React.useState('');
   const [showPopupCostPrice, setShowPopupCostAndPrice] = React.useState(false);
 
   React.useEffect(() => {
-    console.log(customizedPriceObj);
-
-    if (
-      customizedPriceObj &&
-      Object.keys(customizedPriceObj).length > 0 &&
-      customizedPriceObj.firstPrice.price
-    ) {
-      setFormPrice(customizedPriceObj);
+    if (customizedPriceObj) {
+      if (
+        customizedPriceObj &&
+        Object.keys(customizedPriceObj).length > 0 &&
+        customizedPriceObj.firstPrice.price
+      ) {
+        setFormPrice(customizedPriceObj);
+      }
     }
+    setFormPrice({
+      firstPrice: {
+        price: 0,
+        cost: 0,
+        percentage: 0,
+        label: '',
+      },
+
+      secondPrice: {
+        price: 0,
+        cost: 0,
+        percentage: 0,
+        label: '',
+      },
+
+      thirdPrice: {
+        price: 0,
+        cost: 0,
+        percentage: 0,
+        label: '',
+      },
+    });
   }, []);
 
   const CheckonPriceChange = (obj) => {
@@ -58,7 +78,7 @@ function CustomizePrice({
   const handleChange = ({ target }) => {
     const { id, value } = target;
 
-    if (id === "firstLabel") {
+    if (id === 'firstLabel') {
       setFormPrice((prevFormPrice) => ({
         ...prevFormPrice,
         firstPrice: {
@@ -66,7 +86,7 @@ function CustomizePrice({
           label: value, // Atualiza apenas o campo label
         },
       }));
-    } else if (id === "secondLabel") {
+    } else if (id === 'secondLabel') {
       setFormPrice((prevFormPrice) => ({
         ...prevFormPrice,
         secondPrice: {
@@ -74,7 +94,7 @@ function CustomizePrice({
           label: value, // Atualiza apenas o campo label
         },
       }));
-    } else if (id === "thirdLabel") {
+    } else if (id === 'thirdLabel') {
       setFormPrice((prevFormPrice) => ({
         ...prevFormPrice,
         thirdPrice: {
@@ -93,30 +113,42 @@ function CustomizePrice({
   };
 
   const addPriceObj = (priceAndCost) => {
-    console.log("COMO CHEGA A DATA DO COMP   ", priceAndCost);
-    console.log("formPrice antes da atualização   ", formPrice);
+    console.log('COMO CHEGA A DATA DO COMP   ', priceAndCost);
+    console.log('formPrice antes da atualização   ', formPrice);
     setFormPrice({
       ...formPrice,
       [labelPrice]: priceAndCost,
     });
-    console.log("FORM PRICE    ", formPrice);
+    console.log('FORM PRICE    ', formPrice);
   };
 
   React.useEffect(() => {
-    console.log("FUI CHAMADO COM DADOS DE EDIÇÃO");
-
-    console.log(customizedPriceObj);
-    if (customizedPriceObj.firstPrice.price) {
-      console.log("O objeto é antigo");
-    } else if (customizedPriceObj.firstPrice.price == 0) {
-      console.log("Tem mais pé zero");
-    } else {
-      console.log("Não existe esse formato");
+    if (customizedPriceObj && Object.keys(customizedPriceObj).length > 0) {
+      setFormPrice({
+        firstPrice: {
+          price: customizedPriceObj.firstPrice?.price || 0,
+          cost: customizedPriceObj.firstPrice?.cost || 0,
+          percentage: customizedPriceObj.firstPrice?.percentage || 0,
+          label: customizedPriceObj.firstPrice?.label || '',
+        },
+        secondPrice: {
+          price: customizedPriceObj.secondPrice?.price || 0,
+          cost: customizedPriceObj.secondPrice?.cost || 0,
+          percentage: customizedPriceObj.secondPrice?.percentage || 0,
+          label: customizedPriceObj.secondPrice?.label || '',
+        },
+        thirdPrice: {
+          price: customizedPriceObj.thirdPrice?.price || 0,
+          cost: customizedPriceObj.thirdPrice?.cost || 0,
+          percentage: customizedPriceObj.thirdPrice?.percentage || 0,
+          label: customizedPriceObj.thirdPrice?.label || '',
+        },
+      });
     }
   }, [customizedPriceObj]);
 
   const testando = () => {
-    console.log("FORM PRICE   ", formPrice);
+    console.log('FORM PRICE   ', formPrice);
   };
 
   //  HTML++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -139,7 +171,7 @@ function CustomizePrice({
       <div className="wrapper-inputs">
         <button
           onClick={() => {
-            sendPriceObj("firstPrice");
+            sendPriceObj('firstPrice');
           }}
         >
           Preço/Custo
@@ -155,7 +187,7 @@ function CustomizePrice({
       <div className="wrapper-inputs">
         <button
           onClick={() => {
-            sendPriceObj("secondPrice");
+            sendPriceObj('secondPrice');
           }}
         >
           Preço/Custo
@@ -171,7 +203,7 @@ function CustomizePrice({
       <div className="wrapper-inputs">
         <button
           onClick={() => {
-            sendPriceObj("thirdPrice");
+            sendPriceObj('thirdPrice');
           }}
         >
           Preço/Custo
@@ -195,4 +227,4 @@ function CustomizePrice({
     </div>
   );
 }
-export default CustomizePrice;
+export default CustomizePriceForm;

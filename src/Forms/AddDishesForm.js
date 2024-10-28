@@ -1,34 +1,34 @@
-import React from "react";
-import { fetchCategoriesItem } from "../api/Api.js";
-import Input from "../component/Input.js";
-import Title from "../component/title.js";
-import { app, storage } from "../config-firebase/firebase.js";
-import MenuButton from "../component/menuHamburguerButton.js";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import React from 'react';
+import { fetchCategoriesItem } from '../api/Api.js';
+import Input from '../component/Input.js';
+import Title from '../component/title.js';
+import { app, storage } from '../config-firebase/firebase.js';
+import MenuButton from '../component/menuHamburguerButton.js';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
   getFirestore,
   collection,
   addDoc,
   setDoc,
   doc,
-} from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
-import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
-import PriceAndExpenseBuilder from "../component/Payment/PriceAndExpenseBuilder";
-import "../assets/styles/form.css";
-import CustomizePriceForm from "./CustomizePriceForm";
-import RecipeDish from "./recipeDishForm.js";
-import useFormValidation from "../Hooks/useFormValidation.js";
+} from 'firebase/firestore';
+import { useNavigate, Link } from 'react-router-dom';
+import IncludeSideDishesForm from './IncludeSideDishesForm.js';
+import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
+import '../assets/styles/form.css';
+import CustomizePriceForm from './CustomizePriceForm';
+import RecipeDish from './recipeDishForm.js';
+import useFormValidation from '../Hooks/useFormValidation.js';
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
-    title: "",
-    category: "",
-    comment: "",
+    title: '',
+    category: '',
+    comment: '',
     price: 0,
-    image: "",
+    image: '',
     recipe: {},
     costPriceObj: {},
     display: false,
@@ -38,7 +38,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     CustomizedPrice: {},
   });
   const [categories, setCategories] = React.useState([]);
-  const [url, setUrl] = React.useState("");
+  const [url, setUrl] = React.useState('');
   const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
     React.useState(false);
   const [progress, setProgress] = React.useState(0);
@@ -88,21 +88,21 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   }, [dataObj]);
 
   const fetchCategories = async () => {
-    const categories = await fetchCategoriesItem("button");
-    categories.unshift("Selecione uma categoria"); // Add a first option
+    const categories = await fetchCategoriesItem('button');
+    categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
 
   function handleChange({ target }) {
     const { id, value, type, checked } = target;
-    if (id === "price") {
-      const formattedValue = value.split(".")[0];
+    if (id === 'price') {
+      const formattedValue = value.split('.')[0];
       console.log(formattedValue);
       setForm({
         ...form,
         [id]: formattedValue,
       });
-    } else if (type === "checkbox") {
+    } else if (type === 'checkbox') {
       setForm({
         ...form,
         [id]: checked, // Use checked diretamente, que já é um booleano
@@ -122,7 +122,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
-        "state_changed",
+        'state_changed',
         (snapshot) => {
           // Progress function (optional)
           const progress =
@@ -146,18 +146,18 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     event.preventDefault();
 
     if (!dataObj) {
-      addDoc(collection(db, "item"), form)
+      addDoc(collection(db, 'item'), form)
         .then((docRef) => {
-          navigate("/");
+          navigate('/');
         })
         .catch((error) => {
           console.log(error);
         });
     } else {
-      setDoc(doc(db, "item", dataObj.id), form)
+      setDoc(doc(db, 'item', dataObj.id), form)
         .then(() => {
-          navigate("/");
-          console.log("Document successfully updated !");
+          navigate('/');
+          console.log('Document successfully updated !');
         })
         .catch((error) => {
           console.log(error);
@@ -168,7 +168,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const openModalSideDishes = () => {
     setShowPopupSideDisehs(true);
     if (dataObj) {
-      console.log("Data obj", dataObj);
+      console.log('Data obj', dataObj);
     }
   };
 
@@ -202,8 +202,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   };
   React.useEffect(() => {
     if (form.costPriceObj) {
-      console.log("form   ", form);
-      console.log("costPriceObj   ", form.costPriceObj);
+      console.log('form   ', form);
+      console.log('costPriceObj   ', form.costPriceObj);
     }
   }, [form]);
 
@@ -232,7 +232,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         )}
       </div>
-      <Title mainTitle={mainTitle ? mainTitle : "Adicione um novo prato"} />
+      <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"
@@ -343,11 +343,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       </div>
       <div className="sidedishes-recipe-btn-container">
         <button className="btn btn-success " onClick={openModalSideDishes}>
-          {" "}
+          {' '}
           Acompanhamentos
         </button>
         <button className="btn btn-success recipe" onClick={openRecipeModal}>
-          {" "}
+          {' '}
           Receita
         </button>
       </div>
