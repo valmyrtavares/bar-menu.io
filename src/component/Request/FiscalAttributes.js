@@ -50,8 +50,6 @@ const FiscalAttributes = () => {
     nfce.formas_pagamento.push({
       forma_pagamento: paymentMethodWay(paymentMethod),
       valor_pagamento: finalPriceRequest,
-      nome_credenciadora:
-        paymentMethodWay(paymentMethod) === '01' ? '' : 'Cielo',
       bandeira_operadora: card,
     });
     for (let i = 0; i < request.length; i++) {
@@ -70,7 +68,7 @@ const FiscalAttributes = () => {
         icms_situacao_tributaria: '102',
         unidade_comercial: 'un',
         unidade_tributavel: 'un',
-        valor_total_tributos: 'un',
+        valor_total_tributos: '0.00',
       });
     }
 
@@ -78,10 +76,17 @@ const FiscalAttributes = () => {
     const ref = generationUniqueRandomStrig();
 
     // URL atualizada para o seu servidor
-    const url = `http://localhost:4000/v2/nfce?ref=${ref}`;
+    const url = `http://localhost:4000/api/send-nfce?ref=${ref}`;
 
     // Transformar nfce em JSON
     const nfceJson = JSON.stringify(nfce);
+
+    const payload = {
+      ref: ref,
+      nfceData: nfce,
+    };
+
+    console.log('Payload enviado:', payload);
 
     try {
       const response = await fetch(url, {
@@ -89,7 +94,7 @@ const FiscalAttributes = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: nfceJson,
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
