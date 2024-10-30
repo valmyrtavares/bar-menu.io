@@ -152,8 +152,8 @@ const FiscalAttributes = () => {
   };
 
   const handleConsulta = async () => {
-    const ref = 'bvjc47rYtPSb9oJltF4RzUDpH9flOZw2wz'; // Exemplo de referência
-    const url = `http://localhost:4000/v2/nfce/consultar/${ref}`; // URL da consulta
+    const ref = '1Jb8Op4U7Wz6afwJe1w3mjNQlqBdkOMAvF'; // Exemplo de referência
+    const url = `http://localhost:4000/api/check-nfce/${ref}`;
 
     try {
       const response = await fetch(url, {
@@ -278,3 +278,4 @@ const FiscalAttributes = () => {
   );
 };
 export default FiscalAttributes;
+//1Jb8Op4U7Wz6afwJe1w3mjNQlqBdkOMAvF
