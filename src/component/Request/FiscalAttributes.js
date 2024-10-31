@@ -100,6 +100,16 @@ const FiscalAttributes = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Resposta da API CEFAZ:', result);
+
+        if (result.status === 'autorizado' && result.caminho_danfe) {
+          const danfeUrl = ` https://api.focusnfe.com.br${result.caminho_danfe}`;
+
+          // Abre o link do DANFE em uma nova aba e dispara o comando de impressão
+          const printWindow = window.open(danfeUrl, '_blank');
+          printWindow.onload = () => {
+            printWindow.print(); // Inicia a impressão assim que a página carrega
+          };
+        }
       } else {
         console.error('Erro ao enviar NFC-e:', response.statusText);
       }

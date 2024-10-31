@@ -1,1 +1,3 @@
 It was created two new features about check out all documents and cancel some specific document
+
+ We are able to print the note from result.caminho_danfe
