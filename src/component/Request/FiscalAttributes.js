@@ -175,6 +175,62 @@ const FiscalAttributes = () => {
     }
   };
 
+  // Função para checar todas as NFS-e recebidas de um CNPJ específico
+  const handleCheckNfses = async () => {
+    const cnpj = '19337953000178'; // Substitua pelo CNPJ específico
+    const url = `http://localhost:4000/api/check-nfses/${cnpj}`; // URL do backend
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Notas Fiscais Recebidas:', result);
+        // Exibir o resultado na interface se necessário
+      } else {
+        console.error(
+          'Erro ao consultar NFS-e recebidas:',
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
+  };
+
+  async function cancelarNfce() {
+    const ref = 'dItAKeN1uNaDncnyXWjVrQW3XRSdYAsjwK';
+    const url = `http://localhost:4000/api/cancel-nfce/${ref}`; // URL do backend
+
+    const body = {
+      justificativa: 'Desistencia do cliente', // Justificativa para o cancelamento
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body), // Enviando a justificativa como corpo da requisição
+      });
+
+      const data = await response.json(); // Obtendo a resposta da API
+      if (response.ok) {
+        console.log('Cancelamento realizado com sucesso:', data); // Sucesso
+      } else {
+        console.error('Erro ao cancelar NFC-e:', data); // Erro na requisição
+      }
+    } catch (error) {
+      console.error('Erro ao fazer a requisição:', error); // Tratamento de erro
+    }
+  }
+
   const fillingNcmCode = (category) => {
     let op = {
       agua: 20011000,
@@ -230,7 +286,6 @@ const FiscalAttributes = () => {
   return (
     <div className="fiscal-attributes-container">
       <h1>Aqui começa a emissão de NFCe</h1>
-
       <div className="input-container">
         <div>
           <label className="form-label"></label>
@@ -273,6 +328,12 @@ const FiscalAttributes = () => {
       </button>
       <div>
         <button onClick={handleConsulta}>Consultar NFC-e</button>
+      </div>
+      <div>
+        <button onClick={handleCheckNfses}>Todas as notas</button>
+      </div>
+      <div>
+        <button onClick={cancelarNfce}>Cancelar</button>
       </div>
     </div>
   );
