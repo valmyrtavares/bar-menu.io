@@ -45,9 +45,6 @@ const FiscalAttributes = () => {
     cpfAndCardFlagValidation();
     const fetchData = async () => {
       const data = await getBtnData('taxDocuments');
-      if (data) {
-        console.log(data);
-      }
       setTaxDocument(data);
     };
     fetchData();
@@ -159,7 +156,10 @@ const FiscalAttributes = () => {
         collection(db, 'taxDocuments'),
         resultWithDateAndPrice
       ); // Adiciona o documento à coleção taxDocuments
+
       console.log('Documento adicionado com ID:', docRef.id);
+      const data = await getBtnData('taxDocuments');
+      setTaxDocument(data);
     } catch (error) {
       console.error('Erro ao salvar o documento no Firestore:', error);
     }
