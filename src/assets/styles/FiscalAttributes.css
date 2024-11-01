@@ -11,3 +11,8 @@
  .error-form{
     color:#8f0101;
 }
+
+.fiscal-attributes-container table{
+    width:80%;
+    margin:10px 10%;
+}

@@ -1,7 +1,7 @@
-import React from "react";
-import "../../assets/styles/resultMessage.css";
+import React from 'react';
+import '../../assets/styles/resultMessage.css';
 
-const DefaultComumMessage = ({ msg, onClose, onConfirm }) => {
+const DefaultComumMessage = ({ msg, onClose, onConfirm, item }) => {
   return (
     <>
       <div className="overlay"></div> {/* Overlay para o fundo escuro */}
@@ -10,7 +10,15 @@ const DefaultComumMessage = ({ msg, onClose, onConfirm }) => {
         <h3>{msg}</h3>
         <div className="container-button">
           {onClose && <button onClick={onClose}>Cancelar</button>}
-          {onConfirm && <button onClick={onConfirm}>Continuar</button>}
+          {onConfirm && (
+            <button
+              onClick={() => {
+                item ? onConfirm(item, true) : onConfirm();
+              }}
+            >
+              Continuar
+            </button>
+          )}
         </div>
       </div>
     </>

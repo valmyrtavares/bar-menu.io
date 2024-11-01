@@ -3,7 +3,17 @@ import { GlobalContext } from '../../GlobalContext';
 import Input from '../../component/Input.js';
 import '../../assets/styles/FiscalAttributes.css';
 import useFormValidation from '../../Hooks/useFormValidation.js';
-import { cardClasses } from '@mui/material';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  setDoc,
+  getDoc,
+} from 'firebase/firestore';
+import { getBtnData } from '../../api/Api.js';
+import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 
 const FiscalAttributes = () => {
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
@@ -15,6 +25,9 @@ const FiscalAttributes = () => {
       email: '',
     });
   const [btnValidation, setBtnValidation] = React.useState(false);
+  const [taxDocument, setTaxDocument] = React.useState(false);
+  const [openpopCancelTax, setOpenpopCancelTax] = React.useState(null);
+  const [confirm, setConfirm] = React.useState(false);
   const global = React.useContext(GlobalContext);
   const {
     name,
@@ -30,6 +43,14 @@ const FiscalAttributes = () => {
   React.useEffect(() => {
     console.log('Estou no emissor de NFCe     ', global.userNewRequest);
     cpfAndCardFlagValidation();
+    const fetchData = async () => {
+      const data = await getBtnData('taxDocuments');
+      if (data) {
+        console.log(data);
+      }
+      setTaxDocument(data);
+    };
+    fetchData();
   }, []);
 
   const nfce = {
@@ -101,8 +122,10 @@ const FiscalAttributes = () => {
         const result = await response.json();
         console.log('Resposta da API CEFAZ:', result);
 
+        await saveToFirestore(result, finalPriceRequest, ref);
+
         if (result.status === 'autorizado' && result.caminho_danfe) {
-          const danfeUrl = ` https://api.focusnfe.com.br${result.caminho_danfe}`;
+          const danfeUrl = `https://api.focusnfe.com.br${result.caminho_danfe}`;
 
           // Abre o link do DANFE em uma nova aba e dispara o comando de impressão
           const printWindow = window.open(danfeUrl, '_blank');
@@ -118,10 +141,34 @@ const FiscalAttributes = () => {
     }
   };
 
+  const saveToFirestore = async (result, finalPrice, ref) => {
+    try {
+      const db = getFirestore(); // Inicializa o Firestore
+      const currentDate = new Date();
+      const formattedDate = `${currentDate.getDate()}/${
+        currentDate.getMonth() + 1
+      }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+      const resultWithDateAndPrice = {
+        ...result,
+        date_issued: formattedDate,
+        total_value: finalPrice,
+        ref: ref,
+        active: false,
+      };
+      const docRef = await addDoc(
+        collection(db, 'taxDocuments'),
+        resultWithDateAndPrice
+      ); // Adiciona o documento à coleção taxDocuments
+      console.log('Documento adicionado com ID:', docRef.id);
+    } catch (error) {
+      console.error('Erro ao salvar o documento no Firestore:', error);
+    }
+  };
+
   const paymentMethodWay = (method) => {
     let op = {
-      debit: '05',
-      credite: '04',
+      debit: '04',
+      credite: '03',
       cash: '01',
       pix: '99',
     };
@@ -213,33 +260,63 @@ const FiscalAttributes = () => {
     }
   };
 
-  async function cancelarNfce() {
-    const ref = 'dItAKeN1uNaDncnyXWjVrQW3XRSdYAsjwK';
-    const url = `http://localhost:4000/api/cancel-nfce/${ref}`; // URL do backend
+  async function cancelarNfce(ref, confirm) {
+    if (!confirm) {
+      setOpenpopCancelTax(ref); // Defina o item específico para abrir a confirmação
+      return;
+    }
 
-    const body = {
-      justificativa: 'Desistencia do cliente', // Justificativa para o cancelamento
-    };
+    if (confirm) {
+      setOpenpopCancelTax(null);
+      const url = `http://localhost:4000/api/cancel-nfce/${ref.ref}`; // URL do backend
+      console.log(url);
 
-    try {
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body), // Enviando a justificativa como corpo da requisição
-      });
-
-      const data = await response.json(); // Obtendo a resposta da API
-      if (response.ok) {
-        console.log('Cancelamento realizado com sucesso:', data); // Sucesso
-      } else {
-        console.error('Erro ao cancelar NFC-e:', data); // Erro na requisição
+      const body = {
+        justificativa: 'Desistencia do cliente', // Justificativa para o cancelamento
+      };
+      try {
+        const response = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body), // Enviando a justificativa como corpo da requisição
+        });
+        const data = await response.json(); // Obtendo a resposta da API
+        if (response.ok) {
+          console.log('Cancelamento realizado com sucesso:', data); // Sucesso
+          updateCollection(ref);
+        } else {
+          console.error('Erro ao cancelar NFC-e:', data); // Erro na requisição
+        }
+      } catch (error) {
+        console.error('Erro ao fazer a requisição:', error); // Tratamento de erro
       }
-    } catch (error) {
-      console.error('Erro ao fazer a requisição:', error); // Tratamento de erro
     }
   }
+
+  const updateCollection = async (ref) => {
+    const db = getFirestore();
+    const docRef = doc(db, 'taxDocuments', ref.id);
+
+    try {
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        await updateDoc(docRef, {
+          activate: true,
+        });
+        console.log('Documento atualizado com sucesso.');
+
+        setTaxDocument((prevDocuments) =>
+          prevDocuments.map((doc) =>
+            doc.ref === ref.ref ? { ...doc, activate: true } : doc
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar o documento no Firestore:', error);
+    }
+  };
 
   const fillingNcmCode = (category) => {
     let op = {
@@ -248,7 +325,7 @@ const FiscalAttributes = () => {
     };
     if (!op[category]) {
       console.log('outros');
-      return '8119000';
+      return '08119000';
     } else {
       console.log(op[category]);
       return op[category];
@@ -276,21 +353,13 @@ const FiscalAttributes = () => {
     const randomTime = new Date(
       now.getTime() - Math.floor(Math.random() * maxDifference)
     );
-
-    // const timezoneOffset = randomTime.getTimezoneOffset();
-    // const offsetHours = String(
-    //   Math.floor(Math.abs(timezoneOffset) / 60)
-    // ).padStart(2, "0");
-    // const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(
-    //   2,
-    //   "0"
-    // );
-    // const offsetSign = timezoneOffset > 0 ? "-" : "+";
-
-    // const formattedTime = randomTime.toISOString().slice(0, -5);
-    // const isoString = `${formattedTime}${offsetSign}${offsetHours}:${offsetMinutes}`;
     console.log(randomTime);
     return randomTime;
+  };
+
+  const onConfirm = (ref, fonfirm) => {
+    setConfirm(true);
+    cancelarNfce(ref);
   };
 
   return (
@@ -336,15 +405,60 @@ const FiscalAttributes = () => {
       >
         Gerar Nota fiscal
       </button>
-      <div>
+      {/* <div>
         <button onClick={handleConsulta}>Consultar NFC-e</button>
-      </div>
-      <div>
-        <button onClick={handleCheckNfses}>Todas as notas</button>
-      </div>
-      <div>
-        <button onClick={cancelarNfce}>Cancelar</button>
-      </div>
+      </div> */}
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nota</th>
+            <th>Data</th>
+            <th>valor total</th>
+            <th>Imprimir</th>
+            <th>Cancelar Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          {taxDocument &&
+            taxDocument.map((item, index) => (
+              <tr key={index}>
+                <td>{item.ref}</td>
+                <td>{item.date_issued}</td>
+                <td>{item.total_value}</td>
+                <td>
+                  <a
+                    href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    nota
+                  </a>
+                </td>
+                <td>
+                  <button
+                    onClick={() => {
+                      setOpenpopCancelTax(item);
+                    }}
+                    disabled={item.activate}
+                  >
+                    Cancelar
+                  </button>
+                  {openpopCancelTax?.ref === item.ref && (
+                    <DefaultComumMessage
+                      msg="Tem certeza que deseja cancelar essa nota"
+                      onClose={() => {
+                        setOpenpopCancelTax(null);
+                      }}
+                      onConfirm={cancelarNfce}
+                      item={item}
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
     </div>
   );
 };

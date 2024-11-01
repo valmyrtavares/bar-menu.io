@@ -1,5 +1,5 @@
-import { debugErrorMap } from "firebase/auth";
-import { app } from "../config-firebase/firebase.js";
+import { debugErrorMap } from 'firebase/auth';
+import { app } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
@@ -9,7 +9,7 @@ import {
   getDoc,
   deleteDoc,
   updateDoc,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
 //FIRESTORE
 const db = getFirestore(app);
@@ -42,14 +42,14 @@ export async function deleteData(coolectionName, id) {
 //Remove item in the "request" array list
 export async function deleteRequestItem(userId, itemId) {
   const db = getFirestore(app);
-  const userRef = doc(db, "user", userId);
+  const userRef = doc(db, 'user', userId);
 
   try {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      console.log("Dados do usuário:", userData);
+      console.log('Dados do usuário:', userData);
 
       if (userData.request && Array.isArray(userData.request)) {
         const updatedRequest = userData.request.filter(
@@ -61,12 +61,12 @@ export async function deleteRequestItem(userId, itemId) {
         });
       }
 
-      console.log("Item removed successfully.");
+      console.log('Item removed successfully.');
     } else {
-      console.log("User not found.");
+      console.log('User not found.');
     }
   } catch (error) {
-    console.log("Error removing item: ", error);
+    console.log('Error removing item: ', error);
   }
 }
 
@@ -97,7 +97,7 @@ export async function getOneItemColleciton(collectionName, itemId) {
     if (docSnap.exists()) {
       return { ...docSnap.data(), id: docSnap.id };
     } else {
-      throw new Error("No document found with the given ID");
+      throw new Error('No document found with the given ID');
     }
   } catch (error) {
     throw error;
@@ -135,7 +135,7 @@ export async function fetchCategoriesButton(collectionName) {
     (await getBtnData(collectionName)).map((item) => item.category) //Categoria de todos os pratos publicados
   );
 
-  const btnCategories = (await getBtnData("button")).map((item) => item.parent); //Todas as categorias já criadas
+  const btnCategories = (await getBtnData('button')).map((item) => item.parent); //Todas as categorias já criadas
   // Parent pode ser o pai de um botão ou de um prato se ele tiver um filho
   // botão ele pode ter neto, se o filho dele for um prato ele não pode ter neto, porque
   //prato não pode ter filho
@@ -147,10 +147,10 @@ export async function fetchCategoriesButton(collectionName) {
 export const updateItemsSideDishes = async () => {
   try {
     // Pega todos os acompanhamentos da coleção 'sideDishes'
-    const allSideDishes = await getBtnData("sideDishes");
-    
+    const allSideDishes = await getBtnData('sideDishes');
+
     // Pega todos os itens da coleção 'item'
-    const allItems = await getBtnData("item");
+    const allItems = await getBtnData('item');
 
     // Percorre cada item da coleção 'item'
     for (const item of allItems) {
@@ -178,9 +178,12 @@ export const updateItemsSideDishes = async () => {
       }
 
       // Verifica se houve mudanças no sideDishesElementList
-      const itemRef = doc(db, "item", item.id);
+      const itemRef = doc(db, 'item', item.id);
 
-      if (JSON.stringify(updatedSideDishes) !== JSON.stringify(item.sideDishesElementList)) {
+      if (
+        JSON.stringify(updatedSideDishes) !==
+        JSON.stringify(item.sideDishesElementList)
+      ) {
         // Se houver mudanças, atualiza o item no Firestore
         await updateDoc(itemRef, {
           sideDishesElementList: updatedSideDishes,
@@ -188,8 +191,8 @@ export const updateItemsSideDishes = async () => {
         console.log(`Item atualizado: ${item.title}`);
       }
     }
-    console.log("Atualização concluída.");
+    console.log('Atualização concluída.');
   } catch (error) {
-    console.error("Erro ao atualizar sideDishesElementList: ", error);
+    console.error('Erro ao atualizar sideDishesElementList: ', error);
   }
 };

@@ -1,3 +1,5 @@
 It was created two new features about check out all documents and cancel some specific document
 
  We are able to print the note from result.caminho_danfe
+
+ We have the screen of tax documents almost ready We list all the documents, we can cancel and print each one, and it was fixed the bug regard to debit card it was with the number wrong. and for now i need just update the list of documents in screen when a new documents was created 
