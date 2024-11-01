@@ -1,0 +1,18 @@
+.fiscal-attributes-container .input-container{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.fiscal-attributes-container .input-container select
+.fiscal-attributes-container .input-container select
+{
+    max-height: 58px;
+}
+ .error-form{
+    color:#8f0101;
+}
+
+.fiscal-attributes-container table{
+    width:80%;
+    margin:10px 10%;
+}

@@ -78,6 +78,9 @@ const PrintRequestCustomer = () => {
       <p>
         TOTAL:<span> RS {finalPriceRequest},00</span>
       </p>
+      <Link to="/nfce" className="btn btn-success">
+        Nota Fiscal
+      </Link>
     </div>
   );
 };
