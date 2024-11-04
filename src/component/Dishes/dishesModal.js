@@ -1,5 +1,5 @@
-import React from "react";
-import "../../assets/styles/dishesModal.css";
+import React from 'react';
+import '../../assets/styles/dishesModal.css';
 import {
   getFirestore,
   collection,
@@ -9,15 +9,15 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-} from "firebase/firestore";
-import { app } from "../../config-firebase/firebase.js";
-import { useNavigate, Link } from "react-router-dom";
-import CustomizedPrice from "./CustomizedPrice.js";
+} from 'firebase/firestore';
+import { app } from '../../config-firebase/firebase.js';
+import { useNavigate, Link } from 'react-router-dom';
+import CustomizedPrice from './CustomizedPrice.js';
 
 //React variables
 const DishesModal = ({ item, setModal }) => {
   const [totalPrice, setTotalPrice] = React.useState(Number(item.price));
-  const [currentUser, setCurrentUser] = React.useState("");
+  const [currentUser, setCurrentUser] = React.useState('');
   const [disabledSelect, setDisabledSelect] = React.useState(true);
   const [form, setForm] = React.useState({
     //this object is regarding  to all dishes inside of request
@@ -29,9 +29,9 @@ const DishesModal = ({ item, setModal }) => {
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
-    size: "",
+    size: '',
   });
-  const [itemOnScreen, setItemOnScreen] = React.useState("");
+  const [itemOnScreen, setItemOnScreen] = React.useState('');
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
     []
   );
@@ -41,11 +41,11 @@ const DishesModal = ({ item, setModal }) => {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    if (localStorage.hasOwnProperty("userMenu")) {
-      const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       setCurrentUser(currentUserNew.id);
     }
-    console.log("prato   ", item);
+    console.log('prato   ', item);
   }, [item]);
 
   //load side dishes on  screen
@@ -57,13 +57,6 @@ const DishesModal = ({ item, setModal }) => {
       disabledRadio();
     }
   }, [itemOnScreen]);
-
-  // React.useEffect(() => {
-  //   if (sideDishesListOnScreen.length > 0) {
-  //     setRadioDisabled(false);
-  //     setDisabledSelect(true);
-  //   }
-  // }, [sideDishesListOnScreen]);
 
   const disabledRadio = () => {
     if (itemOnScreen) {
@@ -89,8 +82,8 @@ const DishesModal = ({ item, setModal }) => {
       name: selectedItem.sideDishes,
       price: selectedItem.price,
     });
-    console.log("nome   ", selectedItem.sideDishes);
-    console.log("preço   ", selectedItem.price);
+    console.log('nome   ', selectedItem.sideDishes);
+    console.log('preço   ', selectedItem.price);
   };
 
   //Check number of side dishes to disabled select
@@ -126,7 +119,7 @@ const DishesModal = ({ item, setModal }) => {
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      const userDocRef = doc(db, "user", currentUser);
+      const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
@@ -135,7 +128,7 @@ const DishesModal = ({ item, setModal }) => {
 
         // Acrescente o novo objeto 'form' ao array 'request'
         currentRequests.push(form);
-        console.log("form   ", form);
+        console.log('form   ', form);
 
         // Atualize o documento com o novo array 'request'
         await updateDoc(userDocRef, {
@@ -159,13 +152,14 @@ const DishesModal = ({ item, setModal }) => {
       });
 
       // Redireciona o usuário para a página de requisições
-      navigate("/request");
+      navigate('/request');
     } catch (error) {
       console.log(error);
     }
   }
 
   function onPriceChange(item) {
+    console.log('O que vem do customize price   ', item);
     form.size = item.label;
 
     setTotalPrice(Number(item.price));
@@ -220,8 +214,8 @@ const DishesModal = ({ item, setModal }) => {
             <div
               className={
                 item.maxLimitSideDishes === 0
-                  ? "side-dishes-list"
-                  : "limit-dishes"
+                  ? 'side-dishes-list'
+                  : 'limit-dishes'
               }
             >
               {item.maxLimitSideDishes == 0 ? (
@@ -252,14 +246,14 @@ const DishesModal = ({ item, setModal }) => {
                       {item.sideDishesElementList &&
                         item.sideDishesElementList.map((item, index) => (
                           <option key={index} value={index}>
-                            {" "}
+                            {' '}
                             {item.sideDishes}
                           </option>
                         ))}
                     </select>
                   ) : (
                     <p>
-                      O Numero máximo de acompanhamentos é{" "}
+                      O Numero máximo de acompanhamentos é{' '}
                       {item.maxLimitSideDishes}
                     </p>
                   )}
@@ -272,14 +266,14 @@ const DishesModal = ({ item, setModal }) => {
           {sideDishesListOnScreen &&
             sideDishesListOnScreen.map((item, index) => (
               <div className="side-dishe">
-                <p>{item.name}</p> <p> {item.price},00</p>{" "}
+                <p>{item.name}</p> <p> {item.price},00</p>{' '}
                 <button
                   type="button"
                   className="btn-close-side-dishes"
                   onClick={() => removeSideDish(index)}
                 >
                   x
-                </button>{" "}
+                </button>{' '}
               </div>
             ))}
         </div>
