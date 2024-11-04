@@ -7,3 +7,5 @@ It was created two new features about check out all documents and cancel some sp
  list of tax documents are updated in screen 
 
  The FiscalAttributes component was integrated in main branch
+
+ Today theres is no way to log out of an anonymous client because the local storage of the phone is never cleaned and this has caused many bugs in the system. Lide the same cliente who was logged in as an anonyous one wants to switch to legal client and cannot. Now when the client record does not exist, the local storage of this phone is cleared and it is forwarded to login screen

@@ -1,21 +1,21 @@
-import React from "react";
-import CarrosselImages from "../component/carouselComponent";
-import NestedBtn from "../component/nestedBtn";
-import { getBtnData, getOneItemColleciton, deleteData } from "../api/Api";
-import MenuButton from "../component/menuHamburguerButton";
-import RequestModal from "../component/Request/requestModal.js";
-import { Link, useNavigate } from "react-router-dom";
-import "../assets/styles/mainMenu.css";
-import { common } from "@mui/material/colors";
-import { GlobalContext } from "../GlobalContext";
-import { CheckUser, updatingSideDishes } from "../Helpers/Helpers.js";
-import WarningMessage from "../component/WarningMessages";
+import React from 'react';
+import CarrosselImages from '../component/carouselComponent';
+import NestedBtn from '../component/nestedBtn';
+import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
+import MenuButton from '../component/menuHamburguerButton';
+import RequestModal from '../component/Request/requestModal.js';
+import { Link, useNavigate } from 'react-router-dom';
+import '../assets/styles/mainMenu.css';
+import { common } from '@mui/material/colors';
+import { GlobalContext } from '../GlobalContext';
+import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
+import WarningMessage from '../component/WarningMessages';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
-  const [nameClient, setNameClient] = React.useState("");
+  const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
@@ -29,23 +29,23 @@ function MainMenu() {
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
-          getBtnData("button"),
-          getBtnData("item"),
+          getBtnData('button'),
+          getBtnData('item'),
         ]);
         setMenuButton(data);
         setDishes(dataItem);
         grabClient();
       } catch (error) {
-        console.error("Erro fetching data", error);
+        console.error('Erro fetching data', error);
       }
     };
     fetchData();
-  }, []);
+  }, [global.authorizated]);
 
   const logoutCustomer = () => {
     if (global.isToten) {
       if (logoutAdminPopup) {
-        localStorage.removeItem("userMenu");
+        localStorage.removeItem('userMenu');
         global.setAuthorizated(false);
         CheckLogin();
       }
@@ -53,19 +53,19 @@ function MainMenu() {
     }
   };
   async function CheckLogin() {
-    const userId = await CheckUser("userMenu");
+    const userId = await CheckUser('userMenu');
     navigate(userId);
   }
 
   function grabClient() {
-    if (localStorage.hasOwnProperty("userMenu")) {
-      const nameCustomer = JSON.parse(localStorage.getItem("userMenu"));
-      console.log("nameCustomer   ", nameCustomer);
-      if (nameCustomer.name === "anonimo") {
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const nameCustomer = JSON.parse(localStorage.getItem('userMenu'));
+      console.log('nameCustomer   ', nameCustomer);
+      if (nameCustomer.name === 'anonimo') {
         deleteAnonymousWithnoItem(nameCustomer.id);
       }
 
-      let firstName = nameCustomer.name.split(" ")[0];
+      let firstName = nameCustomer.name.split(' ')[0];
       firstName =
         firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
       setNameClient(firstName);
@@ -76,15 +76,15 @@ function MainMenu() {
     // Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
     setTimeout(async () => {
       try {
-        const data = await getOneItemColleciton("user", id);
+        const data = await getOneItemColleciton('user', id);
         if (!data?.request || data?.request.length === 0) {
-          await deleteData("user", id);
-          localStorage.removeItem("userMenu");
+          await deleteData('user', id);
+          localStorage.removeItem('userMenu');
           global.setAuthorizated(false);
           CheckLogin();
         }
       } catch (error) {
-        console.error("Erro ao buscar e deletar dados", error);
+        console.error('Erro ao buscar e deletar dados', error);
       }
     }, 1200000);
   };
@@ -101,7 +101,7 @@ function MainMenu() {
         )}
       </div>
 
-      <div ref={containerRef} style={{ height: "80vh", overflowY: "auto" }}>
+      <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         {true && <CarrosselImages />}
         <div className="container-btn">
           {nameClient && (
@@ -125,7 +125,7 @@ function MainMenu() {
               <div key={index}>
                 <NestedBtn
                   containerRef={containerRef}
-                  parent={"main"}
+                  parent={'main'}
                   item={item}
                   menuButton={menuButton}
                   dishes={dishes}

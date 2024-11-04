@@ -27,6 +27,12 @@ justify-content: end;
     align-items: center;
     margin-bottom: 15px;
 }
+.container-requestListToBePrepared .user-container .customer-profile-button{
+    display: flex;
+    justify-content: center;
+    margin-top:10px;
+}
+
 
 .container-requestListToBePrepared .user-container .btn-status{
     display: flex;
