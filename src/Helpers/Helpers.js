@@ -15,7 +15,6 @@ export function getFirstFourLetters(inputString, max) {
 
 export async function CheckUser(check) {
   if (localStorage.hasOwnProperty(check)) {
-    debugger;
     const userMenu = JSON.parse(localStorage.getItem(check));
     const userList = await getBtnData('user');
     const currentUser = userList.filter((item) => item.id === userMenu.id);
