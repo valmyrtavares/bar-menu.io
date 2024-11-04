@@ -1,21 +1,22 @@
-import React from "react";
-import { getBtnData, deleteData, getOneItemColleciton } from "../../api/Api.js";
-import { app } from "../../config-firebase/firebase.js";
-import PaymentMethod from "../Payment/PaymentMethod";
-import { fetchInDataChanges } from "../../api/Api.js";
-import { getFirestore, setDoc, doc } from "firebase/firestore";
-import "../../assets/styles/RequestListToBePrepared.css";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
+import { app } from '../../config-firebase/firebase.js';
+import PaymentMethod from '../Payment/PaymentMethod';
+import { fetchInDataChanges } from '../../api/Api.js';
+import { getFirestore, setDoc, doc } from 'firebase/firestore';
+import '../../assets/styles/RequestListToBePrepared.css';
+import { Link } from 'react-router-dom';
 import {
   getFirstFourLetters,
   requestSorter,
   firstNameClient,
-} from "../../Helpers/Helpers.js";
-import RecipeModal from "./RecipeModal";
-import { cardClasses } from "@mui/material";
-import DefaultComumMessage from "../Messages/DefaultComumMessage";
-import { GlobalContext } from "../../GlobalContext";
-import { useNavigate } from "react-router-dom";
+} from '../../Helpers/Helpers.js';
+import RecipeModal from './RecipeModal';
+
+import DefaultComumMessage from '../Messages/DefaultComumMessage';
+import { GlobalContext } from '../../GlobalContext';
+import { useNavigate } from 'react-router-dom';
+import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -27,16 +28,16 @@ const RequestListToBePrepared = () => {
   const navigate = useNavigate();
   const [recipeModal, setRecipeModal] = React.useState({
     openModal: false,
-    id: "",
+    id: '',
   });
 
   // const { isOpen, toggle } = useModal();
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges("request", (data) => {
+    const unsubscribe = fetchInDataChanges('request', (data) => {
       let requestList = data.filter((item) => item.orderDelivered == false);
       requestList = requestSorter(requestList);
-      console.log("requestList   ", requestList);
+      console.log('requestList   ', requestList);
 
       setRequestDoneList(requestList);
     });
@@ -44,17 +45,17 @@ const RequestListToBePrepared = () => {
   }, []);
 
   const fetchUserRequests = async () => {
-    let requestList = await getBtnData("request");
+    let requestList = await getBtnData('request');
     requestList = requestList.filter((item) => item.orderDelivered == false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
   };
 
   const handleDeleteRequest = async (id) => {
-    const data = await getOneItemColleciton("request", id);
-    await deleteData("request", id);
-    if (data.name === "anonimo") {
-      await deleteData("user", data.idUser);
+    const data = await getOneItemColleciton('request', id);
+    await deleteData('request', id);
+    if (data.name === 'anonimo') {
+      await deleteData('user', data.idUser);
     }
     setShowDefaultMessage(false); // Fecha o modal após excluir
   };
@@ -70,9 +71,9 @@ const RequestListToBePrepared = () => {
 
   const RequestDone = (item) => {
     item.done = false;
-    setDoc(doc(db, "request", item.id), item)
+    setDoc(doc(db, 'request', item.id), item)
       .then(() => {
-        console.log("Document successfully updated !");
+        console.log('Document successfully updated !');
         fetchUserRequests();
       })
       .catch((error) => {
@@ -82,9 +83,9 @@ const RequestListToBePrepared = () => {
 
   const handlePaymentMethodChange = (method, item) => {
     item.paymentMethod = method;
-    setDoc(doc(db, "request", item.id), item)
+    setDoc(doc(db, 'request', item.id), item)
       .then(() => {
-        console.log("Document successfully updated !");
+        console.log('Document successfully updated !');
         fetchUserRequests();
       })
       .catch((error) => {
@@ -94,26 +95,26 @@ const RequestListToBePrepared = () => {
 
   const changeStatusPaid = (item) => {
     item.paymentDone = true;
-    setDoc(doc(db, "request", item.id), item)
+    setDoc(doc(db, 'request', item.id), item)
       .then(() => {
-        console.log("Document successfully updated !");
+        console.log('Document successfully updated !');
         fetchUserRequests();
         global.setUserNewRequest(item);
-        navigate("/print");
+        navigate('/print');
       })
       .catch((error) => {
         console.log(error);
       });
   };
   const orderDelivery = (item) => {
-    if (item.name === "anonimo") {
-      deleteData("user", item.idUser);
+    if (item.name === 'anonimo') {
+      deleteData('user', item.idUser);
     }
 
     item.orderDelivered = true;
-    setDoc(doc(db, "request", item.id), item)
+    setDoc(doc(db, 'request', item.id), item)
       .then(() => {
-        console.log("Document successfully updated !");
+        console.log('Document successfully updated !');
         fetchUserRequests();
       })
       .catch((error) => {
@@ -145,7 +146,10 @@ const RequestListToBePrepared = () => {
                 <p>
                   <span>Data</span> {item.dateTime}
                 </p>
-                <h2>Valor final {item.finalPriceRequest}</h2>
+                <h2>Valor final R$ {item.finalPriceRequest},00</h2>
+                <div className="customer-profile-button">
+                  <ButtonCustomerProfile item={item} />
+                </div>
                 <PaymentMethod
                   item={item}
                   onPaymentMethodChange={handlePaymentMethodChange}
@@ -169,21 +173,21 @@ const RequestListToBePrepared = () => {
                 </div>
                 <button
                   disabled={!item.paymentMethod}
-                  className={item.paymentDone ? "done" : "pendent"}
+                  className={item.paymentDone ? 'done' : 'pendent'}
                   onClick={() => changeStatusPaid(item)}
                 >
                   Pago
                 </button>
                 <button
                   disabled={!item.paymentDone}
-                  className={item.done ? "pendent" : "done"}
+                  className={item.done ? 'pendent' : 'done'}
                   onClick={() => RequestDone(item)}
                 >
                   Pronto
                 </button>
                 <button
                   disabled={item.done}
-                  className={item.orderDelivered ? "done" : "pendent"}
+                  className={item.orderDelivered ? 'done' : 'pendent'}
                   onClick={() => orderDelivery(item)}
                 >
                   Entregue
