@@ -3,7 +3,13 @@ import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
 import { app } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod';
 import { fetchInDataChanges } from '../../api/Api.js';
-import { getFirestore, setDoc, doc } from 'firebase/firestore';
+import {
+  getFirestore,
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import '../../assets/styles/RequestListToBePrepared.css';
 import { Link } from 'react-router-dom';
 import {
@@ -93,6 +99,39 @@ const RequestListToBePrepared = () => {
       });
   };
 
+  const descontFinalPrice = async (descont, idRequest) => {
+    try {
+      const requestRef = doc(db, 'request', idRequest);
+
+      const requestSnap = await getDoc(requestRef);
+
+      if (requestSnap.exists()) {
+        // Obtém o valor atual de finalPriceRequest
+        const currentFinalPrice = requestSnap.data().finalPriceRequest;
+
+        // Calcula o novo valor subtraindo o desconto
+        const updatedFinalPrice = currentFinalPrice - descont;
+
+        // Atualiza o documento no Firestore com o novo valor
+        await updateDoc(requestRef, {
+          finalPriceRequest: updatedFinalPrice,
+        });
+        console.log(
+          'finalPriceRequest atualizado com sucesso para:',
+          updatedFinalPrice
+        );
+
+        // Aqui você pode atualizar o estado local para refletir a mudança imediatamente na interface
+        // Exemplo:
+        // fetchUserRequests(); // Supondo que setFinalPriceRequest seja um estado
+      } else {
+        console.log('Documento não encontrado!');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar finalPriceRequest:', error);
+    }
+  };
+
   const changeStatusPaid = (item) => {
     item.paymentDone = true;
     setDoc(doc(db, 'request', item.id), item)
@@ -148,7 +187,11 @@ const RequestListToBePrepared = () => {
                 </p>
                 <h2>Valor final R$ {item.finalPriceRequest},00</h2>
                 <div className="customer-profile-button">
-                  <ButtonCustomerProfile item={item} />
+                  <ButtonCustomerProfile
+                    item={item}
+                    request={item.request}
+                    descontFinalPrice={descontFinalPrice}
+                  />
                 </div>
                 <PaymentMethod
                   item={item}

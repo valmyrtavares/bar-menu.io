@@ -1,8 +1,11 @@
-button{
-    padding: 2px 10px ;
+@import 'variables.css';
+
+.button-profile{
+    padding: 4px 9px !important ;
         border: none;
+        color:black;
       
 }
 .registrated{
-    background-color: aqua;
+    background-color: var(--btn-color);
 }

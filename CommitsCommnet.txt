@@ -9,3 +9,7 @@ It was created two new features about check out all documents and cancel some sp
  The FiscalAttributes component was integrated in main branch
 
  Today theres is no way to log out of an anonymous client because the local storage of the phone is never cleaned and this has caused many bugs in the system. Lide the same cliente who was logged in as an anonyous one wants to switch to legal client and cannot. Now when the client record does not exist, the local storage of this phone is cleared and it is forwarded to login screen
+
+ If was implemented a new feature about promotion
+
+ It was implemented a new feature of voucher promotion. For now we have one button in the kitchen screen that show if the customer is or not a register client . If not the label of button is writed client if In the case when the customer is regitred the label is the name of the client. If is a client the employ can click and give the descont of voucher, just if it is a register client, else there is no descont to this customer Eech client just can participate one turn of this promotion. 
