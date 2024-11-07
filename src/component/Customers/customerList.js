@@ -1,16 +1,19 @@
-import React from "react";
-import "../../assets/styles/customerList.css";
-import { getBtnData, deleteData } from "../../api/Api";
-import { getFirstFourLetters, firstNameClient } from "../../Helpers/Helpers";
+import React from 'react';
+import '../../assets/styles/customerList.css';
+import { getBtnData, deleteData } from '../../api/Api';
+import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
+import EachCustomer from './eachCustomer';
 
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
-  const [customer, setCustomer] = React.useState("");
+  const [customer, setCustomer] = React.useState('');
   const [originalCustomerList, setOriginalCustomerList] = React.useState([]);
+  const [oneClient, setOneClient] = React.useState({});
+  const [showPopup, setShowPopup] = React.useState(false);
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
-      const data = await getBtnData("user");
+      const data = await getBtnData('user');
       setCustomerList(data);
       setOriginalCustomerList(data);
     };
@@ -18,11 +21,11 @@ const CustomerList = () => {
   }, []);
 
   const deleteAnonymousCustomer = async () => {
-    const data = await getBtnData("user");
-    const excludeCustomer = data.filter((item) => item.name === "anonimo");
+    const data = await getBtnData('user');
+    const excludeCustomer = data.filter((item) => item.name === 'anonimo');
     if (excludeCustomer.length > 0) {
       await Promise.all(
-        excludeCustomer.map((item) => deleteData("user", item.id))
+        excludeCustomer.map((item) => deleteData('user', item.id))
       );
     }
   };
@@ -31,21 +34,35 @@ const CustomerList = () => {
     const searchValue = target.value.toLowerCase();
     setCustomer(searchValue);
 
-    if (searchValue === "") {
+    if (searchValue === '') {
       setCustomerList(originalCustomerList);
     } else {
-      const filtered = originalCustomerList.filter(
-        (customer) =>
-          (customer.name &&
-            customer.name.toLowerCase().includes(searchValue)) ||
-          (customer.cpf && customer.cpf.toLowerCase().includes(searchValue))
-      );
+      const filtered = originalCustomerList.filter((customer) => {
+        const nameMatch =
+          customer.name && customer.name.toLowerCase().includes(searchValue);
+        const cpfMatch =
+          customer.cpf && customer.cpf.toLowerCase().includes(searchValue);
+        const birthdayMatch =
+          customer.birthday &&
+          customer.birthday.toLowerCase().includes(searchValue);
+
+        return nameMatch || cpfMatch || birthdayMatch;
+      });
+
       setCustomerList(filtered);
     }
   };
 
+  const eachCustomer = (client) => {
+    setOneClient(client);
+    setShowPopup(true);
+  };
+
   return (
     <div className="customerList-container">
+      {showPopup && (
+        <EachCustomer oneClient={oneClient} setShowPopup={setShowPopup} />
+      )}
       <div className="search-container">
         <input
           type="text"
@@ -55,6 +72,11 @@ const CustomerList = () => {
         />
       </div>
       <div className="button-title-container">
+        {customerList && customerList.length > 0 && (
+          <h5>
+            <span>{customerList.length}</span> Clientes
+          </h5>
+        )}
         <h1>Lista de Clientes</h1>
         <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
       </div>
@@ -63,16 +85,16 @@ const CustomerList = () => {
           <th>Nome</th>
           <th>CPF</th>
           <th>Celular</th>
-          <th>Email</th>
+          <th>Aniverário</th>
         </tr>
         {customerList &&
           customerList.length > 0 &&
           customerList.map((item, index) => (
-            <tr>
+            <tr onClick={() => eachCustomer(item)}>
               <td>{firstNameClient(item.name)}</td>
               <td>{item.cpf}</td>
               <td>{item.phone}</td>
-              <td>{item.email}</td>
+              <td>{item.birthday}</td>
             </tr>
           ))}
       </table>

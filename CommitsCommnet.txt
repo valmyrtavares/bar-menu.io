@@ -13,3 +13,5 @@ It was created two new features about check out all documents and cancel some sp
  If was implemented a new feature about promotion
 
  It was implemented a new feature of voucher promotion. For now we have one button in the kitchen screen that show if the customer is or not a register client . If not the label of button is writed client if In the case when the customer is regitred the label is the name of the client. If is a client the employ can click and give the descont of voucher, just if it is a register client, else there is no descont to this customer Eech client just can participate one turn of this promotion. 
+
+ It was created a eachCustomer component that show a sumary with all customer' s data and all dishes requested for him. In this screen still  is displayed the all requests's date done and the value of each one. This component stils this component still copy the phone number and anothers customer's data with one mouse click. The eachCustomer component is called inside of customerList component with one mouse click
