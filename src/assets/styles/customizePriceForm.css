@@ -1,14 +1,16 @@
 @import "variables";
 
 .container-custome-price{
-    width: 100%;       
+    width: 206%;       
     background-color:var(--secundary-bg-color);    
+    height: 80vh;      
+    overflow-y: auto;       
 }
 
 .container-custome-price .wrapper-inputs{
     padding:5% 5%;
     display:grid;
-    grid-template-columns: 2fr 5fr;
+    grid-template-columns: 5fr 2fr;
     column-gap: 10px;
     align-items: center;
     

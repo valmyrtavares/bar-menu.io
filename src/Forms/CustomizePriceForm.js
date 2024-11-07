@@ -31,41 +31,45 @@ function CustomizePriceForm({
     },
   });
   const [labelPrice, setLabelPrice] = React.useState('');
-  const [showPopupCostPrice, setShowPopupCostAndPrice] = React.useState(false);
+  const [showPopupCostPrice, setShowPopupCostAndPrice] = React.useState(true);
+
+  // React.useEffect(() => {
+  //   if (customizedPriceObj) {
+  //     if (
+  //       customizedPriceObj &&
+  //       Object.keys(customizedPriceObj).length > 0 &&
+  //       customizedPriceObj.firstPrice.price
+  //     ) {
+  //       setFormPrice(customizedPriceObj);
+  //     }
+  //   }
+  //   setFormPrice({
+  //     firstPrice: {
+  //       price: 0,
+  //       cost: 0,
+  //       percentage: 0,
+  //       label: '',
+  //     },
+
+  //     secondPrice: {
+  //       price: 0,
+  //       cost: 0,
+  //       percentage: 0,
+  //       label: '',
+  //     },
+
+  //     thirdPrice: {
+  //       price: 0,
+  //       cost: 0,
+  //       percentage: 0,
+  //       label: '',
+  //     },
+  //   });
+  // }, []);
 
   React.useEffect(() => {
-    if (customizedPriceObj) {
-      if (
-        customizedPriceObj &&
-        Object.keys(customizedPriceObj).length > 0 &&
-        customizedPriceObj.firstPrice.price
-      ) {
-        setFormPrice(customizedPriceObj);
-      }
-    }
-    setFormPrice({
-      firstPrice: {
-        price: 0,
-        cost: 0,
-        percentage: 0,
-        label: '',
-      },
-
-      secondPrice: {
-        price: 0,
-        cost: 0,
-        percentage: 0,
-        label: '',
-      },
-
-      thirdPrice: {
-        price: 0,
-        cost: 0,
-        percentage: 0,
-        label: '',
-      },
-    });
-  }, []);
+    console.log('FORM ATUALIZADO NO USEEFFCTS    ', formPrice);
+  }, [formPrice]);
 
   const CheckonPriceChange = (obj) => {
     console.log(obj);
@@ -75,52 +79,30 @@ function CustomizePriceForm({
     setShowPopupCustomizePrice(false);
   };
 
-  const handleChange = ({ target }) => {
-    const { id, value } = target;
+  const handleChange = (e, priceType) => {
+    const { id, value } = e.target;
 
-    if (id === 'firstLabel') {
-      setFormPrice((prevFormPrice) => ({
-        ...prevFormPrice,
-        firstPrice: {
-          ...prevFormPrice.firstPrice,
-          label: value, // Atualiza apenas o campo label
-        },
-      }));
-    } else if (id === 'secondLabel') {
-      setFormPrice((prevFormPrice) => ({
-        ...prevFormPrice,
-        secondPrice: {
-          ...prevFormPrice.secondPrice,
-          label: value, // Atualiza apenas o campo label
-        },
-      }));
-    } else if (id === 'thirdLabel') {
-      setFormPrice((prevFormPrice) => ({
-        ...prevFormPrice,
-        thirdPrice: {
-          ...prevFormPrice.thirdPrice,
-          label: value, // Atualiza apenas o campo label
-        },
-      }));
-    }
+    setFormPrice((prevFormPrice) => ({
+      ...prevFormPrice,
+      [priceType]: {
+        ...prevFormPrice[priceType],
+        [id]: value, // Atualiza apenas o campo específico (como "label", "price", etc.)
+      },
+    }));
   };
 
   const sendPriceObj = (obj) => {
-    debugger;
     setLabelPrice(obj);
-
     setShowPopupCostAndPrice(true);
   };
 
-  const addPriceObj = (priceAndCost) => {
-    console.log('COMO CHEGA A DATA DO COMP   ', priceAndCost);
-    console.log('formPrice antes da atualização   ', formPrice);
-    setFormPrice({
-      ...formPrice,
-      [labelPrice]: priceAndCost,
-    });
-    console.log('FORM PRICE    ', formPrice);
-  };
+  // const addPriceObj = (priceAndCost) => {
+  //   setFormPrice({
+  //     ...formPrice,
+  //     [labelPrice]: priceAndCost,
+  //   });
+  //   console.log('FORM PRICE    ', formPrice);
+  // };
 
   React.useEffect(() => {
     if (customizedPriceObj && Object.keys(customizedPriceObj).length > 0) {
@@ -151,69 +133,102 @@ function CustomizePriceForm({
     console.log('FORM PRICE   ', formPrice);
   };
 
+  const handleFatherBlur = (e) => {
+    const { id, value } = e.target;
+    debugger;
+    // Converte os valores de form para números para garantir que não sejam strings
+    const cost = parseFloat(formPrice.cost) || 0;
+    const percentage = parseFloat(formPrice.percentage) || 0;
+    const price = parseFloat(formPrice.price) || 0;
+
+    // Cenário 1: Se preencher o custo e a porcentagem, calcula o preço
+    if (id === 'percentage' && cost > 0) {
+      const calculatedPrice = cost + (cost * percentage) / 100;
+      setFormPrice((prevForm) => ({
+        ...prevForm,
+        price: calculatedPrice.toFixed(2), // Calcula o preço
+      }));
+    }
+
+    // Cenário 2: Se preencher o custo e o preço, calcula a porcentagem correta
+    if (id === 'price' && cost > 0) {
+      const calculatedPercentage = ((price - cost) / cost) * 100;
+      setFormPrice((prevForm) => ({
+        ...prevForm,
+        percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta
+      }));
+    }
+
+    // Mantém a lógica anterior para cálculo básico de porcentagem com base em preço e custo
+    if (id === 'cost' || id === 'price') {
+      if (price > 0 && cost > 0) {
+        const calculatedPercentage = ((price - cost) / cost) * 100;
+        setFormPrice((prevForm) => ({
+          ...prevForm,
+          percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta de lucro
+        }));
+      }
+    }
+  };
+
   //  HTML++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   return (
     <div className="container-custome-price">
-      <div className="close-btn">
-        <button onClick={close}>X</button>
-      </div>
+      {
+        <div className="close-btn">
+          <button onClick={close}>X</button>
+        </div>
+      }
       <Title Preço mainTitle="Preço Customizado" />
 
-      {showPopupCostPrice && (
-        <PriceAndExpenseBuilder
-          objPriceCost={formPrice}
-          setShowPopupCostAndPrice={setShowPopupCostAndPrice}
-          labelPrice={labelPrice}
-          addPriceObj={addPriceObj}
-        />
-      )}
       <div className="wrapper-inputs">
-        <button
-          onClick={() => {
-            sendPriceObj('firstPrice');
-          }}
-        >
-          Preço/Custo
-        </button>
+        {
+          <PriceAndExpenseBuilder
+            formPrice={formPrice}
+            labelPrice="firstPrice"
+            handleFatherChange={handleChange}
+            handleFatherBlur={handleFatherBlur}
+          />
+        }
         <Input
-          id="firstLabel"
+          id="label"
           label="Descrição do primeiro preço"
-          value={formPrice?.firstPrice?.label}
+          value={formPrice.label}
           type="text"
-          onChange={handleChange}
+          onChange={(e) => handleChange(e, 'firstPrice')}
         />
       </div>
       <div className="wrapper-inputs">
-        <button
-          onClick={() => {
-            sendPriceObj('secondPrice');
-          }}
-        >
-          Preço/Custo
-        </button>
+        {showPopupCostPrice && (
+          <PriceAndExpenseBuilder
+            formPrice={formPrice}
+            labelPrice="secondPrice"
+            handleFatherChange={handleFatherBlur}
+          />
+        )}
         <Input
-          id="secondLabel"
-          value={formPrice?.secondPrice?.label}
+          id="label"
+          value={formPrice.label}
           label="Descrição do segundo preço"
           type="text"
-          onChange={handleChange}
+          onChange={(e) => handleChange(e, 'secondPrice')}
         />
       </div>
       <div className="wrapper-inputs">
-        <button
-          onClick={() => {
-            sendPriceObj('thirdPrice');
-          }}
-        >
-          Preço/Custo
-        </button>
+        {showPopupCostPrice && (
+          <PriceAndExpenseBuilder
+            formPrice={formPrice}
+            labelPrice="thirdPrice"
+            handleFatherChange={handleFatherBlur}
+          />
+        )}
         <Input
-          id="thirdLabel"
-          value={formPrice?.thirdPrice?.label}
+          id="lable"
+          value={formPrice.label}
           label="Descrição do terceiro preço"
           type="text"
-          onChange={handleChange}
+          onChange={(e) => handleChange(e, 'thirdPrice')}
         />
       </div>
       <button onClick={testando}>Botão de teste</button>

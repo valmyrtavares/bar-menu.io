@@ -198,8 +198,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     setForm((prevForm) => ({
       ...prevForm,
       costPriceObj: obj,
+      price: obj.price,
     }));
+    setShowPopupCostAndPrice(false);
   };
+
   React.useEffect(() => {
     if (form.costPriceObj) {
       console.log('form   ', form);
@@ -273,7 +276,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             type="button"
             onClick={() => setShowPopupCostAndPrice(true)}
           >
-            Preço/Custo R${form.price}
+            Preço R$ {form.price},00
           </button>
           <button
             className="btn btn-success"

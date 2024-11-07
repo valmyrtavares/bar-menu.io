@@ -1,10 +1,8 @@
 @import "variables.css";
 
 .Price-cost-container{
-    position: fixed;
-    top:30%;
-    left: 15%;
-    width: 70%;
+   
+   
     background:#c68ccd;
     max-width: 700px;
     box-shadow: 6px 5px #8888889c;
