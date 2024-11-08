@@ -71,9 +71,9 @@ function CustomizePriceForm({
     console.log('FORM ATUALIZADO NO USEEFFCTS    ', formPrice);
   }, [formPrice]);
 
-  const CheckonPriceChange = (obj) => {
-    console.log(obj);
-  };
+  // const onPriceChange = (obj) => {
+  //   console.log(obj);
+  // };
 
   const close = () => {
     setShowPopupCustomizePrice(false);
@@ -133,20 +133,22 @@ function CustomizePriceForm({
     console.log('FORM PRICE   ', formPrice);
   };
 
-  const handleFatherBlur = (e) => {
+  const handleFatherBlur = (e, priceType) => {
     const { id, value } = e.target;
-    debugger;
-    // Converte os valores de form para números para garantir que não sejam strings
-    const cost = parseFloat(formPrice.cost) || 0;
-    const percentage = parseFloat(formPrice.percentage) || 0;
-    const price = parseFloat(formPrice.price) || 0;
+    // Pega os valores atuais de cost, percentage e price da coleção especificada (ex.: firstPrice, secondPrice)
+    const cost = parseFloat(formPrice[priceType].cost) || 0;
+    const percentage = parseFloat(formPrice[priceType].percentage) || 0;
+    const price = parseFloat(formPrice[priceType].price) || 0;
 
     // Cenário 1: Se preencher o custo e a porcentagem, calcula o preço
     if (id === 'percentage' && cost > 0) {
       const calculatedPrice = cost + (cost * percentage) / 100;
       setFormPrice((prevForm) => ({
         ...prevForm,
-        price: calculatedPrice.toFixed(2), // Calcula o preço
+        [priceType]: {
+          ...prevForm[priceType],
+          price: calculatedPrice.toFixed(2), // Calcula e atualiza o preço
+        },
       }));
     }
 
@@ -155,7 +157,10 @@ function CustomizePriceForm({
       const calculatedPercentage = ((price - cost) / cost) * 100;
       setFormPrice((prevForm) => ({
         ...prevForm,
-        percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta
+        [priceType]: {
+          ...prevForm[priceType],
+          percentage: calculatedPercentage.toFixed(2), // Calcula e atualiza a porcentagem
+        },
       }));
     }
 
@@ -165,7 +170,10 @@ function CustomizePriceForm({
         const calculatedPercentage = ((price - cost) / cost) * 100;
         setFormPrice((prevForm) => ({
           ...prevForm,
-          percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta de lucro
+          [priceType]: {
+            ...prevForm[priceType],
+            percentage: calculatedPercentage.toFixed(2), // Calcula e atualiza a porcentagem correta de lucro
+          },
         }));
       }
     }
@@ -204,7 +212,8 @@ function CustomizePriceForm({
           <PriceAndExpenseBuilder
             formPrice={formPrice}
             labelPrice="secondPrice"
-            handleFatherChange={handleFatherBlur}
+            handleFatherChange={handleChange}
+            handleFatherBlur={handleFatherBlur}
           />
         )}
         <Input
@@ -220,11 +229,12 @@ function CustomizePriceForm({
           <PriceAndExpenseBuilder
             formPrice={formPrice}
             labelPrice="thirdPrice"
-            handleFatherChange={handleFatherBlur}
+            handleFatherChange={handleChange}
+            handleFatherBlur={handleFatherBlur}
           />
         )}
         <Input
-          id="lable"
+          id="label"
           value={formPrice.label}
           label="Descrição do terceiro preço"
           type="text"
@@ -235,7 +245,7 @@ function CustomizePriceForm({
       <button
         className="customized-price-btn"
         type="button"
-        onClick={() => CheckonPriceChange(formPrice)}
+        onClick={() => onPriceChange(formPrice)}
       >
         Enviar
       </button>

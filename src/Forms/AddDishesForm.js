@@ -28,6 +28,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     category: '',
     comment: '',
     price: 0,
+    costProfitMargin: {},
     image: '',
     recipe: {},
     costPriceObj: {},
@@ -36,6 +37,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     sideDishesElementList: [],
     maxLimitSideDishes: 0,
     CustomizedPrice: {},
+    costProfitMarginCustomized: {},
   });
   const [categories, setCategories] = React.useState([]);
   const [url, setUrl] = React.useState('');
@@ -48,6 +50,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
+  const [costProfitMarginCustomized, setCostProfitMarginCustomized] =
+    React.useState({});
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
   const { handleBlur } = useFormValidation();
@@ -179,15 +183,36 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   React.useEffect(() => {
     if (customizedPriceObj) {
+      console.log('Customized Price oBJ   ', customizedPriceObj);
       setForm((prevForm) => ({
         ...prevForm,
         CustomizedPrice: customizedPriceObj,
+        costProfitMarginCustomized: costProfitMarginCustomized,
       }));
     }
   }, [customizedPriceObj]);
 
+  React.useEffect(() => {
+    if (
+      costProfitMarginCustomized &&
+      costProfitMarginCustomized.firstPrice &&
+      costProfitMarginCustomized.secondPrice
+    ) {
+      console.log('costProfitMarginCustomized  ', costProfitMarginCustomized);
+      setCustomizedPriceObj({
+        firstLabel: costProfitMarginCustomized.firstPrice?.label,
+        firstPrice: costProfitMarginCustomized.firstPrice?.price,
+        secondLabel: costProfitMarginCustomized.secondPrice?.label,
+        secondPrice: costProfitMarginCustomized.secondPrice?.price,
+        thirdLabel: costProfitMarginCustomized.thirdPrice?.label,
+        thirdPrice: costProfitMarginCustomized.thirdPrice?.price,
+      });
+      console.log('customizedPriceObj    ', customizedPriceObj);
+    }
+  }, [costProfitMarginCustomized]);
+
   const onPriceChange = (customizedPriceChanged) => {
-    setCustomizedPriceObj(customizedPriceChanged);
+    setCostProfitMarginCustomized(customizedPriceChanged);
     setShowPopupCustomizePrice(false);
   };
 

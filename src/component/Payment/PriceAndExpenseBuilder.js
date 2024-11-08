@@ -20,15 +20,24 @@ const PriceAndExpenseBuilder = ({
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setForm({
-      ...form,
+
+    // Atualiza o estado `form` com o novo valor do campo alterado.
+    setForm((prevForm) => ({
+      ...prevForm,
       [id]: value,
-    });
+    }));
+
+    // Se `handleFatherChange` estiver disponível, chama a função passando o evento
+    // para atualizar `formPrice` no componente pai.
+    if (handleFatherChange) {
+      handleFatherChange({ target: { id, value } }, labelPrice);
+    }
   };
+
   React.useEffect(() => {
     if (formPrice && labelPrice) {
       const selectedPriceObj = formPrice[labelPrice];
-      if (selectedPriceObj.price !== 0) {
+      if (selectedPriceObj && selectedPriceObj.price !== undefined) {
         setForm({
           price: selectedPriceObj.price,
           cost: selectedPriceObj.cost,
@@ -91,38 +100,50 @@ const PriceAndExpenseBuilder = ({
         <Input
           id="price"
           label="Preço"
-          value={formPrice ? formPrice.price : form.price}
+          value={form.price}
           type="number"
           onChange={
             handleFatherChange
               ? (e) => handleFatherChange(e, labelPrice)
               : handleChange
           }
-          onBlur={handleFatherBlur ? handleFatherBlur : handleBlur}
+          onBlur={
+            handleFatherBlur
+              ? (e) => handleFatherBlur(e, labelPrice)
+              : handleBlur
+          }
         />
         <Input
           id="cost"
           label="Custo"
-          value={formPrice ? formPrice.cost : form.cost}
+          value={form.cost}
           type="number"
           onChange={
             handleFatherChange
               ? (e) => handleFatherChange(e, labelPrice)
               : handleChange
           }
-          onBlur={handleFatherBlur ? handleFatherBlur : handleBlur}
+          onBlur={
+            handleFatherBlur
+              ? (e) => handleFatherBlur(e, labelPrice)
+              : handleBlur
+          }
         />
         <Input
           id="percentage"
           label="Porcentagem"
-          value={formPrice ? formPrice.percentage : form.percentage}
+          value={form.percentage}
           type="number"
           onChange={
             handleFatherChange
               ? (e) => handleFatherChange(e, labelPrice)
               : handleChange
           }
-          onBlur={handleFatherBlur ? handleFatherBlur : handleBlur}
+          onBlur={
+            handleFatherBlur
+              ? (e) => handleFatherBlur(e, labelPrice)
+              : handleBlur
+          }
         />
       </div>
       {addPriceObj && (
