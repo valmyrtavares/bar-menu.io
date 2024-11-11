@@ -11,6 +11,7 @@ const PriceAndExpenseBuilder = ({
   labelPrice, //show what price will be change
   handleFatherChange,
   handleFatherBlur,
+  objPriceCost,
 }) => {
   const [form, setForm] = React.useState({
     price: 0,
@@ -36,6 +37,7 @@ const PriceAndExpenseBuilder = ({
 
   React.useEffect(() => {
     if (formPrice && labelPrice) {
+      console.log('formPrice     ', formPrice);
       const selectedPriceObj = formPrice[labelPrice];
       if (selectedPriceObj && selectedPriceObj.price !== undefined) {
         setForm({
@@ -47,6 +49,16 @@ const PriceAndExpenseBuilder = ({
       }
     }
   }, [formPrice, labelPrice]);
+
+  React.useEffect(() => {
+    if (objPriceCost) {
+      setForm({
+        price: objPriceCost.price,
+        cost: objPriceCost.cost,
+        percentage: objPriceCost.percentage,
+      });
+    }
+  }, [objPriceCost]);
 
   React.useEffect(() => {
     console.log('FORM    ', form);

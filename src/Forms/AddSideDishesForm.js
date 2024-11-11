@@ -31,7 +31,7 @@ function AddSideDishesForm({
   const [noNavigate, setNoNavigate] = React.useState(false);
   const [hideShowCheckForm, setHideShowCheckForm] = React.useState(true);
   const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
-    React.useState(true);
+    React.useState(false);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -44,7 +44,6 @@ function AddSideDishesForm({
 
   const addPriceObj = (obj) => {
     obj.profit = obj.price - obj.cost;
-    console.log('Objeto recebido   ', obj);
 
     // Atualizando o estado de forma correta
     setForm((prevForm) => ({
@@ -52,7 +51,7 @@ function AddSideDishesForm({
       costPriceObj: obj,
       price: obj.price,
     }));
-    console.log('form atualizado   ', form);
+
     setShowPopupCostAndPrice(false);
   };
 
