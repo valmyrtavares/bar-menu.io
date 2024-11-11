@@ -33,39 +33,40 @@ function CustomizePriceForm({
   const [labelPrice, setLabelPrice] = React.useState('');
   const [showPopupCostPrice, setShowPopupCostAndPrice] = React.useState(true);
 
-  // React.useEffect(() => {
-  //   if (customizedPriceObj) {
-  //     if (
-  //       customizedPriceObj &&
-  //       Object.keys(customizedPriceObj).length > 0 &&
-  //       customizedPriceObj.firstPrice.price
-  //     ) {
-  //       setFormPrice(customizedPriceObj);
-  //     }
-  //   }
-  //   setFormPrice({
-  //     firstPrice: {
-  //       price: 0,
-  //       cost: 0,
-  //       percentage: 0,
-  //       label: '',
-  //     },
+  React.useEffect(() => {
+    if (customizedPriceObj) {
+      console.log('customizedPriceObj     ', customizedPriceObj);
+      if (
+        customizedPriceObj &&
+        Object.keys(customizedPriceObj).length > 0 &&
+        customizedPriceObj.firstPrice.price
+      ) {
+        setFormPrice(customizedPriceObj);
+      }
+    }
+    //   setFormPrice({
+    //     firstPrice: {
+    //       price: 0,
+    //       cost: 0,
+    //       percentage: 0,
+    //       label: '',
+    //     },
 
-  //     secondPrice: {
-  //       price: 0,
-  //       cost: 0,
-  //       percentage: 0,
-  //       label: '',
-  //     },
+    //     secondPrice: {
+    //       price: 0,
+    //       cost: 0,
+    //       percentage: 0,
+    //       label: '',
+    //     },
 
-  //     thirdPrice: {
-  //       price: 0,
-  //       cost: 0,
-  //       percentage: 0,
-  //       label: '',
-  //     },
-  //   });
-  // }, []);
+    //     thirdPrice: {
+    //       price: 0,
+    //       cost: 0,
+    //       percentage: 0,
+    //       label: '',
+    //     },
+    //   });
+  }, [customizedPriceObj]);
 
   React.useEffect(() => {
     console.log('FORM ATUALIZADO NO USEEFFCTS    ', formPrice);
@@ -202,7 +203,7 @@ function CustomizePriceForm({
         <Input
           id="label"
           label="Descrição do primeiro preço"
-          value={formPrice.label}
+          value={formPrice.firstPrice.label}
           type="text"
           onChange={(e) => handleChange(e, 'firstPrice')}
         />
@@ -218,7 +219,7 @@ function CustomizePriceForm({
         )}
         <Input
           id="label"
-          value={formPrice.label}
+          value={formPrice.secondPrice.label}
           label="Descrição do segundo preço"
           type="text"
           onChange={(e) => handleChange(e, 'secondPrice')}
@@ -235,7 +236,7 @@ function CustomizePriceForm({
         )}
         <Input
           id="label"
-          value={formPrice.label}
+          value={formPrice.thirdPrice.label}
           label="Descrição do terceiro preço"
           type="text"
           onChange={(e) => handleChange(e, 'thirdPrice')}

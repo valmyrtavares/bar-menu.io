@@ -88,6 +88,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       setMaxLimitSideDishes(dataObj.maxLimitSideDishes);
       setCustomizedPriceObj(dataObj.CustomizedPrice);
       setRecipe(dataObj.recipe ? dataObj.recipe : {});
+      setCostProfitMarginCustomized(
+        dataObj.costProfitMarginCustomized
+          ? dataObj.costProfitMarginCustomized
+          : {}
+      );
     }
   }, [dataObj]);
 
@@ -365,7 +370,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <CustomizePriceForm
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
             onPriceChange={onPriceChange}
-            customizedPriceObj={customizedPriceObj}
+            customizedPriceObj={costProfitMarginCustomized}
           />
         )}
       </div>
