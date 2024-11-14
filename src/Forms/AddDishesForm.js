@@ -1,45 +1,46 @@
-import React from "react";
-import { fetchCategoriesItem } from "../api/Api.js";
-import Input from "../component/Input.js";
-import Title from "../component/title.js";
-import { app, storage } from "../config-firebase/firebase.js";
-import MenuButton from "../component/menuHamburguerButton.js";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import React from 'react';
+import { fetchCategoriesItem } from '../api/Api.js';
+import Input from '../component/Input.js';
+import Title from '../component/title.js';
+import { app, storage } from '../config-firebase/firebase.js';
+import MenuButton from '../component/menuHamburguerButton.js';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
   getFirestore,
   collection,
   addDoc,
   setDoc,
   doc,
-} from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
-import IncludeSideDishesForm from "./IncludeSideDishesForm.js";
-import PriceAndExpenseBuilder from "../component/Payment/PriceAndExpenseBuilder";
-import "../assets/styles/form.css";
-import CustomizePrice from "./CustomizePriceForm";
-import RecipeDish from "./recipeDishForm.js";
-import useFormValidation from "../Hooks/useFormValidation.js";
-import { cardClasses } from "@mui/material";
+} from 'firebase/firestore';
+import { useNavigate, Link } from 'react-router-dom';
+import IncludeSideDishesForm from './IncludeSideDishesForm.js';
+import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
+import '../assets/styles/form.css';
+import CustomizePriceForm from './CustomizePriceForm';
+import RecipeDish from './recipeDishForm.js';
+import useFormValidation from '../Hooks/useFormValidation.js';
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
-    title: "",
-    category: "",
-    comment: "",
+    title: '',
+    category: '',
+    comment: '',
     price: 0,
-    image: "",
-    costPriceObj: {},
+    costProfitMargin: {},
+    image: '',
     recipe: {},
+    costPriceObj: {},
     display: false,
     carrossel: false,
     sideDishesElementList: [],
     maxLimitSideDishes: 0,
     CustomizedPrice: {},
+    costProfitMarginCustomized: {},
   });
   const [categories, setCategories] = React.useState([]);
-  const [url, setUrl] = React.useState("");
+  const [url, setUrl] = React.useState('');
   const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
     React.useState(false);
   const [progress, setProgress] = React.useState(0);
@@ -49,6 +50,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
   const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
+  const [costProfitMarginCustomized, setCostProfitMarginCustomized] =
+    React.useState({});
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
   const { handleBlur } = useFormValidation();
@@ -85,25 +88,30 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       setMaxLimitSideDishes(dataObj.maxLimitSideDishes);
       setCustomizedPriceObj(dataObj.CustomizedPrice);
       setRecipe(dataObj.recipe ? dataObj.recipe : {});
+      setCostProfitMarginCustomized(
+        dataObj.costProfitMarginCustomized
+          ? dataObj.costProfitMarginCustomized
+          : {}
+      );
     }
   }, [dataObj]);
 
   const fetchCategories = async () => {
-    const categories = await fetchCategoriesItem("button");
-    categories.unshift("Selecione uma categoria"); // Add a first option
+    const categories = await fetchCategoriesItem('button');
+    categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
 
   function handleChange({ target }) {
     const { id, value, type, checked } = target;
-    if (id === "price") {
-      const formattedValue = value.split(".")[0];
+    if (id === 'price') {
+      const formattedValue = value.split('.')[0];
       console.log(formattedValue);
       setForm({
         ...form,
         [id]: formattedValue,
       });
-    } else if (type === "checkbox") {
+    } else if (type === 'checkbox') {
       setForm({
         ...form,
         [id]: checked, // Use checked diretamente, que já é um booleano
@@ -123,7 +131,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
-        "state_changed",
+        'state_changed',
         (snapshot) => {
           // Progress function (optional)
           const progress =
@@ -147,18 +155,18 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     event.preventDefault();
 
     if (!dataObj) {
-      addDoc(collection(db, "item"), form)
+      addDoc(collection(db, 'item'), form)
         .then((docRef) => {
-          navigate("/");
+          navigate('/');
         })
         .catch((error) => {
           console.log(error);
         });
     } else {
-      setDoc(doc(db, "item", dataObj.id), form)
+      setDoc(doc(db, 'item', dataObj.id), form)
         .then(() => {
-          navigate("/");
-          console.log("Document successfully updated !");
+          navigate('/');
+          console.log('Document successfully updated !');
         })
         .catch((error) => {
           console.log(error);
@@ -169,7 +177,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   const openModalSideDishes = () => {
     setShowPopupSideDisehs(true);
     if (dataObj) {
-      console.log("Data obj", dataObj);
+      console.log('Data obj', dataObj);
     }
   };
 
@@ -180,38 +188,67 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   React.useEffect(() => {
     if (customizedPriceObj) {
+      console.log('Customized Price oBJ   ', customizedPriceObj);
       setForm((prevForm) => ({
         ...prevForm,
         CustomizedPrice: customizedPriceObj,
+        costProfitMarginCustomized: costProfitMarginCustomized,
       }));
     }
   }, [customizedPriceObj]);
 
+  React.useEffect(() => {
+    if (
+      costProfitMarginCustomized &&
+      costProfitMarginCustomized.firstPrice &&
+      costProfitMarginCustomized.secondPrice
+    ) {
+      console.log('costProfitMarginCustomized  ', costProfitMarginCustomized);
+      setCustomizedPriceObj({
+        firstLabel: costProfitMarginCustomized.firstPrice?.label,
+        firstPrice: costProfitMarginCustomized.firstPrice?.price,
+        secondLabel: costProfitMarginCustomized.secondPrice?.label,
+        secondPrice: costProfitMarginCustomized.secondPrice?.price,
+        thirdLabel: costProfitMarginCustomized.thirdPrice?.label,
+        thirdPrice: costProfitMarginCustomized.thirdPrice?.price,
+      });
+      console.log('customizedPriceObj    ', customizedPriceObj);
+    }
+  }, [costProfitMarginCustomized]);
+
   const onPriceChange = (customizedPriceChanged) => {
-    console.log("Objeto de preço enviado   ", customizedPriceChanged);
-    setCustomizedPriceObj(customizedPriceChanged);
-    console.log("Preço muda no on Price  ", customizedPriceObj);
+    setCostProfitMarginCustomized(customizedPriceChanged);
+    setShowPopupCustomizePrice(false);
   };
 
   const addPriceObj = (obj) => {
-    console.log(obj);
-    obj.profit = (obj.price - obj.cost).toFixed(2);
-    console.log(obj);
-    setForm({
-      ...form,
+    obj.profit = obj.price - obj.cost;
+
+    // Atualizando o estado de forma correta
+    setForm((prevForm) => ({
+      ...prevForm,
       costPriceObj: obj,
-    });
+      price: obj.price,
+    }));
+    setShowPopupCostAndPrice(false);
   };
 
   React.useEffect(() => {
     if (form.costPriceObj) {
-      console.log("form   ", form);
-      console.log("form.costPriceObj   ", form.costPriceObj);
+      console.log('form   ', form);
+      console.log('costPriceObj   ', form.costPriceObj);
     }
   }, [form]);
 
   return (
     <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
+      {showPopupCostAndPrice && (
+        <PriceAndExpenseBuilder
+          setShowPopupCostAndPrice={setShowPopupCostAndPrice}
+          addPriceObj={addPriceObj}
+          objPriceCost={form.costPriceObj}
+        />
+      )}
       <div className="close-btn">
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
@@ -228,7 +265,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         )}
       </div>
-      <Title mainTitle={mainTitle ? mainTitle : "Adicione um novo prato"} />
+      <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"
@@ -264,15 +301,13 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           onChange={handleChange}
         />
         <div className="box-price">
-          <Input
-            id="price"
-            label="Preço"
-            value={form.price}
-            required
-            type="number"
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
+          <button
+            className="btn btn-success"
+            type="button"
+            onClick={() => setShowPopupCostAndPrice(true)}
+          >
+            Preço R$ {form.price},00
+          </button>
           <button
             className="btn btn-success"
             type="button"
@@ -332,20 +367,20 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       )}
       <div className="external-container-customize-price">
         {showPopupCustomizePrice && (
-          <CustomizePrice
+          <CustomizePriceForm
             setShowPopupCustomizePrice={setShowPopupCustomizePrice}
             onPriceChange={onPriceChange}
-            customizedPriceObj={customizedPriceObj}
+            customizedPriceObj={costProfitMarginCustomized}
           />
         )}
       </div>
       <div className="sidedishes-recipe-btn-container">
         <button className="btn btn-success " onClick={openModalSideDishes}>
-          {" "}
+          {' '}
           Acompanhamentos
         </button>
         <button className="btn btn-success recipe" onClick={openRecipeModal}>
-          {" "}
+          {' '}
           Receita
         </button>
       </div>

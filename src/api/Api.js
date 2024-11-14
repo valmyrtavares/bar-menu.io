@@ -3,6 +3,8 @@ import { app } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
+  query,
+  where,
   doc,
   getDocs,
   onSnapshot,
@@ -13,6 +15,32 @@ import {
 
 //FIRESTORE
 const db = getFirestore(app);
+
+//Bringing by query data
+export async function fetchingByQuery(reference, collectionName) {
+  try {
+    const Ref = collection(db, collectionName); // referencia a coleção "sideDishes"
+
+    // Filtra os documentos pelo campo "sideDishes" igual ao nome recebido
+    const q = query(Ref, where(collectionName, '==', reference));
+
+    const querySnapshot = await getDocs(q); // Executa a consulta
+
+    // Verifica se encontrou algum documento
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0]; // Pega o primeiro documento encontrado
+      const costPriceObj = doc.data(); // Obtém os dados do documento
+      // Retorna o objeto com os dados de custo e preço
+      return costPriceObj;
+    } else {
+      console.log('Acompanhamento não encontrado');
+      return null;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar o acompanhamento:', error);
+    return null;
+  }
+}
 
 //Bringing collecton whenever ther was any change in data
 export function fetchInDataChanges(collectionName, onData) {
