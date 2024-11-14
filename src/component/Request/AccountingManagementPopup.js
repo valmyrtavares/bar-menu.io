@@ -20,6 +20,8 @@ const AccountingManagementPopup = ({
   const [sideDishesData, setSideDishesData] = React.useState({});
   const db = getFirestore(app);
 
+  // USEEFFECTS SESSION  **********************************************************************************
+
   React.useEffect(() => {
     const fetchDishAndSideDishes = async () => {
       if (dishesRequested && dishesRequested.length > 0) {
@@ -80,6 +82,8 @@ const AccountingManagementPopup = ({
       console.log('costPrice     ', costPrice);
     }
   }, [costPrice]);
+
+  // FUNCTION SESSION  **********************************************************************************
 
   // Função para buscar dados do acompanhamento no Firestore
   const fetchingSideDishes = async (name) => {

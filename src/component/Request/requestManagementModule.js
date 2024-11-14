@@ -1,5 +1,9 @@
 import React from 'react';
-import { getBtnData } from '../../api/Api';
+import {
+  getBtnData,
+  fetchingByQuery,
+  getOneItemColleciton,
+} from '../../api/Api';
 import '../../assets/styles/requestManagementModule.css';
 import Input from '../../component/Input.js';
 import { cardClasses } from '@mui/material';
@@ -14,6 +18,7 @@ const RequestManagementModule = () => {
     totalPrice: 0,
     totalProfit: 0,
   });
+  const [itemTotals, setItemTotals] = React.useState([]);
 
   const [showAccountingManagementPopup, setShowAccountingManagementPopup] =
     React.useState(false);
@@ -26,6 +31,8 @@ const RequestManagementModule = () => {
     endDate: '',
   });
   const [filterRequests, setFilterRequests] = React.useState(null);
+
+  // USEEFFECTS SESSION  **********************************************************************************
 
   React.useEffect(() => {
     const fetchRequest = async () => {
@@ -49,7 +56,7 @@ const RequestManagementModule = () => {
 
   // UseEffect para filtrar as datas
   React.useEffect(() => {
-    const filterdDate = () => {
+    const filterdDate = async () => {
       if (form.startDate && form.endDate) {
         const startDate = new Date(form.startDate);
         const endDate = new Date(form.endDate);
@@ -63,7 +70,8 @@ const RequestManagementModule = () => {
             return itemDate >= startDate && itemDate <= endDate;
           });
 
-          const statusList = calculateProductsStatus(filteredRequests);
+          const statusList = await calculateProductsStatus(filteredRequests);
+
           setRequestList(statusList);
         }
       }
@@ -78,6 +86,12 @@ const RequestManagementModule = () => {
     }
     totalScore();
   }, [requestList]); // Executa totalScore sempre que requestList mudar
+
+  // React.useEffect(() => {
+  //   console.log('FILTER REQUESTS    ', filterRequests);
+  // }, [filterRequests]);
+
+  // FUNCTION SESSION******************************************************************************
 
   const totalScore = () => {
     let price = 0;
@@ -98,31 +112,97 @@ const RequestManagementModule = () => {
     });
   };
 
-  React.useEffect(() => {
-    console.log('FILTER REQUESTS    ', filterRequests);
-  }, [filterRequests]);
-
-  const calculateProductsStatus = (filteredRequestsSended) => {
+  const calculateProductsStatus = async (filteredRequestsSended) => {
     const productMap = {};
     setFilterRequests(filteredRequestsSended);
 
-    filteredRequestsSended.forEach((item) => {
-      const { name, finalPrice } = item;
-      const price = Number(finalPrice) || 0;
+    for (const item of filteredRequestsSended) {
+      let sideDishesCost = 0;
+      let sideDishesProfit = 0;
 
+      // Verifica se há acompanhamentos e obtém os custos e lucros
+      if (item.sideDishes && item.sideDishes.length > 0) {
+        const sideDishesResults = await Promise.all(
+          item.sideDishes.map((sidedish) =>
+            fetchSideDishesGlobalCost(sidedish.name, 'sideDishes')
+          )
+        );
+
+        sideDishesResults.forEach((result) => {
+          if (result) {
+            sideDishesCost += result.cost;
+            sideDishesProfit += result.profit;
+          }
+        });
+      }
+
+      const mainDishData = await fetchDishesGlobalCost(item.id, item.size);
+
+      // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
+      if (mainDishData) {
+        const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
+        sideDishesCost += Number(cost);
+        sideDishesProfit += Number(price) - Number(cost);
+      }
+
+      const { name, finalPrice } = item;
+      const FinalMainprice = Number(finalPrice) || 0;
+
+      // Verifica se o produto já está no productMap e acumula os valores
       if (productMap[name]) {
         productMap[name].repetitions += 1;
-        productMap[name].totalSum += price;
+        productMap[name].totalSum += FinalMainprice;
+        productMap[name].cost += sideDishesCost; // Acumula o cost
+        productMap[name].profit += sideDishesProfit; // Acumula o profit
       } else {
         productMap[name] = {
           name: name,
           repetitions: 1,
-          totalSum: price,
+          totalSum: FinalMainprice,
+          cost: sideDishesCost, // Inicia com o valor calculado
+          profit: sideDishesProfit, // Inicia com o valor calculado
         };
       }
-    });
-
+    }
+    console.log('productMap   ', productMap);
     return Object.values(productMap);
+  };
+
+  const fetchDishesGlobalCost = async (id, size, name) => {
+    console.log('name  ', name);
+    const { costProfitMarginCustomized, costPriceObj } =
+      await getOneItemColleciton('item', id);
+    let currentCostData;
+    if (costProfitMarginCustomized && costPriceObj) {
+      if (size === '') {
+        return {
+          ...costPriceObj,
+          cost: Number(costPriceObj.cost), // Converte `cost` para número
+          price: Number(costPriceObj.price), // Converte `price` para número
+        };
+      } else {
+        currentCostData = Object.values(costProfitMarginCustomized || {}).find(
+          (priceObj) => priceObj.label === size
+        );
+      }
+      return currentCostData
+        ? {
+            ...currentCostData,
+            cost: Number(currentCostData.cost), // Converte `cost` para número
+            price: Number(currentCostData.price), // Converte `price` para número
+          }
+        : undefined;
+    }
+    return undefined;
+  };
+
+  const fetchSideDishesGlobalCost = async (name, collectionName) => {
+    const obj = await fetchingByQuery(name, collectionName);
+
+    return {
+      cost: obj.costPriceObj.cost,
+      profit: obj.costPriceObj.profit,
+    };
   };
 
   const sendAccountManagementData = (dish) => {
@@ -141,6 +221,38 @@ const RequestManagementModule = () => {
       [id]: value,
     });
   };
+
+  // const calculateItemTotals = (itemSelected) => {
+  //   let totalCost = 0;
+  //   let totalProfit = 0;
+
+  //   console.log(itemSelected);
+  //   debugger;
+
+  // itemSelected.forEach((dish) => {
+  //   const costData = dish.size
+  //     ? Object.values(costPrice.costProfitMarginCustomized || {}).find(
+  //         (priceObj) => priceObj.label === dish.size
+  //       )
+  //     : costPrice.costPriceObj;
+
+  //   const profit = costData ? costData.price - costData.cost : 0;
+  //   totalCost += costData ? Number(costData.cost) : 0;
+  //   totalProfit += profit;
+
+  //   if (dish.sideDishes && dish.sideDishes.length > 0) {
+  //     dish.sideDishes.forEach((sideDish) => {
+  //       const sideData = sideDishesData[sideDish.name];
+  //       const sideProfit = sideData ? sideData.price - sideData.cost : 0;
+
+  //       totalCost += sideData ? Number(sideData.cost) : 0;
+  //       totalProfit += sideProfit;
+  //     });
+  //   }
+  // });
+
+  // return { totalCost, totalProfit };
+  //};
 
   return (
     <div className="management-requests">
@@ -179,6 +291,8 @@ const RequestManagementModule = () => {
             <th>Nome</th>
             <th>quantidade</th>
             <th>valor total</th>
+            <th> Custo</th>
+            <th> Lucro</th>
           </tr>
         </thead>
         <tbody>
@@ -190,6 +304,8 @@ const RequestManagementModule = () => {
                 <td>{item.name}</td>
                 <td>{item.repetitions}</td>
                 <td>{item.totalSum}</td>
+                <td>{item.cost}</td>
+                <td>{item.profit}</td>
               </tr>
             ))
           ) : (
