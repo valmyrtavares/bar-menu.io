@@ -196,13 +196,15 @@ const DishesModal = ({ item, setModal }) => {
       <img src={item.image} alt="img" />
       <p>{item.comment}</p>
       <h4>Valor: R${totalPrice.toFixed(2)}</h4>
-      {item.CustomizedPrice && (
-        <CustomizedPrice
-          item={item.CustomizedPrice}
-          onPriceChange={onPriceChange}
-          radioDisabled={radioDisabled}
-        />
-      )}
+      {item.CustomizedPrice &&
+        item.CustomizedPrice.firstPrice !== 0 &&
+        item.CustomizedPrice.firstLabel !== '' && (
+          <CustomizedPrice
+            item={item.CustomizedPrice}
+            onPriceChange={onPriceChange}
+            radioDisabled={radioDisabled}
+          />
+        )}
       <form className="my-3" onSubmit={handleSubmit}>
         {item.sideDishesElementList && (
           <>
