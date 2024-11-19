@@ -196,13 +196,13 @@ const AccountingManagementPopup = ({
       <tr key="totals">
         <td></td>
         <td>
-          <strong>{totalCost}</strong>
+          <strong>{Number(totalCost).toFixed(2)}</strong>
         </td>
         <td>
-          <strong>{totalPrice}</strong>
+          <strong>{Number(totalPrice).toFixed(2)}</strong>
         </td>
         <td>
-          <strong>{totalProfit}</strong>
+          <strong>{Number(totalProfit).toFixed(2)}</strong>
         </td>
         <td colSpan="6"></td>
       </tr>

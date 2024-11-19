@@ -119,9 +119,11 @@ const RequestManagementModule = () => {
     for (const item of filteredRequestsSended) {
       let sideDishesCost = 0;
       let sideDishesProfit = 0;
-
-      // Verifica se há acompanhamentos e obtém os custos e lucros
+      // if (item.name === 'BIG AÇAI') {
+      //   debugger;
+      // }
       if (item.sideDishes && item.sideDishes.length > 0) {
+        // Verifica se há acompanhamentos e obtém os custos e lucros
         const sideDishesResults = await Promise.all(
           item.sideDishes.map((sidedish) =>
             fetchSideDishesGlobalCost(sidedish.name, 'sideDishes')
@@ -200,7 +202,7 @@ const RequestManagementModule = () => {
     const obj = await fetchingByQuery(name, collectionName);
 
     return {
-      cost: obj.costPriceObj.cost,
+      cost: Number(obj.costPriceObj.cost),
       profit: obj.costPriceObj.profit,
     };
   };
@@ -272,8 +274,8 @@ const RequestManagementModule = () => {
                 <td>{item.name}</td>
                 <td>{item.repetitions}</td>
                 <td>{item.totalSum}</td>
-                <td>{item.cost}</td>
-                <td>{item.profit}</td>
+                <td>{Number(item.cost).toFixed(2)}</td>
+                <td>{Number(item.profit).toFixed(2)}</td>
               </tr>
             ))
           ) : (
@@ -283,9 +285,16 @@ const RequestManagementModule = () => {
               </td>
             </tr>
           )}
+          <tr className="score-total">
+            <td>Total</td>
+            <td>{totalParams.amount}</td>
+            <td>{Number(totalParams.totalValue || 0).toFixed(2)}</td>
+            <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
+            <td>{Number(totalParams.profit || 0).toFixed(2)}</td>
+          </tr>
         </tbody>
       </table>
-      <div className="score-total">
+      {/* <div className="score-total">
         <p></p>
         <p>
           QUANTIDADE <span>{totalParams.amount}</span>
@@ -293,7 +302,7 @@ const RequestManagementModule = () => {
         <p>
           TOTAL R$<span>{totalParams.totalValue},00</span>
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };
