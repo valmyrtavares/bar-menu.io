@@ -19,6 +19,7 @@ const RequestManagementModule = () => {
     totalProfit: 0,
   });
   const [itemTotals, setItemTotals] = React.useState([]);
+  const [voucher, setVoucher] = React.useState([]);
 
   const [showAccountingManagementPopup, setShowAccountingManagementPopup] =
     React.useState(false);
@@ -27,6 +28,7 @@ const RequestManagementModule = () => {
     totalValue: 0,
     cost: 0,
     profit: 0,
+    discount: 0,
   });
   const [form, setForm] = React.useState({
     startDate: '',
@@ -38,19 +40,27 @@ const RequestManagementModule = () => {
 
   React.useEffect(() => {
     const fetchRequest = async () => {
-      const data = await getBtnData('request');
-      const allRequests = data.reduce((accumulator, currentOrder) => {
-        const requestsWithDate = currentOrder.request.map((item) => {
-          return {
-            ...item,
-            dateTime: currentOrder.dateTime,
-          };
-        });
-        return [...accumulator, ...requestsWithDate];
-      }, []);
+      try {
+        const [requestData, voucherData] = await Promise.all([
+          getBtnData('request'),
+          getBtnData('voucherPromotion'),
+        ]);
+        const allRequests = requestData.reduce((accumulator, currentOrder) => {
+          const requestsWithDate = currentOrder.request.map((item) => {
+            return {
+              ...item,
+              dateTime: currentOrder.dateTime,
+            };
+          });
+          return [...accumulator, ...requestsWithDate];
+        }, []);
 
-      setRequestList(allRequests);
-      setOriginalRequestList(allRequests);
+        setRequestList(allRequests);
+        setOriginalRequestList(allRequests);
+        setVoucher(voucherData);
+      } catch (error) {
+        console.error('Erro ao buscar os dados:', error);
+      }
     };
 
     fetchRequest();
@@ -65,15 +75,17 @@ const RequestManagementModule = () => {
         if (startDate > endDate) {
           alert('Data de início não pode ser maior que a data de fim.');
         } else {
-          const filteredRequests = originalRequestList.filter((item) => {
-            const itemDate = new Date(
-              item.dateTime?.split(' - ')[0].split('/').reverse().join('-')
-            );
-            return itemDate >= startDate && itemDate <= endDate;
-          });
-
-          const statusList = await calculateProductsStatus(filteredRequests);
-
+          const originalRequestListArray = filteredRequests(
+            originalRequestList,
+            startDate,
+            endDate
+          );
+          const statusList = await calculateProductsStatus(
+            originalRequestListArray
+          );
+          console.log('VOUCHER   ', voucher);
+          const voucherFiltered = filteredRequests(voucher, startDate, endDate);
+          showDiscountsVoucher(voucherFiltered);
           setRequestList(statusList);
         }
       }
@@ -89,11 +101,37 @@ const RequestManagementModule = () => {
     totalScore();
   }, [requestList]); // Executa totalScore sempre que requestList mudar
 
-  // React.useEffect(() => {
-  //   console.log('FILTER REQUESTS    ', filterRequests);
-  // }, [filterRequests]);
-
   // FUNCTION SESSION******************************************************************************
+
+  const filteredRequests = (data, startDate, endDate) => {
+    if (data && data.length > 0) {
+      return data.filter((item) => {
+        const itemDate = new Date(
+          item.dateTime?.split(' - ')[0].split('/').reverse().join('-')
+        );
+
+        return itemDate >= startDate && itemDate <= endDate;
+      });
+    }
+    return []; // Retorna um array vazio se `data` estiver indefinido ou vazio
+  };
+
+  const showDiscountsVoucher = (voucherFiltered) => {
+    let totalDiscount = 0;
+    if (voucherFiltered) {
+      voucherFiltered.forEach((item) => {
+        totalDiscount += item.discount;
+      });
+      console.log('VOUCHER   ', voucherFiltered);
+      console.log('desconto total   ', totalDiscount);
+      console.log('Total params  1 ', totalParams);
+      setTotalParams({
+        ...totalParams,
+        discount: totalDiscount,
+      });
+      console.log('Total params 2   ', totalParams);
+    }
+  };
 
   const totalScore = () => {
     let price = 0;
@@ -113,6 +151,7 @@ const RequestManagementModule = () => {
     }
 
     setTotalParams({
+      ...totalParams,
       amount: amount,
       totalValue: price,
       cost: cost,
@@ -123,55 +162,56 @@ const RequestManagementModule = () => {
   const calculateProductsStatus = async (filteredRequestsSended) => {
     const productMap = {};
     setFilterRequests(filteredRequestsSended);
+    if (filteredRequestsSended && filteredRequestsSended.length > 0) {
+      for (const item of filteredRequestsSended) {
+        let sideDishesCost = 0;
+        let sideDishesProfit = 0;
+        // if (item.name === 'BIG AÇAI') {
+        //   debugger;
+        // }
+        if (item.sideDishes && item.sideDishes.length > 0) {
+          // Verifica se há acompanhamentos e obtém os custos e lucros
+          const sideDishesResults = await Promise.all(
+            item.sideDishes.map((sidedish) =>
+              fetchSideDishesGlobalCost(sidedish.name, 'sideDishes')
+            )
+          );
 
-    for (const item of filteredRequestsSended) {
-      let sideDishesCost = 0;
-      let sideDishesProfit = 0;
-      // if (item.name === 'BIG AÇAI') {
-      //   debugger;
-      // }
-      if (item.sideDishes && item.sideDishes.length > 0) {
-        // Verifica se há acompanhamentos e obtém os custos e lucros
-        const sideDishesResults = await Promise.all(
-          item.sideDishes.map((sidedish) =>
-            fetchSideDishesGlobalCost(sidedish.name, 'sideDishes')
-          )
-        );
+          sideDishesResults.forEach((result) => {
+            if (result) {
+              sideDishesCost += result.cost;
+              sideDishesProfit += result.profit;
+            }
+          });
+        }
 
-        sideDishesResults.forEach((result) => {
-          if (result) {
-            sideDishesCost += result.cost;
-            sideDishesProfit += result.profit;
-          }
-        });
-      }
+        const mainDishData = await fetchDishesGlobalCost(item.id, item.size);
 
-      const mainDishData = await fetchDishesGlobalCost(item.id, item.size);
+        // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
+        if (mainDishData) {
+          const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
+          sideDishesCost += Number(cost);
+          sideDishesProfit += Number(price) - Number(cost);
+        }
 
-      // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
-      if (mainDishData) {
-        const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
-        sideDishesCost += Number(cost);
-        sideDishesProfit += Number(price) - Number(cost);
-      }
+        const { name, finalPrice } = item;
+        const FinalMainprice = Number(finalPrice) || 0;
 
-      const { name, finalPrice } = item;
-      const FinalMainprice = Number(finalPrice) || 0;
-
-      // Verifica se o produto já está no productMap e acumula os valores
-      if (productMap[name]) {
-        productMap[name].repetitions += 1;
-        productMap[name].totalSum += FinalMainprice;
-        productMap[name].cost += sideDishesCost; // Acumula o cost
-        productMap[name].profit += sideDishesProfit; // Acumula o profit
-      } else {
-        productMap[name] = {
-          name: name,
-          repetitions: 1,
-          totalSum: FinalMainprice,
-          cost: sideDishesCost, // Inicia com o valor calculado
-          profit: sideDishesProfit, // Inicia com o valor calculado
-        };
+        // Verifica se o produto já está no productMap e acumula os valores
+        if (productMap[name]) {
+          productMap[name].repetitions += 1;
+          productMap[name].totalSum += FinalMainprice;
+          productMap[name].cost += sideDishesCost; // Acumula o cost
+          productMap[name].profit += sideDishesProfit; // Acumula o profit
+        } else {
+          productMap[name] = {
+            name: name,
+            repetitions: 1,
+            totalSum: FinalMainprice,
+            cost: sideDishesCost, // Inicia com o valor calculado
+            profit: sideDishesProfit, // Inicia com o valor calculado
+          };
+        }
       }
     }
     console.log('productMap   ', productMap);
@@ -271,6 +311,7 @@ const RequestManagementModule = () => {
             <th>valor total</th>
             <th> Custo</th>
             <th> Lucro</th>
+            <th>Desconto</th>
           </tr>
         </thead>
         <tbody>
@@ -284,6 +325,7 @@ const RequestManagementModule = () => {
                 <td>{item.totalSum}</td>
                 <td>{Number(item.cost).toFixed(2)}</td>
                 <td>{Number(item.profit).toFixed(2)}</td>
+                <td colSpan="1"></td>
               </tr>
             ))
           ) : (
@@ -296,9 +338,15 @@ const RequestManagementModule = () => {
           <tr className="score-total">
             <td>Total</td>
             <td>{totalParams.amount}</td>
-            <td>{Number(totalParams.totalValue || 0).toFixed(2)}</td>
+            <td>
+              {totalParams.discount
+                ? totalParams.totalValue - totalParams.discount
+                : totalParams.totalValue}
+              ,00
+            </td>
             <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
             <td>{Number(totalParams.profit || 0).toFixed(2)}</td>
+            <td>{totalParams.discount !== 0 ? totalParams.discount : 0}</td>
           </tr>
         </tbody>
       </table>

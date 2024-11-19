@@ -13,7 +13,7 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
 
   const [form, setForm] = React.useState({
     name: '',
-    data: '',
+    dateTime: '',
     idUserVoucher: '',
     phone: '',
     cpf: '',
@@ -99,7 +99,8 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
     }
     setForm({
       name: item.name,
-      data: item.dateTime,
+      dateTime: item.dateTime,
+      discount: 3,
       idUserVoucher: item.idUser,
       cpf: promotionClient.cpf,
       phone: promotionClient.phone,
