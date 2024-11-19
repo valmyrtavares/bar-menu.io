@@ -25,6 +25,8 @@ const RequestManagementModule = () => {
   const [totalParams, setTotalParams] = React.useState({
     amount: 0,
     totalValue: 0,
+    cost: 0,
+    profit: 0,
   });
   const [form, setForm] = React.useState({
     startDate: '',
@@ -96,12 +98,16 @@ const RequestManagementModule = () => {
   const totalScore = () => {
     let price = 0;
     let amount = 0;
+    let profit = 0;
+    let cost = 0;
 
     if (requestList && requestList.length > 0) {
       requestList.forEach((item) => {
         if (item && item.totalSum && item.repetitions) {
           price += Number(item.totalSum);
           amount += Number(item.repetitions);
+          profit += Number(item.profit);
+          cost += Number(item.cost);
         }
       });
     }
@@ -109,6 +115,8 @@ const RequestManagementModule = () => {
     setTotalParams({
       amount: amount,
       totalValue: price,
+      cost: cost,
+      profit: profit,
     });
   };
 
@@ -294,15 +302,6 @@ const RequestManagementModule = () => {
           </tr>
         </tbody>
       </table>
-      {/* <div className="score-total">
-        <p></p>
-        <p>
-          QUANTIDADE <span>{totalParams.amount}</span>
-        </p>
-        <p>
-          TOTAL R$<span>{totalParams.totalValue},00</span>
-        </p>
-      </div> */}
     </div>
   );
 };

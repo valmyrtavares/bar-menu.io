@@ -18,5 +18,7 @@ It was created two new features about check out all documents and cancel some sp
 
  In this commit we already have all costs and prifits in the requestManagementModule and the final line is in table's bottom. For now all we have only total price selled and amont of products of day, There is no stil total cost and total profit. In many previus commits unfortunily theres os no commnets here and therefore it is a good idea talk about some features done. In current time of project we already have a popup with each product, showing costs, profits and prices of each item and the sums of all
 
+ All totals params diplayed in screen of requestManagementModule component 
+
 
 
