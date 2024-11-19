@@ -8,6 +8,7 @@ import '../../assets/styles/requestManagementModule.css';
 import Input from '../../component/Input.js';
 import { cardClasses } from '@mui/material';
 import AccountingManagementPopup from './AccountingManagementPopup';
+import Loading from '../Loading.js';
 
 const RequestManagementModule = () => {
   const [requestList, setRequestList] = React.useState(null);
@@ -35,6 +36,7 @@ const RequestManagementModule = () => {
     endDate: '',
   });
   const [filterRequests, setFilterRequests] = React.useState(null);
+  const [loadMessage, setLoadMessage] = React.useState(false);
 
   // USEEFFECTS SESSION  **********************************************************************************
 
@@ -75,6 +77,7 @@ const RequestManagementModule = () => {
         if (startDate > endDate) {
           alert('Data de início não pode ser maior que a data de fim.');
         } else {
+          setLoadMessage(true);
           const originalRequestListArray = filteredRequests(
             originalRequestList,
             startDate,
@@ -87,6 +90,7 @@ const RequestManagementModule = () => {
           const voucherFiltered = filteredRequests(voucher, startDate, endDate);
           showDiscountsVoucher(voucherFiltered);
           setRequestList(statusList);
+          setLoadMessage(false);
         }
       }
     };
@@ -281,6 +285,7 @@ const RequestManagementModule = () => {
           setTotals={setTotals}
         />
       )}
+      {loadMessage && <Loading />}
       <div className="container-date">
         <div>
           <Input
