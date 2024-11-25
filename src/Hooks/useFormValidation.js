@@ -1,14 +1,14 @@
-import React from "react";
-import { getBtnData } from "../api/Api";
+import React from 'react';
+import { getBtnData } from '../api/Api';
 
-const useFormValidation = (initialValue = "") => {
+const useFormValidation = (initialValue = '') => {
   const [form, setForm] = React.useState(initialValue);
   const [error, setError] = React.useState({});
   const [clientFinded, setClientFinded] = React.useState({});
 
   const handlePhoneChange = (value) => {
     // Remove todos os caracteres não numéricos
-    const digits = value.replace(/\D/g, "");
+    const digits = value.replace(/\D/g, '');
 
     // Formata conforme o usuário digita
     let formattedPhone = digits;
@@ -26,19 +26,19 @@ const useFormValidation = (initialValue = "") => {
     if (digits.length >= 11) {
       setError((prevError) => ({
         ...prevError,
-        phone: "", // Limpa o erro do campo phone
+        phone: '', // Limpa o erro do campo phone
       }));
     } else {
       setError((prevError) => ({
         ...prevError,
-        phone: "Por favor, insira um número válido de celular com 11 dígitos",
+        phone: 'Por favor, insira um número válido de celular com 11 dígitos',
       }));
     }
   };
 
   const handleCpfChange = (value) => {
     // Remove todos os caracteres não numéricos
-    const digits = value.replace(/\D/g, "");
+    const digits = value.replace(/\D/g, '');
 
     // Formata o CPF conforme o usuário digita
     let formattedCpf = digits;
@@ -71,18 +71,18 @@ const useFormValidation = (initialValue = "") => {
     if (digits.length === 11 && isValidCpf(digits)) {
       setError((prevError) => ({
         ...prevError,
-        cpf: "", // Limpa o erro do campo CPF
+        cpf: '', // Limpa o erro do campo CPF
       }));
     } else {
       setError((prevError) => ({
         ...prevError,
-        cpf: "Por favor, insira um CPF válido.",
+        cpf: 'Por favor, insira um CPF válido.',
       }));
     }
   };
 
   const checkCpfRepeated = async (cpf) => {
-    const data = await getBtnData("user");
+    const data = await getBtnData('user');
     const repeatedCpf = data.some((item) => item.cpf === cpf);
     if (repeatedCpf) {
       const customer = data.filter((item) => item.cpf === cpf);
@@ -96,29 +96,29 @@ const useFormValidation = (initialValue = "") => {
     if (digits.length > 11) {
       // Faz a verificação de CPF repetido
       const isRepeated = await checkCpfRepeated(digits);
-      console.log("sRepeated ", isRepeated);
+      console.log('sRepeated ', isRepeated);
 
       if (isRepeated) {
         // Se o CPF for repetido, mostra o erro
         setError((prevError) => ({
           ...prevError,
-          cpf: "Esse número de CPF já foi usado",
+          cpf: 'Esse número de CPF já foi usado',
         }));
       } else {
         // Se não for repetido, remove o erro de CPF
         setError((prevError) => ({
           ...prevError,
-          cpf: "",
+          cpf: '',
         }));
       }
     }
   };
 
   const isValidCpf = (cpf) => {
-    console.log("Entrei no isValid   ");
+    console.log('Entrei no isValid   ');
 
     // Remove caracteres não numéricos
-    const digits = cpf.replace(/\D/g, "");
+    const digits = cpf.replace(/\D/g, '');
 
     // Verifica se o CPF tem 11 dígitos
     if (digits.length !== 11) return false;
@@ -152,7 +152,7 @@ const useFormValidation = (initialValue = "") => {
   };
 
   const isValidDate = (dateString) => {
-    const dateParts = dateString.split("-");
+    const dateParts = dateString.split('-');
     const inputYear = parseInt(dateParts[0], 10);
     const inputMonth = parseInt(dateParts[1], 10);
     const inputDay = parseInt(dateParts[2], 10);
@@ -170,43 +170,64 @@ const useFormValidation = (initialValue = "") => {
   };
 
   const handleBirthdayChange = (value) => {
-    const today = new Date();
-    const selectedDate = new Date(value);
+    const numericValue = value.replace(/\D/g, '');
 
-    if (selectedDate > today) {
+    // Aplica a formatação no estilo DD/MM/AAAA
+    let formattedValue = numericValue;
+    if (numericValue.length > 2) {
+      formattedValue = numericValue.slice(0, 2) + '/' + numericValue.slice(2);
+    }
+    if (numericValue.length > 4) {
+      formattedValue =
+        numericValue.slice(0, 2) +
+        '/' +
+        numericValue.slice(2, 4) +
+        '/' +
+        numericValue.slice(4, 8);
+    }
+
+    // Tenta criar uma data válida a partir do valor formatado
+    const [day, month, year] = formattedValue.split('/');
+    const isCompleteDate =
+      numericValue.length === 8 &&
+      !isNaN(new Date(`${year}-${month}-${day}`).getTime());
+    const today = new Date();
+    const selectedDate = isCompleteDate
+      ? new Date(`${year}-${month}-${day}`)
+      : null;
+
+    if (selectedDate && selectedDate > today) {
       setError((prevError) => ({
         ...prevError,
-        birthday: "Por favor, insira uma data de aniversário válida.",
+        birthday: 'Por favor, insira uma data de aniversário válida.',
       }));
-    } else if (!isValidDate(value)) {
+    } else if (!isCompleteDate && numericValue.length === 8) {
       setError((prevError) => ({
         ...prevError,
         birthday:
-          "A data inserida não existe. Por favor, insira uma data válida.",
+          'A data inserida não existe. Por favor, insira uma data válida.',
       }));
     } else {
       setError((prevError) => ({
         ...prevError,
-        birthday: "", // Limpa o erro do campo birthday
+        birthday: '', // Limpa o erro do campo birthday
       }));
     }
 
     setForm((prevForm) => ({
       ...prevForm,
-      birthday: value,
+      birthday: formattedValue,
     }));
   };
-
-  
 
   const handleChange = (e) => {
     const { id, value } = e.target;
 
-    if (id === "cpf") {
+    if (id === 'cpf') {
       handleCpfChange(value);
-    } else if (id === "phone") {
+    } else if (id === 'phone') {
       handlePhoneChange(value);
-    } else if (id === "birthday") {
+    } else if (id === 'birthday') {
       handleBirthdayChange(value);
     } else {
       setForm((prevForm) => ({
@@ -219,7 +240,7 @@ const useFormValidation = (initialValue = "") => {
   const handleBlur = (e) => {
     const { id, value } = e.target;
     handleCpfCheck(value);
-    return value.split(".")[0];
+    return value.split('.')[0];
   };
 
   return {

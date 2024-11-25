@@ -22,5 +22,5 @@ It was created two new features about check out all documents and cancel some sp
 
  it was implemented a colunm discount in our requestManagementModule component This data is grabed from voucherPromotion and calculate in showDiscountsVoucher function 
 
-
+In the createCustomer component the input field birthday is a type-text and when it get focus the text keyboard turn avaiable to customer write your birthday date and it is not necessary use the defult windows keyboard that provided  one bad experience user 
 

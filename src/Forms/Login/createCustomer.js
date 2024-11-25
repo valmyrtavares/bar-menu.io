@@ -1,20 +1,20 @@
-import React from "react";
-import Input from "../../component/Input.js";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { app } from "../../config-firebase/firebase.js";
-import { useNavigate } from "react-router-dom";
-import { GlobalContext } from "../../GlobalContext";
-import "../../assets/styles/createCustomer.css";
-import useFormValidation from "../../Hooks/useFormValidation.js";
+import React from 'react';
+import Input from '../../component/Input.js';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { app } from '../../config-firebase/firebase.js';
+import { useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../../GlobalContext';
+import '../../assets/styles/createCustomer.css';
+import useFormValidation from '../../Hooks/useFormValidation.js';
 // import { Link } from "react-router-dom";
-import { getBtnData } from "../../api/Api.js";
+import { getBtnData } from '../../api/Api.js';
 // import { FormControlLabel } from "@mui/material";
-import { CheckUser } from "../../Helpers/Helpers.js";
-import Error from "../../component/error.js";
-import CpfMessage from "../../component/CpfMessage";
-import Keyboard from "../../component/Keyboard";
-import TextKeyboard from "../../component/Textkeyboard.js";
-import NameForm from "./NameForm";
+import { CheckUser } from '../../Helpers/Helpers.js';
+import Error from '../../component/error.js';
+import CpfMessage from '../../component/CpfMessage';
+import Keyboard from '../../component/Keyboard';
+import TextKeyboard from '../../component/Textkeyboard.js';
+import NameForm from './NameForm';
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
@@ -25,16 +25,16 @@ const CreateCustomer = () => {
   const [errorPopup, setErrorPopup] = React.useState(false);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
-      name: "",
-      phone: "",
-      cpf: "",
-      birthday: "",
-      email: "",
+      name: '',
+      phone: '',
+      cpf: '',
+      birthday: '',
+      email: '',
     });
 
   const [welcome, setWelcome] = React.useState({
-    salute: "",
-    gift: "",
+    salute: '',
+    gift: '',
   });
 
   // *****************************IMPLEMENTAÇÃO DO TECLADO VIRTUAL
@@ -49,7 +49,7 @@ const CreateCustomer = () => {
   //*************************************************************** */
 
   React.useEffect(() => {
-    if (form.name === "") {
+    if (form.name === '') {
       // Ativa o botão de "não quero deixar meus dados" quando o nome está vazio
 
       anonymousClient.current.disabled = false;
@@ -65,14 +65,14 @@ const CreateCustomer = () => {
 
   React.useEffect(() => {
     async function CheckLogin() {
-      const userId = await CheckUser("userMenu");
-      if (userId === "/") {
+      const userId = await CheckUser('userMenu');
+      if (userId === '/') {
         global.setAuthorizated(true);
         navigate(userId);
       }
     }
     const fetchSalut = async () => {
-      const data = await getBtnData("welcomeCustomer");
+      const data = await getBtnData('welcomeCustomer');
       setWelcome(data[0]);
     };
     CheckLogin();
@@ -84,35 +84,35 @@ const CreateCustomer = () => {
 
     // Preenche o formulário com dados default se o nome estiver vazio
     const formToSubmit =
-      form.name === ""
+      form.name === ''
         ? {
-            name: "anonimo",
-            phone: "777",
-            birthday: "77",
-            email: "anonimo@anonimo.com",
+            name: 'anonimo',
+            phone: '777',
+            birthday: '77',
+            email: 'anonimo@anonimo.com',
           }
         : form;
     if (error.birthday || error.phone || error.cpf) {
       setErrorPopup(true);
     } else {
       // Envia o formulário para o Firestore
-      addDoc(collection(db, "user"), formToSubmit)
+      addDoc(collection(db, 'user'), formToSubmit)
         .then((docRef) => {
           global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
           const currentUser = {
             id: docRef.id,
             name: formToSubmit.name,
           };
-          localStorage.setItem("userMenu", JSON.stringify(currentUser));
+          localStorage.setItem('userMenu', JSON.stringify(currentUser));
           setForm({
-            name: "",
-            phone: "",
-            birthday: "",
-            email: "",
+            name: '',
+            phone: '',
+            birthday: '',
+            email: '',
           });
         })
         .then(() => {
-          navigate("/");
+          navigate('/');
         })
         .catch((error) => {
           console.log(error);
@@ -124,10 +124,10 @@ const CreateCustomer = () => {
     // handleAnonymousSubmit()
     if (!name) {
       setPopupName(true);
-      console.log("Sem nome");
+      console.log('Sem nome');
     } else {
       handleAnonymousSubmit(name);
-      console.log("Com nome");
+      console.log('Com nome');
       setPopupName(false);
     }
   };
@@ -136,34 +136,34 @@ const CreateCustomer = () => {
     // event.preventDefault();
     // Define dados default e envia para o Firestore
     const formWithDefaults = {
-      fantasyName: "",
-      name: "anonimo",
-      phone: "777",
-      birthday: "77",
-      email: "anonimo@anonimo.com",
+      fantasyName: '',
+      name: 'anonimo',
+      phone: '777',
+      birthday: '77',
+      email: 'anonimo@anonimo.com',
     };
     if (name) {
       formWithDefaults.fantasyName = name;
     }
 
-    addDoc(collection(db, "user"), formWithDefaults)
+    addDoc(collection(db, 'user'), formWithDefaults)
       .then((docRef) => {
         global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
         const currentUser = {
           id: docRef.id,
           name: formWithDefaults.fantasyName,
         };
-        localStorage.setItem("userMenu", JSON.stringify(currentUser));
+        localStorage.setItem('userMenu', JSON.stringify(currentUser));
         setForm({
-          name: "",
-          phone: "",
-          birthday: "",
-          email: "",
-          cpf: "",
+          name: '',
+          phone: '',
+          birthday: '',
+          email: '',
+          cpf: '',
         });
       })
       .then(() => {
-        navigate("/");
+        navigate('/');
       })
       .catch((error) => {
         console.log(error);
@@ -174,31 +174,31 @@ const CreateCustomer = () => {
 
   const handleFocus = (e) => {
     const { id, value } = e.target;
-    if (id === "cpf") {
+    if (id === 'cpf') {
       setShowCpfKeyboard(true);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
       setShowBirthdayKeyboard(false);
-    } else if (id === "phone") {
+    } else if (id === 'phone') {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(true);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(false);
       setShowBirthdayKeyboard(false);
-    } else if (id === "name") {
+    } else if (id === 'name') {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(true);
       setShowEmailKeyboard(false);
       setShowBirthdayKeyboard(false);
-    } else if (id === "email") {
+    } else if (id === 'email') {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
       setShowEmailKeyboard(true);
       setShowBirthdayKeyboard(false);
-    } else if (id === "birthday") {
+    } else if (id === 'birthday') {
       setShowCpfKeyboard(false);
       setShowPhoneKeyboard(false);
       setShowNameKeyboard(false);
@@ -209,22 +209,22 @@ const CreateCustomer = () => {
 
   // Função chamada quando um número é clicado no teclado
   const addCharacter = (char, id) => {
-    if (char === "clearField") {
+    if (char === 'clearField') {
       // Limpar o campo CPF
-      setForm((prev) => ({ ...prev, id: "" }));
+      setForm((prev) => ({ ...prev, id: '' }));
 
       // Criar e passar o evento sintético para handleChange com o campo vazio
       const syntheticEvent = {
         target: {
           id: id,
-          value: "", // Campo vazio
+          value: '', // Campo vazio
         },
       };
       handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    if (char === "Bcksp") {
+    if (char === 'Bcksp') {
       // Limpar o campo CPF
       setForm((prev) => ({
         ...prev,
@@ -242,17 +242,17 @@ const CreateCustomer = () => {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    let newValue = "";
+    let newValue = '';
     // Adicionar o novo caractere ao valor atual do CPF
-    if (id === "phone") {
+    if (id === 'phone') {
       newValue = form.phone + char;
-    } else if (id === "cpf") {
+    } else if (id === 'cpf') {
       newValue = form.cpf + char;
-    } else if (id === "name") {
+    } else if (id === 'name') {
       newValue = form.name + char;
-    } else if (id === "email") {
+    } else if (id === 'email') {
       newValue = form.email + char;
-    } else if (id === "birthday") {
+    } else if (id === 'birthday') {
       newValue = form.birthday + char;
     }
 
@@ -268,41 +268,41 @@ const CreateCustomer = () => {
   };
 
   const closeKeyboard = (Value, id) => {
-    if (id === "cpf") {
+    if (id === 'cpf') {
       setShowCpfKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "cpf",
+          id: 'cpf',
           value: Value,
         },
       };
       handleBlur(syntheticEvent);
     }
-    if (id === "phone") {
+    if (id === 'phone') {
       setShowPhoneKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "phone",
+          id: 'phone',
           value: Value,
         },
       };
       handleBlur(syntheticEvent);
     }
-    if (id === "name") {
+    if (id === 'name') {
       setShowNameKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "name",
+          id: 'name',
           value: Value,
         },
       };
       handleBlur(syntheticEvent);
     }
-    if (id === "email") {
+    if (id === 'email') {
       setShowNameKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "email",
+          id: 'email',
           value: Value,
         },
       };
@@ -313,11 +313,11 @@ const CreateCustomer = () => {
     //   return;
     // }
 
-    if (id === "birthday") {
+    if (id === 'birthday') {
       setShowNameKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "birthday",
+          id: 'birthday',
           value: Value,
         },
       };
@@ -367,7 +367,7 @@ const CreateCustomer = () => {
           <Keyboard
             handleBlur={handleBlur}
             addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, "cpf")}
+            closeKeyboard={() => closeKeyboard(form.cpf, 'cpf')}
             id="cpf"
           />
         )}
@@ -393,7 +393,7 @@ const CreateCustomer = () => {
           <TextKeyboard
             addCharacter={addCharacter}
             id="name"
-            closeKeyboard={() => closeKeyboard(form.name, "name")}
+            closeKeyboard={() => closeKeyboard(form.name, 'name')}
           />
         )}
         <Input
@@ -410,7 +410,7 @@ const CreateCustomer = () => {
           <Keyboard
             handleBlur={handleBlur}
             addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, "phone")}
+            closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
             id="phone"
           />
         )}
@@ -420,10 +420,18 @@ const CreateCustomer = () => {
           required
           label="Aniversário"
           value={form.birthday}
-          type="date"
+          type="text"
           onFocus={handleFocus}
           onChange={handleChange}
         />
+        {showBirthdayKeyboard && global.isToten && (
+          <Keyboard
+            handleBlur={handleBlur}
+            addCharacter={addCharacter}
+            closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
+            id="birthday"
+          />
+        )}
 
         {error.birthday && <div className="error-form">{error.birthday}</div>}
 
@@ -441,7 +449,7 @@ const CreateCustomer = () => {
           <TextKeyboard
             addCharacter={addCharacter}
             id="email"
-            closeKeyboard={() => closeKeyboard(form.name, "email")}
+            closeKeyboard={() => closeKeyboard(form.name, 'email')}
           />
         )}
         <div className="create-new-customer-btns">
