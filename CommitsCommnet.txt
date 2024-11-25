@@ -24,3 +24,4 @@ It was created two new features about check out all documents and cancel some sp
 
 In the createCustomer component the input field birthday is a type-text and when it get focus the text keyboard turn avaiable to customer write your birthday date and it is not necessary use the defult windows keyboard that provided  one bad experience user 
 
+In the requestModal component we have a popup called WarningMessages, inside it I created a ternary option that if the customer is anonymous, I load a new screen asking if he doesn't want to get a discount and then we have two buttons. Either he cancels and the flow remains the same and nothing changes or he clicks on the register button and I get all the items from his request and store them in the customer's local storage, clear the main userMenu in the local storage and send it to the create-customer component where he should register and that's all for now
