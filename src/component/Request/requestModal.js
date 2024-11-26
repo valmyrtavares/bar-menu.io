@@ -1,30 +1,32 @@
-import React from "react";
-import { app } from "../../config-firebase/firebase.js";
+import React from 'react';
+import { app } from '../../config-firebase/firebase.js';
 import {
   getFirestore,
   getDoc,
   collection,
   updateDoc,
+  setDoc,
   addDoc,
   doc,
-} from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
-import CheckDishesModal from "../Dishes/CheckdishesModal.js";
-import "../../assets/styles/requestModal.css";
+} from 'firebase/firestore';
+import { useNavigate, Link } from 'react-router-dom';
+import CheckDishesModal from '../Dishes/CheckdishesModal.js';
+import '../../assets/styles/requestModal.css';
 import {
   deleteRequestItem,
   getOneItemColleciton,
   getBtnData,
-} from "../../api/Api.js";
-import WarningMessages from "../WarningMessages";
-import PrintRequestCustomer from "./PrintRequestCustomer";
-import { GlobalContext } from "../../GlobalContext";
-import DefaultComumMessage from "../Messages/DefaultComumMessage.js";
+} from '../../api/Api.js';
+import WarningMessages from '../WarningMessages';
+import PrintRequestCustomer from './PrintRequestCustomer';
+import { GlobalContext } from '../../GlobalContext';
+import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 //import { cardClasses } from "@mui/material";
 
 const RequestModal = () => {
-  const [currentUser, setCurrentUser] = React.useState("");
+  const [currentUser, setCurrentUser] = React.useState('');
   const [userData, setUserData] = React.useState(null);
+  const [backorder, setBackorder] = React.useState(null);
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
@@ -38,13 +40,24 @@ const RequestModal = () => {
   const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
-    if (localStorage.hasOwnProperty("userMenu")) {
-      const currentUserNew = JSON.parse(localStorage.getItem("userMenu"));
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       setCurrentUser(currentUserNew.id);
     }
-    if (localStorage.hasOwnProperty("isToten")) {
-      const toten = JSON.parse(localStorage.getItem("isToten"));
+    if (localStorage.hasOwnProperty('isToten')) {
+      const toten = JSON.parse(localStorage.getItem('isToten'));
       if (toten) setIsToten(true);
+    }
+
+    if (localStorage.hasOwnProperty('backorder')) {
+      let data = [];
+      const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+      if (orderStoraged && orderStoraged.length > 0) {
+        orderStoraged.forEach((element) => {
+          data.push(element);
+        });
+      }
+      setBackorder(data);
     }
   }, []);
 
@@ -52,6 +65,17 @@ const RequestModal = () => {
     if (userData && Array.isArray(userData.request)) {
       // Mudança aqui: Verificação de que userData existe e que request é um array
 
+      // if (localStorage.hasOwnProperty('backorder')) {
+      //   const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+      //   if (orderStoraged && orderStoraged.length > 0) {
+      //     if (userData.request && userData.request) {
+      //       orderStoraged.forEach((element) => {
+      //         userData.request.push(element);
+      //       });
+      //     }
+      //   }
+      //   console.log('order Storaged   ', orderStoraged);
+      // }
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -64,6 +88,7 @@ const RequestModal = () => {
   React.useEffect(() => {
     if (currentUser) {
       fetchUser();
+      updateingNewCustomer(backorder);
     }
   }, [currentUser]);
 
@@ -71,7 +96,7 @@ const RequestModal = () => {
 
   async function fetchUser() {
     try {
-      const userDocRef = doc(db, "user", currentUser);
+      const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
 
@@ -83,9 +108,39 @@ const RequestModal = () => {
         }
       }
     } catch (error) {
-      console.error("Erro ao buscar dados do usuário:", error);
+      console.error('Erro ao buscar dados do usuário:', error);
     }
   }
+
+  const updateingNewCustomer = async (data) => {
+    try {
+      const userDocRef = doc(db, 'user', currentUser);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        // Se o documento do usuário já existir, atualiza o array request
+        const currentRequests = userDocSnap.data().request || [];
+
+        // Acrescente o novo objeto 'form' ao array 'request'
+        currentRequests.push(...data);
+        console.log('form   ', currentRequests);
+
+        // Atualize o documento com o novo array 'request'
+        await updateDoc(userDocRef, {
+          request: currentRequests,
+        });
+      } else {
+        // Se o documento do usuário não existir, cria o documento com o array request
+        await setDoc(userDocRef, {
+          request: [data],
+        });
+      }
+      fetchUser();
+      localStorage.removeItem('backorder');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const requestFinalPrice = (data) => {
     if (userData && userData.request.length > 0) {
@@ -118,11 +173,11 @@ const RequestModal = () => {
         setTotenMessage(true);
         setTimeout(() => {
           setTotenMessage(false);
-          localStorage.removeItem("userMenu");
-          navigate("/create-customer");
+          localStorage.removeItem('userMenu');
+          navigate('/create-customer');
         }, 5000);
       } else {
-        navigate("/orderqueue");
+        navigate('/orderqueue');
       }
     }
   };
@@ -131,24 +186,24 @@ const RequestModal = () => {
     const now = new Date();
     const formattedDateTime = `${String(now.getDate()).padStart(
       2,
-      "0"
+      '0'
     )}/${String(now.getMonth() + 1).padStart(
       2,
-      "0"
+      '0'
     )}/${now.getFullYear()} - ${String(now.getHours()).padStart(
       2,
-      "0"
-    )}:${String(now.getMinutes()).padStart(2, "0")}`;
+      '0'
+    )}:${String(now.getMinutes()).padStart(2, '0')}`;
     return formattedDateTime;
   };
 
   //send request with finel price
   const addRequestUser = async (id) => {
     if (id) {
-      const data = await getOneItemColleciton("user", id);
+      const data = await getOneItemColleciton('user', id);
 
       const userNewRequest = {
-        name: data.name === "anonimo" ? data.fantasyName : data.name,
+        name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
         // recipe: item.recipe ? item.recipe : {},
@@ -161,9 +216,9 @@ const RequestModal = () => {
       //global.setUserNewRequest(userNewRequest);
 
       if (userNewRequest) {
-        addDoc(collection(db, "request"), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        addDoc(collection(db, 'request'), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
 
-        const userDocRef = doc(db, "user", id);
+        const userDocRef = doc(db, 'user', id);
         await updateDoc(userDocRef, {
           request: [],
         });
@@ -171,7 +226,7 @@ const RequestModal = () => {
     }
   };
   const countingRequest = async () => {
-    const requestData = await getBtnData("request");
+    const requestData = await getBtnData('request');
     const requestNumbers = requestData
       .filter((item) => item.countRequest !== undefined)
       .map((item) => item.countRequest);
@@ -199,12 +254,13 @@ const RequestModal = () => {
           finalPriceRequest={finalPriceRequest}
           sendRequestToKitchen={sendRequestToKitchen}
           setWarningMsg={setWarningMsg}
+          requests={userData.request}
         />
       )}
 
       <p className="current-client">
         <span>Cliente: </span>
-        {userData?.name === "anonimo" ? userData?.fantasyName : userData?.name}
+        {userData?.name === 'anonimo' ? userData?.fantasyName : userData?.name}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
