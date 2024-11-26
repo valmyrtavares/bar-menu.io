@@ -5,6 +5,7 @@ import {
   getDoc,
   collection,
   updateDoc,
+  setDoc,
   addDoc,
   doc,
 } from 'firebase/firestore';
@@ -25,6 +26,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState('');
   const [userData, setUserData] = React.useState(null);
+  const [backorder, setBackorder] = React.useState(null);
   const db = getFirestore(app);
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
@@ -46,12 +48,34 @@ const RequestModal = () => {
       const toten = JSON.parse(localStorage.getItem('isToten'));
       if (toten) setIsToten(true);
     }
+
+    if (localStorage.hasOwnProperty('backorder')) {
+      let data = [];
+      const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+      if (orderStoraged && orderStoraged.length > 0) {
+        orderStoraged.forEach((element) => {
+          data.push(element);
+        });
+      }
+      setBackorder(data);
+    }
   }, []);
 
   React.useEffect(() => {
     if (userData && Array.isArray(userData.request)) {
       // Mudança aqui: Verificação de que userData existe e que request é um array
 
+      // if (localStorage.hasOwnProperty('backorder')) {
+      //   const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+      //   if (orderStoraged && orderStoraged.length > 0) {
+      //     if (userData.request && userData.request) {
+      //       orderStoraged.forEach((element) => {
+      //         userData.request.push(element);
+      //       });
+      //     }
+      //   }
+      //   console.log('order Storaged   ', orderStoraged);
+      // }
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -64,6 +88,7 @@ const RequestModal = () => {
   React.useEffect(() => {
     if (currentUser) {
       fetchUser();
+      updateingNewCustomer(backorder);
     }
   }, [currentUser]);
 
@@ -86,6 +111,36 @@ const RequestModal = () => {
       console.error('Erro ao buscar dados do usuário:', error);
     }
   }
+
+  const updateingNewCustomer = async (data) => {
+    try {
+      const userDocRef = doc(db, 'user', currentUser);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        // Se o documento do usuário já existir, atualiza o array request
+        const currentRequests = userDocSnap.data().request || [];
+
+        // Acrescente o novo objeto 'form' ao array 'request'
+        currentRequests.push(...data);
+        console.log('form   ', currentRequests);
+
+        // Atualize o documento com o novo array 'request'
+        await updateDoc(userDocRef, {
+          request: currentRequests,
+        });
+      } else {
+        // Se o documento do usuário não existir, cria o documento com o array request
+        await setDoc(userDocRef, {
+          request: [data],
+        });
+      }
+      fetchUser();
+      localStorage.removeItem('backorder');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const requestFinalPrice = (data) => {
     if (userData && userData.request.length > 0) {

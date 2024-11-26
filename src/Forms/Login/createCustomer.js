@@ -77,7 +77,16 @@ const CreateCustomer = () => {
     };
     CheckLogin();
     fetchSalut();
+    requestDiscount();
   }, []);
+
+  //FUNCTIONS #############################################################################
+
+  const requestDiscount = () => {
+    if (localStorage.hasOwnProperty('backorder')) {
+      setPopupName(false);
+    }
+  };
 
   function handleSubmit(event) {
     event.preventDefault();
