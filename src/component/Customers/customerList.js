@@ -3,6 +3,7 @@ import '../../assets/styles/customerList.css';
 import { getBtnData, deleteData } from '../../api/Api';
 import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
 import EachCustomer from './eachCustomer';
+import DefaultComumMessage from '../Messages/DefaultComumMessage';
 
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
@@ -10,6 +11,9 @@ const CustomerList = () => {
   const [originalCustomerList, setOriginalCustomerList] = React.useState([]);
   const [oneClient, setOneClient] = React.useState({});
   const [showPopup, setShowPopup] = React.useState(false);
+  const [showWarningDeletePopup, setShowWarningDeltePopup] =
+    React.useState(false);
+  const [excludeCustomer, setExcludeCustomer] = React.useState('');
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
@@ -27,6 +31,14 @@ const CustomerList = () => {
       await Promise.all(
         excludeCustomer.map((item) => deleteData('user', item.id))
       );
+    }
+  };
+  const deleteCustomer = (item, permission) => {
+    setExcludeCustomer(item);
+    setShowWarningDeltePopup(true);
+    if (permission && excludeCustomer.name === item.name) {
+      setShowWarningDeltePopup(false);
+      deleteData('user', item.id);
     }
   };
 
@@ -63,6 +75,7 @@ const CustomerList = () => {
       {showPopup && (
         <EachCustomer oneClient={oneClient} setShowPopup={setShowPopup} />
       )}
+
       <div className="search-container">
         <input
           type="text"
@@ -86,15 +99,31 @@ const CustomerList = () => {
           <th>CPF</th>
           <th>Celular</th>
           <th>Aniverário</th>
+          <th>Excluir</th>
         </tr>
         {customerList &&
           customerList.length > 0 &&
           customerList.map((item, index) => (
-            <tr onClick={() => eachCustomer(item)}>
-              <td>{firstNameClient(item.name)}</td>
+            <tr>
+              <td onClick={() => eachCustomer(item)}>
+                {firstNameClient(item.name)}
+              </td>
               <td>{item.cpf}</td>
               <td>{item.phone}</td>
               <td>{item.birthday}</td>
+              <td>
+                {showWarningDeletePopup && (
+                  <DefaultComumMessage
+                    msg={`Você está prestes a excluir ${excludeCustomer.name}`}
+                    item={excludeCustomer}
+                    onConfirm={deleteCustomer}
+                    onClose={() => setShowWarningDeltePopup(false)}
+                  />
+                )}
+                <button onClick={() => deleteCustomer(item, false)}>
+                  Excluir
+                </button>
+              </td>
             </tr>
           ))}
       </table>
