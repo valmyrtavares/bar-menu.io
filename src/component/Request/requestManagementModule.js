@@ -74,20 +74,25 @@ const RequestManagementModule = () => {
       if (form.startDate && form.endDate) {
         const startDate = new Date(form.startDate);
         const endDate = new Date(form.endDate);
+
         if (startDate > endDate) {
           alert('Data de início não pode ser maior que a data de fim.');
         } else {
           setLoadMessage(true);
           const originalRequestListArray = filteredRequests(
+            //traz somente os pedidos do filtro de data
             originalRequestList,
             startDate,
             endDate
           );
+
           const statusList = await calculateProductsStatus(
             originalRequestListArray
           );
+
           console.log('VOUCHER   ', voucher);
           const voucherFiltered = filteredRequests(voucher, startDate, endDate);
+
           showDiscountsVoucher(voucherFiltered);
           setRequestList(statusList);
           setLoadMessage(false);
@@ -124,11 +129,8 @@ const RequestManagementModule = () => {
     let totalDiscount = 0;
     if (voucherFiltered) {
       voucherFiltered.forEach((item) => {
-        totalDiscount += item.discount;
+        totalDiscount += Number(item.discount);
       });
-      console.log('VOUCHER   ', voucherFiltered);
-      console.log('desconto total   ', totalDiscount);
-      console.log('Total params  1 ', totalParams);
       setTotalParams({
         ...totalParams,
         discount: totalDiscount,
@@ -170,9 +172,7 @@ const RequestManagementModule = () => {
       for (const item of filteredRequestsSended) {
         let sideDishesCost = 0;
         let sideDishesProfit = 0;
-        // if (item.name === 'BIG AÇAI') {
-        //   debugger;
-        // }
+
         if (item.sideDishes && item.sideDishes.length > 0) {
           // Verifica se há acompanhamentos e obtém os custos e lucros
           const sideDishesResults = await Promise.all(
