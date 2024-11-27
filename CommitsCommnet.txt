@@ -29,3 +29,5 @@ In the requestModal component we have a popup called WarningMessages, inside it 
 The second part of this feature is complete. Now when the customer registers and returns to the system and he enters the order queue in the requestModal component, the system checks if there is a backorder in localstorage and loads it inside the backorder useState. And another useEffect with currentUser dependency is called. Remember that currentUser is the user id. When the currentUser is loaded, this useEffect calls updateingNewCustomer and passes the backorder useState as a parameter and the user receives the order items that were stored in localstorage and the flow continues. This new customer can come back to get new items or not. If he decides to finalize the order, the flow remains the same and since he is a new customer, the system allows the discount.
 
 In the customerList component was implemented a delete button to each customer. It waw also implemented with the DefaultCommumMessage a warning due exclude customer
+
+In the cusomer list screen that correspond to customerList component after delete some data, the screen is automatic updated

@@ -14,6 +14,7 @@ const CustomerList = () => {
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
+  const [refreshData, setRefreshData] = React.useState(false);
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
@@ -23,6 +24,15 @@ const CustomerList = () => {
     };
     fetchCustomer();
   }, []);
+
+  React.useEffect(() => {
+    const fetchCustomer = async () => {
+      const data = await getBtnData('user');
+      setCustomerList(data);
+      setOriginalCustomerList(data);
+    };
+    fetchCustomer();
+  }, [refreshData]);
 
   const deleteAnonymousCustomer = async () => {
     const data = await getBtnData('user');
@@ -39,6 +49,7 @@ const CustomerList = () => {
     if (permission && excludeCustomer.name === item.name) {
       setShowWarningDeltePopup(false);
       deleteData('user', item.id);
+      setRefreshData((prev) => !prev);
     }
   };
 
