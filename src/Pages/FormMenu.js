@@ -1,26 +1,26 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Title from "../component/title.js";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Title from '../component/title.js';
 //import UseLocalStorage from "../Hooks/useLocalStorage.js";
-import "../assets/styles/FormMenu.css";
-import WarningMessage from "../component/WarningMessages";
+import '../assets/styles/FormMenu.css';
+import WarningMessage from '../component/WarningMessages';
 
 const FormMenu = () => {
   const navigate = useNavigate();
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   React.useEffect(() => {
-    if (!localStorage.hasOwnProperty("token")) {
-      navigate("/admin/login");
+    if (!localStorage.hasOwnProperty('token')) {
+      navigate('/admin/login');
     } else {
-      const token = JSON.parse(localStorage.getItem("token"));
+      const token = JSON.parse(localStorage.getItem('token'));
     }
   }, []);
 
   const logoutAdmin = () => {
     if (logoutAdminPopup) {
-      localStorage.removeItem("token");
-      navigate("/");
+      localStorage.removeItem('token');
+      navigate('/');
     }
     setLogoutAdminPopup(true);
   };
@@ -43,12 +43,12 @@ const FormMenu = () => {
           <p>
             Use essa seção para criar novas categorias de botões, que devem
             guardar outras subcategorias ou os itens finais referentes aos
-            pratos relacionados{" "}
+            pratos relacionados{' '}
           </p>
         </div>
         <div className="btn-form">
           <Link to="/admin/category" className="btn btn-success  ">
-            Adicione Botão{" "}
+            Adicione Botão{' '}
           </Link>
           <Link to="/admin/editButton/cat" className=" btn btn-success">
             Lista de Botões
@@ -60,7 +60,7 @@ const FormMenu = () => {
         <div className="btn-text">
           <p>
             Use essa seção para criar novos pratos com preços, imagens,
-            descrições, organizá-los dentro de categorias e editá-los e excluir{" "}
+            descrições, organizá-los dentro de categorias e editá-los e excluir{' '}
           </p>
         </div>
         <div className="btn-form">
@@ -77,7 +77,7 @@ const FormMenu = () => {
         <div className="btn-text">
           <p>
             Use essa seção para criar novos acompanhamentos para usá-los junto
-            aos pratos. Exclua e edite todos os itens criados aqui{" "}
+            aos pratos. Exclua e edite todos os itens criados aqui{' '}
           </p>
         </div>
         <div className="btn-form">
@@ -98,7 +98,7 @@ const FormMenu = () => {
         <div className="btn-text">
           <p>
             Use essa seção para criar acompanhar todos os clientes pedidos, por
-            nome, data, e preferências. E criar uma rede te interação{" "}
+            nome, data, e preferências. E criar uma rede te interação{' '}
           </p>
         </div>
         <div className="btn-form">
@@ -123,6 +123,20 @@ const FormMenu = () => {
         <div className="btn-form">
           <Link to="/admin/frontimage" className="btn btn-success ">
             Adicione sua marca
+          </Link>
+        </div>
+      </div>
+      <h3>Gerenciamento de Despesas</h3>
+      <div className="sub-container">
+        <div className="btn-text">
+          <p>
+            Crie uma lista de despesas fixas e móveis para que possa acompanhar
+            e gerenciar o crescimento do seu estabelecimento
+          </p>
+        </div>
+        <div className="btn-form">
+          <Link to="/admin/expenses" className="btn btn-success ">
+            Despesas
           </Link>
         </div>
       </div>

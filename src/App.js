@@ -27,6 +27,7 @@ import OrderQueue from './component/orderQueue';
 import RequestList from './component/Request/RequestList';
 import RecipeDish from './Forms/recipeDishForm';
 import CustomerList from './component/Customers/customerList';
+import ExpensesManegementList from './component/Payment/ExpensesManegementList';
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
@@ -60,6 +61,7 @@ function App() {
           <Route path="/admin/item" element={<FormItem />} />
           <Route path="/admin/recipedish" element={<RecipeDish />} />
           <Route path="/admin/category" element={<AddButtonForm />} />
+          <Route path="/admin/expenses" element={<ExpensesManegementList />} />
           <Route path="/admin/customer" element={<CustomerList />} />
           <Route path="/admin/request" element={<RequestManagementModule />} />
           {/* <Route

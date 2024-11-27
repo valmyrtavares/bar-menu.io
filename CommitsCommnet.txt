@@ -31,3 +31,5 @@ The second part of this feature is complete. Now when the customer registers and
 In the customerList component was implemented a delete button to each customer. It waw also implemented with the DefaultCommumMessage a warning due exclude customer
 
 In the cusomer list screen that correspond to customerList component after delete some data, the screen is automatic updated
+
+It was added the ExpensesManagementList component and it has a root adress to show data and i'll start development of its features
