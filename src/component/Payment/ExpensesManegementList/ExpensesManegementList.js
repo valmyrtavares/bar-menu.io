@@ -1,33 +1,51 @@
 import React from 'react';
-import '../../assets/styles/ExpensesManegementList.css';
-import { getBtnData, deleteData } from '../../api/Api';
-import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
+import '../../../assets/styles/ExpensesManegementList.css';
+import { getBtnData, deleteData } from '../../../api/Api';
+import AddExpensesForm from './AddExpensesForm.js';
 
-import DefaultComumMessage from '../Messages/DefaultComumMessage';
+import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 
-const CustomerList = () => {
+const ExpensesManegementList = () => {
   const [expensesList, setExpensesList] = React.useState(null);
 
   const [showPopup, setShowPopup] = React.useState(false);
-  const [showWarningDeletePopup, setShowWarningDeltePopup] =
-    React.useState(false);
+
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
+  const [obj, setObj] = React.useState(null);
+  const [showWarningDeletePopup, setShowWarningDeltePopup] =
+    React.useState(false);
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
       const data = await getBtnData('outgoing');
-      console.log('EXPENSES   ', data);
       setExpensesList(data);
     };
     fetchCustomer();
   }, []);
 
   React.useEffect(() => {
-    if (expensesList) {
-      console.log('EXPENSES LIST   ', expensesList);
+    const fetchCustomer = async () => {
+      const data = await getBtnData('outgoing');
+      setExpensesList(data);
+    };
+    fetchCustomer();
+  }, [refreshData]);
+
+  const editContent = (data) => {
+    setObj(data);
+    setShowPopup(true);
+  };
+  const deleteExpenses = (item, permission) => {
+    setExcludeCustomer(item);
+    setShowWarningDeltePopup(true);
+
+    if (permission && excludeCustomer.name === item.name) {
+      setShowWarningDeltePopup(false);
+      deleteData('outgoing', item.id);
+      setRefreshData((prev) => !prev);
     }
-  }, [expensesList]);
+  };
 
   // React.useEffect(() => {
   //   const fetchCustomer = async () => {
@@ -78,8 +96,25 @@ const CustomerList = () => {
 
   return (
     <div className="customerList-container">
-      <button>Adicione Despesa</button>
-      <div className="button-title-container">
+      {showWarningDeletePopup && (
+        <DefaultComumMessage
+          msg={`Você está prestes a excluir ${excludeCustomer.name}`}
+          item={excludeCustomer}
+          onConfirm={deleteExpenses}
+          onClose={() => setShowWarningDeltePopup(false)}
+        />
+      )}
+      {showPopup && (
+        <AddExpensesForm
+          setShowPopup={setShowPopup}
+          setRefreshData={setRefreshData}
+          obj={obj}
+        />
+      )}
+      <div>
+        <button onClick={() => setShowPopup(true)}>Adicione Despesa</button>
+      </div>
+      <div>
         <h1>Lista de Despesas</h1>
       </div>
       <table striped bordered hover>
@@ -105,10 +140,12 @@ const CustomerList = () => {
               <td>{item.paymentDate}</td>
               <td>{item.confirmation}</td>
               <td>
-                <button>Editar</button>
+                <button onClick={() => editContent(item)}>Editar</button>
               </td>
               <td>
-                <button>Excluir</button>
+                <button onClick={() => deleteExpenses(item, false)}>
+                  Excluir
+                </button>
               </td>
             </tr>
           ))}
@@ -116,4 +153,4 @@ const CustomerList = () => {
     </div>
   );
 };
-export default CustomerList;
+export default ExpensesManegementList;

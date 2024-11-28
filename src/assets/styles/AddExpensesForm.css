@@ -1,0 +1,17 @@
+.container-add-expenses-form{
+    width: 80%;
+    position: fixed;
+    top:15%;
+    left:10%;
+    background-color:var(--secundary-bg-color);
+    display:block !important;
+}
+.container-add-expenses-form form{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: end;
+    padding: 10px;
+}
+.container-add-expenses-form form input{
+    max-width: 300px;
+}

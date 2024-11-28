@@ -27,7 +27,7 @@ import OrderQueue from './component/orderQueue';
 import RequestList from './component/Request/RequestList';
 import RecipeDish from './Forms/recipeDishForm';
 import CustomerList from './component/Customers/customerList';
-import ExpensesManegementList from './component/Payment/ExpensesManegementList';
+import ExpensesManegementList from './component/Payment/ExpensesManegementList/ExpensesManegementList';
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';

@@ -33,3 +33,5 @@ In the customerList component was implemented a delete button to each customer. 
 In the cusomer list screen that correspond to customerList component after delete some data, the screen is automatic updated
 
 It was added the ExpensesManagementList component and it has a root adress to show data and i'll start development of its features
+
+In this commit we finish the CRUD in ExpensesManagementList component with all is working

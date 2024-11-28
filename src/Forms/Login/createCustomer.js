@@ -344,11 +344,13 @@ const CreateCustomer = () => {
           setPopupName={setPopupName}
         />
       )}
-      <main>
-        {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
-        {welcome.salute && <p>{welcome.salute}</p>}
-        {welcome.gift && <p>{welcome.gift}</p>}
-      </main>
+      {welcome && welcome.salute && welcome.gift && (
+        <main>
+          {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
+          {welcome.salute && <p>{welcome.salute}</p>}
+          {welcome.gift && <p>{welcome.gift}</p>}
+        </main>
+      )}
       <div className="create-new-customer-btns">
         <button
           type="button"
