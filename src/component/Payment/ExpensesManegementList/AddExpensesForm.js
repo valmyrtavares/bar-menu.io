@@ -44,14 +44,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [obj]);
 
-  React.useEffect(() => {
-    console.log(obj);
-    debugger;
-
-    if (!obj) {
-    }
-  }, []);
-
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -63,6 +55,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           setRefreshData((prev) => !prev); // Atualiza a interface, se necessário
           console.log('Documento atualizado com sucesso!');
           setShowPopup(false);
+          setForm({
+            name: '',
+            value: 0,
+            dueDate: '',
+            paymentDate: '',
+            category: '',
+            confirmation: 0,
+          });
+          obj = null;
+          console.log('OBJ  ', obj);
         })
         .catch((error) => {
           console.error('Erro ao atualizar o documento:', error);
@@ -71,6 +73,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       addDoc(collection(db, 'outgoing'), form).then(() => {
         setRefreshData((prev) => !prev);
         setShowPopup(false);
+        setForm({
+          name: '',
+          value: 0,
+          dueDate: '',
+          paymentDate: '',
+          category: '',
+          confirmation: 0,
+        });
+        obj = null;
+        console.log('OBJ  ', obj);
       });
     }
   };
@@ -123,16 +135,22 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           onFocus={handleFocus}
           onChange={handleChange}
         />
-        <Input
-          id="category"
-          autocomplete="off"
-          required
-          label="Categoria"
-          value={form.category}
-          type="text"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
+
+        <div className="select-form">
+          <select
+            id="category"
+            className="form-select custom-select"
+            value={form.category}
+            required
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>
+              Selecione o tipo de custo
+            </option>
+            <option value="fixed">Fixo</option>
+            <option value="variable"> Variável</option>
+          </select>
+        </div>
         <Input
           id="paymentDate"
           autocomplete="off"

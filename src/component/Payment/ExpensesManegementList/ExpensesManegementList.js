@@ -22,6 +22,7 @@ const ExpensesManegementList = () => {
       setExpensesList(data);
     };
     fetchCustomer();
+    setObj(null);
   }, []);
 
   React.useEffect(() => {
@@ -45,6 +46,11 @@ const ExpensesManegementList = () => {
       deleteData('outgoing', item.id);
       setRefreshData((prev) => !prev);
     }
+  };
+
+  const addNewExpense = () => {
+    setShowPopup(true);
+    setObj(null);
   };
 
   // React.useEffect(() => {
@@ -112,7 +118,7 @@ const ExpensesManegementList = () => {
         />
       )}
       <div>
-        <button onClick={() => setShowPopup(true)}>Adicione Despesa</button>
+        <button onClick={addNewExpense}>Adicione Despesa</button>
       </div>
       <div>
         <h1>Lista de Despesas</h1>

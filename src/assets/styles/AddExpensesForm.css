@@ -15,3 +15,6 @@
 .container-add-expenses-form form input{
     max-width: 300px;
 }
+.container-add-expenses-form form .select-form select {
+    max-height: 58px;
+}
