@@ -1,3 +1,5 @@
+@import 'variables';
+
 .customerList-container div{
     display: flex;
     justify-content: center;
@@ -18,4 +20,43 @@
   margin:60px 0;
     text-align: center;
     font-size: 39px;
+}
+
+table {
+    width: 100%;
+    /* Ajusta a tabela para ocupar toda a largura disponível */
+    border-collapse: collapse;
+    /* Remove os espaçamentos entre bordas */
+}
+
+table th,
+table td {
+    border: 1px solid #ccc;
+    /* Define bordas visíveis entre linhas e colunas */
+    padding: 8px;
+    /* Adiciona espaçamento interno */
+    text-align: left;
+    /* Alinha o texto à esquerda */
+}
+
+table th {
+    background-color: var(--secundary-bg-color);
+    /* Define uma cor de fundo para o cabeçalho */
+    font-weight: bold;
+    /* Destaca o texto do cabeçalho */
+}
+
+table tr:nth-child(even) {
+    background-color: var(--secundary-bg-color);
+    /* Adiciona uma cor de fundo para linhas pares */
+}
+
+table tr:hover {
+    background-color: #e2c11d;
+    /* Destaca a linha ao passar o mouse */
+}
+
+table .totals td{
+    font-weight: bold;
+    font-size: 15px;
 }

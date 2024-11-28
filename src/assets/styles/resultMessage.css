@@ -23,6 +23,7 @@
   transform: translate(-50%, -50%);
   z-index: 2; /* Certifica-se de que o container fique acima do overlay */
   width: 160%; /* Aumenta o tamanho proporcionalmente em 60% */
+  
 }
 
 .default-comum-message-container h1 {
@@ -32,10 +33,12 @@
 
 .default-comum-message-container h3 {
   margin: 30px 10px;
+  font-size: 35px;
 }
 
-.default-comum-message-container .container-button {
+.default-comum-message-container {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
 }
 

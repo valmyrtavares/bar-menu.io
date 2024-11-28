@@ -37,3 +37,5 @@ It was added the ExpensesManagementList component and it has a root adress to sh
 In this commit we finish the CRUD in ExpensesManagementList component with all is working
 
 It was fixed a bug regarding the fields form which was never clear and always was filled. I add a new function in the button of open modal and in this function i change the obj sent to  null and therefore when i click in this button all the fields are empty and i also change the input type text to input type select in the form and I did some adjustments in style of this input
+
+The totalExpensesValue function was implemented in the ExpensesManegementList component, which adds up all the values, both estimated and total, and places them in place of the screen button. In this case was used the generater html as a return of function with the data inside of it

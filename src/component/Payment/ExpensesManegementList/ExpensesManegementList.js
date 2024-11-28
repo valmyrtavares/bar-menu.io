@@ -22,7 +22,6 @@ const ExpensesManegementList = () => {
       setExpensesList(data);
     };
     fetchCustomer();
-    setObj(null);
   }, []);
 
   React.useEffect(() => {
@@ -51,6 +50,37 @@ const ExpensesManegementList = () => {
   const addNewExpense = () => {
     setShowPopup(true);
     setObj(null);
+    const result = totalExpensesValue();
+    console.log('Objeto com valores totais  ', result);
+  };
+
+  const totalExpensesValue = () => {
+    if (!expensesList || expensesList.length === 0) {
+      return null;
+    }
+    //let totals = { paid: 0, estimate: 0 };
+
+    const result = expensesList.reduce(
+      (totals, item) => {
+        totals.estimate += Number(item.value);
+        totals.paid += Number(item.confirmation);
+        return totals;
+      },
+      { paid: 0, estimate: 0 } // valor inicial do acumulador
+    );
+
+    return (
+      <tr className="totals">
+        <td>Total Estimado = </td> {/* Primeira coluna vazia */}
+        <td>{result.estimate}</td> {/* Segunda coluna com o total */}
+        <td colSpan={2}></td>{' '}
+        {/* Três colunas vazias (Data de Vencimento, Categoria, Data do Pagamento) */}
+        <td>Total Pago = </td>
+        <td>{result.paid}</td> {/* Sexta coluna com o total */}
+        <td colSpan={2}></td>{' '}
+        {/* Últimas duas colunas (Editar, Excluir) vazias */}
+      </tr>
+    );
   };
 
   // React.useEffect(() => {
@@ -124,37 +154,41 @@ const ExpensesManegementList = () => {
         <h1>Lista de Despesas</h1>
       </div>
       <table striped bordered hover>
-        <tr>
-          <th>Nome da despesa</th>
-          <th>Valor</th>
-          <th>Data de Vencimento</th>
-          <th>Categoria</th>
-          <th>Data do Pagamento</th>
-          <th>Confirmação</th>
-          <th>Editar</th>
-          <th>Excluir</th>
-        </tr>
-        {expensesList &&
-          expensesList.length > 0 &&
-          expensesList.map((item, index) => (
-            <tr key={index}>
-              <td>{item.name}</td>
-
-              <td>{item.value}</td>
-              <td>{item.dueDate}</td>
-              <td>{item.category}</td>
-              <td>{item.paymentDate}</td>
-              <td>{item.confirmation}</td>
-              <td>
-                <button onClick={() => editContent(item)}>Editar</button>
-              </td>
-              <td>
-                <button onClick={() => deleteExpenses(item, false)}>
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          ))}
+        <thead>
+          <tr>
+            <th>Nome da despesa</th>
+            <th>Valor</th>
+            <th>Data de Vencimento</th>
+            <th>Categoria</th>
+            <th>Data do Pagamento</th>
+            <th>Confirmação</th>
+            <th>Editar</th>
+            <th>Excluir</th>
+          </tr>
+        </thead>
+        <tbody>
+          {expensesList &&
+            expensesList.length > 0 &&
+            expensesList.map((item, index) => (
+              <tr key={index}>
+                <td>{item.name}</td>
+                <td>{item.value}</td>
+                <td>{item.dueDate}</td>
+                <td>{item.category}</td>
+                <td>{item.paymentDate}</td>
+                <td>{item.confirmation}</td>
+                <td>
+                  <button onClick={() => editContent(item)}>Editar</button>
+                </td>
+                <td>
+                  <button onClick={() => deleteExpenses(item, false)}>
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            ))}
+          {totalExpensesValue()} {/* Linha de totais no final */}
+        </tbody>
       </table>
     </div>
   );
