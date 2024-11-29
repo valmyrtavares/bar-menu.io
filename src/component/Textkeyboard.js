@@ -1,5 +1,5 @@
-import React from "react";
-import "../assets/styles/Textkeyboard.css";
+import React from 'react';
+import '../assets/styles/Textkeyboard.css';
 
 const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
   const handleCharacterClick = (char) => {
@@ -10,264 +10,264 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
     <div>
       <div className="text-keyboard-line-container">
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("0")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('0')}
         >
           0
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("1")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('1')}
         >
           1
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("2")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('2')}
         >
           2
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("3")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('3')}
         >
           3
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("4")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('4')}
         >
           4
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("5")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('5')}
         >
           5
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("6")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('6')}
         >
           6
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("7")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('7')}
         >
           7
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("8")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('8')}
         >
           8
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("9")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('9')}
         >
           9
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("@")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('@')}
         >
           @
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("-")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('-')}
         >
           -
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("_")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('_')}
         >
           _
         </div>
       </div>
       <div className="text-keyboard-line-container">
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("q")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('q')}
         >
           q
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("w")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('w')}
         >
           w
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("e")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('e')}
         >
           e
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("r")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('r')}
         >
           r
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("t")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('t')}
         >
           t
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("y")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('y')}
         >
           y
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("u")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('u')}
         >
           u
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("i")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('i')}
         >
           i
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("o")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('o')}
         >
           o
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("p")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('p')}
         >
           p
         </div>
         <div
           className="text-character"
-          onClick={() => handleCharacterClick("Bcksp")}
+          onClick={() => handleCharacterClick('Bcksp')}
         >
           Bcksp
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick(".")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('.')}
         >
           .
         </div>
       </div>
       <div className="text-keyboard-line-container">
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("a")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('a')}
         >
           a
         </div>
 
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("s")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('s')}
         >
           s
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("d")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('d')}
         >
           d
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("f")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('f')}
         >
           f
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("g")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('g')}
         >
           g
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("h")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('h')}
         >
           h
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("j")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('j')}
         >
           j
         </div>
 
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("k")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('k')}
         >
           k
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("l")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('l')}
         >
           l
         </div>
       </div>
       <div className="text-keyboard-line-container">
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("z")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('z')}
         >
           z
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("x")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('x')}
         >
           x
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("c")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('c')}
         >
           c
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("v")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('v')}
         >
           v
         </div>
 
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("b")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('b')}
         >
           b
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("n")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('n')}
         >
           n
         </div>
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("m")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('m')}
         >
           m
         </div>
 
         <div
-          className="text-character"
-          onClick={() => handleCharacterClick("p")}
+          className="text-character one-char"
+          onClick={() => handleCharacterClick('p')}
         >
           p
         </div>
@@ -275,13 +275,13 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
       <div className="text-keyboard-line-container">
         <div
           className="text-character"
-          onClick={() => handleCharacterClick("clearField")}
+          onClick={() => handleCharacterClick('clearField')}
         >
           limpar
         </div>
         <div
           className="text-character space"
-          onClick={() => handleCharacterClick(" ")}
+          onClick={() => handleCharacterClick(' ')}
         >
           Esp
         </div>
@@ -290,7 +290,7 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
         </div>
         <div
           className="text-character"
-          onClick={() => handleCharacterClick(".com")}
+          onClick={() => handleCharacterClick('.com')}
         >
           .com
         </div>

@@ -19,7 +19,11 @@
      display: grid;
      background-color: var(--btn-color);
      place-items: center;
+   font-size: 18px;
  
+  }
+  .text-keyboard-line-container .one-char{
+   font-size: 25px;
   }
   .space{
    width: 100px !important;
