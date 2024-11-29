@@ -32,14 +32,6 @@ const TableComponent = ({ filteredCompleteRequests }) => {
           </thead>
           <tbody>
             <tr>
-              <td>Total Geral</td>
-              <td>{totalInScreen.total}</td>
-            </tr>
-            <tr>
-              <td>desconto</td>
-              <td>{totalInScreen.discount}</td>
-            </tr>
-            <tr>
               <td>Débito</td>
               <td>{totalInScreen.debit}</td>
             </tr>
@@ -54,6 +46,18 @@ const TableComponent = ({ filteredCompleteRequests }) => {
             <tr>
               <td>Pix</td>
               <td>{totalInScreen.pix}</td>
+            </tr>
+            <tr>
+              <td>Total Bruto</td>
+              <td>{totalInScreen.grossdiscount}</td>
+            </tr>
+            <tr>
+              <td>Desconto</td>
+              <td>{totalInScreen.discount}</td>
+            </tr>
+            <tr>
+              <td>Total com Desconto</td>
+              <td>{totalInScreen.total}</td>
             </tr>
           </tbody>
         </table>
@@ -111,6 +115,7 @@ const TableComponent = ({ filteredCompleteRequests }) => {
 
         // Calcula o desconto (se houver diferença)
         const discount = sumItemsPrice - finalPriceRequest;
+
         if (discount > 0) {
           acc.discount += discount; // Acumula o desconto
         }
@@ -118,10 +123,11 @@ const TableComponent = ({ filteredCompleteRequests }) => {
         // Soma aos subtotais por método de pagamento
         request.forEach((reqItem) => {
           const price = reqItem.finalPrice;
+          acc.grossdiscount += price;
 
           if (paymentMethod === 'debit') {
             acc.debit += price;
-          } else if (paymentMethod === 'credit') {
+          } else if (paymentMethod === 'credite') {
             acc.credit += price;
           } else if (paymentMethod === 'cash') {
             acc.cash += price;
@@ -132,7 +138,15 @@ const TableComponent = ({ filteredCompleteRequests }) => {
 
         return acc;
       },
-      { total: 0, debit: 0, credit: 0, cash: 0, pix: 0, discount: 0 } // Objeto inicial
+      {
+        total: 0,
+        debit: 0,
+        credit: 0,
+        cash: 0,
+        pix: 0,
+        discount: 0,
+        grossdiscount: 0,
+      } // Objeto inicial
     );
 
     return totals; // Retorna o objeto final com os totais
