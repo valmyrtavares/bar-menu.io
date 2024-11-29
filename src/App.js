@@ -31,13 +31,14 @@ import ExpensesManegementList from './component/Payment/ExpensesManegementList/E
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
+import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 
 import './style.css';
 
 function App() {
-  const basename = '/bar-menu.io';
-  // const basename = '/';
+  // const basename = '/bar-menu.io';
+  const basename = '/';
   return (
     <div className="ultra-wrapper">
       <BrowserRouter basename={basename}>
@@ -51,7 +52,6 @@ function App() {
           <Route path="/requestlistcheck" element={<RequestList />} />
           <Route path="/nfce" element={<FiscalAttributes />} />
           <Route path="/print" element={<PrintRequestCustomer />} />
-
           {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
           <Route path="/requestlist" element={<RequestListToBePrepared />} />
           <Route
@@ -64,6 +64,8 @@ function App() {
           <Route path="/admin/expenses" element={<ExpensesManegementList />} />
           <Route path="/admin/customer" element={<CustomerList />} />
           <Route path="/admin/request" element={<RequestManagementModule />} />
+          <Route path="admin/sell-flow" element={<SellFlowMangement />} />
+
           {/* <Route
             path="/admin/SideDisehsInDishes"
             element={<NoNameSideDisehsInDishes />}
@@ -78,8 +80,8 @@ function App() {
           <Route path="/admin/frontimage" element={<FormFrontImage />} />
           <Route path="/admin/styles" element={<ScreenStylesForm />} />
           <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
-          <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
-          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
+          {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </div>

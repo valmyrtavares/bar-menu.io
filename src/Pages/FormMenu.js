@@ -93,7 +93,7 @@ const FormMenu = () => {
           </Link>
         </div>
       </div>
-      <h3>Gerenciando Clientes</h3>
+      <h3>Gerencia de Fluxo</h3>
       <div className="sub-container">
         <div className="btn-text">
           <p>
@@ -107,6 +107,9 @@ const FormMenu = () => {
           </Link>
           <Link to="/admin/request" className=" btn btn-success sidedishe">
             Lista de Pedidos
+          </Link>
+          <Link to="/admin/sell-flow" className=" btn btn-success sidedishe">
+            Fechamento de Caixa
           </Link>
         </div>
       </div>
