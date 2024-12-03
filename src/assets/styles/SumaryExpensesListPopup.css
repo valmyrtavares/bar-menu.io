@@ -1,0 +1,9 @@
+.container-sumary-expenses{
+    width: 60%;
+    background-color: white;
+    position: fixed !important;
+    display: grid !important;
+    top:opx;
+    left: 15%;
+    z-index: 10;
+}

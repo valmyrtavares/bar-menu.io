@@ -1,13 +1,24 @@
 @import 'variables';
 
-.customerList-container div{
+.customerList-container{
+    position: relative !important;
+}
+.customerList-container .container-add-expenses{
+    position: relative;
+}
+
+
+.customerList-container .btn-add {
     display: flex;
     justify-content: center;
+    width: 100%;
+
 }
-.customerList-container div button {
+.customerList-container .btn-add button{
    
     border-radius: 10px;
         padding: 15px 35px;
+        justify-content: center;
   
     font-family: var(--title-font) !important;
     font-size: 18px;

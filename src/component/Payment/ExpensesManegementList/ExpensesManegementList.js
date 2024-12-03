@@ -2,7 +2,7 @@ import React from 'react';
 import '../../../assets/styles/ExpensesManegementList.css';
 import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
-
+import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 
 const ExpensesManegementList = () => {
@@ -15,6 +15,8 @@ const ExpensesManegementList = () => {
   const [obj, setObj] = React.useState(null);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
+  const [openSumaryPopup, setOpenSumaryPopup] = React.useState(false);
+  const [oneExpense, setOneExpense] = React.useState(null);
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
@@ -83,6 +85,11 @@ const ExpensesManegementList = () => {
     );
   };
 
+  const openLoadSumaryPopup = (item) => {
+    setOpenSumaryPopup(true);
+    setOneExpense(item);
+  };
+
   // React.useEffect(() => {
   //   const fetchCustomer = async () => {
   //     const data = await getBtnData('user');
@@ -140,17 +147,25 @@ const ExpensesManegementList = () => {
           onClose={() => setShowWarningDeltePopup(false)}
         />
       )}
-      {showPopup && (
-        <AddExpensesForm
-          setShowPopup={setShowPopup}
-          setRefreshData={setRefreshData}
-          obj={obj}
+      <div className="container-add-expenses">
+        {showPopup && (
+          <AddExpensesForm
+            setShowPopup={setShowPopup}
+            setRefreshData={setRefreshData}
+            obj={obj}
+          />
+        )}
+      </div>
+      {openSumaryPopup && (
+        <SumaryExpensesListPopup
+          setOpenSumaryPopup={setOpenSumaryPopup}
+          oneExpense={oneExpense}
         />
       )}
-      <div>
+      <div className="btn-add">
         <button onClick={addNewExpense}>Adicione Despesa</button>
       </div>
-      <div>
+      <div className="title-table">
         <h1>Lista de Despesas</h1>
       </div>
       <table striped bordered hover>
@@ -171,7 +186,7 @@ const ExpensesManegementList = () => {
             expensesList.length > 0 &&
             expensesList.map((item, index) => (
               <tr key={index}>
-                <td>{item.name}</td>
+                <td onClick={() => openLoadSumaryPopup(item)}>{item.name}</td>
                 <td>{item.value}</td>
                 <td>{item.dueDate}</td>
                 <td>{item.category}</td>

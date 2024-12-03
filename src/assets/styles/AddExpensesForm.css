@@ -2,11 +2,19 @@
     width: 80%;
     position: fixed;
     top:15%;
-    left:10%;
+    left:30%;
     background-color:var(--secundary-bg-color);
     display:block !important;
+    padding: 16px;
+    max-width: 700px;
+    background-color: var(--secundary-bg-color);
+    height: 70vh;
+    overflow-y: auto;
 }
-.container-add-expenses-form form{
+.container-add-expenses-form h1{
+    margin:5px 0 !important;
+}
+.container-add-expenses-form .form-product{
     display:grid;
     grid-template-columns: 1fr 1fr;
     justify-items: end;
@@ -17,4 +25,59 @@
 }
 .container-add-expenses-form form .select-form select {
     max-height: 58px;
+}
+
+.container-add-expenses-form button{
+    border-radius: 10px;
+    padding: 15px 35px;
+    justify-content: center;
+   
+    font-family: var(--title-font) !important;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+
+}
+.container-add-expenses-form fieldset {
+     border: 2px solid #ccc;
+     /* Define uma borda visível */
+     padding: 10px;
+     /* Espaçamento interno */
+     margin-bottom: 15px;
+     /* Espaçamento entre fieldsets */
+     border-radius: 5px;
+     /* Borda arredondada (opcional) */
+     display:flex;
+     flex-wrap: wrap;
+     gap: 5px;
+     justify-content: space-around;
+     
+ }
+ .container-add-expenses-form fieldset legend{
+    text-align: center;
+ }
+ .container-add-expenses-form fieldset label{
+    font-size:16px !important;
+    display:block;
+ }
+
+ legend {
+     font-weight: bold;
+     /* Destaca o texto do legend */
+ }
+ .container-add-expenses-form fieldset .num{
+    max-width: 50px;
+ }
+  .container-add-expenses-form fieldset .num {
+      max-width: 90px;
+  }
+.container-add-expenses-form fieldset .product {
+    max-width: 160px;
+}
+.container-add-expenses-form fieldset .provider {
+    max-width: 180px;
+}
+.container-add-expenses-form fieldset .account {
+    max-width: 150px;
 }
