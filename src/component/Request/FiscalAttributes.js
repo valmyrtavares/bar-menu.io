@@ -388,7 +388,7 @@ const FiscalAttributes = () => {
         <div>
           <Input
             id="cpf"
-            autocomplete="off"
+            autoComplete="off"
             placeholder="CPF"
             value={form.cpf}
             type="text"

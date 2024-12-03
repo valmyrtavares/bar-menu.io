@@ -1,28 +1,28 @@
-import React from "react";
-import Input from "../../component/Input.js";
-import "../../assets/styles/NameForm.css";
-import TextKeyboard from "../../component/Textkeyboard";
-import useFormValidation from "../../Hooks/useFormValidation.js";
-import { GlobalContext } from "../../GlobalContext";
+import React from 'react';
+import Input from '../../component/Input.js';
+import '../../assets/styles/NameForm.css';
+import TextKeyboard from '../../component/Textkeyboard';
+import useFormValidation from '../../Hooks/useFormValidation.js';
+import { GlobalContext } from '../../GlobalContext';
 
 const NameForm = ({ justNameFantasy, setPopupName }) => {
   //    const [nameFantasey, setNameFantasy] = React.useState("")
   const global = React.useContext(GlobalContext);
   const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
-    name: "",
-    phone: "",
-    cpf: "",
-    birthday: "",
-    email: "",
+    name: '',
+    phone: '',
+    cpf: '',
+    birthday: '',
+    email: '',
   });
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
 
   const closeKeyboard = (Value, id) => {
-    if (id === "fantasyName") {
+    if (id === 'fantasyName') {
       setShowNameKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "fantasyName",
+          id: 'fantasyName',
           value: Value,
         },
       };
@@ -30,22 +30,22 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
     }
   };
   const addCharacter = (char, id) => {
-    if (char === "clearField") {
+    if (char === 'clearField') {
       // Limpar o campo CPF
-      setForm((prev) => ({ ...prev, id: "" }));
+      setForm((prev) => ({ ...prev, id: '' }));
 
       // Criar e passar o evento sintético para handleChange com o campo vazio
       const syntheticEvent = {
         target: {
           id: id,
-          value: "", // Campo vazio
+          value: '', // Campo vazio
         },
       };
       handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    if (char === "Bcksp") {
+    if (char === 'Bcksp') {
       // Limpar o campo CPF
       setForm((prev) => ({
         ...prev,
@@ -63,15 +63,15 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    let newValue = "";
+    let newValue = '';
     // Adicionar o novo caractere ao valor atual do CPF
-    if (id === "phone") {
+    if (id === 'phone') {
       newValue = form.phone + char;
-    } else if (id === "cpf") {
+    } else if (id === 'cpf') {
       newValue = form.cpf + char;
-    } else if (id === "name") {
+    } else if (id === 'name') {
       newValue = form.name + char;
-    } else if (id === "email") {
+    } else if (id === 'email') {
       newValue = form.email + char;
     }
 
@@ -88,7 +88,7 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
 
   const handleFocus = (e) => {
     const { id, value } = e.target;
-    if (id === "name") {
+    if (id === 'name') {
       setShowNameKeyboard(true);
     }
   };
@@ -100,7 +100,7 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
         id="name"
         required
         label="Nome"
-        autocomplete="off"
+        autoComplete="off"
         value={form.name}
         type="text"
         onChange={handleChange}
@@ -110,7 +110,7 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
         <TextKeyboard
           addCharacter={addCharacter}
           id="name"
-          closeKeyboard={() => closeKeyboard(form.fantasyName, "name")}
+          closeKeyboard={() => closeKeyboard(form.fantasyName, 'name')}
         />
       )}
       <button className="goon-btn" onClick={() => justNameFantasy(form.name)}>

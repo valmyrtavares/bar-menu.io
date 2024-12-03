@@ -1,14 +1,14 @@
-import React from "react";
-import Input from "../../component/Input.js";
-import "../../assets/styles/form.css";
-import Title from "../../component/title.js";
-import { auth } from "../../config-firebase/firebase.js";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { GlobalContext } from "../../GlobalContext";
-import { useNavigate } from "react-router-dom";
-import Error from "../../component/error.js";
-import TextKeyboard from "../../component/Textkeyboard.js";
-import useFormValidation from "../../Hooks/useFormValidation.js";
+import React from 'react';
+import Input from '../../component/Input.js';
+import '../../assets/styles/form.css';
+import Title from '../../component/title.js';
+import { auth } from '../../config-firebase/firebase.js';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { GlobalContext } from '../../GlobalContext';
+import { useNavigate } from 'react-router-dom';
+import Error from '../../component/error.js';
+import TextKeyboard from '../../component/Textkeyboard.js';
+import useFormValidation from '../../Hooks/useFormValidation.js';
 
 function Login() {
   const navigate = useNavigate();
@@ -21,37 +21,37 @@ function Login() {
   const global = React.useContext(GlobalContext);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     });
 
   const handleFocus = (e) => {
     const { id, value } = e.target;
-    if (id === "password") {
+    if (id === 'password') {
       setShowPasswordKeyboard(true);
       setShowEmailKeyboard(false);
-    } else if (id === "email") {
+    } else if (id === 'email') {
       setShowPasswordKeyboard(false);
       setShowEmailKeyboard(true);
     }
   };
   const addCharacter = (char, id) => {
-    if (char === "clearField") {
+    if (char === 'clearField') {
       // Limpar o campo CPF
-      setForm((prev) => ({ ...prev, id: "" }));
+      setForm((prev) => ({ ...prev, id: '' }));
 
       // Criar e passar o evento sintético para handleChange com o campo vazio
       const syntheticEvent = {
         target: {
           id: id,
-          value: "", // Campo vazio
+          value: '', // Campo vazio
         },
       };
       handleChange(syntheticEvent); // Disparar o handleChange com o campo limpo
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    if (char === "Bcksp") {
+    if (char === 'Bcksp') {
       // Limpar o campo CPF
       setForm((prev) => ({
         ...prev,
@@ -69,11 +69,11 @@ function Login() {
       return; // Evitar adicionar mais caracteres após limpar o campo
     }
 
-    let newValue = "";
+    let newValue = '';
     // Adicionar o novo caractere ao valor atual do CPF
-    if (id === "password") {
+    if (id === 'password') {
       newValue = form.password + char;
-    } else if (id === "email") {
+    } else if (id === 'email') {
       newValue = form.email + char;
     }
 
@@ -89,22 +89,22 @@ function Login() {
   };
 
   const closeKeyboard = (Value, id) => {
-    if (id === "password") {
+    if (id === 'password') {
       showPasswordlKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "password",
+          id: 'password',
           value: Value,
         },
       };
       handleBlur(syntheticEvent);
     }
 
-    if (id === "email") {
+    if (id === 'email') {
       showEmailKeyboard(false);
       const syntheticEvent = {
         target: {
-          id: "email",
+          id: 'email',
           value: Value,
         },
       };
@@ -126,8 +126,8 @@ function Login() {
         form.password
       );
       const user = userCredential.user;
-      localStorage.setItem("token", JSON.stringify(user.accessToken));
-      navigate("/admin");
+      localStorage.setItem('token', JSON.stringify(user.accessToken));
+      navigate('/admin');
 
       //navigate("/admin");
     } catch (error) {
@@ -142,14 +142,14 @@ function Login() {
       {errorMessage && (
         <Error
           setErrorPopup={setErrorMessage}
-          error={{ login: "Sua senha ou email estão incorretos" }}
+          error={{ login: 'Sua senha ou email estão incorretos' }}
         />
       )}
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="email"
           label="email"
-          autocomplete="off"
+          autoComplete="off"
           value={form.email}
           type="email"
           onFocus={handleFocus}
@@ -159,13 +159,13 @@ function Login() {
           <TextKeyboard
             addCharacter={addCharacter}
             id="email"
-            closeKeyboard={() => closeKeyboard(form.email, "email")}
+            closeKeyboard={() => closeKeyboard(form.email, 'email')}
           />
         )}
 
         <Input
           id="password"
-          autocomplete="off"
+          autoComplete="off"
           label="Password"
           value={form.password}
           type="password"
@@ -176,7 +176,7 @@ function Login() {
           <TextKeyboard
             addCharacter={addCharacter}
             id="password"
-            closeKeyboard={() => closeKeyboard(form.password, "password")}
+            closeKeyboard={() => closeKeyboard(form.password, 'password')}
           />
         )}
 
