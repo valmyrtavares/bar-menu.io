@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Input from '../../Input';
 import '../../../assets/styles/AddExpensesForm.css';
 import CloseBtn from '../../closeBtn';
@@ -23,7 +23,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const [item, setItem] = React.useState({
     product: '',
-    amout: 0,
+    amount: 0,
     CostPerUnit: 0,
     totalCost: 0,
     provider: '',
@@ -31,6 +31,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     volumePerUnit: 0,
     unitOfMeasurement: '',
   });
+  const [itemArrayList, setItemArrayList] = React.useState([]);
   const db = getFirestore(app);
 
   React.useEffect(() => {
@@ -56,9 +57,51 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   }, [obj]);
 
   const addItem = () => {
-    if (item) {
-      console.log('ITEM ADICIONADO  ', item);
+    if (item.product !== '') {
+      setItemArrayList((prevArrayList) => [...prevArrayList, item]);
     }
+  };
+
+  useEffect(() => {
+    if (itemArrayList) {
+      console.log('Arrau de itens   ', itemArrayList);
+    }
+    renderTableItem();
+  }, [itemArrayList]);
+
+  const renderTableItem = () => {
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Custo por unidade</th>
+            <th>Custo Total</th>
+            <th>Fornecedor</th>
+            <th>Nota Fiscal</th>
+            <th>Volume</th>
+            <th>Unidade de medida</th>
+          </tr>
+        </thead>
+        <tbody>
+          {itemArrayList &&
+            itemArrayList.length > 0 &&
+            itemArrayList.map((requestItem, index) => (
+              <tr key={index}>
+                <td>{requestItem.product}</td>
+                <td>{requestItem.amount}</td>
+                <td>{requestItem.CostPerUnit}</td>
+                <td>{requestItem.totalCost}</td>
+                <td>{requestItem.provider}</td>
+                <td>{requestItem.account}</td>
+                <td>{requestItem.volumePerUnit}</td>
+                <td>{requestItem.unitOfMeasurement}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    );
   };
 
   const handleSubmit = (event) => {
@@ -213,7 +256,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onChange={handleItemChange}
           />
           <Input
-            id="amout"
+            id="amount"
             autoComplete="off"
             className="num"
             required
@@ -284,8 +327,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               <option value="" disabled hidden>
                 Unidade de medida
               </option>
-              <option value="fixed">Fixo</option>
-              <option value="variable"> Variável</option>
+              <option value="litle">Litro</option>
+              <option value="unit"> Unidade</option>
+
+              <option value="ml"> ml</option>
+              <option value="kg"> kilos</option>
+              <option value="g"> Gramas</option>
             </select>
           </div>
           <button type="button" onClick={addItem}>
@@ -294,6 +341,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         </fieldset>
         <button>Enviar</button>
       </form>
+      {item && renderTableItem()}
     </div>
   );
 };

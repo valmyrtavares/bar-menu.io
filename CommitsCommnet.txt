@@ -41,3 +41,5 @@ It was fixed a bug regarding the fields form which was never clear and always wa
 The totalExpensesValue function was implemented in the ExpensesManegementList component, which adds up all the values, both estimated and total, and places them in place of the screen button. In this case was used the generater html as a return of function with the data inside of it
 
 it was done the selfFlowManagement component very similar to requestManagementModule. It select two dates and filter all orders just is between that two dates, after that this date is sended to TableComponent and it show de each item separeated, the order's price and the discount in each request. And in this tableComponent all total payments are separated in categories like cash, debit, credite, and pix with each total number
+
+In the addExpensesForm component we added a new form to items with a lot of new fields. After filling them the system print a row of table with all data. This items are sent to DB within the main expense. In this approach we can have expenses with or without items. In case of payment of electric light or salary expenses there is no items in this casess
