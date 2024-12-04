@@ -1,0 +1,88 @@
+.ContainerAddProviderForm{
+    width: 80%;
+        position: fixed;
+        top: 15%;
+        left: 20%;
+        background-color: var(--secundary-bg-color);
+        display: block !important;
+        padding: 16px;
+        max-width: 1100px;
+        background-color: var(--secundary-bg-color);
+        height: 70vh;
+        overflow-y: auto;
+}
+
+.ContainerAddProviderForm h1{    
+    font-family: var(--title-font) !important;
+    color: var(--title-font-color);
+    margin: 15px 0;
+        text-align: center;
+}
+.containerInputs{
+    display:flex;
+    justify-content:space-around
+}
+
+.containerBtn{
+    display:flex;
+    justify-content: center;
+    width: 100%;
+    margin:30px auto
+}
+
+.btn {
+    border-radius: 10px;
+        padding: 15px 35px;
+    max-width: 30%;
+        font-family: var(--title-font) !important;
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--title-font-color);
+        background: var(--btn-color);
+}
+
+.ContainerAddProviderForm button {
+    
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
+
+.ContainerAddProviderForm table {
+    width: 80%;
+    /* Ajusta a tabela para ocupar toda a largura disponível */
+    border-collapse: collapse;
+    /* Remove os espaçamentos entre bordas */
+}
+
+.ContainerAddProviderForm table th,
+.ContainerAddProviderForm table td {
+    border: 1px solid #ccc;
+    /* Define bordas visíveis entre linhas e colunas */
+    padding: 8px;
+    /* Adiciona espaçamento interno */
+    text-align: left;
+    /* Alinha o texto à esquerda */
+}
+
+.ContainerAddProviderForm table th {
+    background-color: var(--bg-color);
+    /* Define uma cor de fundo para o cabeçalho */
+    font-weight: bold;
+    /* Destaca o texto do cabeçalho */
+}
+
+.ContainerAddProviderForm table tr:nth-child(even) {
+    background-color: var(--bg-color);
+    /* Adiciona uma cor de fundo para linhas pares */
+}
+
+.ContainerAddProviderForm table tr:hover {
+    background-color: #e2c11d;
+    /* Destaca a linha ao passar o mouse */
+}
+
+.ContainerAddProviderForm table .totals td {
+    font-weight: bold;
+    font-size: 15px;
+}

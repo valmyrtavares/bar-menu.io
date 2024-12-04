@@ -11,6 +11,8 @@
     height: 70vh;
     overflow-y: auto;
 }
+
+
 .container-add-expenses-form h1{
     margin:5px 0 !important;
 }

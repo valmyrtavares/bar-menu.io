@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
-import '../../../assets/styles/AddExpensesForm.css';
+import provider from '../../../assets/styles/RegisterProvider.module.css';
 import CloseBtn from '../../closeBtn';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
@@ -107,13 +107,13 @@ const RegisterProvider = ({ setShowPopup }) => {
   };
 
   return (
-    <div className="container-add-expenses-form">
+    <div className={provider.ContainerAddProviderForm}>
       <CloseBtn setClose={setShowPopup} />
 
       <h1>Adicione um novo fornecedor</h1>
 
       <form onSubmit={handleSubmit} className="m-1">
-        <div className="form-product">
+        <div className={provider.containerInputs}>
           <Input
             id="name"
             autoComplete="off"
@@ -132,8 +132,9 @@ const RegisterProvider = ({ setShowPopup }) => {
             onChange={handleChange}
           />
         </div>
-
-        <button>Enviar</button>
+        <div className={provider.containerBtn}>
+          <button className={provider.btn}>Enviar</button>
+        </div>
       </form>
       {listProvider && renderTableItem()}
     </div>
