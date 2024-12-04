@@ -3,6 +3,7 @@ import '../../../assets/styles/ExpensesManegementList.css';
 import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
+import RegisterProduct from './RegisterProduct.js';
 import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 
@@ -11,6 +12,8 @@ const ExpensesManegementList = () => {
 
   const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
   const [showProviderRegisterPopup, setShowProviderRegisterPopup] =
+    React.useState(false);
+  const [showProductRegistePopup, setShowProductRegisterPopup] =
     React.useState(false);
 
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
@@ -57,7 +60,7 @@ const ExpensesManegementList = () => {
     setObj(null);
   };
   const registerProduct = () => {
-    console.log('Registrou');
+    setShowProductRegisterPopup(true);
   };
   const addRegisterProvider = () => {
     console.log('Registrou');
@@ -112,6 +115,14 @@ const ExpensesManegementList = () => {
         {showProviderRegisterPopup && (
           <RegisterProvider
             setShowPopup={setShowProviderRegisterPopup}
+            obj={obj}
+          />
+        )}
+      </div>
+      <div className="container-add-expenses">
+        {showProductRegistePopup && (
+          <RegisterProduct
+            setShowPopup={setShowProductRegisterPopup}
             obj={obj}
           />
         )}

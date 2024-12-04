@@ -51,3 +51,5 @@ I added two new buttons in the ExpensesManagementList component to register new 
 The RegisterProvider component is done. It gets the data and print in your own talble with two input fields to add new provider and in each row of table there is one X to exclude the provider data. The CNPJ field has one formatter function and for now all is working. In this epecific case the popup doesn't close after the data is sended.If remains opened because all providers data is displayed in your own table. This table will be displayed after in select in the AddExpensesForm component
 
 RegisterProvider component was styled with module css
+
+The same process was done in RegisterProduct component
