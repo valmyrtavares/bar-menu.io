@@ -45,3 +45,5 @@ it was done the selfFlowManagement component very similar to requestManagementMo
 In the addExpensesForm component we added a new form to items with a lot of new fields. After filling them the system print a row of table with all data. This items are sent to DB within the main expense. In this approach we can have expenses with or without items. In case of payment of electric light or salary expenses there is no items in this casess
 
 In this commit I made a small change that is not so important, but it is worth explaining. I moved the input field of provider and account to the first group of fields. Because it doesn't make sense to fill these fields more than once. considering that all items have the sema provider and the same account
+
+I added two new buttons in the ExpensesManagementList component to register new providers and new products. All work was done in this component to allow to show the new popup. For now I copied the addExpensesForm cause there is a lot of similar procedeure between of them. Form now i have exactly the same component wiht another name. The new name is RegisterProvider component. I'm goint to work on it 

@@ -2,13 +2,16 @@ import React from 'react';
 import '../../../assets/styles/ExpensesManegementList.css';
 import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
+import RegisterProvider from './RegisterProvider.js';
 import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 
 const ExpensesManegementList = () => {
   const [expensesList, setExpensesList] = React.useState(null);
 
-  const [showPopup, setShowPopup] = React.useState(false);
+  const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
+  const [showProviderRegisterPopup, setShowProviderRegisterPopup] =
+    React.useState(false);
 
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
@@ -36,7 +39,7 @@ const ExpensesManegementList = () => {
 
   const editContent = (data) => {
     setObj(data);
-    setShowPopup(true);
+    setShowExpensesPopup(true);
   };
   const deleteExpenses = (item, permission) => {
     setExcludeCustomer(item);
@@ -50,10 +53,15 @@ const ExpensesManegementList = () => {
   };
 
   const addNewExpense = () => {
-    setShowPopup(true);
+    setShowExpensesPopup(true);
     setObj(null);
-    const result = totalExpensesValue();
-    console.log('Objeto com valores totais  ', result);
+  };
+  const registerProduct = () => {
+    console.log('Registrou');
+  };
+  const addRegisterProvider = () => {
+    console.log('Registrou');
+    setShowProviderRegisterPopup(true);
   };
 
   const totalExpensesValue = () => {
@@ -90,53 +98,6 @@ const ExpensesManegementList = () => {
     setOneExpense(item);
   };
 
-  // React.useEffect(() => {
-  //   const fetchCustomer = async () => {
-  //     const data = await getBtnData('user');
-  //     setExpensesList(data);
-  // setOriginalCustomerList(data);
-  //   };
-  //   fetchCustomer();
-  // }, [refreshData]);
-
-  // const deleteCustomer = (item, permission) => {
-  //   setExcludeCustomer(item);
-  //   setShowWarningDeltePopup(true);
-  //   if (permission && excludeCustomer.name === item.name) {
-  //     setShowWarningDeltePopup(false);
-  //     deleteData('user', item.id);
-  //     setRefreshData((prev) => !prev);
-  //   }
-  // };
-
-  // const handleChange = ({ target }) => {
-  //   const searchValue = target.value.toLowerCase();
-  //   setCustomer(searchValue);
-
-  //   if (searchValue === '') {
-  //     setCustomerList(originalCustomerList);
-  //   } else {
-  //     const filtered = originalCustomerList.filter((customer) => {
-  //       const nameMatch =
-  //         customer.name && customer.name.toLowerCase().includes(searchValue);
-  //       const cpfMatch =
-  //         customer.cpf && customer.cpf.toLowerCase().includes(searchValue);
-  //       const birthdayMatch =
-  //         customer.birthday &&
-  //         customer.birthday.toLowerCase().includes(searchValue);
-
-  //       return nameMatch || cpfMatch || birthdayMatch;
-  //     });
-
-  //     setCustomerList(filtered);
-  //   }
-  // };
-
-  // const eachCustomer = (client) => {
-  //   setOneClient(client);
-  //   setShowPopup(true);
-  // };
-
   return (
     <div className="customerList-container">
       {showWarningDeletePopup && (
@@ -148,9 +109,18 @@ const ExpensesManegementList = () => {
         />
       )}
       <div className="container-add-expenses">
-        {showPopup && (
+        {showProviderRegisterPopup && (
+          <RegisterProvider
+            setShowPopup={setShowExpensesPopup}
+            setRefreshData={setRefreshData}
+            obj={obj}
+          />
+        )}
+      </div>
+      <div className="container-add-provider">
+        {showExpensesPopup && (
           <AddExpensesForm
-            setShowPopup={setShowPopup}
+            setShowPopup={setShowExpensesPopup}
             setRefreshData={setRefreshData}
             obj={obj}
           />
@@ -163,7 +133,9 @@ const ExpensesManegementList = () => {
         />
       )}
       <div className="btn-add">
-        <button onClick={addNewExpense}>Adicione Despesa</button>
+        <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button>
+        <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
+        <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>
       </div>
       <div className="title-table">
         <h1>Lista de Despesas</h1>
