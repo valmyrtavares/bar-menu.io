@@ -18,6 +18,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     dueDate: '',
     paymentDate: '',
     category: '',
+    account: '',
+    provider: '',
     confirmation: 0,
   });
 
@@ -26,8 +28,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     amount: 0,
     CostPerUnit: 0,
     totalCost: 0,
-    provider: '',
-    account: '',
     volumePerUnit: 0,
     unitOfMeasurement: '',
   });
@@ -60,6 +60,22 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     if (item.product !== '') {
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
     }
+    setItem({
+      product: '',
+      amount: 0,
+      CostPerUnit: 0,
+      totalCost: 0,
+      volumePerUnit: 0,
+      unitOfMeasurement: '',
+    });
+  };
+  const deleteItem = (indexToRemove) => {
+    console.log('index removido  ', indexToRemove);
+    const removeItemByIndex = (item, index) => {
+      return itemArrayList.filter((_, index) => index !== indexToRemove);
+    };
+    console.log();
+    setItemArrayList((prevArrayList) => [...prevArrayList, removeItemByIndex]);
   };
 
   useEffect(() => {
@@ -78,10 +94,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             <th>Quantidade</th>
             <th>Custo por unidade</th>
             <th>Custo Total</th>
-            <th>Fornecedor</th>
-            <th>Nota Fiscal</th>
             <th>Volume</th>
             <th>Unidade de medida</th>
+            <th>Excluir</th>
           </tr>
         </thead>
         <tbody>
@@ -93,10 +108,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                 <td>{requestItem.amount}</td>
                 <td>{requestItem.CostPerUnit}</td>
                 <td>{requestItem.totalCost}</td>
-                <td>{requestItem.provider}</td>
-                <td>{requestItem.account}</td>
                 <td>{requestItem.volumePerUnit}</td>
                 <td>{requestItem.unitOfMeasurement}</td>
+                <td onClick={() => deleteItem(index)}>X</td>
               </tr>
             ))}
         </tbody>
@@ -206,22 +220,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onChange={handleChange}
           />
 
-          <div className="select-form">
-            <label></label>
-            <select
-              id="category"
-              className="form-select custom-select"
-              value={form.category}
-              required
-              onChange={handleChange}
-            >
-              <option value="" disabled hidden>
-                Selecione o tipo de custo
-              </option>
-              <option value="fixed">Fixo</option>
-              <option value="variable"> Variável</option>
-            </select>
-          </div>
           <Input
             id="paymentDate"
             autoComplete="off"
@@ -241,49 +239,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             type="number"
             onFocus={handleFocus}
             onChange={handleChange}
-          />
-        </div>
-        <fieldset>
-          <legend>Adicionar Item</legend>
-          <Input
-            id="product"
-            autoComplete="off"
-            className="product"
-            required
-            label="Produto"
-            value={item.product}
-            type="text"
-            onChange={handleItemChange}
-          />
-          <Input
-            id="amount"
-            autoComplete="off"
-            className="num"
-            required
-            label="Quantidade"
-            value={item.amout}
-            type="number"
-            onChange={handleItemChange}
-          />
-          <Input
-            id="CostPerUnit"
-            autoComplete="off"
-            className="num"
-            required
-            label="Custo por un"
-            value={form.CostPerUnit}
-            type="number"
-            onChange={handleItemChange}
-          />
-          <Input
-            id="totalCost"
-            autoComplete="off"
-            className="num"
-            required
-            label="Custo Total"
-            value={form.totalCost}
-            type="number"
-            onChange={handleItemChange}
           />
           <Input
             id="provider"
@@ -305,13 +260,73 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             type="text"
             onChange={handleItemChange}
           />
+          <div className="select-form">
+            <label></label>
+            <select
+              id="category"
+              className="form-select custom-select"
+              value={form.category}
+              required
+              onChange={handleChange}
+            >
+              <option value="" disabled hidden>
+                Selecione o tipo de custo
+              </option>
+              <option value="fixed">Fixo</option>
+              <option value="variable"> Variável</option>
+            </select>
+          </div>
+        </div>
+        <fieldset>
+          <legend>Adicionar Item</legend>
+          <Input
+            id="product"
+            autoComplete="off"
+            className="product"
+            required
+            label="Produto"
+            value={item.product}
+            type="text"
+            onChange={handleItemChange}
+          />
+          <Input
+            id="amount"
+            autoComplete="off"
+            className="num"
+            required
+            label="Quantidade"
+            value={item.amount}
+            type="number"
+            onChange={handleItemChange}
+          />
+          <Input
+            id="CostPerUnit"
+            autoComplete="off"
+            className="num"
+            required
+            label="Custo por un"
+            value={item.CostPerUnit}
+            type="number"
+            onChange={handleItemChange}
+          />
+          <Input
+            id="totalCost"
+            autoComplete="off"
+            className="num"
+            required
+            label="Custo Total"
+            value={item.totalCost}
+            type="number"
+            onChange={handleItemChange}
+          />
+
           <Input
             id="volumePerUnit"
             autoComplete="off"
             className="num"
             required
             label="Volume por unidade"
-            value={form.volumePerUnit}
+            value={item.volumePerUnit}
             type="number"
             onChange={handleItemChange}
           />
