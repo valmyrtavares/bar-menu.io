@@ -111,8 +111,7 @@ const ExpensesManegementList = () => {
       <div className="container-add-expenses">
         {showProviderRegisterPopup && (
           <RegisterProvider
-            setShowPopup={setShowExpensesPopup}
-            setRefreshData={setRefreshData}
+            setShowPopup={setShowProviderRegisterPopup}
             obj={obj}
           />
         )}
