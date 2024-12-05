@@ -53,3 +53,5 @@ The RegisterProvider component is done. It gets the data and print in your own t
 RegisterProvider component was styled with module css
 
 The same process was done in RegisterProduct component
+
+The AddExpensesForm is receiving the provider and product data to show in the selects and when the amount field and CostPerUnit is filled the total coust field make the multiply between them. Right now I need that the value field be filled as the sum of all total cost items but it is the next step

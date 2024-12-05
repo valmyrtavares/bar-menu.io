@@ -10,6 +10,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
+import { getBtnData } from '../../../api/Api';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [form, setForm] = React.useState({
@@ -21,6 +22,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     account: '',
     provider: '',
     confirmation: 0,
+    items: [],
   });
 
   const [item, setItem] = React.useState({
@@ -32,7 +34,38 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     unitOfMeasurement: '',
   });
   const [itemArrayList, setItemArrayList] = React.useState([]);
+  const [productList, setProductList] = React.useState(null);
+  const [providerList, setProviderList] = React.useState(null);
+  const [total, setTotal] = React.useState(0);
   const db = getFirestore(app);
+
+  React.useEffect(() => {
+    const fetchProduct = async () => {
+      const [dataProduct, dataProvider, sideDishes] = await Promise.all([
+        getBtnData('product'),
+        getBtnData('provider'),
+      ]);
+
+      if (dataProduct && dataProduct.length > 0) {
+        setProductList(dataProduct);
+      }
+      if (dataProvider && dataProvider.length > 0) {
+        setProviderList(dataProvider);
+      }
+    };
+    fetchProduct();
+  }, []);
+
+  React.useEffect(() => {
+    if (productList) console.log('Lista de produtos   ', productList);
+  }, [productList]);
+
+  React.useEffect(() => {
+    if (itemArrayList) {
+      setForm({ ...form, items: itemArrayList, value: total });
+    }
+    renderTableItem();
+  }, [itemArrayList, total]);
 
   React.useEffect(() => {
     if (obj) {
@@ -56,9 +89,23 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [obj]);
 
+  React.useEffect(() => {
+    console.log('FORM   ', form);
+  }, [form]);
+
+  useEffect(() => {
+    if (item.CostPerUnit !== 0 && item.amount !== 0) {
+      setItem({
+        ...item,
+        totalCost: item.CostPerUnit * item.amount,
+      });
+    }
+  }, [item.CostPerUnit, item.amount]);
+
   const addItem = () => {
     if (item.product !== '') {
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
+      setTotal((prev) => (prev += itemArrayList.totalCost));
     }
     setItem({
       product: '',
@@ -70,20 +117,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     });
   };
   const deleteItem = (indexToRemove) => {
-    console.log('index removido  ', indexToRemove);
-    const removeItemByIndex = (item, index) => {
-      return itemArrayList.filter((_, index) => index !== indexToRemove);
-    };
-    console.log();
-    setItemArrayList((prevArrayList) => [...prevArrayList, removeItemByIndex]);
-  };
+    console.log('Index removido:', indexToRemove);
 
-  useEffect(() => {
-    if (itemArrayList) {
-      console.log('Arrau de itens   ', itemArrayList);
-    }
-    renderTableItem();
-  }, [itemArrayList]);
+    setItemArrayList((prevArrayList) =>
+      prevArrayList.filter((_, index) => index !== indexToRemove)
+    );
+  };
 
   const renderTableItem = () => {
     return (
@@ -136,6 +175,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             paymentDate: '',
             category: '',
             confirmation: 0,
+            items: [],
           });
           obj = null;
           console.log('OBJ  ', obj);
@@ -181,6 +221,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const handleFocus = () => {
     console.log('To aqui');
   };
+
   return (
     <div className="container-add-expenses-form">
       <CloseBtn setClose={setShowPopup} />
@@ -219,7 +260,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onFocus={handleFocus}
             onChange={handleChange}
           />
-
           <Input
             id="paymentDate"
             autoComplete="off"
@@ -240,16 +280,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onFocus={handleFocus}
             onChange={handleChange}
           />
-          <Input
-            id="provider"
-            autoComplete="off"
-            className="provider"
-            required
-            label="Fornecedor"
-            value={form.provider}
-            type="text"
-            onChange={handleItemChange}
-          />
+          <div className="my-3">
+            <label className="form-label">Produto</label>
+            <select
+              id="provider"
+              required
+              className="form-select"
+              onChange={handleChange}
+            >
+              <option>Selecione um fornecedor</option>
+              {providerList &&
+                providerList.length > 0 &&
+                providerList.map((category, index) => (
+                  <option key={index} value={category.provider}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
           <Input
             id="account"
             autoComplete="off"
@@ -279,16 +328,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         </div>
         <fieldset>
           <legend>Adicionar Item</legend>
-          <Input
-            id="product"
-            autoComplete="off"
-            className="product"
-            required
-            label="Produto"
-            value={item.product}
-            type="text"
-            onChange={handleItemChange}
-          />
+          <div className="my-3">
+            <label className="form-label">Produto</label>
+            <select
+              id="product"
+              required
+              value={item.product}
+              className="form-select"
+              onChange={handleItemChange}
+            >
+              <option>Selecione um produto</option>
+              {productList &&
+                productList.length > 0 &&
+                productList.map((category, index) => (
+                  <option key={index} value={category.product}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
+          </div>
           <Input
             id="amount"
             autoComplete="off"
