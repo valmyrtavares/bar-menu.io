@@ -62,10 +62,18 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   React.useEffect(() => {
     if (itemArrayList) {
-      setForm({ ...form, items: itemArrayList, value: total });
+      let totalItemsCost = 0;
+      itemArrayList.forEach((item) => {
+        totalItemsCost += item.totalCost;
+      });
+      setTotal(totalItemsCost);
     }
     renderTableItem();
-  }, [itemArrayList, total]);
+  }, [itemArrayList]);
+
+  React.useEffect(() => {
+    setForm({ ...form, items: itemArrayList, value: total });
+  }, [total]);
 
   React.useEffect(() => {
     if (obj) {
@@ -105,8 +113,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const addItem = () => {
     if (item.product !== '') {
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
-      setTotal((prev) => (prev += itemArrayList.totalCost));
     }
+    console.log('total ', total);
     setItem({
       product: '',
       amount: 0,
@@ -352,7 +360,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             autoComplete="off"
             className="num"
             required
-            label="Quantidade"
+            label="Qtd de volumes"
             value={item.amount}
             type="number"
             onChange={handleItemChange}
@@ -362,7 +370,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             autoComplete="off"
             className="num"
             required
-            label="Custo por un"
+            label="Custo por vol"
             value={item.CostPerUnit}
             type="number"
             onChange={handleItemChange}
@@ -383,7 +391,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             autoComplete="off"
             className="num"
             required
-            label="Volume por unidade"
+            label="Qtd por volume"
             value={item.volumePerUnit}
             type="number"
             onChange={handleItemChange}
