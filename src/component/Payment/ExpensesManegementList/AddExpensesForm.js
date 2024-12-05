@@ -31,6 +31,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     CostPerUnit: 0,
     totalCost: 0,
     volumePerUnit: 0,
+    totalVolume: 0,
     unitOfMeasurement: '',
   });
   const [itemArrayList, setItemArrayList] = React.useState([]);
@@ -72,6 +73,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   }, [itemArrayList]);
 
   React.useEffect(() => {
+    console.log('total     ', total);
     setForm({ ...form, items: itemArrayList, value: total });
   }, [total]);
 
@@ -97,21 +99,34 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [obj]);
 
-  React.useEffect(() => {
-    console.log('FORM   ', form);
-  }, [form]);
+  // React.useEffect(() => {
+  //   console.log('FORM   ', form);
+  // }, [form]);
 
   useEffect(() => {
     if (item.CostPerUnit !== 0 && item.amount !== 0) {
-      setItem({
-        ...item,
-        totalCost: item.CostPerUnit * item.amount,
-      });
+      setItem((prevItem) => ({
+        ...prevItem,
+        totalCost: prevItem.CostPerUnit * prevItem.amount,
+      }));
     }
   }, [item.CostPerUnit, item.amount]);
 
+  useEffect(() => {
+    if (item.volumePerUnit !== 0 && item.amount !== 0) {
+      setItem((prevItem) => ({
+        ...prevItem,
+        totalVolume: prevItem.volumePerUnit * prevItem.amount,
+      }));
+    }
+  }, [item.volumePerUnit, item.amount]);
+
   const addItem = () => {
     if (item.product !== '') {
+      // setItem({
+      //   ...item,
+      //   totalVolume: item.volumePerUnit * item.amount,
+      // });
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
     }
     console.log('total ', total);
@@ -121,6 +136,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       CostPerUnit: 0,
       totalCost: 0,
       volumePerUnit: 0,
+      totalVolume: 0,
       unitOfMeasurement: '',
     });
   };
@@ -164,9 +180,35 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       </table>
     );
   };
+  const handleStock = async (itemsStock) => {
+    const data = await getBtnData('stock');
+    if (data && data.length > 0) {
+      for (let i = 0; i < itemsStock.length; i++) {
+        const itemFinded = data.find(
+          (itemSearch) => itemSearch.product === itemsStock[i].product
+        );
+        if (itemFinded) {
+          itemsStock[i].totalCost += itemFinded.totalCost || 0;
+          itemsStock[i].totalVolume += itemFinded.totalVolume || 0;
+          const docRef = doc(db, 'stock', itemFinded.id);
+          await updateDoc(docRef, itemsStock[i]);
+        } else {
+          await addDoc(collection(db, 'stock'), itemsStock[i]);
+        }
+      }
+    } else {
+      for (const item of itemsStock) {
+        await addDoc(collection(db, 'stock'), item);
+      }
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    debugger;
+    if (form && form.items && form.items.length > 0) {
+      handleStock(form.items);
+    }
 
     if (obj) {
       const docRef = doc(db, 'outgoing', obj.id);
