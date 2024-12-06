@@ -143,6 +143,20 @@ const FormMenu = () => {
           </Link>
         </div>
       </div>
+      <h3>Estoque</h3>
+      <div className="sub-container">
+        <div className="btn-text">
+          <p>
+            Acompanhe o seu estoque a cada produto vendido e a cada compra
+            matéria prima adicionada
+          </p>
+        </div>
+        <div className="btn-form">
+          <Link to="/admin/stock" className="btn btn-success ">
+            Estoque
+          </Link>
+        </div>
+      </div>
       <h3>Modifique as cores e fontes </h3>
       <div className="sub-container">
         <div className="btn-text">

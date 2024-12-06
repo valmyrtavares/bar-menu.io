@@ -1,9 +1,71 @@
-.container-sumary-expenses{
-    width: 60%;
-    background-color: white;
-    position: fixed !important;
-    display: grid !important;
-    top:opx;
-    left: 15%;
-    z-index: 10;
+@import "variables.css";
+
+.container-sumary-expenses {
+  width: 40%;
+  background-color: var(--bg-color);
+  color: var(--font-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  z-index: 10;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-family: var(--text-font);
+}
+
+.container-sumary-expenses h1 {
+  margin: 0 !important;
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--title-font-color);
+  font-family: var(--title-font);
+}
+
+.container-sumary-expenses main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.container-sumary-expenses main div p {
+  margin: 8px 0;
+}
+
+.container-sumary-expenses main span {
+  font-weight: bold;
+  color:(--title-font-color)ack;
+}
+
+.container-sumary-expenses main .container-item {
+  border: solid 1px var(--bg-color);
+  border-radius: 8px;
+  padding: 15px;
+  background-color: var(--secundary-bg-color);
+  color: var(--title-font-color);
+  font-size: 0.9rem;
+}
+
+.container-sumary-expenses main .container-item h4 {
+  margin: 0 0 10px 0;
+  color: var(--title-font-color);
+}
+
+.container-sumary-expenses .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--font-color);
+  cursor: pointer;
+}
+
+.container-sumary-expenses .close-btn:hover {
+  color: var(--btn-color);
 }
