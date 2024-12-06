@@ -1,16 +1,36 @@
 import React from 'react';
-import { getBtnData } from '../../api/Api';
+import { getBtnData, deleteData } from '../../api/Api';
+import DefaultComumMessage from '../Messages/DefaultComumMessage';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
+  const [showWarningDeletePopup, setShowWarningDeltePopup] =
+    React.useState(false);
+  const [excludeStockItem, setExcludeStockItem] = React.useState('');
+  const [refreshData, setRefreshData] = React.useState(false);
 
   React.useEffect(() => {
-    const fetchStock = async () => {
-      const data = await getBtnData('stock');
-      setStock(data);
-    };
     fetchStock();
   }, []);
+  React.useEffect(() => {
+    fetchStock();
+  }, [refreshData]);
+
+  const fetchStock = async () => {
+    const data = await getBtnData('stock');
+    setStock(data);
+  };
+
+  const deleteStockItem = (item, permission) => {
+    debugger;
+    setExcludeStockItem(item);
+    setShowWarningDeltePopup(true);
+    if (permission && excludeStockItem.product === item.product) {
+      setShowWarningDeltePopup(false);
+      deleteData('stock', item.id);
+      setRefreshData((prev) => !prev);
+    }
+  };
 
   return (
     <div>
@@ -27,9 +47,20 @@ const TrackStockProduct = () => {
           stock.map((item, index) => (
             <tr>
               <td>{item.product}</td>
-              <td>{item.totalCost}</td>
-              <td>{item.totalVolume}</td>
-              <td>X</td>
+              <td>R$ {item.totalCost},00</td>
+              <td>
+                {item.totalVolume}
+                {item.unitOfMeasurement}
+              </td>
+              {showWarningDeletePopup && (
+                <DefaultComumMessage
+                  msg={`Você está prestes a excluir ${excludeStockItem.product}`}
+                  item={excludeStockItem}
+                  onConfirm={deleteStockItem}
+                  onClose={() => setShowWarningDeltePopup(false)}
+                />
+              )}
+              <td onClick={() => deleteStockItem(item, false)}>X</td>
             </tr>
           ))}
       </table>
