@@ -205,7 +205,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    debugger;
+
     if (form && form.items && form.items.length > 0) {
       handleStock(form.items);
     }

@@ -12,24 +12,69 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
     <div className="container-sumary-expenses">
       <CloseBtn setClose={setOpenSumaryPopup} />
       <h1>Despesa Completa</h1>
-      <p>
-        Categoria<span>oneExpense.category</span>
-      </p>
-      <p>
-        Confirmação<span>{oneExpense.confirmation}</span>
-        <p>
-          Data de Pagamento<span>{oneExpense.dueDate}</span>
-        </p>
-        <p>
-          Nome da Despesa<span>{oneExpense.name}</span>
-        </p>
-        <p>
-          Despesa Paga em <span>{oneExpense.paymentDate}</span>
-        </p>
-        <p>
-          Valor Total<span>{oneExpense.value}</span>
-        </p>
-      </p>
+      <main>
+        <div>
+          <p>
+            Nome da Despesa<span>: {oneExpense.name}</span>
+          </p>
+          <p>
+            Categoria<span>: {oneExpense.category}</span>
+          </p>
+          <p>
+            {' '}
+            Confirmação<span>: {oneExpense.confirmation}</span>
+          </p>
+          <p>
+            Data de Pagamento<span>: {oneExpense.dueDate}</span>
+          </p>
+          <p>
+            Despesa Paga em <span>: {oneExpense.paymentDate}</span>
+          </p>
+          <p>
+            Valor Total<span>: {oneExpense.value}</span>
+          </p>
+          <p>
+            Quantidade de items<span>: {oneExpense.items.length}</span>
+          </p>
+        </div>
+        <div>
+          {oneExpense.items &&
+            oneExpense.items.length > 0 &&
+            oneExpense.items.map((item) => (
+              <div className="container-item">
+                <h4>Produto {item.product}</h4>
+                <p>
+                  Custo por unidade
+                  <span> {item.CostPerUnit}</span>
+                </p>
+                <p>
+                  Custo Total
+                  <span> {item.totalCost}</span>
+                </p>
+                <p>
+                  Volume por unidade
+                  <span>
+                    {' '}
+                    {item.volumePerUnit}
+                    {item.unitOfMeasurement}
+                  </span>
+                </p>
+                <p>
+                  Quantdade de volumes
+                  <span> {item.amount}</span>
+                </p>
+                <p>
+                  Volume Total
+                  <span>
+                    {' '}
+                    {item.totalVolume}
+                    {item.unitOfMeasurement}
+                  </span>
+                </p>
+              </div>
+            ))}
+        </div>
+      </main>
     </div>
   );
 };
