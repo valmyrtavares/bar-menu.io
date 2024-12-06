@@ -263,10 +263,23 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const handleItemChange = (e) => {
     const { id, value } = e.target;
 
-    setItem((prevForm) => ({
-      ...prevForm,
-      [id]: value,
-    }));
+    if (id === 'product') {
+      const selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
+
+      setItem((prevForm) => ({
+        ...prevForm,
+        product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
+        unitOfMeasurement: selectedProduct
+          ? selectedProduct.unitOfMeasurement
+          : '', // Define a unidade de medida
+      }));
+    } else {
+      // Comportamento genérico para outros inputs
+      setItem((prevForm) => ({
+        ...prevForm,
+        [id]: value,
+      }));
+    }
   };
   const handleFocus = () => {
     console.log('To aqui');
@@ -349,7 +362,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             </select>
           </div>
 
-          <Input
+          {/* <Input
             id="account"
             autoComplete="off"
             className="account"
@@ -358,7 +371,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             value={form.account}
             type="text"
             onChange={handleItemChange}
-          />
+          /> */}
           <div className="select-form">
             <label></label>
             <select
@@ -382,26 +395,26 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             <label className="form-label">Produto</label>
             <select
               id="product"
-              required
-              value={item.product}
+              value={productList?.findIndex(
+                (product) => product.name === item.product
+              )}
               className="form-select"
               onChange={handleItemChange}
             >
-              <option>Selecione um produto</option>
+              <option value="">Selecione um produto</option>
               {productList &&
-                productList.length > 0 &&
                 productList.map((category, index) => (
-                  <option key={index} value={category.product}>
+                  <option key={index} value={index}>
                     {category.name}
                   </option>
                 ))}
             </select>
           </div>
+
           <Input
             id="amount"
             autoComplete="off"
             className="num"
-            required
             label="Qtd de volumes"
             value={item.amount}
             type="number"
@@ -411,7 +424,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             id="CostPerUnit"
             autoComplete="off"
             className="num"
-            required
             label="Custo por vol"
             value={item.CostPerUnit}
             type="number"
@@ -421,7 +433,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             id="totalCost"
             autoComplete="off"
             className="num"
-            required
             label="Custo Total"
             value={item.totalCost}
             type="number"
@@ -432,32 +443,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             id="volumePerUnit"
             autoComplete="off"
             className="num"
-            required
             label="Qtd por volume"
             value={item.volumePerUnit}
             type="number"
             onChange={handleItemChange}
           />
-          <div className="select-form">
-            <label></label>
-            <select
-              id="unitOfMeasurement"
-              className="form-select unitOfMeasurement"
-              value={item.unitOfMeasurement}
-              required
-              onChange={handleItemChange}
-            >
-              <option value="" disabled hidden>
-                Unidade de medida
-              </option>
-              <option value="litle">Litro</option>
-              <option value="unit"> Unidade</option>
-
-              <option value="ml"> ml</option>
-              <option value="kg"> kilos</option>
-              <option value="g"> Gramas</option>
-            </select>
-          </div>
           <button type="button" onClick={addItem}>
             Adicionar
           </button>

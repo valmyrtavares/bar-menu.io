@@ -115,11 +115,10 @@ const RegisterProvider = ({ setShowPopup }) => {
               <option value="" disabled hidden>
                 Unidade de medida
               </option>
-              <option value="litro">Litro</option>
-              <option value="unidade"> Unidade</option>
-
-              <option value="ml"> ml</option>
-              <option value="kg"> kilos</option>
+              <option value="un"> Unidade</option>
+              <option value="L"> Litro</option>
+              <option value="ml"> Mililitro</option>
+              <option value="kg"> Kilo</option>
               <option value="g"> Gramas</option>
             </select>
           </div>
