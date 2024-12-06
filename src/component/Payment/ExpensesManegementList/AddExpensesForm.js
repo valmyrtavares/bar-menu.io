@@ -103,7 +103,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   //   console.log('FORM   ', form);
   // }, [form]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (item.CostPerUnit !== 0 && item.amount !== 0) {
       setItem((prevItem) => ({
         ...prevItem,
@@ -112,7 +112,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [item.CostPerUnit, item.amount]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (item.volumePerUnit !== 0 && item.amount !== 0) {
       setItem((prevItem) => ({
         ...prevItem,
