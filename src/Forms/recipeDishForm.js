@@ -82,7 +82,9 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
       <div className="ingridients">
         <select
           id="name"
-          value={ingridients.name}
+          value={productList?.findIndex(
+            (product) => product.name === ingridients.name
+          )}
           className="select-input"
           onChange={handleChange}
         >
@@ -127,7 +129,11 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
                     {item.amount}
                     {item.unitOfMeasurement}
                   </td>
-                  <td className="items" onClick={() => remveIten(index)}>
+                  <td
+                    className="items"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => remveIten(index)}
+                  >
                     x
                   </td>
                 </tr>

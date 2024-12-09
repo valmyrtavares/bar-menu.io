@@ -1,16 +1,16 @@
-import React from "react";
-import "../../assets/styles/RecipeModal.css";
-import CloseBtn from "../closeBtn";
-import { getOneItemColleciton } from "../../api/Api";
+import React from 'react';
+import '../../assets/styles/RecipeModal.css';
+import CloseBtn from '../closeBtn';
+import { getOneItemColleciton } from '../../api/Api';
 
 const RecipeModal = ({ recipeModal, setRecipeModal }) => {
   const [recipeDishDisplayed, setRecipeDishDisplayed] = React.useState({});
-  const [imageDish, setImageDish] = React.useState("");
-  const [TitleDish, setTitleDish] = React.useState("");
+  const [imageDish, setImageDish] = React.useState('');
+  const [TitleDish, setTitleDish] = React.useState('');
 
   React.useEffect(() => {
     const fetchOneDish = async () => {
-      const data = await getOneItemColleciton("item", recipeModal.id);
+      const data = await getOneItemColleciton('item', recipeModal.id);
       const { recipe, image, title } = data;
       if (recipe) {
         setRecipeDishDisplayed(recipe);
@@ -44,7 +44,11 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
           <ul>
             {recipeDishDisplayed.FinalingridientsList &&
               recipeDishDisplayed.FinalingridientsList.map((item, index) => (
-                <li key={index}>{item}</li>
+                <li key={index}>
+                  {typeof item === 'string'
+                    ? item
+                    : `${item.amount}${item.unitOfMeasurement} ${item.name}`}
+                </li>
               ))}
           </ul>
           <h3>Preparo do {TitleDish}</h3>
