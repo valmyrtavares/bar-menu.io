@@ -168,7 +168,12 @@ const ExpensesManegementList = () => {
             expensesList.length > 0 &&
             expensesList.map((item, index) => (
               <tr key={index}>
-                <td onClick={() => openLoadSumaryPopup(item)}>{item.name}</td>
+                <td
+                  className="openPopup"
+                  onClick={() => openLoadSumaryPopup(item)}
+                >
+                  {item.name}
+                </td>
                 <td>{item.value}</td>
                 <td>{item.dueDate}</td>
                 <td>{item.category}</td>

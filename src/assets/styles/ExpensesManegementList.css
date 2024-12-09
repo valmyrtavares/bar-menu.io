@@ -32,6 +32,9 @@
     text-align: center;
     font-size: 39px;
 }
+.customerList-container .openPopup{
+   cursor: pointer
+}
 
 table {
     width: 100%;

@@ -74,7 +74,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   React.useEffect(() => {
     console.log('total     ', total);
-    setForm({ ...form, items: itemArrayList, value: total });
+    setForm({
+      ...form,
+      items: itemArrayList,
+      value: total,
+      confirmation: total,
+    });
   }, [total]);
 
   React.useEffect(() => {
@@ -361,17 +366,15 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                 ))}
             </select>
           </div>
-
-          {/* <Input
+          <Input
             id="account"
             autoComplete="off"
             className="account"
-            required
             label="Nota fiscal"
             value={form.account}
             type="text"
             onChange={handleItemChange}
-          /> */}
+          />
           <div className="select-form">
             <label></label>
             <select

@@ -49,7 +49,7 @@ const TrackStockProduct = () => {
               <td>{item.product}</td>
               <td>R$ {item.totalCost},00</td>
               <td>
-                {item.totalVolume}
+                {Number(item.totalVolume).toFixed(2)}
                 {item.unitOfMeasurement}
               </td>
               {showWarningDeletePopup && (
