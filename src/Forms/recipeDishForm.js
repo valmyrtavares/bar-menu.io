@@ -1,17 +1,23 @@
-import React from "react";
-import "../assets/styles/recipeDish.css";
-import Input from "../component/Input";
-import CloseBtn from "../component/closeBtn";
+import React from 'react';
+import '../assets/styles/recipeDish.css';
+import Input from '../component/Input';
+import CloseBtn from '../component/closeBtn';
+import { getBtnData } from '../api/Api';
 
 const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
-  const [ingridients, setIngridients] = React.useState("");
+  const [ingridients, setIngridients] = React.useState({
+    name: '',
+    amount: '',
+    unitOfMeasurement: '',
+  });
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
-  const [recipeExplanation, setRecipeExplanation] = React.useState("");
+  const [recipeExplanation, setRecipeExplanation] = React.useState('');
+  const [productList, setProductList] = React.useState(null);
   const fieldFocus = React.useRef();
   React.useEffect(() => {
     if (recipe) {
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
-        recipe.Explanation = "";
+        recipe.Explanation = '';
         recipe.FinalingridientsList = [];
       }
       setIngridientsGroup(recipe.FinalingridientsList);
@@ -19,10 +25,41 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
     }
   }, [recipe]);
 
+  React.useEffect(() => {
+    const fetchProduct = async () => {
+      const data = await getBtnData('product');
+      console.log('Todos os produtos de estoque   ', data);
+      setProductList(data);
+    };
+    fetchProduct();
+    setIngridientsGroup([]);
+  }, []);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    if (id === 'name') {
+      const selectedProduct = productList[value];
+
+      setIngridients((prevForm) => ({
+        ...prevForm,
+        name: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
+        unitOfMeasurement: selectedProduct
+          ? selectedProduct.unitOfMeasurement
+          : '', // Define a unidade de medida
+      }));
+    } else {
+      setIngridients({
+        ...ingridients,
+        [id]: value,
+      });
+    }
+  };
+
   const addIngredient = () => {
+    console.log('ingredientes    ', ingridients);
     setIngridientsGroup([...IngridientsGroup, ingridients]);
-    setIngridients("");
-    fieldFocus.current.focus();
+    setIngridients({ name: '', amount: '' });
+    // fieldFocus.current.focus();
   };
 
   const sendRecipe = () => {
@@ -30,7 +67,7 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
       FinalingridientsList: IngridientsGroup,
       Explanation: recipeExplanation,
     });
-    setRecipeModal(false);
+    setRecipeModal(true);
   };
 
   const remveIten = (index) => {
@@ -43,25 +80,60 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
       <CloseBtn setClose={setRecipeModal} />
       <h1>Faça sua receita</h1>
       <div className="ingridients">
-        <Input
-          id="recipe"
+        <select
+          id="name"
+          value={ingridients.name}
+          className="select-input"
+          onChange={handleChange}
+        >
+          <option value="">Selecione um produto</option>
+          {productList &&
+            productList.length > 0 &&
+            productList.map((item, index) => (
+              <option key={index} value={index}>
+                {item.name}
+              </option>
+            ))}
+        </select>
+        <input
+          id="amount"
           fieldFocus={fieldFocus}
-          label="Liste seus ingredientes"
-          value={ingridients}
+          placeholder="Quantidade"
+          className="number-input"
+          value={ingridients.amount}
           type="text"
-          onChange={({ target }) => setIngridients(target.value)}
+          onChange={handleChange}
         />
+
         <button type="button" onClick={addIngredient}>
           Adicione
         </button>
       </div>
       <div className="items-recipe">
-        {IngridientsGroup &&
-          IngridientsGroup.map((item, index) => (
-            <p className="items" key={index} onClick={() => remveIten(index)}>
-              {item} X
-            </p>
-          ))}
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Excluir</th>
+            </tr>
+          </thead>
+          <tbody>
+            {IngridientsGroup &&
+              IngridientsGroup.map((item, index) => (
+                <tr key={index}>
+                  <td className="items">{item.name}</td>
+                  <td className="items">
+                    {item.amount}
+                    {item.unitOfMeasurement}
+                  </td>
+                  <td className="items" onClick={() => remveIten(index)}>
+                    x
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
       <div>
         <label>Escreva sua receita</label>
@@ -73,9 +145,10 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
         >
           Saudação
         </textarea>
-        <p>{recipeExplanation} </p>
       </div>
-      <button onClick={sendRecipe}>Enviar Receita</button>
+      <div className="btn-container">
+        <button onClick={sendRecipe}>Enviar Receita</button>
+      </div>
     </div>
   );
 };
