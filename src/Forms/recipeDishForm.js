@@ -18,6 +18,12 @@ const RecipeDish = ({
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
   const [recipeExplanation, setRecipeExplanation] = React.useState('');
   const [productList, setProductList] = React.useState(null);
+  const [ingredientsSimple, setIngredientsSimple] = React.useState(
+    recipe?.FinalIngredientsList || []
+  );
+  const [ingredientsBySize, setIngredientsBySize] = React.useState(
+    customizedPriceObj ? {} : {}
+  );
   const fieldFocus = React.useRef();
   React.useEffect(() => {
     if (recipe) {
@@ -41,6 +47,13 @@ const RecipeDish = ({
     setIngridientsGroup([]);
     console.log('Customized Price   ', customizedPriceObj);
   }, []);
+
+  React.useEffect(() => {
+    if (ingredientsBySize)
+      console.log('ingredientsBySize    ', ingredientsBySize);
+    if (ingredientsSimple)
+      console.log('ingredientsSimple    ', ingredientsSimple);
+  }, [ingredientsBySize, ingredientsSimple]);
 
   const isEmptyObject = (obj) => Object.keys(obj).length === 0;
 
@@ -72,18 +85,30 @@ const RecipeDish = ({
     }
   };
 
-  const addIngredient = () => {
-    console.log('ingredientes    ', ingridients);
-    setIngridientsGroup([...IngridientsGroup, ingridients]);
-    setIngridients({ name: '', amount: '' });
-    // fieldFocus.current.focus();
+  const addIngredient = (size) => {
+    if (!isEmptyObject(customizedPriceObj)) {
+      setIngredientsBySize((prev) => ({
+        ...prev,
+        [size]: [...(prev[size] || []), ingridients],
+      }));
+    } else {
+      setIngredientsSimple((prev) => [...prev, ingridients]);
+    }
+    setIngridients({ name: '', amount: '', unitOfMeasurement: '' });
   };
 
   const sendRecipe = () => {
-    setRecipe({
-      FinalingridientsList: IngridientsGroup,
-      Explanation: recipeExplanation,
-    });
+    if (!isEmptyObject(customizedPriceObj)) {
+      setRecipe({
+        FinalingridientsList: ingredientsBySize,
+        Explanation: recipeExplanation,
+      });
+    } else {
+      setRecipe({
+        FinalingridientsList: ingredientsSimple,
+        Explanation: recipeExplanation,
+      });
+    }
     setRecipeModal(true);
   };
 
@@ -140,8 +165,8 @@ const RecipeDish = ({
                 </tr>
               </thead>
               <tbody>
-                {IngridientsGroup &&
-                  IngridientsGroup.map((item, index) => (
+                {ingredientsSimple &&
+                  ingredientsSimple.map((item, index) => (
                     <tr key={index}>
                       <td className="items">{item.name}</td>
                       <td className="items">
@@ -164,10 +189,10 @@ const RecipeDish = ({
       ) : (
         extractLabelSizes() &&
         extractLabelSizes().length > 0 &&
-        extractLabelSizes().map((item) => (
+        extractLabelSizes().map((label) => (
           <div className="container-with-differents-sizes">
             <div className="ingridients">
-              {item}
+              {label}
               <select
                 id="name"
                 value={productList?.findIndex(
@@ -195,8 +220,8 @@ const RecipeDish = ({
                 onChange={handleChange}
               />
 
-              <button type="button" onClick={addIngredient}>
-                Adicione
+              <button type="button" onClick={() => addIngredient(label)}>
+                Adicionek
               </button>
             </div>
             <div className="items-recipe">
@@ -209,8 +234,8 @@ const RecipeDish = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {IngridientsGroup &&
-                    IngridientsGroup.map((item, index) => (
+                  {ingredientsBySize &&
+                    ingredientsBySize[label]?.map((item, index) => (
                       <tr key={index}>
                         <td className="items">{item.name}</td>
                         <td className="items">
