@@ -262,6 +262,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             setRecipeModal={setRecipeModal}
             setRecipe={setRecipe}
             recipe={recipe}
+            customizedPriceObj={customizedPriceObj}
           />
         )}
       </div>

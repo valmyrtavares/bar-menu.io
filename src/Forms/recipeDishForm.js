@@ -4,7 +4,12 @@ import Input from '../component/Input';
 import CloseBtn from '../component/closeBtn';
 import { getBtnData } from '../api/Api';
 
-const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
+const RecipeDish = ({
+  setRecipeModal,
+  setRecipe,
+  recipe,
+  customizedPriceObj,
+}) => {
   const [ingridients, setIngridients] = React.useState({
     name: '',
     amount: '',
@@ -16,6 +21,7 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
   const fieldFocus = React.useRef();
   React.useEffect(() => {
     if (recipe) {
+      console.log('Como fica a receita    ', recipe);
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
         recipe.Explanation = '';
         recipe.FinalingridientsList = [];
@@ -33,7 +39,18 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
     };
     fetchProduct();
     setIngridientsGroup([]);
+    console.log('Customized Price   ', customizedPriceObj);
   }, []);
+
+  const isEmptyObject = (obj) => Object.keys(obj).length === 0;
+
+  const extractLabelSizes = () => {
+    return [
+      customizedPriceObj.firstLabel,
+      customizedPriceObj.secondLabel,
+      customizedPriceObj.thirdLabel,
+    ];
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -79,68 +96,142 @@ const RecipeDish = ({ setRecipeModal, setRecipe, recipe }) => {
     <div className="recipeDish-container">
       <CloseBtn setClose={setRecipeModal} />
       <h1>Faça sua receita</h1>
-      <div className="ingridients">
-        <select
-          id="name"
-          value={productList?.findIndex(
-            (product) => product.name === ingridients.name
-          )}
-          className="select-input"
-          onChange={handleChange}
-        >
-          <option value="">Selecione um produto</option>
-          {productList &&
-            productList.length > 0 &&
-            productList.map((item, index) => (
-              <option key={index} value={index}>
-                {item.name}
-              </option>
-            ))}
-        </select>
-        <input
-          id="amount"
-          fieldFocus={fieldFocus}
-          placeholder="Quantidade"
-          className="number-input"
-          value={ingridients.amount}
-          type="text"
-          onChange={handleChange}
-        />
+      {isEmptyObject(customizedPriceObj) ? (
+        <div>
+          <div className="ingridients">
+            <select
+              id="name"
+              value={productList?.findIndex(
+                (product) => product.name === ingridients.name
+              )}
+              className="select-input"
+              onChange={handleChange}
+            >
+              <option value="">Selecione um produto</option>
+              {productList &&
+                productList.length > 0 &&
+                productList.map((item, index) => (
+                  <option key={index} value={index}>
+                    {item.name}-{item.unitOfMeasurement}
+                  </option>
+                ))}
+            </select>
+            <input
+              id="amount"
+              fieldFocus={fieldFocus}
+              placeholder="Quantidade"
+              className="number-input"
+              value={ingridients.amount}
+              type="text"
+              onChange={handleChange}
+            />
 
-        <button type="button" onClick={addIngredient}>
-          Adicione
-        </button>
-      </div>
-      <div className="items-recipe">
-        <table>
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Quantidade</th>
-              <th>Excluir</th>
-            </tr>
-          </thead>
-          <tbody>
-            {IngridientsGroup &&
-              IngridientsGroup.map((item, index) => (
-                <tr key={index}>
-                  <td className="items">{item.name}</td>
-                  <td className="items">
-                    {item.amount}
-                    {item.unitOfMeasurement}
-                  </td>
-                  <td
-                    className="items"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => remveIten(index)}
-                  >
-                    x
-                  </td>
+            <button type="button" onClick={addIngredient}>
+              Adicione
+            </button>
+          </div>
+          <div className="items-recipe">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Quantidade</th>
+                  <th>Excluir</th>
                 </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {IngridientsGroup &&
+                  IngridientsGroup.map((item, index) => (
+                    <tr key={index}>
+                      <td className="items">{item.name}</td>
+                      <td className="items">
+                        {item.amount}
+                        {item.unitOfMeasurement}
+                      </td>
+                      <td
+                        className="items"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => remveIten(index)}
+                      >
+                        x
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        extractLabelSizes() &&
+        extractLabelSizes().length > 0 &&
+        extractLabelSizes().map((item) => (
+          <div className="container-with-differents-sizes">
+            <div className="ingridients">
+              {item}
+              <select
+                id="name"
+                value={productList?.findIndex(
+                  (product) => product.name === ingridients.name
+                )}
+                className="select-input"
+                onChange={handleChange}
+              >
+                <option value="">Selecione um produto</option>
+                {productList &&
+                  productList.length > 0 &&
+                  productList.map((item, index) => (
+                    <option key={index} value={index}>
+                      {item.name}-{item.unitOfMeasurement}
+                    </option>
+                  ))}
+              </select>
+              <input
+                id="amount"
+                fieldFocus={fieldFocus}
+                placeholder="Quantidade"
+                className="number-input"
+                value={ingridients.amount}
+                type="text"
+                onChange={handleChange}
+              />
+
+              <button type="button" onClick={addIngredient}>
+                Adicione
+              </button>
+            </div>
+            <div className="items-recipe">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Excluir</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {IngridientsGroup &&
+                    IngridientsGroup.map((item, index) => (
+                      <tr key={index}>
+                        <td className="items">{item.name}</td>
+                        <td className="items">
+                          {item.amount}
+                          {item.unitOfMeasurement}
+                        </td>
+                        <td
+                          className="items"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => remveIten(index)}
+                        >
+                          x
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))
+      )}
       <div>
         <label>Escreva sua receita</label>
         <textarea

@@ -59,3 +59,4 @@ The AddExpensesForm is receiving the provider and product data to show in the se
 Improved and finished for now the SumaryExpensesPopup component 
 
 It was replaced the input type text in the form of  RecipeDishForm component to another one type select. Because I needed separate the amount, the name and the unit of measurement of each product. And I created instead of a array list with one string i created a array list with a object with name, amount and measurement of unit. Now the next step i am going to prepare the recipe field to receive these new format data
+

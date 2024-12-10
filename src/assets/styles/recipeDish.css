@@ -20,7 +20,7 @@
     justify-content: space-around;
     align-items: center;
     align-content: center;
-    margin:40px auto;
+   
 }
 .recipeDish-container .ingridients .select-input{
     height: 45px;
@@ -29,12 +29,12 @@
 
 .recipeDish-container .ingridients .select-input {
     height: 45px;
-    max-width: 160px;
+    max-width: 242px;
 }
 
 
 .recipeDish-container .ingridients .number-input{
-    max-width: 100px;
+    max-width: 83px;
     height: 45px;
 }
 .recipeDish-container button, 
@@ -42,7 +42,7 @@
     max-height: 50px;
    
         border-radius: 10px;
-        padding: 10px 20px;
+        padding: 10px 10px;
       
         font-family: var(--title-font) !important;
         font-size: 1.2rem;
