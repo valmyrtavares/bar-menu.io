@@ -97,12 +97,21 @@ justify-content: end;
     grid-template-columns: 2fr 1fr;
     
 }
-.request-item div {
+.request-item  {
 display:flex;
 flex-direction: column;
 justify-content: center;
 gap: 1px; 
 }
+.request-item .image-button{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+
+
 .request-item div h5,
 .request-item div p {
   text-align: center;

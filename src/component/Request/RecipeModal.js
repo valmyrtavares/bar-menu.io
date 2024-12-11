@@ -12,6 +12,7 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
     const fetchOneDish = async () => {
       const data = await getOneItemColleciton('item', recipeModal.id);
       const { recipe, image, title } = data;
+      console.log('Receita   ', recipe);
       if (recipe) {
         setRecipeDishDisplayed(recipe);
       }
@@ -34,29 +35,55 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
           x
         </button>
       </div>
-      {recipeDishDisplayed.FinalingridientsList &&
-      recipeDishDisplayed.FinalingridientsList.length > 0 ? (
-        <div className="current-recipe">
+      {recipeDishDisplayed.FinalingridientsList ? (
+        <div>
           <div className="image-recipe-container">
             {imageDish && <img src={imageDish} alt="image" />}
           </div>
-          <h3>ingredientes</h3>
-          <ul>
-            {recipeDishDisplayed.FinalingridientsList &&
-              recipeDishDisplayed.FinalingridientsList.map((item, index) => (
-                <li key={index}>
-                  {typeof item === 'string'
-                    ? item
-                    : `${item.amount}${item.unitOfMeasurement} ${item.name}`}
-                </li>
-              ))}
-          </ul>
-          <h3>Preparo do {TitleDish}</h3>
+
+          {Array.isArray(recipeDishDisplayed.FinalingridientsList) ? (
+            <>
+              <h3>Ingredientes</h3>
+              <ul>
+                {recipeDishDisplayed.FinalingridientsList.map((item, index) => (
+                  <li key={index}>
+                    {typeof item === 'string'
+                      ? item
+                      : `${item.amount}${item.unitOfMeasurement} ${item.name}`}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <>
+              {/* Espaço reservado para tratar recipeDishDisplayed.FinalingridientsList como um objeto com 3 arrays */}
+              <h3>Ingredientes organizados</h3>
+              <div>
+                {Object.entries(recipeDishDisplayed.FinalingridientsList).map(
+                  ([key, items]) => (
+                    <div key={key}>
+                      <h4>{key.toUpperCase()}</h4>
+                      <ul>
+                        {items.map((item, index) => (
+                          <li key={index}>
+                            {item.name} {item.amount}
+                            {item.unitOfMeasurement}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                )}
+              </div>
+            </>
+          )}
+
+          <h3 className="title-recipe">Preparo do {TitleDish}</h3>
           <p>{recipeDishDisplayed.Explanation}</p>
         </div>
       ) : (
         <div className="no-recipe">
-          <p>Não temos uma receita</p>
+          <p className="recipe-text">Não temos uma receita</p>
         </div>
       )}
     </div>

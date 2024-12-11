@@ -269,7 +269,7 @@ const RequestListToBePrepared = () => {
                       )}
                     </div>
                   </div>
-                  <div>
+                  <div className="image-button">
                     <img src={item.image} alt="123" />
                     <button
                       // onClick={() => toggle(`${item.id}-${recipeIndex}`)}

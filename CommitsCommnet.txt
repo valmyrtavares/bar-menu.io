@@ -60,3 +60,4 @@ Improved and finished for now the SumaryExpensesPopup component
 
 It was replaced the input type text in the form of  RecipeDishForm component to another one type select. Because I needed separate the amount, the name and the unit of measurement of each product. And I created instead of a array list with one string i created a array list with a object with name, amount and measurement of unit. Now the next step i am going to prepare the recipe field to receive these new format data
 
+In this commit The recipe modal called RecipeModal component screen was changed to receive the new data create in the new RecipeDishForm component

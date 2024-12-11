@@ -1,35 +1,108 @@
-.recipe-global-container{
-    border:solid black 2px;
+@import "variables.css";
+
+/* Estilo do container principal */
+.recipe-global-container {
     position: fixed;
-    top:8vh;
-    left:24%;
-    background-color:white;
-    width: 50%;
-
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-color);
+    color: var(--font-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000;
 }
-.recipe-global-container .no-recipe {
-    padding:5%;
-    color:red;
-    text-align: center;
 
+/* Barra de rolagem personalizada */
+.recipe-global-container::-webkit-scrollbar {
+    width: 10px;
 }
-.recipe-global-container .btn-container{
+
+.recipe-global-container::-webkit-scrollbar-thumb {
+    background-color: var(--secundary-bg-color);
+    border-radius: 10px;
+}
+
+.recipe-global-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--btn-color);
+}
+
+/* Botão de fechar */
+.btn-container {
     display: flex;
-    flex-direction: row;
-    justify-content: flex-end; /* Use flex-end, que é mais comum, mas end também deve funcionar */
+    justify-content: flex-end;
+    margin-bottom: 10px;
 }
-.recipe-global-container .btn-container button{
-    max-width: 30px;
-    background-color: transparent;
-    border:none;
 
+.btn-container button {
+    background-color: var(--btn-color);
+    color: var(--font-color);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
 }
-.recipe-global-container .current-recipe .image-recipe-container{
-    display:flex;
-    flex-direction: row;
-    justify-content:center;
+
+.btn-container button:hover {
+    background-color: var(--secundary-bg-color);
+    color: var(--btn-color);
 }
-.recipe-global-container .current-recipe p{
-padding:4%;
-font-family:arial;
+
+/* Conteúdo da receita */
+.current-recipe {
+    font-family: var(--text-font);
+}
+
+h3,
+h4 {
+    font-family: var(--title-font);
+    color: var(--title-font-color);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    margin: 5px 0;
+    padding: 5px;
+    background-color: var(--secundary-bg-color);
+    border-radius: 5px;
+}
+
+/* Container de imagem */
+.image-recipe-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.image-recipe-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Mensagem sem receita */
+.no-recipe {
+    text-align: center;
+    font-style: italic;
+    color: var(--font-color);
+}
+
+.title-recipe{
+    font-size:30px ;
+}
+.recipe-text{
+    font-size: 18px;
 }
