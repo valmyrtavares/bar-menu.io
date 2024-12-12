@@ -1,6 +1,8 @@
 import React from 'react';
 import { getBtnData, deleteData } from '../../api/Api';
+import '../../assets/styles/TrackStockProduct.css';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
+import EditFormStockProduct from './EditFormStockProduct';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
@@ -8,6 +10,8 @@ const TrackStockProduct = () => {
     React.useState(false);
   const [excludeStockItem, setExcludeStockItem] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
+  const [showEditForm, setShowEditForm] = React.useState(false);
+  const [obj, setObj] = React.useState(null);
 
   React.useEffect(() => {
     fetchStock();
@@ -18,11 +22,11 @@ const TrackStockProduct = () => {
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
+    console.log('Estoque    ', data);
     setStock(data);
   };
 
   const deleteStockItem = (item, permission) => {
-    debugger;
     setExcludeStockItem(item);
     setShowWarningDeltePopup(true);
     if (permission && excludeStockItem.product === item.product) {
@@ -31,23 +35,35 @@ const TrackStockProduct = () => {
       setRefreshData((prev) => !prev);
     }
   };
+  const editStockItem = (item) => {
+    setObj(item);
+    setShowEditForm(true);
+  };
 
   return (
-    <div>
+    <div className="container-track-stock-product">
+      {showEditForm && (
+        <EditFormStockProduct
+          fetchStock={fetchStock}
+          obj={obj}
+          setShowEditForm={setShowEditForm}
+        />
+      )}
       <h1> Tela de estoque</h1>;
       <table striped bordered hover>
         <tr>
           <th>Produto</th>
           <th>Custo de Estoque</th>
           <th>Estoque em volume</th>
-          <th>Excluir</th>
+          <th>Quantidade de embalagens</th>
+          <th>Editar</th>
         </tr>
         {stock &&
           stock.length > 0 &&
           stock.map((item, index) => (
             <tr>
               <td>{item.product}</td>
-              <td>R$ {item.totalCost},00</td>
+              <td>R$ {Number(item.totalCost).toFixed(2)}</td>
               <td>
                 {Number(item.totalVolume).toFixed(2)}
                 {item.unitOfMeasurement}
@@ -60,7 +76,13 @@ const TrackStockProduct = () => {
                   onClose={() => setShowWarningDeltePopup(false)}
                 />
               )}
-              <td onClick={() => deleteStockItem(item, false)}>X</td>
+              <td>{Number(item.amount).toFixed(2)}</td>
+              <td
+                style={{ cursor: 'pointer' }}
+                onClick={() => editStockItem(item)}
+              >
+                Editar
+              </td>
             </tr>
           ))}
       </table>

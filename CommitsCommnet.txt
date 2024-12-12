@@ -61,3 +61,5 @@ Improved and finished for now the SumaryExpensesPopup component
 It was replaced the input type text in the form of  RecipeDishForm component to another one type select. Because I needed separate the amount, the name and the unit of measurement of each product. And I created instead of a array list with one string i created a array list with a object with name, amount and measurement of unit. Now the next step i am going to prepare the recipe field to receive these new format data
 
 In this commit The recipe modal called RecipeModal component screen was changed to receive the new data create in the new RecipeDishForm component
+
+For now, it is possible to edit and update our product inventory. The only value that can be edited is the total volume of each product. The expense value and the number of wrappers related to it are changed at the same time. A new product packaging column has been added that reflect a amont of packages of each product 

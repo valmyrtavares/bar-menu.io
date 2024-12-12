@@ -128,10 +128,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const addItem = () => {
     if (item.product !== '') {
-      // setItem({
-      //   ...item,
-      //   totalVolume: item.volumePerUnit * item.amount,
-      // });
+      setItem({
+        ...item,
+        totalVolume: item.volumePerUnit * item.amount,
+      });
+      console.log('ITEM ', item);
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
     }
     console.log('total ', total);
@@ -373,7 +374,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             label="Nota fiscal"
             value={form.account}
             type="text"
-            onChange={handleItemChange}
+            onChange={handleChange}
           />
           <div className="select-form">
             <label></label>
