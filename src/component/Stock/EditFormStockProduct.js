@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/EditFormStockProduct.css';
+import edit from '../../assets/styles/EditFormStockProduct.module.css';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
 
@@ -64,22 +64,22 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       });
   };
   return (
-    <div className="popup-overlay">
-      <div className="close-btn-container">
+    <div className={edit.popupOverlay}>
+      <div className={edit.closeBtnContainer}>
         <button
-          className="close-btn"
+          className={edit.closeBtn}
           type="button"
           onClick={() => setShowEditForm(false)}
         >
           X
         </button>
       </div>
-      <div className="container-edit-stock">
-        <div className="field">
+      <div className={edit.containerEditStock}>
+        <div className={edit.field}>
           <h3>Produto</h3>
           <p>{stockProductObj.product}</p>
         </div>
-        <div className="field">
+        <div className={edit.field}>
           <Input
             id="totalVolume"
             autoComplete="off"
@@ -91,22 +91,22 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             onBlur={updateCost}
           />
         </div>
-        <div className="field">
+        <div className={edit.field}>
           <h3>Custo Total</h3>
           <p>{stockProductObj.totalCost}</p>
         </div>
-        <div className="field">
+        <div className={edit.field}>
           <h3>Quantidade de recipientes</h3>
           <p>{stockProductObj.amount}</p>
         </div>
-        <div className="field">
+        <div className={edit.field}>
           <h3>Volume Total do Produto</h3>
           <p>
             {stockProductObj.totalVolume}
             {stockProductObj.unitOfMeasurement}
           </p>
         </div>
-        <button className="add-btn" type="button" onClick={addItem}>
+        <button className={edit.addBtn} type="button" onClick={addItem}>
           Adicionar
         </button>
       </div>
