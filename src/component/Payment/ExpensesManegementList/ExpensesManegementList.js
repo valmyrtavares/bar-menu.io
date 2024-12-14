@@ -35,6 +35,7 @@ const ExpensesManegementList = () => {
   React.useEffect(() => {
     const fetchCustomer = async () => {
       const data = await getBtnData('outgoing');
+      console.log('Data  ', data);
       setExpensesList(data);
     };
     fetchCustomer();
@@ -85,11 +86,13 @@ const ExpensesManegementList = () => {
     return (
       <tr className="totals">
         <td>Total Estimado = </td> {/* Primeira coluna vazia */}
-        <td>{result.estimate}</td> {/* Segunda coluna com o total */}
+        <td>{Number(result.estimate).toFixed(2)}</td>{' '}
+        {/* Segunda coluna com o total */}
         <td colSpan={2}></td>{' '}
         {/* Três colunas vazias (Data de Vencimento, Categoria, Data do Pagamento) */}
         <td>Total Pago = </td>
-        <td>{result.paid}</td> {/* Sexta coluna com o total */}
+        <td>{Number(result.paid).toFixed(2)}</td>{' '}
+        {/* Sexta coluna com o total */}
         <td colSpan={2}></td>{' '}
         {/* Últimas duas colunas (Editar, Excluir) vazias */}
       </tr>
@@ -158,6 +161,7 @@ const ExpensesManegementList = () => {
             <th>Data de Vencimento</th>
             <th>Categoria</th>
             <th>Data do Pagamento</th>
+            <th>Fornecedor</th>
             <th>Confirmação</th>
             <th>Editar</th>
             <th>Excluir</th>
@@ -178,6 +182,7 @@ const ExpensesManegementList = () => {
                 <td>{item.dueDate}</td>
                 <td>{item.category}</td>
                 <td>{item.paymentDate}</td>
+                <td>{item.provider}</td>
                 <td>{item.confirmation}</td>
                 <td>
                   <button onClick={() => editContent(item)}>Editar</button>

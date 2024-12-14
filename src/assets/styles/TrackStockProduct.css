@@ -1,3 +1,7 @@
-.container-track-stock-product .btn{
-   
+.container-track-stock-product {
+    position: relative;
+    }
+
+.container-adjustment-screen{
+    position: relative;
 }

@@ -3,6 +3,7 @@ import { getBtnData, deleteData } from '../../api/Api';
 import '../../assets/styles/TrackStockProduct.css';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
+import AdjustmentRecords from './AdjustmentRecords';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
@@ -12,6 +13,9 @@ const TrackStockProduct = () => {
   const [refreshData, setRefreshData] = React.useState(false);
   const [showEditForm, setShowEditForm] = React.useState(false);
   const [obj, setObj] = React.useState(null);
+  const [eventLogData, setEventLogData] = React.useState(null);
+  const [showAdjustmentRecords, setShowAdjustmentRecords] =
+    React.useState(false);
 
   React.useEffect(() => {
     fetchStock();
@@ -22,7 +26,6 @@ const TrackStockProduct = () => {
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
-    console.log('Estoque    ', data);
     setStock(data);
   };
 
@@ -40,6 +43,12 @@ const TrackStockProduct = () => {
     setShowEditForm(true);
   };
 
+  const usageHistory = (item) => {
+    debugger;
+    setEventLogData(item.UsageHistory);
+    setShowAdjustmentRecords(true);
+  };
+
   return (
     <div className="container-track-stock-product">
       {showEditForm && (
@@ -49,6 +58,11 @@ const TrackStockProduct = () => {
           setShowEditForm={setShowEditForm}
         />
       )}
+      <div className="container-adjustment-screen">
+        {showAdjustmentRecords && (
+          <AdjustmentRecords eventLogData={eventLogData} />
+        )}
+      </div>
       <h1> Tela de estoque</h1>;
       <table striped bordered hover>
         <tr>
@@ -62,7 +76,7 @@ const TrackStockProduct = () => {
           stock.length > 0 &&
           stock.map((item, index) => (
             <tr>
-              <td>{item.product}</td>
+              <td onClick={() => usageHistory(item)}>{item.product}</td>
               <td>R$ {Number(item.totalCost).toFixed(2)}</td>
               <td>
                 {Number(item.totalVolume).toFixed(2)}

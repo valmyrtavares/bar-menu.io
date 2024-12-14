@@ -104,9 +104,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [obj]);
 
-  // React.useEffect(() => {
-  //   console.log('FORM   ', form);
-  // }, [form]);
+  React.useEffect(() => {
+    console.log('FORM   ', form);
+  }, [form]);
 
   React.useEffect(() => {
     if (item.CostPerUnit !== 0 && item.amount !== 0) {
@@ -186,34 +186,128 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       </table>
     );
   };
-  const handleStock = async (itemsStock) => {
-    const data = await getBtnData('stock');
-    if (data && data.length > 0) {
-      for (let i = 0; i < itemsStock.length; i++) {
-        const itemFinded = data.find(
-          (itemSearch) => itemSearch.product === itemsStock[i].product
-        );
-        if (itemFinded) {
-          itemsStock[i].totalCost += itemFinded.totalCost || 0;
-          itemsStock[i].totalVolume += itemFinded.totalVolume || 0;
-          const docRef = doc(db, 'stock', itemFinded.id);
-          await updateDoc(docRef, itemsStock[i]);
-        } else {
-          await addDoc(collection(db, 'stock'), itemsStock[i]);
+  // const handleStock = async (itemsStock, account, paymentDate) => {
+  //   const data = await getBtnData('stock');
+  //   if (data && data.length > 0) {
+  //     for (let i = 0; i < itemsStock.length; i++) {
+  //       const itemFinded = data.find(
+  //         (itemSearch) => itemSearch.product === itemsStock[i].product
+  //       );
+  //       if (itemFinded) {
+  //         itemsStock[i].totalCost += itemFinded.totalCost || 0;
+  //         itemsStock[i].totalVolume += itemFinded.totalVolume || 0;
+  //         if (itemFinded.UsageHistory && itemFinded.UsageHistory.length > 0) {
+  //           itemsStock[i].UsageHistory.push(
+  //             stockHistoryList(
+  //               itemFinded,
+  //               account,
+  //               paymentDate,
+  //               itemsStock[i].totalCost,
+  //               itemsStock[i].totalVolume
+  //             )
+  //           );
+  //         } else {
+  //           itemsStock[i].UsageHistory = [];
+  //           itemsStock[i].UsageHistory.push(
+  //             stockHistoryList(
+  //               itemFinded,
+  //               account,
+  //               paymentDate,
+  //               itemsStock[i].totalCost,
+  //               itemsStock[i].totalVolume
+  //             )
+  //           );
+  //         }
+  //         // const docRef = doc(db, 'stock', itemFinded.id);
+  //         // await updateDoc(docRef, itemsStock[i]);
+  //       } else {
+  //         await itemsStock[i]; //addDoc(collection(db, 'stock'), itemsStock[i]);
+  //       }
+  //     }
+  //   } else {
+  //     for (const item of itemsStock) {
+  //       await item; //addDoc(collection(db, 'stock'), item);
+  //     }
+  //   }
+  // };
+
+  const handleStock = async (itemsStock, account, paymentDate) => {
+    const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
+
+    for (let i = 0; i < itemsStock.length; i++) {
+      const currentItem = itemsStock[i];
+
+      // Verifica se o item já existe no banco de dados
+      const itemFinded = data?.find(
+        (itemSearch) => itemSearch.product === currentItem.product
+      );
+
+      if (itemFinded) {
+        // Atualiza os valores de custo e volume totais
+        currentItem.totalCost += itemFinded.totalCost || 0;
+        currentItem.totalVolume += itemFinded.totalVolume || 0;
+
+        // Inicializa ou adiciona ao UsageHistory
+        if (!itemFinded.UsageHistory) {
+          currentItem.UsageHistory = [];
         }
-      }
-    } else {
-      for (const item of itemsStock) {
-        await addDoc(collection(db, 'stock'), item);
+        currentItem.UsageHistory.push(
+          stockHistoryList(
+            itemFinded,
+            account,
+            paymentDate,
+            currentItem.totalCost,
+            currentItem.totalVolume
+          )
+        );
+
+        // Atualiza o registro no banco de dados
+        const docRef = doc(db, 'stock', itemFinded.id);
+        await updateDoc(docRef, currentItem);
+      } else {
+        // Cria um novo registro para o item no banco de dados
+        currentItem.UsageHistory = [
+          stockHistoryList(
+            currentItem,
+            account,
+            paymentDate,
+            currentItem.totalCost,
+            currentItem.totalVolume
+          ),
+        ];
+        await addDoc(collection(db, 'stock'), currentItem);
       }
     }
+  };
+
+  const stockHistoryList = (
+    item,
+    account,
+    paymentDate,
+    totalCost,
+    totalVolume
+  ) => {
+    const stockEventRegistration = {
+      date: paymentDate,
+      inputProduct: item.totalVolume,
+      outputProduct: 0,
+      category: account,
+      ContentsInStock: totalVolume,
+      totalResourceInvested: totalCost,
+      package: item.amount,
+    };
+    return stockEventRegistration;
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    console.log(form);
+
+    debugger;
     if (form && form.items && form.items.length > 0) {
-      handleStock(form.items);
+      // Organize the items in stock
+      handleStock(form.items, form.account, form.paymentDate);
     }
 
     if (obj) {
@@ -325,7 +419,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             required
             label="Vencimento"
             value={form.dueDate}
-            type="text"
+            type="date"
             onFocus={handleFocus}
             onChange={handleChange}
           />
@@ -335,7 +429,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             required
             label="Data Pagamento"
             value={form.paymentDate}
-            type="text"
+            type="date"
             onFocus={handleFocus}
             onChange={handleChange}
           />
