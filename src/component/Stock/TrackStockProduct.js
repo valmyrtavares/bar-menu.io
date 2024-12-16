@@ -60,7 +60,10 @@ const TrackStockProduct = () => {
       )}
       <div className="container-adjustment-screen">
         {showAdjustmentRecords && (
-          <AdjustmentRecords eventLogData={eventLogData} />
+          <AdjustmentRecords
+            eventLogData={eventLogData}
+            setShowAdjustmentRecords={setShowAdjustmentRecords}
+          />
         )}
       </div>
       <h1> Tela de estoque</h1>;

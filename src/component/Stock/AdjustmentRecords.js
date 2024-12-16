@@ -1,13 +1,15 @@
 import React from 'react';
 import log from '../../assets/styles/AdjustmentRecords.module.css';
+import CloseBtn from '../closeBtn';
 
-const AdjustmentRecords = ({ eventLogData }) => {
+const AdjustmentRecords = ({ eventLogData, setShowAdjustmentRecords }) => {
   React.useEffect(() => {
     console.log('array de eventos   ', eventLogData);
   }, [eventLogData]);
 
   return (
     <div className={log.containderAdjustmentRecords}>
+      <CloseBtn setClose={setShowAdjustmentRecords} />
       <h1>Lista de Ocorrencias</h1>;
       <table striped bordered hover>
         <tr>
