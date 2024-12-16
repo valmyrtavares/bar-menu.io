@@ -1,33 +1,34 @@
-import React from "react";
-import Title from "../component/title";
-import Input from "../component/Input";
-import { app } from "../config-firebase/firebase.js";
+import React from 'react';
+import Title from '../component/title';
+import Input from '../component/Input';
+import { app } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
   addDoc,
   setDoc,
   doc,
-} from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-import { getBtnData } from "../api/Api";
+} from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { getBtnData } from '../api/Api';
+import { Link } from 'react-router-dom';
 
 function ScreenStylesForm() {
   const [form, setForm] = React.useState({
-    btnColor: "",
-    bgColor: "",
-    fontColor: "",
-    titleFontColor: "",
-    titleFont: "",
-    textFont: "",
-    secundaryBgColor: "",
+    btnColor: '',
+    bgColor: '',
+    fontColor: '',
+    titleFontColor: '',
+    titleFont: '',
+    textFont: '',
+    secundaryBgColor: '',
   });
   const db = getFirestore(app);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     async function getSytylesData() {
-      const data = await getBtnData("styles");
+      const data = await getBtnData('styles');
       console.log(data);
       setForm(data[1]);
     }
@@ -36,9 +37,9 @@ function ScreenStylesForm() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    setDoc(doc(db, "styles", "Ka5eQA5um9W3vA5gyV70"), form)
+    setDoc(doc(db, 'styles', 'Ka5eQA5um9W3vA5gyV70'), form)
       .then((docRef) => {
-        navigate("/");
+        navigate('/');
       })
       .catch((error) => {
         console.log(error);
@@ -55,7 +56,9 @@ function ScreenStylesForm() {
 
   return (
     <>
-      <Title mainTitle="Formulário de Estílos" />
+      <Link to="/admin/admin">
+        <Title mainTitle="Formulário de Estílos" />
+      </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="btnColor"

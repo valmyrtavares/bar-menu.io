@@ -1,11 +1,13 @@
-import React from "react";
-import { getBtnData, deleteData } from "../api/Api";
-import AddButtonForm from "./AddButtonForm";
-import AddDishesForm from "./AddDishesForm";
-import { useParams } from "react-router-dom";
-import "../assets/styles/ListToEditAndDelete.css";
-import MenuButton from "../component/menuHamburguerButton";
-import AddSideDishesForm from "./AddSideDishesForm";
+import React from 'react';
+import { getBtnData, deleteData } from '../api/Api';
+import AddButtonForm from './AddButtonForm';
+import AddDishesForm from './AddDishesForm';
+import { useParams } from 'react-router-dom';
+import '../assets/styles/ListToEditAndDelete.css';
+import MenuButton from '../component/menuHamburguerButton';
+import AddSideDishesForm from './AddSideDishesForm';
+import { Link } from 'react-router-dom';
+import Title from '../component/title';
 //import CloseButton from 'react-bootstrap/CloseButton';
 
 const EditFormButton = () => {
@@ -17,23 +19,23 @@ const EditFormButton = () => {
   const [modalEditSideDishes, setModalEditSideDishes] = React.useState(false); //Open and close Por-up Edit SideDishes
   const [dataObj, setDataObj] = React.useState({});
   const { id } = useParams();
-  const EditDishesTitle = "Edite o Prato";
-  const EditButtonTitle = "Edite o Botão";
-  const EditSideDishesTitle = "Edite o Acompanhamento";
+  const EditDishesTitle = 'Edite o Prato';
+  const EditButtonTitle = 'Edite o Botão';
+  const EditSideDishesTitle = 'Edite o Acompanhamento';
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const [data, dataItem, sideDishes] = await Promise.all([
-          getBtnData("button"),
-          getBtnData("item"),
-          getBtnData("sideDishes"),
+          getBtnData('button'),
+          getBtnData('item'),
+          getBtnData('sideDishes'),
         ]);
         setMenuButton(data);
         setDishes(dataItem);
         setSideDishes(sideDishes);
       } catch (error) {
-        console.error("Error fetching data", error);
+        console.error('Error fetching data', error);
       }
     };
     fetchData();
@@ -43,11 +45,11 @@ const EditFormButton = () => {
     alert(
       `Você está prestes a deletar ${item.title} tem certeza que quer fazer isso?`
     );
-    if (id === "cat") {
+    if (id === 'cat') {
       let res = item.title
-        .replace(/\s/g, "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s/g, '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
 
       let bastardChildrens = [
@@ -61,11 +63,11 @@ const EditFormButton = () => {
         );
         return;
       }
-      await fetchData("button", item.id);
-    } else if (id === "dishes") {
-      await fetchData("item", item.id);
-    } else if (id === "sidedishes") {
-      await fetchData("sideDishes", item.id);
+      await fetchData('button', item.id);
+    } else if (id === 'dishes') {
+      await fetchData('item', item.id);
+    } else if (id === 'sidedishes') {
+      await fetchData('sideDishes', item.id);
     }
   }
 
@@ -75,14 +77,14 @@ const EditFormButton = () => {
 
   //Open All Edit pop forms
   function openModal(item, type) {
-    if (type === "button") {
+    if (type === 'button') {
       setModalEditButton(true);
       setDataObj(item);
-    } else if (type === "dishes") {
+    } else if (type === 'dishes') {
       setModalEditDishes(true);
-      console.log("ITEM   ", item);
+      console.log('ITEM   ', item);
       setDataObj(item);
-    } else if (type === "sidedishes") {
+    } else if (type === 'sidedishes') {
       setModalEditSideDishes(true);
       setDataObj(item);
     }
@@ -94,8 +96,19 @@ const EditFormButton = () => {
     setModalEditDishes(false);
   }
 
+  const titles = {
+    cat: 'Edite suas categorias',
+    dishes: 'Edite seus Pratos',
+    sidedishes: 'Edite seus acompanhamentos',
+  };
+
   return (
     <div className="container">
+      {
+        <Link to="/admin/admin">
+          <Title mainTitle={titles[id] || 'Título padrão'} />
+        </Link>
+      }
       <MenuButton />
       {modalEditButton && (
         <div className="form-position">
@@ -107,7 +120,7 @@ const EditFormButton = () => {
         </div>
       )}
       {menuButton &&
-        id === "cat" &&
+        id === 'cat' &&
         menuButton.map((item, index) => {
           return (
             <div key={index} className="row my-3">
@@ -116,13 +129,13 @@ const EditFormButton = () => {
                 className="btn btn-danger col-3 mx-1"
                 onClick={() => grabItem(item)}
               >
-                Excluir{" "}
+                Excluir{' '}
               </button>
               <button
                 className="btn btn-warning col-3"
-                onClick={() => openModal(item, "button")}
+                onClick={() => openModal(item, 'button')}
               >
-                Editar{" "}
+                Editar{' '}
               </button>
             </div>
           );
@@ -138,7 +151,7 @@ const EditFormButton = () => {
         </div>
       )}
       {menuButton && // Why manuButton again ???
-        id === "dishes" &&
+        id === 'dishes' &&
         dishes.map((item, index) => {
           return (
             <div key={index} className="row my-3">
@@ -147,13 +160,13 @@ const EditFormButton = () => {
                 className="btn btn-danger col-3 mx-1"
                 onClick={() => grabItem(item)}
               >
-                Excluir{" "}
+                Excluir{' '}
               </button>
               <button
                 className="btn btn-warning col-3"
-                onClick={() => openModal(item, "dishes")}
+                onClick={() => openModal(item, 'dishes')}
               >
-                Editar{" "}
+                Editar{' '}
               </button>
             </div>
           );
@@ -172,7 +185,7 @@ const EditFormButton = () => {
 
       {/* {************************************************} */}
       {sideDishes &&
-        id === "sidedishes" &&
+        id === 'sidedishes' &&
         sideDishes.map((item, index) => {
           return (
             <div key={index} className="row my-3">
@@ -181,13 +194,13 @@ const EditFormButton = () => {
                 className="btn btn-danger col-3 mx-1"
                 onClick={() => grabItem(item)}
               >
-                Excluir{" "}
+                Excluir{' '}
               </button>
               <button
                 className="btn btn-warning col-3"
-                onClick={() => openModal(item, "sidedishes")}
+                onClick={() => openModal(item, 'sidedishes')}
               >
-                Editar{" "}
+                Editar{' '}
               </button>
             </div>
           );

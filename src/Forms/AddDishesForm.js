@@ -266,7 +266,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         )}
       </div>
-      <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
+      <Link to="/admin/admin">
+        <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
+      </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"

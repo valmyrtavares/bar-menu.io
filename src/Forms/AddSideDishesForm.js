@@ -117,13 +117,15 @@ function AddSideDishesForm({
       <div className="close-btn">
         <Link to="/admin/admin">X</Link>
       </div>
-      <Title
-        mainTitle={
-          EditSideDishesTitle
-            ? EditSideDishesTitle
-            : 'Adicione um novo Acompanhamento'
-        }
-      />
+      <Link to="/admin/admin">
+        <Title
+          mainTitle={
+            EditSideDishesTitle
+              ? EditSideDishesTitle
+              : 'Adicione um novo Acompanhamento'
+          }
+        />
+      </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="sideDishes"

@@ -4,6 +4,8 @@ import '../../assets/styles/TrackStockProduct.css';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
+import { Link } from 'react-router-dom';
+import Title from '../title';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
@@ -66,7 +68,9 @@ const TrackStockProduct = () => {
           />
         )}
       </div>
-      <h1> Tela de estoque</h1>;
+      <Link to="/admin/admin">
+        <Title mainTitle="Tela de Estoque" />
+      </Link>
       <table striped bordered hover>
         <tr>
           <th>Produto</th>

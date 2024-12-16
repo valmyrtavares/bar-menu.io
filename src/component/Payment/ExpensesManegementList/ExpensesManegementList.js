@@ -6,6 +6,8 @@ import RegisterProvider from './RegisterProvider.js';
 import RegisterProduct from './RegisterProduct.js';
 import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
+import { Link } from 'react-router-dom';
+import Title from '../../title.js';
 
 const ExpensesManegementList = () => {
   const [expensesList, setExpensesList] = React.useState(null);
@@ -151,7 +153,9 @@ const ExpensesManegementList = () => {
         <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>
       </div>
       <div className="title-table">
-        <h1>Lista de Despesas</h1>
+        <Link to="/admin/admin">
+          <Title mainTitle="Lista de Despesas"></Title>
+        </Link>
       </div>
       <table striped bordered hover>
         <thead>

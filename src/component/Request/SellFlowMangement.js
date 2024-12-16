@@ -6,7 +6,8 @@ import {
 } from '../../api/Api.js';
 import '../../assets/styles/requestManagementModule.css';
 import Input from '../Input.js';
-
+import { Link } from 'react-router-dom';
+import Title from '../title.js';
 import TableComponent from './TableComponent.js';
 
 const RequestManagementModule = () => {
@@ -209,6 +210,9 @@ const RequestManagementModule = () => {
 
   return (
     <div className="management-requests">
+      <Link to="/admin/admin">
+        <Title mainTitle="Fechamento de Caixa" />
+      </Link>
       <div className="container-date">
         <div>
           <Input

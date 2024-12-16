@@ -1,31 +1,31 @@
-import React from "react";
-import Input from "../component/Input.js";
+import React from 'react';
+import Input from '../component/Input.js';
 import {
   fetchCategories,
   fetchCategoriesItem,
   fetchCategoriesButton,
-} from "../api/Api.js";
-import MenuButton from "../component/menuHamburguerButton.js";
-import Title from "../component/title.js";
-import { app } from "../config-firebase/firebase.js";
+} from '../api/Api.js';
+import MenuButton from '../component/menuHamburguerButton.js';
+import Title from '../component/title.js';
+import { app } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
   addDoc,
   setDoc,
   doc,
-} from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-import "../assets/styles/form.css";
-import { Link } from "react-router-dom";
+} from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import '../assets/styles/form.css';
+import { Link } from 'react-router-dom';
 
 function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
-    title: "",
-    category: "",
-    parent: "",
-    display: "true",
+    title: '',
+    category: '',
+    parent: '',
+    display: 'true',
   });
   const [categories, setCategories] = React.useState([]);
 
@@ -34,15 +34,15 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
 
   React.useEffect(() => {
     const fetchCategory = async () => {
-      const grabCategory = await fetchCategoriesButton("item");
-      grabCategory.unshift("Selecione uma Categoria", "main"); // Add a first option
+      const grabCategory = await fetchCategoriesButton('item');
+      grabCategory.unshift('Selecione uma Categoria', 'main'); // Add a first option
       setCategories(grabCategory);
     };
     fetchCategory();
   }, []);
 
   React.useEffect(() => {
-    const categories = fetchCategoriesButton("item");
+    const categories = fetchCategoriesButton('item');
   }, [dataObj]);
 
   React.useEffect(() => {
@@ -62,25 +62,25 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   function handleSubmit(event) {
     event.preventDefault(); // Impede o comportamento padrão de recarregar a página
     if (!dataObj) {
-      addDoc(collection(db, "button"), form)
+      addDoc(collection(db, 'button'), form)
         .then((docRef) => {
           setForm({
-            title: "",
-            category: "",
-            parent: returningParent(""),
-            display: "true",
+            title: '',
+            category: '',
+            parent: returningParent(''),
+            display: 'true',
           });
-          navigate("/");
-          console.log("FORM   ", form);
+          navigate('/');
+          console.log('FORM   ', form);
         })
         .catch((error) => {
           console.log(error);
         });
     } else {
-      setDoc(doc(db, "button", dataObj.id), form)
+      setDoc(doc(db, 'button', dataObj.id), form)
         .then(() => {
-          console.log("Document successfully updated !");
-          navigate("/");
+          console.log('Document successfully updated !');
+          navigate('/');
         })
         .catch((error) => {
           console.log(error);
@@ -96,15 +96,15 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
 
   //Deletes all accents
   function normalizeString(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
   // Trasform a sentence with 2 or 3 words in a unique word with no accents and no upper case
   function returningParent(title) {
-    const words = title.split(" ");
+    const words = title.split(' ');
     let result = words
       .map((word) => normalizeString(word).toLowerCase())
-      .join("");
+      .join('');
     return result;
   }
 
@@ -117,9 +117,13 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
           <Link to="/admin/admin">X</Link>
         )}
       </div>
-      <Title
-        mainTitle={EditButtonTitle ? EditButtonTitle : "Adicione um novo botão"}
-      />
+      <Link to="/admin/admin">
+        <Title
+          mainTitle={
+            EditButtonTitle ? EditButtonTitle : 'Adicione um novo botão'
+          }
+        />
+      </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input
           id="title"

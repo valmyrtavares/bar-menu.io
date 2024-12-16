@@ -9,6 +9,8 @@ import Input from '../../component/Input.js';
 import { cardClasses } from '@mui/material';
 import AccountingManagementPopup from './AccountingManagementPopup';
 import Loading from '../Loading.js';
+import { Link } from 'react-router-dom';
+import Title from '../title.js';
 
 const RequestManagementModule = () => {
   const [requestList, setRequestList] = React.useState(null);
@@ -286,6 +288,9 @@ const RequestManagementModule = () => {
         />
       )}
       {loadMessage && <Loading />}
+      <Link to="/admin/admin">
+        <Title mainTitle="Acompanhamento de Despesas" />
+      </Link>
       <div className="container-date">
         <div>
           <Input

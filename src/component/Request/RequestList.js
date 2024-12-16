@@ -1,20 +1,22 @@
-import React from "react";
-import "../../assets/styles/RequestList.css";
-import { fetchInDataChanges } from "../../api/Api.js";
-import { getFirstFourLetters } from "../../Helpers/Helpers.js";
-import { requestSorter } from "../../Helpers/Helpers.js";
+import React from 'react';
+import '../../assets/styles/RequestList.css';
+import { fetchInDataChanges } from '../../api/Api.js';
+import { getFirstFourLetters } from '../../Helpers/Helpers.js';
+import { requestSorter } from '../../Helpers/Helpers.js';
+import Title from '../title.js';
+import { Link } from 'react-router-dom';
 // import Input from "../Input.js";
 
 const RequestList = () => {
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [form, setForm] = React.useState({
-    category: "",
-    search: "",
+    category: '',
+    search: '',
   });
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges("request", (data) => {
-      const dataSorted = requestSorter(data, "direction");
+    const unsubscribe = fetchInDataChanges('request', (data) => {
+      const dataSorted = requestSorter(data, 'direction');
 
       setRequestDoneList(dataSorted);
     });
@@ -23,7 +25,9 @@ const RequestList = () => {
 
   return (
     <div className="container-request-list">
-      <h1>Lista de Pedidos</h1>
+      <Link to="/admin/admin">
+        <Title mainTitle="Adicione um novo prato" />
+      </Link>
       {requestsDoneList &&
         requestsDoneList.map((item) => (
           <div key={item.id} className="request">
@@ -43,7 +47,7 @@ const RequestList = () => {
                 <span>Valor Total R$ </span> {item.finalPriceRequest},00
               </p>
               <p>
-                {" "}
+                {' '}
                 <span>Data</span> {item.dateTime}
               </p>
               <p className="idUser">

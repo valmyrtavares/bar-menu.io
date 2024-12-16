@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import '../../assets/styles/RequestListToBePrepared.css';
 import { Link } from 'react-router-dom';
+import Title from '../title.js';
 import {
   getFirstFourLetters,
   requestSorter,
@@ -163,6 +164,9 @@ const RequestListToBePrepared = () => {
 
   return (
     <div>
+      <Link to="/admin/admin">
+        <Title mainTitle="Lista de pedidos a ser prepardos" />
+      </Link>
       <div className="container-btn-request">
         <Link className="all-request" to="/requestlistcheck">
           Todos os pedidos

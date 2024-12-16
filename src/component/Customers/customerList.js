@@ -4,6 +4,8 @@ import { getBtnData, deleteData } from '../../api/Api';
 import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
 import EachCustomer from './eachCustomer';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
+import { Link } from 'react-router-dom';
+import Title from '../title';
 
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
@@ -101,7 +103,9 @@ const CustomerList = () => {
             <span>{customerList.length}</span> Clientes
           </h5>
         )}
-        <h1>Lista de Clientes</h1>
+        <Link to="/admin/admin">
+          <Title mainTitle="Lista de Clientes" />
+        </Link>
         <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
       </div>
       <table striped bordered hover>
