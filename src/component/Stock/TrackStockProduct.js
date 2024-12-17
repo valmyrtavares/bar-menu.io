@@ -15,6 +15,7 @@ const TrackStockProduct = () => {
   const [refreshData, setRefreshData] = React.useState(false);
   const [showEditForm, setShowEditForm] = React.useState(false);
   const [obj, setObj] = React.useState(null);
+  const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
@@ -46,7 +47,7 @@ const TrackStockProduct = () => {
   };
 
   const usageHistory = (item) => {
-    debugger;
+    setTitle(item.product);
     setEventLogData(item.UsageHistory);
     setShowAdjustmentRecords(true);
   };
@@ -65,6 +66,7 @@ const TrackStockProduct = () => {
           <AdjustmentRecords
             eventLogData={eventLogData}
             setShowAdjustmentRecords={setShowAdjustmentRecords}
+            title={title}
           />
         )}
       </div>

@@ -65,3 +65,5 @@ In this commit The recipe modal called RecipeModal component screen was changed 
 For now, it is possible to edit and update our product inventory. The only value that can be edited is the total volume of each product. The expense value and the number of wrappers related to it are changed at the same time. A new product packaging column has been added that reflect a amont of packages of each product 
 
 In this commit all titles inside of a form is a return button to main menu's form
+
+This is a confusing commit because there is a lot of implementation. It is not a good path to follow, but I will leave it like this for now. In this commit we have the possibility to track all the records in stock about a new item purchased or a new edition of an ingredient whose quantity is not due to reality, and in this case the stock administrator must update the quantity of the ingredient in relation to the reality of the available quantity.
