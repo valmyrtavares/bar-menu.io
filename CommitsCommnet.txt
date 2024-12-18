@@ -72,3 +72,5 @@ In this point i get add and delete any item inside of all kind of lists in recip
 
 The recipeDishForm component loads the previous list of ingredients that were already registered in both scenarios
 
+It was fixed a bug regard a when the admin try to register the first time one ingredient
+

@@ -183,7 +183,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     );
   };
 
-  const handleStock = async (itemsStock, account, paymentDate) => {
+  const handleStock = async (itemsStock, account = '000', paymentDate) => {
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {
@@ -228,13 +228,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
       } else {
+        const previousCost = 0;
+        const constpreviousVolume = 0;
+        const cost = currentItem.totalCost;
+        const pack = Number(currentItem.amount);
+        const volume = currentItem.totalVolume;
+        const unit = currentItem.unitOfMeasurement;
+
         // Cria um novo registro para o item no banco de dados
         currentItem.UsageHistory = [
           stockHistoryList(
             currentItem,
             account,
             paymentDate,
-            0,
+            pack,
+            cost,
+            unit,
+            volume,
+            constpreviousVolume,
+            previousCost,
             currentItem.totalCost,
             currentItem.totalVolume
           ),

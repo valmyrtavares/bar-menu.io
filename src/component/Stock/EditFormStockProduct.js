@@ -31,7 +31,6 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     account = 'Editado',
     paymentDate = null
   ) => {
-    debugger;
     if (!Array.isArray(itemsStock)) {
       itemsStock = [itemsStock];
     }
