@@ -21,9 +21,7 @@ const RecipeDish = ({
   const [ingredientsSimple, setIngredientsSimple] = React.useState(
     recipe?.FinalIngredientsList || []
   );
-  const [ingredientsBySize, setIngredientsBySize] = React.useState(
-    customizedPriceObj ? {} : {}
-  );
+  const [ingredientsBySize, setIngredientsBySize] = React.useState({});
   const fieldFocus = React.useRef();
   React.useEffect(() => {
     if (recipe) {
@@ -31,6 +29,8 @@ const RecipeDish = ({
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
         recipe.Explanation = '';
         recipe.FinalingridientsList = [];
+      } else {
+        formatterRecipes(recipe);
       }
       setIngridientsGroup(recipe.FinalingridientsList);
       setRecipeExplanation(recipe.Explanation);
@@ -38,11 +38,13 @@ const RecipeDish = ({
   }, [recipe]);
 
   React.useEffect(() => {
+    console.log('IsEmptyObject   ', isEmptyObject(customizedPriceObj));
     const fetchProduct = async () => {
       const data = await getBtnData('product');
       console.log('Todos os produtos de estoque   ', data);
       setProductList(data);
     };
+
     fetchProduct();
     setIngridientsGroup([]);
     console.log('Customized Price   ', customizedPriceObj);
@@ -55,7 +57,17 @@ const RecipeDish = ({
       console.log('ingredientsSimple    ', ingredientsSimple);
   }, [ingredientsBySize, ingredientsSimple]);
 
-  const isEmptyObject = (obj) => Object.keys(obj).length === 0;
+  const isEmptyObject = (obj) => {
+    if (obj.firstLabel === '' || obj.firstLabel === undefined) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const formatterRecipes = (recipe) => {
+    console.log('Receitas   ', recipe.FinalingridientsList);
+  };
 
   const extractLabelSizes = () => {
     return [
@@ -112,11 +124,22 @@ const RecipeDish = ({
     setRecipeModal(true);
   };
 
-  const remveIten = (index) => {
-    let updatedList = [...IngridientsGroup];
-    updatedList.splice(index, 1);
-    setIngridientsGroup(updatedList);
+  const remveIten = (sizeOrIndex, index) => {
+    if (!isEmptyObject(customizedPriceObj) && index !== undefined) {
+      // Caso com `customizedPriceObj` e dois parâmetros (size e index)
+      setIngredientsBySize((prev) => ({
+        ...prev,
+        [sizeOrIndex]: prev[sizeOrIndex]?.filter((_, i) => i !== index), // Remove o item específico
+      }));
+    } else if (!isEmptyObject(customizedPriceObj)) {
+      console.error('Index is required for customizedPriceObj scenario.');
+    } else {
+      // Caso sem `customizedPriceObj`, com apenas o index
+      const updatedList = ingredientsSimple.filter((_, i) => i !== sizeOrIndex); // Aqui, sizeOrIndex é tratado como o índice
+      setIngredientsSimple(updatedList);
+    }
   };
+
   return (
     <div className="recipeDish-container">
       <CloseBtn setClose={setRecipeModal} />
@@ -245,7 +268,7 @@ const RecipeDish = ({
                         <td
                           className="items"
                           style={{ cursor: 'pointer' }}
-                          onClick={() => remveIten(index)}
+                          onClick={() => remveIten(label, index)}
                         >
                           x
                         </td>

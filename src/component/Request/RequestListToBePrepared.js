@@ -146,10 +146,16 @@ const RequestListToBePrepared = () => {
         console.log(error);
       });
   };
+
+  const updateIngredientsStock = (item) => {
+    console.log('item   ', item);
+  };
+
   const orderDelivery = (item) => {
     if (item.name === 'anonimo') {
       deleteData('user', item.idUser);
     }
+    updateIngredientsStock(item);
 
     item.orderDelivered = true;
     setDoc(doc(db, 'request', item.id), item)
