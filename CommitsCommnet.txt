@@ -67,3 +67,8 @@ For now, it is possible to edit and update our product inventory. The only value
 In this commit all titles inside of a form is a return button to main menu's form
 
 This is a confusing commit because there is a lot of implementation. It is not a good path to follow, but I will leave it like this for now. In this commit we have the possibility to track all the records in stock about a new item purchased or a new edition of an ingredient whose quantity is not due to reality, and in this case the stock administrator must update the quantity of the ingredient in relation to the reality of the available quantity.
+
+In this point i get add and delete any item inside of all kind of lists in recipeDishForm component
+
+The recipeDishForm component loads the previous list of ingredients that were already registered in both scenarios
+

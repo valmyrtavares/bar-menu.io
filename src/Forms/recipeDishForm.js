@@ -18,9 +18,7 @@ const RecipeDish = ({
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
   const [recipeExplanation, setRecipeExplanation] = React.useState('');
   const [productList, setProductList] = React.useState(null);
-  const [ingredientsSimple, setIngredientsSimple] = React.useState(
-    recipe?.FinalIngredientsList || []
-  );
+  const [ingredientsSimple, setIngredientsSimple] = React.useState(null);
   const [ingredientsBySize, setIngredientsBySize] = React.useState({});
   const fieldFocus = React.useRef();
   React.useEffect(() => {
@@ -36,6 +34,10 @@ const RecipeDish = ({
       setRecipeExplanation(recipe.Explanation);
     }
   }, [recipe]);
+
+  React.useEffect(() => {
+    console.log('ingredientsSimple atualizado:', ingredientsSimple);
+  }, [ingredientsSimple]);
 
   React.useEffect(() => {
     console.log('IsEmptyObject   ', isEmptyObject(customizedPriceObj));
@@ -64,9 +66,16 @@ const RecipeDish = ({
       return false;
     }
   };
-
   const formatterRecipes = (recipe) => {
-    console.log('Receitas   ', recipe.FinalingridientsList);
+    debugger;
+    if (
+      Array.isArray(recipe.FinalingridientsList) &&
+      recipe.FinalingridientsList.length > 0
+    ) {
+      setIngredientsSimple(recipe.FinalingridientsList);
+    } else {
+      setIngredientsBySize(recipe.FinalingridientsList);
+    }
   };
 
   const extractLabelSizes = () => {
