@@ -74,3 +74,5 @@ The recipeDishForm component loads the previous list of ingredients that were al
 
 It was fixed a bug regard a when the admin try to register the first time one ingredient
 
+In each request of certains dishes our Data base is receiving registers and right now we need to test, cause there are a lot of problems and bugs tha just should be fixed if and just if whole team use it and provide tests of usebility 
+

@@ -184,6 +184,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   };
 
   const handleStock = async (itemsStock, account = '000', paymentDate) => {
+    console.log('objeto recebido   ', itemsStock);
+    debugger;
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {

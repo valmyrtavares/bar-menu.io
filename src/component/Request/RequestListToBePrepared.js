@@ -6,6 +6,8 @@ import { fetchInDataChanges } from '../../api/Api.js';
 import {
   getFirestore,
   setDoc,
+  addDoc,
+  collection,
   doc,
   getDoc,
   updateDoc,
@@ -147,8 +149,161 @@ const RequestListToBePrepared = () => {
       });
   };
 
-  const updateIngredientsStock = (item) => {
+  const updateIngredientsStock = async (item) => {
     console.log('item   ', item);
+
+    const ObjPadrao = {
+      CostPerUnit: 0,
+      amount: 0,
+      product: '',
+      totalCost: 0,
+      totalVolume: 0,
+      unitOfMeasurement: '',
+      columePerUnit: 0,
+    };
+
+    const dateTime = item.dateTime;
+    const { request } = item;
+
+    for (let i = 0; i < request.length; i++) {
+      const currentItem = request[i];
+      const account = currentItem.name;
+      const { FinalingridientsList } = currentItem.recipe;
+      if (Array.isArray(FinalingridientsList[currentItem.size])) {
+        for (
+          let i = 0;
+          i < FinalingridientsList[currentItem.size].length;
+          i++
+        ) {
+          const ingredient = FinalingridientsList[currentItem.size][i];
+          ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
+          ObjPadrao.product = ingredient.name;
+          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
+          const arrayParams = [ObjPadrao];
+          await handleStock(arrayParams, account, dateTime);
+        }
+      }
+    }
+  };
+
+  const handleStock = async (
+    itemsStock,
+    account = 'Editado',
+    paymentDate = null
+  ) => {
+    if (!Array.isArray(itemsStock)) {
+      itemsStock = [itemsStock];
+    }
+
+    if (!paymentDate) {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // Mês é zero-based
+      const year = today.getFullYear();
+      paymentDate = `${day}/${month}/${year}`;
+    }
+
+    const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
+
+    for (let i = 0; i < itemsStock.length; i++) {
+      const currentItem = itemsStock[i];
+
+      // Verifica se o item já existe no banco de dados
+      const itemFinded = data?.find(
+        (itemSearch) => itemSearch.product === currentItem.product
+      );
+      if (itemFinded) {
+        // Atualiza os valores de custo e volume totais
+        const previousCost = itemFinded.totalCost;
+        const previousVolume = itemFinded.totalVolume;
+        const cost = account === 'Editado' ? 0 : currentItem.totalCost;
+        const pack =
+          account === 'Editado'
+            ? Number(currentItem.amount)
+            : Number(itemFinded.amount) + Number(currentItem.amount);
+        const volume = account === 'Editado' ? 0 : currentItem.totalVolume;
+        const unit = currentItem.unitOfMeasurement;
+
+        if (
+          account !== 'Editado' && // Não é "Editado"
+          /^[^\d]+$/.test(account) && // Não contém números
+          isNaN(account) // Não é um número
+        ) {
+          // Atualiza totalCost proporcionalmente
+          currentItem.totalCost = previousCost - previousCost / previousVolume;
+
+          // Mantém a atualização de totalVolume
+          currentItem.totalVolume =
+            (currentItem.totalVolume || 0) + (itemFinded.totalVolume || 0);
+        }
+
+        // Inicializa ou adiciona ao UsageHistory
+        currentItem.UsageHistory = itemFinded.UsageHistory || [];
+
+        currentItem.UsageHistory.push(
+          stockHistoryList(
+            itemFinded,
+            account,
+            paymentDate,
+            pack,
+            cost,
+            unit,
+            volume,
+            previousVolume,
+            previousCost,
+            currentItem.totalCost,
+            currentItem.totalVolume
+          )
+        );
+        console.log('Item atual  ', currentItem);
+
+        // Atualiza o registro no banco de dados
+        const docRef = doc(db, 'stock', itemFinded.id);
+        await updateDoc(docRef, currentItem);
+      } else {
+        // Cria um novo registro para o item no banco de dados
+        currentItem.UsageHistory = [
+          stockHistoryList(
+            currentItem,
+            account,
+            paymentDate,
+            0,
+            currentItem.totalCost,
+            currentItem.totalVolume
+          ),
+        ];
+        await addDoc(collection(db, 'stock'), currentItem);
+      }
+    }
+  };
+
+  const stockHistoryList = (
+    item,
+    account,
+    paymentDate,
+    pack,
+    cost,
+    unit,
+    volume,
+    previousVolume,
+    previousCost,
+    totalCost,
+    totalVolume
+  ) => {
+    const stockEventRegistration = {
+      date: paymentDate,
+      outputProduct: Number(volume).toFixed(2),
+      category: account || 0,
+      unit: unit,
+      package: pack,
+      inputProduct: 0,
+      cost: cost,
+      previousVolume: previousVolume,
+      previousCost: previousCost,
+      ContentsInStock: totalVolume,
+      totalResourceInvested: Number(totalCost).toFixed(2),
+    };
+    return stockEventRegistration;
   };
 
   const orderDelivery = (item) => {

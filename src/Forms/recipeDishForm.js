@@ -67,7 +67,6 @@ const RecipeDish = ({
     }
   };
   const formatterRecipes = (recipe) => {
-    debugger;
     if (
       Array.isArray(recipe.FinalingridientsList) &&
       recipe.FinalingridientsList.length > 0
@@ -130,7 +129,7 @@ const RecipeDish = ({
         Explanation: recipeExplanation,
       });
     }
-    setRecipeModal(true);
+    setRecipeModal(false);
   };
 
   const remveIten = (sizeOrIndex, index) => {
