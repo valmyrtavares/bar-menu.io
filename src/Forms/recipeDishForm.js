@@ -27,6 +27,7 @@ const RecipeDish = ({
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
         recipe.Explanation = '';
         recipe.FinalingridientsList = [];
+        formatterRecipes(recipe);
       } else {
         formatterRecipes(recipe);
       }
@@ -40,10 +41,9 @@ const RecipeDish = ({
   }, [ingredientsSimple]);
 
   React.useEffect(() => {
-    console.log('IsEmptyObject   ', isEmptyObject(customizedPriceObj));
+    console.log('Veja como bem o nossa receita    ', recipe);
     const fetchProduct = async () => {
       const data = await getBtnData('product');
-      console.log('Todos os produtos de estoque   ', data);
       const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
       setProductList(sortedData);
     };
@@ -68,10 +68,7 @@ const RecipeDish = ({
     }
   };
   const formatterRecipes = (recipe) => {
-    if (
-      Array.isArray(recipe.FinalingridientsList) &&
-      recipe.FinalingridientsList.length > 0
-    ) {
+    if (Array.isArray(recipe.FinalingridientsList)) {
       setIngredientsSimple(recipe.FinalingridientsList);
     } else {
       setIngredientsBySize(recipe.FinalingridientsList);

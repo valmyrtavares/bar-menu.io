@@ -43,7 +43,7 @@ const AdjustmentRecords = ({
               <td>R${Number(item.previousCost).toFixed(2)}</td>
               <td>
                 {' '}
-                {item.ContentsInStock}
+                {Number(item.ContentsInStock).toFixed(2)}
                 {item.unit}
               </td>
               <td>R$ {Number(item.totalResourceInvested).toFixed(2)}</td>
