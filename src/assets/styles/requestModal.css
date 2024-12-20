@@ -16,7 +16,7 @@
 
 .individual-dishes {
     display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr;
+    grid-template-columns: 5fr 2fr 2fr 2fr 1fr;
     column-gap: 30px;
     justify-items: center;
     max-width: 80%;
@@ -28,6 +28,11 @@
 }
 .individual-dishes .cancel {
     cursor: pointer;
+}
+.individual-dishes button{
+    background:none;
+    border:none;
+    font-size: 35px;
 }
 
 h3 {

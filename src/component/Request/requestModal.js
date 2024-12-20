@@ -225,6 +225,33 @@ const RequestModal = () => {
       }
     }
   };
+
+  const duplicateDish = async (index) => {
+    console.log('OBJETO DE USUÁRIO   ', userData);
+    // Cria uma cópia do array original
+    const updatedRequest = [...userData.request];
+
+    // Duplica o item no índice fornecido
+    const duplicatedItem = { ...updatedRequest[index] };
+
+    // Insere o item duplicado logo após o original
+    updatedRequest.splice(index + 1, 0, duplicatedItem);
+    try {
+      // Referência ao documento do usuário no Firestore
+      const userDocRef = doc(db, 'user', currentUser);
+
+      // Atualiza o array request no Firestore
+      await updateDoc(userDocRef, {
+        request: updatedRequest,
+      });
+
+      console.log('Array atualizado com sucesso no Firestore!');
+      fetchUser();
+    } catch (error) {
+      console.error('Erro ao atualizar o array no Firestore:', error);
+    }
+  };
+
   const countingRequest = async () => {
     const requestData = await getBtnData('request');
     const requestNumbers = requestData
@@ -276,6 +303,7 @@ const RequestModal = () => {
             <p className="cancel" onClick={() => deleteRequest(index)}>
               Cancelar
             </p>
+            <button onClick={() => duplicateDish(index)}>+</button>
           </div>
         ))
       ) : (
