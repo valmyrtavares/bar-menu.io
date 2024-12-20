@@ -91,8 +91,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         console.log('Item atual  ', currentItem);
 
         // Atualiza o registro no banco de dados
-        const docRef = doc(db, 'stock', itemFinded.id);
-        await updateDoc(docRef, currentItem);
+        // const docRef = doc(db, 'stock', itemFinded.id);
+        // await updateDoc(docRef, currentItem);
       } else {
         // Cria um novo registro para o item no banco de dados
         currentItem.UsageHistory = [
@@ -105,7 +105,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             currentItem.totalVolume
           ),
         ];
-        await addDoc(collection(db, 'stock'), currentItem);
+        // await addDoc(collection(db, 'stock'), currentItem);
       }
     }
   };
@@ -165,8 +165,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const addItem = async () => {
     try {
       await handleStock(stockProductObj);
-      const docRef = doc(db, 'stock', stockProductObj.id);
-      await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
+      // const docRef = doc(db, 'stock', stockProductObj.id);
+      // await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
       fetchStock();
