@@ -44,7 +44,8 @@ const RecipeDish = ({
     const fetchProduct = async () => {
       const data = await getBtnData('product');
       console.log('Todos os produtos de estoque   ', data);
-      setProductList(data);
+      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+      setProductList(sortedData);
     };
 
     fetchProduct();
