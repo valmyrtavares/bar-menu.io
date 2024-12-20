@@ -165,8 +165,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const addItem = async () => {
     try {
       await handleStock(stockProductObj);
-      // const docRef = doc(db, 'stock', stockProductObj.id);
-      // await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
+      const docRef = doc(db, 'stock', stockProductObj.id);
+      await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
       fetchStock();
