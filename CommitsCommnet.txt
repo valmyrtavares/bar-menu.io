@@ -77,3 +77,5 @@ It was fixed a bug regard a when the admin try to register the first time one in
 In each request of certains dishes our Data base is receiving registers and right now we need to test, cause there are a lot of problems and bugs tha just should be fixed if and just if whole team use it and provide tests of usebility 
 
 A button that duplicates the item when clicked has been implemented in the requested item queue. This feature helps the customer to request the same item without having to repeat the entire request.
+
+It was done the AdminMainMenu which will have fix buttons to navigate between all admin componentes, becoming more confortable the change of functions in the admin with the use of outlet

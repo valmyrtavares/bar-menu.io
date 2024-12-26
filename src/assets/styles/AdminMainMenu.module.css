@@ -1,0 +1,28 @@
+.containerAdminMainMenu{
+    background:red;
+    height: 100vh;
+    display:grid;
+    grid-template-columns: 1fr 5fr;
+}
+
+.containerAdminMainMenu nav{
+    background-color: yellow;
+
+}
+
+.containerAdminMainMenu section {
+    background-color: orange;
+
+}
+
+.containerAdminMainMenu .sideMenu{
+    margin-top:300px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.containerAdminMainMenu .mainContent {
+    min-width: 500px;
+    min-height: 700px;
+}
