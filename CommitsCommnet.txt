@@ -79,3 +79,5 @@ In each request of certains dishes our Data base is receiving registers and righ
 A button that duplicates the item when clicked has been implemented in the requested item queue. This feature helps the customer to request the same item without having to repeat the entire request.
 
 It was done the AdminMainMenu which will have fix buttons to navigate between all admin componentes, becoming more confortable the change of functions in the admin with the use of outlet
+
+All buttons were implemented and login and logout function as well inside of the new menu admin . All is working and i am going start the styled of component 

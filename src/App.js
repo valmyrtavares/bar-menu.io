@@ -67,21 +67,13 @@ function App() {
         <Route path="/nfce" element={<FiscalAttributes />} />
         <Route path="/print" element={<PrintRequestCustomer />} />
         {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
-        <Route path="/requestlist" element={<RequestListToBePrepared />} />
-        <Route path="/admin/EditButton/:id" element={<ListToEditAndDelete />} />
-        <Route path="/admin/item" element={<FormItem />} />
-        <Route path="/admin/recipedish" element={<RecipeDish />} />
-        <Route path="/admin/category" element={<AddButtonForm />} />
-        <Route path="/admin/expenses" element={<ExpensesManegementList />} />
 
-        <Route path="/admin/customer" element={<CustomerList />} />
-        <Route path="/admin/request" element={<RequestManagementModule />} />
-        <Route path="admin/sell-flow" element={<SellFlowMangement />} />
+        <Route path="/admin/recipedish" element={<RecipeDish />} />
+
         {/* <Route
             path="/admin/SideDisehsInDishes"
             element={<NoNameSideDisehsInDishes />}
-          /> */}
-        <Route path="/admin/sidedishes" element={<AddSideDishesForm />} />
+            /> */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/check-customer-nolog" element={<NoLog />} />
         <Route path="/admin/signup" element={<Signup />} />
@@ -89,13 +81,21 @@ function App() {
         <Route path="/admin/signup" element={<Signup />} />
         {/* <Route path="/admin/admin" element={<Admin />} /> */}
         <Route path="/admin/*" element={<AdminMainMenu />}>
+          <Route path="expenses" element={<ExpensesManegementList />} />
+          <Route path="sell-flow" element={<SellFlowMangement />} />
+          <Route path="request" element={<RequestManagementModule />} />
           <Route path="stock" element={<TrackStockProduct />} />
-          {/* Adicione mais rotas relacionadas ao admin aqui */}
+          <Route path="requestlist" element={<RequestListToBePrepared />} />
+          <Route path="item" element={<FormItem />} />
+          <Route path="EditButton/:id" element={<ListToEditAndDelete />} />
+          <Route path="category" element={<AddButtonForm />} />
+          <Route path="customer" element={<CustomerList />} />
+          <Route path="sidedishes" element={<AddSideDishesForm />} />
+          <Route path="frontimage" element={<FormFrontImage />} />
+          <Route path="styles" element={<ScreenStylesForm />} />
+          <Route path="welcome" element={<WelcomeSaluteForm />} />
         </Route>
 
-        <Route path="/admin/frontimage" element={<FormFrontImage />} />
-        <Route path="/admin/styles" element={<ScreenStylesForm />} />
-        <Route path="/admin/welcome" element={<WelcomeSaluteForm />} />
         {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
