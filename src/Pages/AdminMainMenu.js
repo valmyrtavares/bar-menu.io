@@ -36,104 +36,77 @@ const AdminMainMenu = ({ children }) => {
       <div className={admin.containerAdminMainMenu}>
         <nav>
           <div className={admin.sideMenu}>
-            <button>
-              <Link to="/admin/item" className=" btn btn-success sidedishe">
-                Adcione um prato
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/editButton/dishes" className=" btn btn-success">
-                Lista de pratos
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/category" className="btn btn-success  ">
-                Adicione Botão{' '}
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/editButton/cat" className=" btn btn-success">
-                Lista de Botões
-              </Link>
-            </button>
+            <Link to="/" className="  sidedishe">
+              Sair do Administrador
+            </Link>
 
-            <button>
-              <Link
-                to="/admin/sidedishes"
-                className=" btn btn-success sidedishe"
-              >
-                Adicione Acompanhamentos
-              </Link>
-            </button>
-            <button>
-              <Link
-                to="/admin/editButton/sidedishes"
-                className="btn btn-success sidedishe"
-              >
-                Lista de acompanhamentos
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/stock" className=" btn btn-success sidedishe">
-                Estoque
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/customer" className="btn btn-success sidedishe">
-                Lista de Clientes
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/request" className=" btn btn-success sidedishe">
-                Lista de Pedidos
-              </Link>
-            </button>
-            <button>
-              <Link
-                to="/admin/sell-flow"
-                className=" btn btn-success sidedishe"
-              >
-                Fechamento de Caixa
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/frontimage" className="btn btn-success ">
-                Adicione sua marca
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/expenses" className="btn btn-success ">
-                Despesas
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/stock" className="btn btn-success ">
-                Estoque
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/styles" className="btn btn-success">
-                Gerenciando Estilo
-              </Link>
-            </button>
-            <button>
-              <Link to="/admin/welcome" className="btn btn-success">
-                Saudação inicial
-              </Link>
-            </button>
-            <button>
-              <Link
-                to="/admin/requestlist"
-                className="col-sm-4 btn btn-success nostyle m-2"
-              >
-                Pedidos da Cozinha
-              </Link>
-            </button>
+            <Link to="/admin/item" className="  sidedishe">
+              Adcione um prato
+            </Link>
+
+            <Link to="/admin/editButton/dishes" className=" ">
+              Lista de pratos
+            </Link>
+
+            <Link to="/admin/category" className="  ">
+              Adicione Botão{' '}
+            </Link>
+
+            <Link to="/admin/editButton/cat" className=" ">
+              Lista de Botões
+            </Link>
+
+            <Link to="/admin/sidedishes" className="  sidedishe">
+              Adicione Acompanhamentos
+            </Link>
+
+            <Link to="/admin/editButton/sidedishes" className=" sidedishe">
+              Lista de acompanhamentos
+            </Link>
+
+            <Link to="/admin/stock" className="  sidedishe">
+              Estoque
+            </Link>
+
+            <Link to="/admin/customer" className=" sidedishe">
+              Lista de Clientes
+            </Link>
+
+            <Link to="/admin/request" className="  sidedishe">
+              Lista de Pedidos
+            </Link>
+
+            <Link to="/admin/sell-flow" className="  sidedishe">
+              Fechamento de Caixa
+            </Link>
+
+            <Link to="/admin/frontimage" className=" ">
+              Adicione sua marca
+            </Link>
+
+            <Link to="/admin/expenses" className=" ">
+              Despesas
+            </Link>
+
+            <Link to="/admin/stock" className=" ">
+              Estoque
+            </Link>
+
+            <Link to="/admin/styles" className="">
+              Gerenciando Estilo
+            </Link>
+
+            <Link to="/admin/welcome" className="">
+              Saudação inicial
+            </Link>
+
+            <Link to="/admin/requestlist">Cozinha</Link>
+
             <button onClick={logoutAdmin}>Log out</button>
           </div>
         </nav>
         <section>
-          <h1>Grande Menu do administrador</h1>;
+          <h1> Menu do administrador</h1>;
           <div className={admin.mainContent}>
             {' '}
             <Outlet />

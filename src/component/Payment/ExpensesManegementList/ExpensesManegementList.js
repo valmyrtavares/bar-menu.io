@@ -1,5 +1,6 @@
 import React from 'react';
-import '../../../assets/styles/ExpensesManegementList.css';
+import expenses from '../../../assets/styles/ExpensesManegementList.module.css';
+import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
 import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
@@ -86,7 +87,7 @@ const ExpensesManegementList = () => {
     );
 
     return (
-      <tr className="totals">
+      <tr className={expenses.totals}>
         <td>Total Estimado = </td> {/* Primeira coluna vazia */}
         <td>{Number(result.estimate).toFixed(2)}</td>{' '}
         {/* Segunda coluna com o total */}
@@ -107,7 +108,7 @@ const ExpensesManegementList = () => {
   };
 
   return (
-    <div className="customerList-container">
+    <div className={expenses.customerListContainer}>
       {showWarningDeletePopup && (
         <DefaultComumMessage
           msg={`Você está prestes a excluir ${excludeCustomer.name}`}
@@ -147,7 +148,8 @@ const ExpensesManegementList = () => {
           oneExpense={oneExpense}
         />
       )}
-      <div className="btn-add">
+      <button className={adminStyle['btnAdmin']}>TESTANDO TUDO </button>
+      <div className={expenses.btnAdd}>
         <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button>
         <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
         <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>

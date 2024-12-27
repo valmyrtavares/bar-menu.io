@@ -6,8 +6,8 @@
 }
 
 .containerAdminMainMenu nav{
-    background-color: yellow;
-
+    background-color: white;
+padding: 3%
 }
 
 .containerAdminMainMenu section {
@@ -16,15 +16,40 @@
 }
 
 .containerAdminMainMenu .sideMenu{
-    margin-top:50px;
+    margin-top:80px;
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+.containerAdminMainMenu section{
+    padding:5%;
+    color: #FCA311;
+        background: #14213D;
+}
+
+.containerAdminMainMenu .sideMenu a{
+    padding: 12px 10px;
+    color: #FCA311;
+    background:#14213D;
+   
+}
+.containerAdminMainMenu .sideMenu button {
+    padding: 12px 10px;
+    color: #FCA311;
+    background: #14213D;
+
+}
+.containerAdminMainMenu .sideMenu button a{
+    color: #FCA311;
+    background:none;
+}
 
 .containerAdminMainMenu .mainContent {
-    min-width: 500px;
-    min-height: 700px;
+    background:rgb(218, 212, 212);
+    color:#14213D;
+    padding: 2%;
+    height: 80vh;
+        overflow-y: auto;
 }
 .WarningMessageContainer {
     position: fixed;

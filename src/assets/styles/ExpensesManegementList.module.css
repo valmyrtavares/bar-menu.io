@@ -1,39 +1,42 @@
 @import 'variables';
+@import 'adminStyleReuse.module.css';
 
-.customerList-container{
+.customerListContainer{
     position: relative !important;
 }
-.customerList-container .container-add-expenses{
+.customerListContainer .container-add-expenses{
     position: relative;
 }
 
 
-.customerList-container .btn-add {
+.customerListContainer .btnAdd {
     display: flex;
     justify-content: space-around;
     width: 100%;
 
 }
-.customerList-container .btn-add button{
-   
-    border-radius: 10px;
-        padding: 15px 35px;
-        justify-content: center;
-  
+.customerListContainer .btnAdd button{
+border-radius: 10px;
+    padding: 11px 17px;
+    justify-content: center;
     font-family: var(--title-font) !important;
-    font-size: 18px;
+    font-size: 12px;
     font-weight: bold;
-    color: var(--title-font-color);
-    background: var(--btn-color);
+    color: var(--btn-admin-text-color) !important;
+    background-color: var(--btn-admin-bg-color) !important;
    
 }
-.customerList-container div h1{
+.customerListContainer div h1{
   margin:60px 0;
     text-align: center;
     font-size: 39px;
 }
-.customerList-container .openPopup{
+.customerListContainer .openPopup{
    cursor: pointer
+}
+
+.customerListContainer table thead tr th{
+    font-size: 12px;
 }
 
 table {
@@ -72,5 +75,5 @@ table tr:hover {
 
 table .totals td{
     font-weight: bold;
-    font-size: 15px;
+    font-size: 12px;
 }

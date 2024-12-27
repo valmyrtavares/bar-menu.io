@@ -16,6 +16,7 @@ It was created two new features about check out all documents and cancel some sp
 
  It was created a eachCustomer component that show a sumary with all customer' s data and all dishes requested for him. In this screen still  is displayed the all requests's date done and the value of each one. This component stils this component still copy the phone number and anothers customer's data with one mouse click. The eachCustomer component is called inside of customerList component with one mouse click
 
+
  In this commit we already have all costs and prifits in the requestManagementModule and the final line is in table's bottom. For now all we have only total price selled and amont of products of day, There is no stil total cost and total profit. In many previus commits unfortunily theres os no commnets here and therefore it is a good idea talk about some features done. In current time of project we already have a popup with each product, showing costs, profits and prices of each item and the sums of all
 
  All totals params diplayed in screen of requestManagementModule component 
@@ -81,3 +82,5 @@ A button that duplicates the item when clicked has been implemented in the reque
 It was done the AdminMainMenu which will have fix buttons to navigate between all admin componentes, becoming more confortable the change of functions in the admin with the use of outlet
 
 All buttons were implemented and login and logout function as well inside of the new menu admin . All is working and i am going start the styled of component 
+
+I encounter many problems regarding styling and css, such as styles leaking between components and at this point in the project I need to use variables, mixins and other things that make it easier the work within  html therefore i will create a new branch to preserv what was done 
