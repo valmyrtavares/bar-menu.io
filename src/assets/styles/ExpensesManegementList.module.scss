@@ -1,0 +1,47 @@
+
+@import './adminStyleReuse.module.scss';
+
+.customerListContainer{
+    position: relative !important;
+
+    .containerAddExpenses{
+        position: relative;
+    }
+
+
+
+    .btnAdd {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin:40px 0;
+
+         button{
+       @include btnAdmin;
+       
+       }
+    }
+
+    .titleTable{
+        margin:50px 0;
+    }
+
+    div h1{
+    margin:60px 0;
+        text-align: center;
+        font-size: 39px;
+    }
+     .openPopup{
+    cursor: pointer
+    }
+
+    table thead tr th{
+        font-size: 12px;
+        
+    }
+
+    table{
+        @include tableadmin
+    }
+
+}

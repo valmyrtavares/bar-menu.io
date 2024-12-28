@@ -1,0 +1,12 @@
+@import './adminStyleReuse.module.scss';
+.containerTitle{
+    margin:50px 0;
+}
+
+.containerTitle h3 {
+    font-family:var(--title-font);
+    color: $admin-title-color;
+   font-size:$admin-title-fontsize;
+   font-family: $admin-title-fontfamily;
+
+}

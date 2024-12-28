@@ -1,6 +1,6 @@
 import React from 'react';
-import expenses from '../../../assets/styles/ExpensesManegementList.module.css';
-import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
+import expenses from '../../../assets/styles/ExpensesManegementList.module.scss';
+//import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
 import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
@@ -125,7 +125,7 @@ const ExpensesManegementList = () => {
           />
         )}
       </div>
-      <div className="container-add-expenses">
+      <div className="containerAddExpenses">
         {showProductRegistePopup && (
           <RegisterProduct
             setShowPopup={setShowProductRegisterPopup}
@@ -148,17 +148,18 @@ const ExpensesManegementList = () => {
           oneExpense={oneExpense}
         />
       )}
-      <button className={adminStyle['btnAdmin']}>TESTANDO TUDO </button>
+      <div className={expenses.titleTable}>
+        <Link to="/admin/admin">
+          <Title mainTitle="Lista de Despesas"></Title>
+        </Link>
+      </div>
+
       <div className={expenses.btnAdd}>
         <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button>
         <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
         <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>
       </div>
-      <div className="title-table">
-        <Link to="/admin/admin">
-          <Title mainTitle="Lista de Despesas"></Title>
-        </Link>
-      </div>
+
       <table striped bordered hover>
         <thead>
           <tr>

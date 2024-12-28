@@ -1,9 +1,9 @@
-import React from "react";
-import "../assets/styles/Title.css";
+import React from 'react';
+import '../assets/styles/Title.scss';
 
 const Title = ({ mainTitle }) => {
   return (
-    <div className="tete">
+    <div className="containerTitle">
       <h3>{mainTitle}</h3>
     </div>
   );
