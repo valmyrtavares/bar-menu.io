@@ -1,6 +1,6 @@
 import React from 'react';
 import { getBtnData, deleteData } from '../../api/Api';
-import '../../assets/styles/TrackStockProduct.css';
+import products from '../../assets/styles/TrackStockProduct.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
@@ -55,7 +55,7 @@ const TrackStockProduct = () => {
   };
 
   return (
-    <div className="container-track-stock-product">
+    <div className={products.containerTrackStockproduct}>
       {showEditForm && (
         <EditFormStockProduct
           fetchStock={fetchStock}
@@ -63,7 +63,7 @@ const TrackStockProduct = () => {
           setShowEditForm={setShowEditForm}
         />
       )}
-      <div className="container-adjustment-screen">
+      <div className={products.containerAdjustmentScreen}>
         {showAdjustmentRecords && (
           <AdjustmentRecords
             eventLogData={eventLogData}

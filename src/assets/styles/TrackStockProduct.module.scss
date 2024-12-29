@@ -1,0 +1,14 @@
+@import './adminStyleReuse.module.scss';
+
+
+.containerTrackStockproduct {
+    position: relative;
+
+    table {
+        @include tableadmin
+    }
+}
+
+.containerAdjustmentScreen {
+    position: relative;
+}
