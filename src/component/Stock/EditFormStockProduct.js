@@ -1,5 +1,5 @@
 import React from 'react';
-import edit from '../../assets/styles/EditFormStockProduct.module.css';
+import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
 import { getBtnData } from '../../api/Api';
@@ -177,16 +177,16 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
   return (
     <div className={edit.popupOverlay}>
-      <div className={edit.closeBtnContainer}>
-        <button
-          className={edit.closeBtn}
-          type="button"
-          onClick={() => setShowEditForm(false)}
-        >
-          X
-        </button>
-      </div>
       <div className={edit.containerEditStock}>
+        <div className={edit.closeBtnContainer}>
+          <button
+            className={edit.closeBtn}
+            type="button"
+            onClick={() => setShowEditForm(false)}
+          >
+            X
+          </button>
+        </div>
         <div className={edit.field}>
           <h3>Produto</h3>
           <p>{stockProductObj.product}</p>
