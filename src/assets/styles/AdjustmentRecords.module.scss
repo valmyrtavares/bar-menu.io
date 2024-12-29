@@ -1,0 +1,14 @@
+@import './adminStyleReuse.module.scss';
+
+.containderAdjustmentRecords{
+    position: fixed;
+        top: 16vh;
+        left: 28%;
+        width: 54%;
+        height: 80vh;
+        background: $bg-admin-default;
+
+        table{
+                @include tableadmin
+            }
+}

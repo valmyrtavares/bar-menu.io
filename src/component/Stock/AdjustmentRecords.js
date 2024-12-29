@@ -1,5 +1,5 @@
 import React from 'react';
-import log from '../../assets/styles/AdjustmentRecords.module.css';
+import log from '../../assets/styles/AdjustmentRecords.module.scss';
 import CloseBtn from '../closeBtn';
 
 const AdjustmentRecords = ({

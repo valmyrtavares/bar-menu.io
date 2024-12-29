@@ -3,6 +3,7 @@ $btn-admin-bg-color: #14213D;
 $btn-admin-text-color: #FCA311;
 $btn-admin-table-color: white;
 $admin-title-color: #14213D;
+$bg-admin-default: rgb(218, 212, 212);
 $admin-title-fontsize: 30px;
 $admin-title-fontfamily:'arial';
 $table-text-fontsize:12px;
@@ -22,7 +23,7 @@ $table-text-fontsize:12px;
 }
 
 @mixin tableadmin{
-   
+  
         width: 100%;       
         border-collapse: collapse;
         /* Remove os espaçamentos entre bordas */
