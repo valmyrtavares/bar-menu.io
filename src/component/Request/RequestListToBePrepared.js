@@ -12,7 +12,7 @@ import {
   getDoc,
   updateDoc,
 } from 'firebase/firestore';
-import '../../assets/styles/RequestListToBePrepared.css';
+import style from '../../assets/styles/RequestListToBePrepared.module.scss';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
 import {
@@ -322,21 +322,20 @@ const RequestListToBePrepared = () => {
         console.log(error);
       });
   };
-
   return (
     <div>
       <Link to="/admin/admin">
-        <Title mainTitle="Lista de pedidos a ser prepardos" />
+        <Title mainTitle="Lista de pedidos a ser preparados" />
       </Link>
-      <div className="container-btn-request">
-        <Link className="all-request" to="/requestlistcheck">
+      <div className={style.containerBtnRequest}>
+        <Link className={style.allRequest} to="/requestlistcheck">
           Todos os pedidos
         </Link>
       </div>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => (
-          <div className="container-requestListToBePrepared" key={item.id}>
-            <div className="user-container">
+          <div className={style.containerRequestListToBePrepared} key={item.id}>
+            <div className={style.userContainer}>
               <div>
                 <p>
                   <span>Nome</span> {firstNameClient(item.name)}
@@ -351,7 +350,7 @@ const RequestListToBePrepared = () => {
                   <span>Data</span> {item.dateTime}
                 </p>
                 <h2>Valor final R$ {item.finalPriceRequest},00</h2>
-                <div className="customer-profile-button">
+                <div className={style.customerProfileButton}>
                   <ButtonCustomerProfile
                     item={item}
                     request={item.request}
@@ -363,17 +362,17 @@ const RequestListToBePrepared = () => {
                   onPaymentMethodChange={handlePaymentMethodChange}
                 />
               </div>
-              <div className="btn-status">
+              <div className={style.btnStatus}>
                 <button
                   onClick={() => openShowModal(item.id)}
-                  className="pendent"
+                  className={style.pendent}
                 >
                   Cancelar pedido
                 </button>
                 <div>
                   {ShowDefaultMessage && (
                     <DefaultComumMessage
-                      msg="Você está prestes a excluir esse pedido "
+                      msg="Você está prestes a excluir esse pedido"
                       onClose={closeModal}
                       onConfirm={() => handleDeleteRequest(selectedRequestId)}
                     />
@@ -381,21 +380,21 @@ const RequestListToBePrepared = () => {
                 </div>
                 <button
                   disabled={!item.paymentMethod}
-                  className={item.paymentDone ? 'done' : 'pendent'}
+                  className={item.paymentDone ? style.done : style.pendent}
                   onClick={() => changeStatusPaid(item)}
                 >
                   Pago
                 </button>
                 <button
                   disabled={!item.paymentDone}
-                  className={item.done ? 'pendent' : 'done'}
+                  className={item.done ? style.pendent : style.done}
                   onClick={() => RequestDone(item)}
                 >
                   Pronto
                 </button>
                 <button
                   disabled={item.done}
-                  className={item.orderDelivered ? 'done' : 'pendent'}
+                  className={item.orderDelivered ? style.done : style.pendent}
                   onClick={() => orderDelivery(item)}
                 >
                   Entregue
@@ -405,7 +404,7 @@ const RequestListToBePrepared = () => {
 
             {item.request &&
               item.request.map((item, recipeIndex) => (
-                <div className="request-item" key={recipeIndex}>
+                <div className={style.requestItem} key={recipeIndex}>
                   {recipeModal.openModal && (
                     <RecipeModal
                       setRecipeModal={setRecipeModal}
@@ -416,7 +415,9 @@ const RequestListToBePrepared = () => {
                     <h5>{item.name}</h5>
                     <p>{getFirstFourLetters(item.id, 4)}</p>
                     {item.category && (
-                      <p className="category">Categoria {item.category}</p>
+                      <p className={style.category}>
+                        Categoria {item.category}
+                      </p>
                     )}
                     {item.size && (
                       <p>
@@ -424,7 +425,7 @@ const RequestListToBePrepared = () => {
                       </p>
                     )}
                     <h5>Acompanhamento</h5>
-                    <div className="sideDishes-list">
+                    <div className={style.sideDishesList}>
                       {item.sideDishes && item.sideDishes.length > 0 ? (
                         item.sideDishes.map((item, index) => (
                           <p key={index}>{item.name},</p>
@@ -434,10 +435,9 @@ const RequestListToBePrepared = () => {
                       )}
                     </div>
                   </div>
-                  <div className="image-button">
+                  <div className={style.imageButton}>
                     <img src={item.image} alt="123" />
                     <button
-                      // onClick={() => toggle(`${item.id}-${recipeIndex}`)}
                       onClick={() =>
                         setRecipeModal({ openModal: true, id: item.id })
                       }
@@ -455,3 +455,5 @@ const RequestListToBePrepared = () => {
   );
 };
 export default RequestListToBePrepared;
+
+///admin/requestlist

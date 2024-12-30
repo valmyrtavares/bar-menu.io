@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
-import { GlobalContext } from "../../GlobalContext";
-import "../../assets/styles/PrintRequestCustomer.css";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import { GlobalContext } from '../../GlobalContext';
+import '../../assets/styles/PrintRequestCustomer.css';
+import { Link } from 'react-router-dom';
 
 const PrintRequestCustomer = () => {
   const global = useContext(GlobalContext);
@@ -11,10 +11,10 @@ const PrintRequestCustomer = () => {
   const hasPrintedRef = React.useRef(false);
 
   useEffect(() => {
-    console.log("Fui CHAMADO");
+    console.log('Fui CHAMADO');
 
     if (global.userNewRequest && !hasPrinted) {
-      console.log("request ATUALIZADO", global.userNewRequest);
+      console.log('request ATUALIZADO', global.userNewRequest);
 
       // Aguarda um pequeno tempo para garantir que a tela foi renderizada antes de chamar o print
       setTimeout(() => {
@@ -27,7 +27,7 @@ const PrintRequestCustomer = () => {
   return (
     <div className="print-request-container">
       <div className="container-link" container-link>
-        <Link to="/requestlist" className="btn btn-success">
+        <Link to="/admin/requestlist" className="btn btn-success">
           Cozinha
         </Link>
       </div>

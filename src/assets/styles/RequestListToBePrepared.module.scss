@@ -1,0 +1,126 @@
+@import "variables";
+
+.containerBtnRequest {
+    display: flex;
+    padding: 2px 7%;
+    justify-content: end;
+}
+
+.allRequest {
+    text-decoration: none;
+    background: var(--secundary-bg-color);
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: var(--title-font-color);
+}
+
+.containerRequestListToBePrepared {
+    background-color: white;
+    width: 90%;
+    margin: 10px 5%;
+    padding: 10px;
+
+    .userContainer {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        align-items: center;
+        margin-bottom: 15px;
+
+        .customerProfileButton {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btnStatus {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            .pendent {
+                background-color: red;
+                color: white;
+            }
+
+            .done {
+                background-color: green;
+                color: white;
+            }
+
+            button {
+                max-height: 60px;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-family: var(--title-font) !important;
+                font-size: 1.2rem;
+                font-weight: bold;
+            }
+        }
+
+        span {
+            font-weight: 200;
+            font-family: var(--text-font);
+            color: var(--title-font-color);
+        }
+
+        p {
+            font-weight: 700;
+            margin-bottom: 1px;
+            text-align: center;
+            font-size: 17px;
+            font-family: var(--text-font);
+            color: var(--title-font-color);
+        }
+
+        h2 {
+            font-weight: 700;
+            margin-bottom: 1px;
+            text-align: center;
+            font-size: 20px;
+            font-family: var(--text-font);
+            color: var(--title-font-color);
+            margin-top: 10px;
+        }
+    }
+
+    .requestItem {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        border: solid 3px pink;
+
+        img {
+            max-width: 200px;
+        }
+
+        .imageButton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        div {
+
+            h5,
+            p {
+                text-align: center;
+                font-size: 22px;
+                font-weight: bold;
+            }
+
+            .sideDishesList {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 1px;
+                padding: 3px;
+
+                p {
+                    margin: 1px 2px;
+                    font-size: 22px;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}
