@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/customerList.css';
+import clients from '../../assets/styles/customerList.module.scss';
 import { getBtnData, deleteData } from '../../api/Api';
 import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
 import EachCustomer from './eachCustomer';
@@ -84,12 +84,12 @@ const CustomerList = () => {
   };
 
   return (
-    <div className="customerList-container">
+    <div className={clients.customerListContainer}>
       {showPopup && (
         <EachCustomer oneClient={oneClient} setShowPopup={setShowPopup} />
       )}
 
-      <div className="search-container">
+      <div className={clients.searchContainer}>
         <input
           type="text"
           value={customer}
@@ -97,7 +97,7 @@ const CustomerList = () => {
           placeholder="Busque pelo nome "
         />
       </div>
-      <div className="button-title-container">
+      <div className={clients.buttonTitleContainer}>
         {customerList && customerList.length > 0 && (
           <h5>
             <span>{customerList.length}</span> Clientes
@@ -109,38 +109,42 @@ const CustomerList = () => {
         <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
       </div>
       <table striped bordered hover>
-        <tr>
-          <th>Nome</th>
-          <th>CPF</th>
-          <th>Celular</th>
-          <th>Aniverário</th>
-          <th>Excluir</th>
-        </tr>
-        {customerList &&
-          customerList.length > 0 &&
-          customerList.map((item, index) => (
-            <tr>
-              <td onClick={() => eachCustomer(item)}>
-                {firstNameClient(item.name)}
-              </td>
-              <td>{item.cpf}</td>
-              <td>{item.phone}</td>
-              <td>{item.birthday}</td>
-              <td>
-                {showWarningDeletePopup && (
-                  <DefaultComumMessage
-                    msg={`Você está prestes a excluir ${excludeCustomer.name}`}
-                    item={excludeCustomer}
-                    onConfirm={deleteCustomer}
-                    onClose={() => setShowWarningDeltePopup(false)}
-                  />
-                )}
-                <button onClick={() => deleteCustomer(item, false)}>
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          ))}
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Celular</th>
+            <th>Aniverário</th>
+            <th>Excluir</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customerList &&
+            customerList.length > 0 &&
+            customerList.map((item, index) => (
+              <tr key={index}>
+                <td onClick={() => eachCustomer(item)}>
+                  {firstNameClient(item.name)}
+                </td>
+                <td>{item.cpf}</td>
+                <td>{item.phone}</td>
+                <td>{item.birthday}</td>
+                <td>
+                  {showWarningDeletePopup && (
+                    <DefaultComumMessage
+                      msg={`Você está prestes a excluir ${excludeCustomer.name}`}
+                      item={excludeCustomer}
+                      onConfirm={deleteCustomer}
+                      onClose={() => setShowWarningDeltePopup(false)}
+                    />
+                  )}
+                  <button onClick={() => deleteCustomer(item, false)}>
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
       </table>
     </div>
   );

@@ -1,0 +1,68 @@
+@import './adminStyleReuse.module.scss';
+
+.customerListContainer{   
+    .searchContainer {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+        input {
+                width: 60%;
+                border-radius: 10px;
+                min-height: 40px;
+                border: none;
+        }
+    }
+
+    .buttonTitleContainer {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        align-items: center;    
+        border-radius: 10px;
+        padding: 10px 20px;          
+        font-family: var(--title-font) !important;
+        font-size: 12px;
+        font-weight: bold;
+        color:$admin-title-color;
+           
+        h5 {
+                text-align: center;
+                margin:0;
+            }
+            button{
+                @include btnAdmin
+            }
+    }
+    table{
+       width: 90%;
+       margin: 3px 5%;
+       @include  tableadmin
+} 
+
+
+}
+
+
+
+.customerListContainer .button-title-container
+.customerListContainer .button-title-container button{
+    max-width: 140px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
+.customerListContainer table tr td button{
+    /* max-width: 140px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%; */
+    font-family: var(--title-font) !important;
+    /* font-size: 12px; */
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+}
