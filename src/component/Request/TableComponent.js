@@ -1,5 +1,6 @@
 import React from 'react';
 import { requestSorter } from '../../Helpers/Helpers.js';
+import style from '../../assets/styles/TableComponent.module.scss';
 
 const TableComponent = ({ filteredCompleteRequests }) => {
   const [totalInScreen, setTotalInScreen] = React.useState(null);
@@ -153,7 +154,7 @@ const TableComponent = ({ filteredCompleteRequests }) => {
   };
 
   return (
-    <div>
+    <div className={style.containerTable}>
       {showTotals()}
       <table>
         <thead>

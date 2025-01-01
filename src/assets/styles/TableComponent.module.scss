@@ -1,0 +1,5 @@
+@import './adminStyleReuse.module.scss';
+
+.containerTable{
+@include tableadmin
+}
