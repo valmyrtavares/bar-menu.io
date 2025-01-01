@@ -327,11 +327,6 @@ const RequestListToBePrepared = () => {
       <Link to="/admin/admin">
         <Title mainTitle="Lista de pedidos a ser preparados" />
       </Link>
-      <div className={style.containerBtnRequest}>
-        <Link className={style.allRequest} to="/requestlistcheck">
-          Todos os pedidos
-        </Link>
-      </div>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => (
           <div className={style.containerRequestListToBePrepared} key={item.id}>

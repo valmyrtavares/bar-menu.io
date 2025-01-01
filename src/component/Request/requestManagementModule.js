@@ -289,7 +289,7 @@ const RequestManagementModule = () => {
       )}
       {loadMessage && <Loading />}
       <Link to="/admin/admin">
-        <Title mainTitle="Acompanhamento de Despesas" />
+        <Title mainTitle="Acompanhamento de Vendas" />
       </Link>
       <div className="container-date">
         <div>

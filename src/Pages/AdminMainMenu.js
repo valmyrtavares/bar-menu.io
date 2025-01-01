@@ -73,7 +73,7 @@ const AdminMainMenu = ({ children }) => {
             </Link>
 
             <Link to="/admin/request" className="  sidedishe">
-              Lista de Pedidos
+              Vendas
             </Link>
 
             <Link to="/admin/sell-flow" className="  sidedishe">
@@ -101,6 +101,8 @@ const AdminMainMenu = ({ children }) => {
             </Link>
 
             <Link to="/admin/requestlist">Cozinha</Link>
+
+            <Link to="/admin/requestlistcheck">Lista de Pedidos</Link>
 
             <button onClick={logoutAdmin}>Log out</button>
           </div>

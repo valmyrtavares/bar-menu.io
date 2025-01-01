@@ -63,7 +63,7 @@ function App() {
         <Route path="/create-customer" element={<CreateCustomer />} />
         <Route path="/request" element={<RequestModal />} />
         <Route path="/orderqueue" element={<OrderQueue />} />
-        <Route path="/requestlistcheck" element={<RequestList />} />
+
         <Route path="/nfce" element={<FiscalAttributes />} />
         <Route path="/print" element={<PrintRequestCustomer />} />
         {/* <Route path="/admin/editButton" element={<EditFormButton />} /> */}
@@ -94,6 +94,7 @@ function App() {
           <Route path="frontimage" element={<FormFrontImage />} />
           <Route path="styles" element={<ScreenStylesForm />} />
           <Route path="welcome" element={<WelcomeSaluteForm />} />
+          <Route path="requestlistcheck" element={<RequestList />} />
         </Route>
 
         {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
