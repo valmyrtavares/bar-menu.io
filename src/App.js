@@ -52,8 +52,6 @@ function App() {
     }
   }, [location.pathname]); // Reexecuta sempre que a URL muda
 
-  // const basename = '/bar-menu.io';
-  //const basename = '/';
   return (
     <div className="ultra-wrapper">
       {showHeader && <Header />}
@@ -97,8 +95,8 @@ function App() {
           <Route path="requestlistcheck" element={<RequestList />} />
         </Route>
 
-        {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
+        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
       </Routes>
     </div>
   );
