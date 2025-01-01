@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/RecipeModal.css';
+import style from '../../assets/styles/RecipeModal.module.scss';
 import CloseBtn from '../closeBtn';
 import { getOneItemColleciton } from '../../api/Api';
 
@@ -25,8 +25,8 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
   }, []);
 
   return (
-    <div className="recipe-global-container">
-      <div className="btn-container">
+    <div className={style.recipeGlobalContainer}>
+      <div className={style.btnContainer}>
         <button
           onClick={() =>
             setRecipeModal((prev) => ({ ...prev, openModal: false }))
@@ -37,7 +37,7 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
       </div>
       {recipeDishDisplayed.FinalingridientsList ? (
         <div>
-          <div className="image-recipe-container">
+          <div className={style.imageRecipeContainer}>
             {imageDish && <img src={imageDish} alt="image" />}
           </div>
 
@@ -56,7 +56,6 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
             </>
           ) : (
             <>
-              {/* Espaço reservado para tratar recipeDishDisplayed.FinalingridientsList como um objeto com 3 arrays */}
               <h3>Ingredientes organizados</h3>
               <div>
                 {Object.entries(recipeDishDisplayed.FinalingridientsList).map(
@@ -78,12 +77,12 @@ const RecipeModal = ({ recipeModal, setRecipeModal }) => {
             </>
           )}
 
-          <h3 className="title-recipe">Preparo do {TitleDish}</h3>
+          <h3 className={style.titleRecipe}>Preparo do {TitleDish}</h3>
           <p>{recipeDishDisplayed.Explanation}</p>
         </div>
       ) : (
-        <div className="no-recipe">
-          <p className="recipe-text">Não temos uma receita</p>
+        <div className={style.noRecipe}>
+          <p className={style.recipeText}>Não temos uma receita</p>
         </div>
       )}
     </div>
