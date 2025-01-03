@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
-import '../../../assets/styles/AddExpensesForm.css';
+import style from '../../../assets/styles/AddExpensesForm.module.scss';
 import CloseBtn from '../../closeBtn';
 import {
   getFirestore,
@@ -371,13 +371,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   };
 
   return (
-    <div className="container-add-expenses-form">
+    <div className={style.containerAddExpensesForm}>
       <CloseBtn setClose={setShowPopup} />
 
       <h1>Adicione uma nova despesa</h1>
 
       <form onSubmit={handleSubmit} className="m-1">
-        <div className="form-product">
+        <div className={style.formProduct}>
           <Input
             id="name"
             autoComplete="off"
@@ -428,14 +428,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onFocus={handleFocus}
             onChange={handleChange}
           />
-          <div className="my-3">
-            <label className="form-label">Produto</label>
-            <select
-              id="provider"
-              required
-              className="form-select"
-              onChange={handleChange}
-            >
+          <div className={style.selectform}>
+            <select id="provider" required onChange={handleChange}>
               <option>Selecione um fornecedor</option>
               {providerList &&
                 providerList.length > 0 &&
@@ -455,11 +449,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             type="text"
             onChange={handleChange}
           />
-          <div className="select-form">
-            <label></label>
+          <div className={style.selectform}>
             <select
               id="category"
-              className="form-select custom-select"
               value={form.category}
               required
               onChange={handleChange}
@@ -474,14 +466,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         </div>
         <fieldset>
           <legend>Adicionar Item</legend>
-          <div className="my-3">
-            <label className="form-label">Produto</label>
+          <div className={style.selectform}>
             <select
               id="product"
               value={productList?.findIndex(
                 (product) => product.name === item.product
               )}
-              className="form-select"
               onChange={handleItemChange}
             >
               <option value="">Selecione um produto</option>

@@ -1,0 +1,159 @@
+@import "./adminStyleReuse.module.scss";
+
+.containerAddExpensesForm {
+    width: 80%;
+    position: fixed;
+    top: 15%;
+    left: 20%;
+    background-color: $bg-admin-default;
+    display: block ;
+    padding: 16px;
+    max-width: 1100px;
+    height: 70vh;
+    overflow-y: auto;
+
+    h1 {
+        margin: 5px 0 !important;
+    }
+
+    .formProduct {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        justify-items: center;
+        padding: 10px;
+
+        div {
+            width: 100%;
+            padding: 3%;
+            input {
+               width: 100%;
+            }
+
+        }
+        .selectform {
+          display: flex;
+          justify-content: start;
+          align-items: end;
+          margin-bottom:1rem;
+               select{
+                min-height: 60px;
+                border:none;
+                font-size:21px;
+               }
+            
+        }
+    }
+
+    button {
+    @include btnAdmin
+    }
+
+    fieldset {
+        border: 2px solid #ccc;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: space-around;
+        align-items: end;
+
+        legend {
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+        }
+        .selectform {
+            display: flex;
+            justify-content: start;
+            align-items: end;
+            margin-bottom: 1rem;
+            max-width: 50px;
+            select {
+                min-height: 60px;
+                border: none;
+                font-size: 21px;
+                max-width: 115px
+            }
+
+        }
+
+        label {
+            font-size: 16px !important;
+            display: block;
+            padding: 0;
+            width: 116px;
+        }
+
+        div {
+            max-width: 50px;
+            input{
+                max-width:115px
+            }
+        }
+
+        .product {
+            max-width: 160px;
+        }
+
+        .provider {
+            max-width: 180px;
+        }
+
+        .account {
+            max-width: 150px;
+        }
+    }
+}
+
+@media (max-width: 750px) {
+    .containerAddExpensesForm {
+        left: 10%;
+        .formProduct {
+            grid-template-columns: 1fr;
+            justify-items: stretch;
+
+            form {
+                font-size:12px;
+                input {
+                    width: 100%;
+                }
+            }
+        }
+
+        fieldset {
+            flex-direction: column;
+            align-items: center;
+
+            .selectform {
+                display: flex;
+                justify-content: start;
+                align-items: end;
+                margin-bottom: 1rem;
+                max-width: 300px;
+        
+                select {
+                    min-height: 60px;
+                    border: none;
+                    font-size: 21px;
+                    max-width:  300px
+                }
+        
+            }
+            div {
+                max-width: 300px;
+            
+                input {
+                    max-width: 300px
+                }
+            }
+           
+            .product,
+            .provider,
+            .account {
+                max-width: 100%;
+            }
+        }
+    }
+}
