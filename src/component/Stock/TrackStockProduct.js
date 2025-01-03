@@ -29,7 +29,6 @@ const TrackStockProduct = () => {
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
-    console.log(data);
     const sortedData = data.sort((a, b) => a.product.localeCompare(b.product));
     setStock(sortedData);
   };

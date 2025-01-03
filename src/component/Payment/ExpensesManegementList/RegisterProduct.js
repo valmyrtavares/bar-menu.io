@@ -33,8 +33,10 @@ const RegisterProvider = ({ setShowPopup }) => {
 
   const fetchProvider = async () => {
     const data = await getBtnData('product');
-    if (data && data.length > 0) {
-      setListProvider(data);
+    console.log('DATA ', data);
+    const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortedData && sortedData.length > 0) {
+      setListProvider(sortedData);
     }
   };
 

@@ -48,7 +48,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       ]);
 
       if (dataProduct && dataProduct.length > 0) {
-        setProductList(dataProduct);
+        const sortedData = dataProduct.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setProductList(sortedData);
       }
       if (dataProvider && dataProvider.length > 0) {
         setProviderList(dataProvider);
