@@ -3,11 +3,13 @@
     height: 100vh;
     display:grid;
     grid-template-columns: 1fr 5fr;
+    
 }
 
 .containerAdminMainMenu nav{
     background-color: white;
-padding: 3%
+    padding: 3%;
+    transition: transform 0.3s ease-in-out;
 }
 
 .containerAdminMainMenu section {
@@ -56,4 +58,10 @@ padding: 3%
     top: 200px;
     max-width: 600px;
     left: 20%;
+}
+
+@media (max-width: 750px) {
+    .containerAdminMainMenu nav {
+        display: none;
+    }
 }

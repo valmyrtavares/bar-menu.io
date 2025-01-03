@@ -6,6 +6,7 @@ import WarningMessage from '../component/WarningMessages';
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
+  const [isNavVisible, setIsNavVisible] = React.useState(false);
 
   React.useEffect(() => {
     if (!localStorage.hasOwnProperty('token')) {
@@ -22,6 +23,10 @@ const AdminMainMenu = ({ children }) => {
     }
     setLogoutAdminPopup(true);
   };
+
+  const toggleNav = () => {
+    setIsNavVisible((prev) => !prev);
+  };
   return (
     <div>
       <div className={admin.WarningMessageContainer}>
@@ -34,8 +39,20 @@ const AdminMainMenu = ({ children }) => {
         )}
       </div>
       <div className={admin.containerAdminMainMenu}>
+        <button
+          className={admin.hamburgerButton}
+          onClick={toggleNav}
+          aria-label="Toggle menu"
+        >
+          ☰
+        </button>
+        isNavVisible ? style.visibleNav : style.hiddenNav
         <nav>
-          <div className={admin.sideMenu}>
+          <div
+            className={`${admin.sideMenu} ${
+              isNavVisible ? admin.visibleNav : admin.hiddenNav
+            }`}
+          >
             <Link to="/" className="  sidedishe">
               Sair do Administrador
             </Link>
