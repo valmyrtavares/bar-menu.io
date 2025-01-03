@@ -86,7 +86,7 @@ const TrackStockProduct = () => {
         {stock &&
           stock.length > 0 &&
           stock.map((item, index) => (
-            <tr>
+            <tr key={index}>
               <td onClick={() => usageHistory(item)}>{item.product}</td>
               <td>R$ {Number(item.totalCost).toFixed(2)}</td>
               <td>

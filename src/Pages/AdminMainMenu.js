@@ -88,10 +88,6 @@ const AdminMainMenu = ({ children }) => {
               Despesas
             </Link>
 
-            <Link to="/admin/stock" className=" ">
-              Estoque
-            </Link>
-
             <Link to="/admin/styles" className="">
               Gerenciando Estilo
             </Link>
