@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  getBtnData,
-  fetchingByQuery,
-  getOneItemColleciton,
-} from '../../api/Api';
+import { getBtnData } from '../../api/Api';
 import '../../assets/styles/requestManagementModule.css';
 import Input from '../../component/Input.js';
-import { cardClasses } from '@mui/material';
 import AccountingManagementPopup from './AccountingManagementPopup';
 import Loading from '../Loading.js';
 import { Link } from 'react-router-dom';
@@ -21,8 +16,9 @@ const RequestManagementModule = () => {
     totalPrice: 0,
     totalProfit: 0,
   });
-  const [itemTotals, setItemTotals] = React.useState([]);
   const [voucher, setVoucher] = React.useState([]);
+  const [sideDish, setSideDish] = React.useState(null);
+  const [dish, setDish] = React.useState(null);
 
   const [showAccountingManagementPopup, setShowAccountingManagementPopup] =
     React.useState(false);
@@ -45,11 +41,15 @@ const RequestManagementModule = () => {
   React.useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const [requestData, voucherData] = await Promise.all([
-          getBtnData('request'),
-          getBtnData('voucherPromotion'),
-        ]);
+        const [requestData, voucherData, sideDishesList, item] =
+          await Promise.all([
+            getBtnData('request'),
+            getBtnData('voucherPromotion'),
+            getBtnData('sideDishes'),
+            getBtnData('item'),
+          ]);
         const allRequests = requestData.reduce((accumulator, currentOrder) => {
+          //grab all dishes inside of request put out of it and add in each dish the request's datatime creating a new list of dishes
           const requestsWithDate = currentOrder.request.map((item) => {
             return {
               ...item,
@@ -58,9 +58,10 @@ const RequestManagementModule = () => {
           });
           return [...accumulator, ...requestsWithDate];
         }, []);
-
         setRequestList(allRequests);
         setOriginalRequestList(allRequests);
+        setDish(item);
+        setSideDish(sideDishesList);
         setVoucher(voucherData);
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
@@ -106,9 +107,6 @@ const RequestManagementModule = () => {
 
   // Novo useEffect para calcular o total quando a lista de pedidos mudar
   React.useEffect(() => {
-    if (requestList) {
-      console.log('requestList    ', requestList);
-    }
     totalScore();
   }, [requestList]); // Executa totalScore sempre que requestList mudar
 
@@ -177,10 +175,8 @@ const RequestManagementModule = () => {
 
         if (item.sideDishes && item.sideDishes.length > 0) {
           // Verifica se há acompanhamentos e obtém os custos e lucros
-          const sideDishesResults = await Promise.all(
-            item.sideDishes.map((sidedish) =>
-              fetchSideDishesGlobalCost(sidedish.name, 'sideDishes')
-            )
+          const sideDishesResults = item.sideDishes.map((sidedish) =>
+            fetchSideDishesGlobalCost(sidedish.name)
           );
 
           sideDishesResults.forEach((result) => {
@@ -191,7 +187,7 @@ const RequestManagementModule = () => {
           });
         }
 
-        const mainDishData = await fetchDishesGlobalCost(item.id, item.size);
+        const mainDishData = fetchDishesGlobalCost(item.id, item.size);
 
         // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
         if (mainDishData) {
@@ -224,10 +220,11 @@ const RequestManagementModule = () => {
     return Object.values(productMap);
   };
 
-  const fetchDishesGlobalCost = async (id, size, name) => {
-    console.log('name  ', name);
-    const { costProfitMarginCustomized, costPriceObj } =
-      await getOneItemColleciton('item', id);
+  const fetchDishesGlobalCost = (id, size, name) => {
+    const selectedDish = dish.find((item) => item.id === id);
+
+    const { costProfitMarginCustomized, costPriceObj } = selectedDish;
+
     let currentCostData;
     if (costProfitMarginCustomized && costPriceObj) {
       if (size === '') {
@@ -252,8 +249,13 @@ const RequestManagementModule = () => {
     return undefined;
   };
 
-  const fetchSideDishesGlobalCost = async (name, collectionName) => {
-    const obj = await fetchingByQuery(name, collectionName);
+  const fetchSideDishesGlobalCost = (name) => {
+    const obj = sideDish.find((dish) => dish.name === name);
+
+    if (!obj) {
+      // Retorna valores padrão se o item não for encontrado
+      return { cost: 0, profit: 0 };
+    }
 
     return {
       cost: Number(obj.costPriceObj.cost),
