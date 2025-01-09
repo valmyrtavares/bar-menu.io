@@ -188,7 +188,6 @@ const RequestManagementModule = () => {
         }
 
         const mainDishData = fetchDishesGlobalCost(item.id, item.size);
-
         // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
         if (mainDishData) {
           const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
