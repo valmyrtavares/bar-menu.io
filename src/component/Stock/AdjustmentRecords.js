@@ -29,27 +29,30 @@ const AdjustmentRecords = ({
         </tr>
         {eventLogData &&
           eventLogData.length > 0 &&
-          eventLogData.map((item, index) => (
-            <tr>
-              <td>{item.date}</td>
-              <td>
-                {item.inputProduct} {item.unit}
-              </td>
-              <td>{item?.outputProduct}</td>
-              <td>{item.category}</td>
-              <td>
-                {Number(item.previousVolume).toFixed(2)} {item.unit}
-              </td>
-              <td>R${Number(item.previousCost).toFixed(2)}</td>
-              <td>
-                {' '}
-                {Number(item.ContentsInStock).toFixed(2)}
-                {item.unit}
-              </td>
-              <td>R$ {Number(item.totalResourceInvested).toFixed(2)}</td>
-              <td>{item.package}</td>
-            </tr>
-          ))}
+          eventLogData
+            .slice()
+            .reverse()
+            .map((item, index) => (
+              <tr key={index}>
+                <td>{item.date}</td>
+                <td>
+                  {item.inputProduct} {item.unit}
+                </td>
+                <td>{item?.outputProduct}</td>
+                <td>{item.category}</td>
+                <td>
+                  {Number(item.previousVolume).toFixed(2)} {item.unit}
+                </td>
+                <td>R${Number(item.previousCost).toFixed(2)}</td>
+                <td>
+                  {' '}
+                  {Number(item.ContentsInStock).toFixed(2)}
+                  {item.unit}
+                </td>
+                <td>R$ {Number(item.totalResourceInvested).toFixed(2)}</td>
+                <td>{item.package}</td>
+              </tr>
+            ))}
       </table>
     </div>
   );
