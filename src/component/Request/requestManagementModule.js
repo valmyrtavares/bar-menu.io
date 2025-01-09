@@ -40,6 +40,7 @@ const RequestManagementModule = () => {
 
   React.useEffect(() => {
     const fetchRequest = async () => {
+      console.log('ESTOU AQUI NA DRAGON');
       try {
         const [requestData, voucherData, sideDishesList, item] =
           await Promise.all([
