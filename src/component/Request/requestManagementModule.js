@@ -39,8 +39,10 @@ const RequestManagementModule = () => {
   // USEEFFECTS SESSION  **********************************************************************************
 
   React.useEffect(() => {
+    console.log('ENTREI NO USEEFFECT');
     const fetchRequest = async () => {
-      console.log('ESTOU AQUI NA DRAGON');
+      console.log('ESTOU AQUI NA fetchRequest');
+
       try {
         const [requestData, voucherData, sideDishesList, item] =
           await Promise.all([
@@ -49,16 +51,26 @@ const RequestManagementModule = () => {
             getBtnData('sideDishes'),
             getBtnData('item'),
           ]);
+
         const allRequests = requestData.reduce((accumulator, currentOrder) => {
           //grab all dishes inside of request put out of it and add in each dish the request's datatime creating a new list of dishes
-          const requestsWithDate = currentOrder.request.map((item) => {
-            return {
-              ...item,
-              dateTime: currentOrder.dateTime,
-            };
-          });
+          if (!Array.isArray(currentOrder.request)) {
+            console.warn(
+              'Elemento ignorado, `request` não é um array:',
+              currentOrder
+            );
+            return accumulator; // Ignora itens com estrutura inesperada
+          }
+          const requestsWithDate =
+            currentOrder.request?.map((item) => {
+              return {
+                ...item,
+                dateTime: currentOrder.dateTime,
+              };
+            }) || [];
           return [...accumulator, ...requestsWithDate];
         }, []);
+
         setRequestList(allRequests);
         setOriginalRequestList(allRequests);
         setDish(item);
@@ -179,6 +191,8 @@ const RequestManagementModule = () => {
           const sideDishesResults = item.sideDishes.map((sidedish) =>
             fetchSideDishesGlobalCost(sidedish.name)
           );
+          console.log('sideDishesResults  ', sideDishesResults);
+          debugger;
 
           sideDishesResults.forEach((result) => {
             if (result) {
@@ -223,7 +237,8 @@ const RequestManagementModule = () => {
   const fetchDishesGlobalCost = (id, size, name) => {
     const selectedDish = dish.find((item) => item.id === id);
 
-    const { costProfitMarginCustomized, costPriceObj } = selectedDish;
+    const { costProfitMarginCustomized = {}, costPriceObj = {} } =
+      selectedDish || {};
 
     let currentCostData;
     if (costProfitMarginCustomized && costPriceObj) {
