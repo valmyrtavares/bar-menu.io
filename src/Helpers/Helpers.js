@@ -3,8 +3,12 @@ import { getBtnData } from '../api/Api';
 import { cardClasses } from '@mui/material';
 
 export function firstNameClient(nameCustomer) {
-  let firstName = nameCustomer.split(' ')[0];
-  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  if (nameCustomer) {
+    let firstName = nameCustomer.split(' ')[0];
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  } else {
+    return '';
+  }
 }
 
 export function getFirstFourLetters(inputString, max) {
