@@ -159,51 +159,52 @@ const ExpensesManegementList = () => {
         <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
         <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>
       </div>
-
-      <table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Nome da despesa</th>
-            <th>Valor</th>
-            <th>Data de Vencimento</th>
-            <th>Categoria</th>
-            <th>Data do Pagamento</th>
-            <th>Fornecedor</th>
-            <th>Confirmação</th>
-            <th>Editar</th>
-            <th>Excluir</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expensesList &&
-            expensesList.length > 0 &&
-            expensesList.map((item, index) => (
-              <tr key={index}>
-                <td
-                  className="openPopup"
-                  onClick={() => openLoadSumaryPopup(item)}
-                >
-                  {item.name}
-                </td>
-                <td>{item.value}</td>
-                <td>{item.dueDate}</td>
-                <td>{item.category}</td>
-                <td>{item.paymentDate}</td>
-                <td>{item.provider}</td>
-                <td>{item.confirmation}</td>
-                <td>
-                  <button onClick={() => editContent(item)}>Editar</button>
-                </td>
-                <td>
-                  <button onClick={() => deleteExpenses(item, false)}>
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))}
-          {totalExpensesValue()} {/* Linha de totais no final */}
-        </tbody>
-      </table>
+      <div className={expenses.containerExpensesManegementTable}>
+        <table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Nome da despesa</th>
+              <th>Valor</th>
+              <th>Data de Vencimento</th>
+              <th>Categoria</th>
+              <th>Data do Pagamento</th>
+              <th>Fornecedor</th>
+              <th>Confirmação</th>
+              <th>Editar</th>
+              <th>Excluir</th>
+            </tr>
+          </thead>
+          <tbody>
+            {expensesList &&
+              expensesList.length > 0 &&
+              expensesList.map((item, index) => (
+                <tr key={index}>
+                  <td
+                    className="openPopup"
+                    onClick={() => openLoadSumaryPopup(item)}
+                  >
+                    {item.name}
+                  </td>
+                  <td>{item.value}</td>
+                  <td>{item.dueDate}</td>
+                  <td>{item.category}</td>
+                  <td>{item.paymentDate}</td>
+                  <td>{item.provider}</td>
+                  <td>{item.confirmation}</td>
+                  <td>
+                    <button onClick={() => editContent(item)}>Editar</button>
+                  </td>
+                  <td>
+                    <button onClick={() => deleteExpenses(item, false)}>
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            {totalExpensesValue()} {/* Linha de totais no final */}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

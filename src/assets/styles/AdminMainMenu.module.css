@@ -56,4 +56,5 @@ padding: 3%
     top: 200px;
     max-width: 600px;
     left: 20%;
+    z-index: 30;
 }

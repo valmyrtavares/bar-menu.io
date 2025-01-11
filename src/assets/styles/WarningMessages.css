@@ -4,7 +4,8 @@
     background-color:var(--secundary-bg-color);
     border:solid 3px yellow;
     padding:10px;
-    margin:10px 10%
+    margin:10px 10%;
+    z-index:30;
 }
 .container-warning-message .container-btn{
     display:flex;
