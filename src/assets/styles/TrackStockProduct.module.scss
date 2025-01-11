@@ -3,12 +3,12 @@
 
 .containerTrackStockproduct {
     position: relative;
-
-    table {
-        @include tableadmin
+    .tableStockContainer{
+        @include tableContainer
     }
-}
-
-.containerAdjustmentScreen {
-    position: relative;
+   
+    .containerAdjustmentScreen {
+        position: relative;
+        z-index: 30;
+    }
 }

@@ -67,3 +67,50 @@ $table-text-fontsize:12px;
         }
     
 }
+
+@mixin tableContainer{
+    width: 100%;
+        overflow: auto;
+        max-height: 60vh;
+        /* Permite rolagem horizontal e vertical */
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+    
+            thead {
+                position: sticky;
+                /* Mantém o cabeçalho fixo */
+                top: 0;
+                /* Fixa o cabeçalho na parte superior */
+                z-index: 2;
+                /* Certifica que o cabeçalho estará acima do conteúdo */
+    
+                th {
+                    background-color: $btn-admin-table-color;
+                    font-weight: bold;
+                    text-align: left;
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                }
+            }
+    
+            tbody {
+                tr:nth-child(even) {
+                    background-color: $btn-admin-table-color;
+                    /* Estilo para linhas pares */
+                }
+    
+                tr:hover {
+                    background-color: #e2c11d;
+                    /* Estilo para hover */
+                }
+    
+                td {
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    text-align: left;
+                }
+            }
+        }
+}
