@@ -26,7 +26,7 @@ const RequestList = () => {
   return (
     <div className="container-request-list">
       <Link to="/admin/admin">
-        <Title mainTitle="Adicione um novo prato" />
+        <Title mainTitle="Lista de Pedidos" />
       </Link>
       {requestsDoneList &&
         requestsDoneList.map((item) => (

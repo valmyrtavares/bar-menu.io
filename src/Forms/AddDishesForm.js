@@ -203,7 +203,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       costProfitMarginCustomized.firstPrice &&
       costProfitMarginCustomized.secondPrice
     ) {
-      console.log('costProfitMarginCustomized  ', costProfitMarginCustomized);
       setCustomizedPriceObj({
         firstLabel: costProfitMarginCustomized.firstPrice?.label,
         firstPrice: costProfitMarginCustomized.firstPrice?.price,
@@ -267,7 +266,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         )}
       </div>
       <Link to="/admin/admin">
-        <Title mainTitle={mainTitle ? mainTitle : 'Adicione um novo prato'} />
+        <Title mainTitle={mainTitle ? mainTitle : 'Adicione um prato'} />
       </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input

@@ -191,8 +191,6 @@ const RequestManagementModule = () => {
           const sideDishesResults = item.sideDishes.map((sidedish) =>
             fetchSideDishesGlobalCost(sidedish.name)
           );
-          console.log('sideDishesResults  ', sideDishesResults);
-          debugger;
 
           sideDishesResults.forEach((result) => {
             if (result) {
@@ -306,7 +304,7 @@ const RequestManagementModule = () => {
       )}
       {loadMessage && <Loading />}
       <Link to="/admin/admin">
-        <Title mainTitle="Acompanhamento de Vendas" />
+        <Title mainTitle=" Vendas" />
       </Link>
       <div className="container-date">
         <div>

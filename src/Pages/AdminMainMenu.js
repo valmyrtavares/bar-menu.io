@@ -45,7 +45,7 @@ const AdminMainMenu = ({ children }) => {
             </Link>
 
             <Link to="/admin/editButton/dishes" className=" ">
-              Lista de pratos
+              Edite seus pratos
             </Link>
 
             <Link to="/admin/category" className="  ">
@@ -53,15 +53,15 @@ const AdminMainMenu = ({ children }) => {
             </Link>
 
             <Link to="/admin/editButton/cat" className=" ">
-              Lista de Botões
+              Edite suas categorias
             </Link>
 
             <Link to="/admin/sidedishes" className="  sidedishe">
-              Adicione Acompanhamentos
+              Adicione um novo acompanhamento
             </Link>
 
             <Link to="/admin/editButton/sidedishes" className=" sidedishe">
-              Lista de acompanhamentos
+              Edite seus acompanhamentos
             </Link>
 
             <Link to="/admin/stock" className="  sidedishe">
@@ -89,7 +89,7 @@ const AdminMainMenu = ({ children }) => {
             </Link>
 
             <Link to="/admin/styles" className="">
-              Gerenciando Estilo
+              Gerenciando Estilos
             </Link>
 
             <Link to="/admin/welcome" className="">

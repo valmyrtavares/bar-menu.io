@@ -1,20 +1,22 @@
-import React from "react";
-import Input from "../component/Input";
-import { app, storage } from "../config-firebase/firebase.js";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { setDoc, doc, getFirestore } from "firebase/firestore";
-import { GlobalContext } from "../GlobalContext.js";
-import "../assets/styles/form.css";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import Input from '../component/Input';
+import { app, storage } from '../config-firebase/firebase.js';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { setDoc, doc, getFirestore } from 'firebase/firestore';
+import { GlobalContext } from '../GlobalContext.js';
+import '../assets/styles/form.css';
+import Title from '../component/title.js';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 //import { cardClasses } from "@mui/material";
-import useLocalStorage from "../Hooks/useLocalStorage.js";
+import useLocalStorage from '../Hooks/useLocalStorage.js';
 
 const FormFrontImage = () => {
-  const [url, setUrl] = React.useState("");
-  const [progress, setProgress] = React.useState("");
+  const [url, setUrl] = React.useState('');
+  const [progress, setProgress] = React.useState('');
   const global = React.useContext(GlobalContext);
   const [publicStatement, setPublicStatement] = useLocalStorage(
-    "isToten",
+    'isToten',
     false
   );
 
@@ -29,7 +31,7 @@ const FormFrontImage = () => {
   };
 
   React.useState(() => {
-    console.log("publicStatement   ", publicStatement);
+    console.log('publicStatement   ', publicStatement);
   }, [publicStatement]);
 
   const onfileChange = async (e) => {
@@ -39,7 +41,7 @@ const FormFrontImage = () => {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
-        "state_change",
+        'state_change',
         (snapshot) => {
           const progress = (snapshot.bytesTrans / snapshot.totalBytes) * 100;
           setProgress(progress);
@@ -51,12 +53,12 @@ const FormFrontImage = () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUrl(downloadURL);
           global.setImage(downloadURL);
-          setDoc(doc(db, "frontImage", "oIKq1AHF4cHMkqgOcz1h"), {
+          setDoc(doc(db, 'frontImage', 'oIKq1AHF4cHMkqgOcz1h'), {
             image: downloadURL,
           })
             .then(() => {
-              console.log("Document successfully updated !");
-              navigate("/");
+              console.log('Document successfully updated !');
+              navigate('/');
             })
             .catch((error) => {
               console.log(error);
@@ -67,6 +69,9 @@ const FormFrontImage = () => {
   };
   return (
     <>
+      <Link to="/admin/admin">
+        <Title mainTitle="Adicione sua marca" />
+      </Link>
       <Input
         id="uploadImage"
         label="Upload image"

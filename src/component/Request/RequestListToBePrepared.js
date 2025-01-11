@@ -325,7 +325,7 @@ const RequestListToBePrepared = () => {
   return (
     <div>
       <Link to="/admin/admin">
-        <Title mainTitle="Lista de pedidos a ser preparados" />
+        <Title mainTitle="Cozinha" />
       </Link>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => (

@@ -150,7 +150,7 @@ const ExpensesManegementList = () => {
       )}
       <div className={expenses.titleTable}>
         <Link to="/admin/admin">
-          <Title mainTitle="Lista de Despesas"></Title>
+          <Title mainTitle="Despesas"></Title>
         </Link>
       </div>
 

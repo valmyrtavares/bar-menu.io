@@ -72,7 +72,7 @@ const TrackStockProduct = () => {
         )}
       </div>
       <Link to="/admin/admin">
-        <Title mainTitle="Tela de Estoque" />
+        <Title mainTitle="Estoque" />
       </Link>
       <table striped bordered hover>
         <tr>

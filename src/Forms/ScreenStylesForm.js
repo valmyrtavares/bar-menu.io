@@ -57,7 +57,7 @@ function ScreenStylesForm() {
   return (
     <>
       <Link to="/admin/admin">
-        <Title mainTitle="Formulário de Estílos" />
+        <Title mainTitle="Gerenciando Estilos" />
       </Link>
       <form onSubmit={handleSubmit} className="m-1">
         <Input
