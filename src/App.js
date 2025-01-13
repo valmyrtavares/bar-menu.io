@@ -95,8 +95,8 @@ function App() {
           <Route path="requestlistcheck" element={<RequestList />} />
         </Route>
 
-        {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
+        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
       </Routes>
     </div>
   );
