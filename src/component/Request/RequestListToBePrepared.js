@@ -150,8 +150,6 @@ const RequestListToBePrepared = () => {
   };
 
   const updateIngredientsStock = async (item) => {
-    console.log('item   ', item);
-
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -176,6 +174,15 @@ const RequestListToBePrepared = () => {
           i++
         ) {
           const ingredient = FinalingridientsList[currentItem.size][i];
+          ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
+          ObjPadrao.product = ingredient.name;
+          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
+          const arrayParams = [ObjPadrao];
+          await handleStock(arrayParams, account, dateTime);
+        }
+      } else {
+        for (let i = 0; i < FinalingridientsList.length; i++) {
+          const ingredient = FinalingridientsList[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
