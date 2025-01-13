@@ -349,10 +349,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   };
 
   const handleItemChange = (e) => {
+    debugger;
     const { id, value } = e.target;
 
+    let selectedProduct = {};
+
     if (id === 'product') {
-      const selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
+      selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
 
       setItem((prevForm) => ({
         ...prevForm,
@@ -361,7 +364,18 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           ? selectedProduct.unitOfMeasurement
           : '', // Define a unidade de medida
       }));
+      return;
     } else {
+      debugger;
+      if (id === 'amount' && item.unitOfMeasurement === 'un') {
+        console.log(item.unitOfMeasurement);
+        setItem((prevForm) => ({
+          ...prevForm,
+          [id]: value,
+          volumePerUnit: value,
+        }));
+        return;
+      }
       // Comportamento genérico para outros inputs
       setItem((prevForm) => ({
         ...prevForm,

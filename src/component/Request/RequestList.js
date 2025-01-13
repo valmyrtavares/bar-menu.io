@@ -57,7 +57,7 @@ const RequestList = () => {
             <div>
               {item.request &&
                 item.request.map((dishe, index) => (
-                  <div className="dishes">
+                  <div className="dishes" key={index}>
                     <div>
                       <h3>item {index + 1}</h3>
                       <p>{dishe.name}</p>
