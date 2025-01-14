@@ -131,7 +131,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         ...item,
         totalVolume: item.volumePerUnit * item.amount,
       });
-      console.log('ITEM ', item);
+
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
     }
     console.log('total ', total);
@@ -349,7 +349,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   };
 
   const handleItemChange = (e) => {
-    debugger;
     const { id, value } = e.target;
 
     let selectedProduct = {};
@@ -366,13 +365,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       }));
       return;
     } else {
-      debugger;
       if (id === 'amount' && item.unitOfMeasurement === 'un') {
         console.log(item.unitOfMeasurement);
         setItem((prevForm) => ({
           ...prevForm,
           [id]: value,
-          volumePerUnit: value,
+          volumePerUnit: 1,
         }));
         return;
       }

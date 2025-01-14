@@ -10,6 +10,7 @@
     background-color: var(--secundary-bg-color);
     height: 70vh;
     overflow-y: auto;
+    z-index: 50;
 }
 
 .ContainerAddProviderForm h1 {
