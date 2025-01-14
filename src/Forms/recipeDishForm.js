@@ -43,8 +43,10 @@ const RecipeDish = ({
   React.useEffect(() => {
     console.log('Veja como bem o nossa receita    ', recipe);
     const fetchProduct = async () => {
-      const data = await getBtnData('product');
-      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+      const data = await getBtnData('stock');
+      const sortedData = data.sort((a, b) =>
+        a.product.localeCompare(b.product)
+      );
       setProductList(sortedData);
     };
 
@@ -166,7 +168,7 @@ const RecipeDish = ({
                 productList.length > 0 &&
                 productList.map((item, index) => (
                   <option key={index} value={index}>
-                    {item.name}-{item.unitOfMeasurement}
+                    {item.product}-{item.unitOfMeasurement}
                   </option>
                 ))}
             </select>
@@ -235,7 +237,7 @@ const RecipeDish = ({
                   productList.length > 0 &&
                   productList.map((item, index) => (
                     <option key={index} value={index}>
-                      {item.name}-{item.unitOfMeasurement}
+                      {item.product}-{item.unitOfMeasurement}
                     </option>
                   ))}
               </select>

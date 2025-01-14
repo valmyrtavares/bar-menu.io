@@ -43,11 +43,11 @@ function AddSideDishesForm({
     }
 
     const fetchProduct = async () => {
-      const dataProduct = await getBtnData('product');
+      const dataProduct = await getBtnData('stock');
 
       if (dataProduct && dataProduct.length > 0) {
         const sortedData = dataProduct.sort((a, b) =>
-          a.name.localeCompare(b.name)
+          a.product.localeCompare(b.product)
         );
         setProductList(sortedData);
       }
@@ -151,8 +151,8 @@ function AddSideDishesForm({
           <option value="">Selecione o acompanhamento</option>
           {productList &&
             productList.map((category, index) => (
-              <option key={index} value={category.name}>
-                {category.name}
+              <option key={index} value={category.product}>
+                {category.product}
               </option>
             ))}
         </select>
