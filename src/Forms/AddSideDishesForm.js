@@ -13,9 +13,9 @@ import {
   doc,
 } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
-import '../assets/styles/form.css';
-import { updateItemsSideDishes } from '../api/Api';
-//import { cardClasses } from "@mui/material";
+
+import style from '../assets/styles/AddSideDishesForm.module.scss';
+import { updateItemsSideDishes, getBtnData } from '../api/Api';
 
 function AddSideDishesForm({
   dataObj,
@@ -32,6 +32,7 @@ function AddSideDishesForm({
   const [hideShowCheckForm, setHideShowCheckForm] = React.useState(true);
   const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
     React.useState(false);
+  const [productList, setProductList] = React.useState(null);
 
   //FIRESTORE
   const db = getFirestore(app);
@@ -40,6 +41,18 @@ function AddSideDishesForm({
     if (dataObj) {
       setHideShowCheckForm(false);
     }
+
+    const fetchProduct = async () => {
+      const dataProduct = await getBtnData('product');
+
+      if (dataProduct && dataProduct.length > 0) {
+        const sortedData = dataProduct.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setProductList(sortedData);
+      }
+    };
+    fetchProduct();
   }, []);
 
   const addPriceObj = (obj) => {
@@ -61,6 +74,8 @@ function AddSideDishesForm({
 
   function handleChange({ target }) {
     const { id, value } = target;
+    console.log('VALUE   ', value);
+    debugger;
     setForm({
       ...form,
       [id]: value,
@@ -106,7 +121,7 @@ function AddSideDishesForm({
   }, [dataObj]);
 
   return (
-    <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
+    <div className={style.EditAddPopupContainer}>
       {showPopupCostAndPrice && (
         <PriceAndExpenseBuilder
           setShowPopupCostAndPrice={setShowPopupCostAndPrice}
@@ -122,26 +137,25 @@ function AddSideDishesForm({
           mainTitle={
             EditSideDishesTitle
               ? EditSideDishesTitle
-              : 'Adicione um novo Acompanhamento'
+              : 'Adicione um novo Acompanhamento123'
           }
         />
       </Link>
       <form onSubmit={handleSubmit} className="m-1">
-        <Input
+        <select
           id="sideDishes"
-          required
-          label="Acompanhamento"
           value={form.sideDishes}
-          type="text"
           onChange={handleChange}
-        />
-        {/* <Input
-          id="price"
-          label="Valor"
-          value={form.price}
-          type="text"
-          onChange={handleChange}
-        /> */}
+          required
+        >
+          <option value="">Selecione o acompanhamento</option>
+          {productList &&
+            productList.map((category, index) => (
+              <option key={index} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+        </select>
         <button
           className="btn btn-success"
           type="button"
@@ -151,29 +165,31 @@ function AddSideDishesForm({
         </button>
         <div className="sidedishes-btn-container ">
           <button className="btn btn-primary">Enviar</button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={updateItemsSideDishes}
-          >
-            Atualizar pratos
-          </button>
         </div>
       </form>{' '}
-      {hideShowCheckForm && (
-        <div className="form-check my-1">
-          <input
-            className="form-check-input"
-            id="carrossel"
-            type="checkbox"
-            checked={noNavigate}
-            onChange={changeUrl}
-          />
-          <label className="form-check-label">
-            Mantenha clicado se não quiser mudar de tela
-          </label>
-        </div>
-      )}
+      <div className={style.outform}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={updateItemsSideDishes}
+        >
+          Atualizar pratos
+        </button>
+        {hideShowCheckForm && (
+          <div className="form-check my-1">
+            <input
+              className="form-check-input"
+              id="carrossel"
+              type="checkbox"
+              checked={noNavigate}
+              onChange={changeUrl}
+            />
+            <label className={style.formLabel}>
+              Mantenha clicado se não quiser mudar de tela
+            </label>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

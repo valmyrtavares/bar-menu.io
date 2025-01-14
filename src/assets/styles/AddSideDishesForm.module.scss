@@ -1,0 +1,31 @@
+@import "./adminStyleReuse.module.scss";
+
+.EditAddPopupContainer{
+    form{
+        padding: 3%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;    
+        justify-items: center;
+        gap: 10px;
+        border: solid;
+        button{
+        @include btnAdmin
+        }
+        select{
+            width: 100%;
+            height: 56px;
+        }
+    }
+    .outform{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        justify-items: center;
+        gap: 10px;
+            button {
+                @include btnAdmin
+            }
+            .formLabel{
+                font-size: 16px;
+            }
+    }
+}

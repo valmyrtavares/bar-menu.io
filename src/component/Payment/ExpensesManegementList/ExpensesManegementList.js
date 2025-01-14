@@ -30,7 +30,11 @@ const ExpensesManegementList = () => {
   React.useEffect(() => {
     const fetchCustomer = async () => {
       const data = await getBtnData('outgoing');
-      setExpensesList(data);
+      const sortedData = data.sort(
+        (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
+      );
+
+      setExpensesList(sortedData);
     };
     fetchCustomer();
   }, []);
@@ -38,8 +42,10 @@ const ExpensesManegementList = () => {
   React.useEffect(() => {
     const fetchCustomer = async () => {
       const data = await getBtnData('outgoing');
-      console.log('Data  ', data);
-      setExpensesList(data);
+      const sortedData = data.sort(
+        (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
+      );
+      setExpensesList(sortedData);
     };
     fetchCustomer();
   }, [refreshData]);
