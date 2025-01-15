@@ -186,17 +186,24 @@ const ExpensesManegementList = () => {
               expensesList.map((item, index) => (
                 <tr key={index}>
                   <td
+                    Title={item.name}
                     className="openPopup"
                     onClick={() => openLoadSumaryPopup(item)}
                   >
-                    {item.name}
+                    {item.name?.length > 10
+                      ? `${item.name.slice(0, 10)}...`
+                      : item.name}
                   </td>
-                  <td>{item.value}</td>
+                  <td>{Number(item.value).toFixed(2)}</td>
                   <td>{item.dueDate}</td>
                   <td>{item.category}</td>
                   <td>{item.paymentDate}</td>
-                  <td>{item.provider}</td>
-                  <td>{item.confirmation}</td>
+                  <td title={item.provider}>
+                    {item.provider?.length > 10
+                      ? `${item.provider.slice(0, 10)}...`
+                      : item.paymentDate}
+                  </td>
+                  <td>{Number(item.confirmation).toFixed(2)}</td>
                   <td>
                     <button onClick={() => editContent(item)}>Editar</button>
                   </td>
