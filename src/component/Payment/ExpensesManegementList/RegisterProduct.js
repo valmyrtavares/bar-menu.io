@@ -2,17 +2,26 @@ import React, { useEffect } from 'react';
 import Input from '../../Input';
 import product from '../../../assets/styles/RegisterProduct.module.css';
 import CloseBtn from '../../closeBtn';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../../config-firebase/firebase';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+} from 'firebase/firestore';
+import { app } from '../../../config-firebase/firebase.js';
 import { getBtnData, deleteData } from '../../../api/Api';
 
 const RegisterProvider = ({ setShowPopup }) => {
   const [form, setForm] = React.useState({
     name: '',
+    minimumAmount: '',
     unitOfMeasurement: '',
   });
   const [listProvider, setListProvider] = React.useState(null);
   const [refreshScreen, setRefreshScreen] = React.useState(false);
+  const [editForm, setEditForm] = React.useState(false);
+  const [id, setId] = React.useState(null);
 
   const db = getFirestore(app);
 
@@ -29,6 +38,16 @@ const RegisterProvider = ({ setShowPopup }) => {
   const deleteItem = (item) => {
     deleteData('product', item.id);
     setRefreshScreen((prev) => !prev);
+  };
+
+  const EditItem = (item) => {
+    setEditForm(true);
+    setId(item.id);
+    setForm({
+      name: item.name,
+      minimumAmount: item.minimumAmount,
+      unitOfMeasurement: item.unitOfMeasurement,
+    });
   };
 
   const fetchProvider = async () => {
@@ -48,7 +67,9 @@ const RegisterProvider = ({ setShowPopup }) => {
         <thead>
           <tr>
             <th>Produto</th>
+            <th>Volume mínimo</th>
             <th>Unidade de medida</th>
+            <th>Editar</th>
             <th>Excluir</th>
           </tr>
         </thead>
@@ -58,7 +79,9 @@ const RegisterProvider = ({ setShowPopup }) => {
             listProvider.map((requestItem, index) => (
               <tr key={index}>
                 <td>{requestItem.name}</td>
+                <td>{requestItem.minimumAmount || 0}</td>
                 <td>{requestItem.unitOfMeasurement}</td>
+                <td onClick={() => EditItem(requestItem)}>Editar</td>
                 <td onClick={() => deleteItem(requestItem)}>X</td>
               </tr>
             ))}
@@ -70,13 +93,32 @@ const RegisterProvider = ({ setShowPopup }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    addDoc(collection(db, 'product'), form).then(() => {
-      setRefreshScreen((prev) => !prev);
-      setForm({
-        name: '',
-        unitOfMeasurement: '',
+    if (editForm) {
+      const documentRef = doc(db, 'product', id);
+      setDoc(documentRef, form)
+        .then(() => {
+          console.log('Document successfully updated !');
+          fetchProvider();
+          setEditForm(false);
+        })
+        .catch((error) => {
+          console.error('Error updating document:', error);
+        });
+      return;
+    }
+
+    addDoc(collection(db, 'product'), form)
+      .then(() => {
+        setRefreshScreen((prev) => !prev);
+        setForm({
+          name: '',
+          unitOfMeasurement: '',
+          minimumAmount: '',
+        });
+      })
+      .catch((error) => {
+        console.error('Error adding document:', error);
       });
-    });
   };
 
   const handleChange = (e) => {
@@ -105,6 +147,16 @@ const RegisterProvider = ({ setShowPopup }) => {
             type="text"
             onChange={handleChange}
           />
+
+          <Input
+            id="minimumAmount"
+            autoComplete="off"
+            required
+            label="Volume mínimo"
+            value={form.minimumAmount}
+            type="text"
+            onChange={handleChange}
+          />
           <div className="select-form">
             <label></label>
             <select
@@ -126,7 +178,9 @@ const RegisterProvider = ({ setShowPopup }) => {
           </div>
         </div>
         <div className={product.containerBtn}>
-          <button className={product.btn}>Enviar</button>
+          <button className={product.btn}>
+            {editForm ? 'Mandar alterações' : 'Enviar'}
+          </button>
         </div>
       </form>
       {listProvider && renderTableItem()}
