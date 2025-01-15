@@ -6,6 +6,10 @@ import {
   getFirestore,
   collection,
   addDoc,
+  query,
+  where,
+  getDocs,
+  updateDoc,
   setDoc,
   doc,
 } from 'firebase/firestore';
@@ -22,6 +26,7 @@ const RegisterProvider = ({ setShowPopup }) => {
   const [refreshScreen, setRefreshScreen] = React.useState(false);
   const [editForm, setEditForm] = React.useState(false);
   const [id, setId] = React.useState(null);
+  const [oldName, setOldName] = React.useState('');
 
   const db = getFirestore(app);
 
@@ -43,6 +48,7 @@ const RegisterProvider = ({ setShowPopup }) => {
   const EditItem = (item) => {
     setEditForm(true);
     setId(item.id);
+    setOldName(item.name);
     setForm({
       name: item.name,
       minimumAmount: item.minimumAmount,
@@ -90,16 +96,88 @@ const RegisterProvider = ({ setShowPopup }) => {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (editForm) {
       const documentRef = doc(db, 'product', id);
-      setDoc(documentRef, form)
+
+      // Limpar o objeto `form` para remover valores `undefined`
+      const cleanedForm = {};
+      for (const key in form) {
+        if (form[key] !== undefined && form[key] !== null) {
+          cleanedForm[key] = form[key];
+        }
+      }
+
+      const stockQuery = query(
+        collection(db, 'stock'),
+        where('product', '==', oldName)
+      );
+
+      const stockSnapshot = await getDocs(stockQuery);
+
+      if (!stockSnapshot.empty) {
+        for (const docSnap of stockSnapshot.docs) {
+          const stockRef = doc(db, 'stock', docSnap.id);
+          const stockData = docSnap.data();
+
+          const updatedData = {
+            ...stockData,
+            product: form.name,
+            unitOfMeasurement: form.unitOfMeasurement,
+          };
+
+          // Adicionar `minimumAmount` somente se tiver um valor válido
+          if (form.minimumAmount !== undefined && form.minimumAmount !== null) {
+            updatedData.minimumAmount = form.minimumAmount;
+          }
+
+          await updateDoc(stockRef, updatedData);
+          console.log(`SideDishes item updated successfully: ${docSnap.id}`);
+        }
+      }
+
+      const sideDishesQuery = query(
+        collection(db, 'sideDishes'),
+        where('sideDishes', '==', oldName)
+      );
+      const sideDishesSnapshot = await getDocs(sideDishesQuery);
+
+      if (!sideDishesSnapshot.empty) {
+        for (const docSnap of sideDishesSnapshot.docs) {
+          const sideDishesRef = doc(db, 'sideDishes', docSnap.id);
+          const sideDishesData = docSnap.data();
+
+          const updateData = {
+            ...sideDishesData,
+            sideDishes: form.name,
+            unitOfMeasurement: form.unitOfMeasurement,
+          };
+
+          if (
+            form.unitOfMeasurement !== undefined &&
+            form.unitOfMeasurement !== null
+          ) {
+            updateData.unitOfMeasurement = form.minimumAmount;
+          }
+
+          // Atualizar os campos em `sideDishes`
+          await updateDoc(sideDishesRef, updateData);
+          console.log(`Stock item updated successfully: ${docSnap.id}`);
+        }
+      }
+
+      await setDoc(documentRef, cleanedForm)
         .then(() => {
           console.log('Document successfully updated !');
           fetchProvider();
           setEditForm(false);
+          setForm({
+            name: '',
+            minimumAmount: '',
+            unitOfMeasurement: '',
+          });
         })
         .catch((error) => {
           console.error('Error updating document:', error);
