@@ -50,7 +50,6 @@ const RegisterProvider = ({ setShowPopup }) => {
 
   const deleteItem = (item, permissionToExclude = false) => {
     setProductSelectedToExclude(item);
-    debugger;
     setWarningMsg(true);
     if (permissionToExclude) {
       deleteData('product', item.id);
@@ -72,7 +71,6 @@ const RegisterProvider = ({ setShowPopup }) => {
 
   const fetchProvider = async () => {
     const data = await getBtnData('product');
-    console.log('DATA ', data);
     const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
     if (sortedData && sortedData.length > 0) {
       setListProvider(sortedData);
@@ -237,13 +235,15 @@ const RegisterProvider = ({ setShowPopup }) => {
   return (
     <div className={product.ContainerAddProviderForm}>
       <CloseBtn setClose={setShowPopup} />
-      {warningMsg && (
-        <WarningMessage
-          setWarningMsg={setWarningMsg}
-          message={`Você está prestes a excluir ${productSelectedToExclude.name}`}
-          sendRequestToKitchen={keepDeleting}
-        />
-      )}
+      <div className={product.containerWaringMessage}>
+        {warningMsg && (
+          <WarningMessage
+            setWarningMsg={setWarningMsg}
+            message={`Você está prestes a excluir ${productSelectedToExclude.name}`}
+            sendRequestToKitchen={keepDeleting}
+          />
+        )}
+      </div>
       <h1>Adicione um novo Produto</h1>
 
       <form onSubmit={handleSubmit} className="m-1">

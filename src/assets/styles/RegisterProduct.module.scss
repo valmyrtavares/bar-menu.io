@@ -8,11 +8,16 @@
     background-color: $bg-admin-default;
     display: block !important;
     padding: 16px;
-    max-width: 1100px;
-   
+    max-width: 1100px;   
     height: 85vh;
     overflow-y: auto;
     z-index: 50;
+    .containerWaringMessage{
+        position: fixed;
+        top:200px;
+        left:20%;
+        z-index: 65;
+    }
     h1 {
         font-family: var(--title-font) !important;
         color: $admin-title-color;
