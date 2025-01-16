@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase.js';
 import { getBtnData, deleteData } from '../../../api/Api';
+import WarningMessage from '../../WarningMessages.js';
 
 const RegisterProvider = ({ setShowPopup }) => {
   const [form, setForm] = React.useState({
@@ -27,6 +28,9 @@ const RegisterProvider = ({ setShowPopup }) => {
   const [editForm, setEditForm] = React.useState(false);
   const [id, setId] = React.useState(null);
   const [oldName, setOldName] = React.useState('');
+  const [warningMsg, setWarningMsg] = React.useState(false);
+  const [productSelectedToExclude, setProductSelectedToExclude] =
+    React.useState(null);
 
   const db = getFirestore(app);
 
@@ -40,9 +44,19 @@ const RegisterProvider = ({ setShowPopup }) => {
     renderTableItem();
   }, [refreshScreen]);
 
-  const deleteItem = (item) => {
-    deleteData('product', item.id);
-    setRefreshScreen((prev) => !prev);
+  const keepDeleting = () => {
+    deleteItem(productSelectedToExclude, true);
+  };
+
+  const deleteItem = (item, permissionToExclude = false) => {
+    setProductSelectedToExclude(item);
+    debugger;
+    setWarningMsg(true);
+    if (permissionToExclude) {
+      deleteData('product', item.id);
+      setRefreshScreen((prev) => !prev);
+      setWarningMsg(false);
+    }
   };
 
   const EditItem = (item) => {
@@ -211,7 +225,13 @@ const RegisterProvider = ({ setShowPopup }) => {
   return (
     <div className={product.ContainerAddProviderForm}>
       <CloseBtn setClose={setShowPopup} />
-
+      {warningMsg && (
+        <WarningMessage
+          setWarningMsg={setWarningMsg}
+          message={`Você está prestes a excluir ${productSelectedToExclude.name}`}
+          sendRequestToKitchen={keepDeleting}
+        />
+      )}
       <h1>Adicione um novo Produto</h1>
 
       <form onSubmit={handleSubmit} className="m-1">
