@@ -25,6 +25,7 @@ function AddSideDishesForm({
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     price: 0,
+    portionUsed: '',
     sideDishes: '',
     costPriceObj: {},
   });
@@ -74,8 +75,6 @@ function AddSideDishesForm({
 
   function handleChange({ target }) {
     const { id, value } = target;
-    console.log('VALUE   ', value);
-    debugger;
     setForm({
       ...form,
       [id]: value,
@@ -156,6 +155,14 @@ function AddSideDishesForm({
               </option>
             ))}
         </select>
+        <input
+          id="portionUsed"
+          required
+          placeholder="Volume da porçao"
+          value={form.portionUsed}
+          type="text"
+          onChange={handleChange}
+        />
         <button
           className="btn btn-success"
           type="button"

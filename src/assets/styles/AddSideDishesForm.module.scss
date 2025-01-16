@@ -11,7 +11,7 @@
         button{
         @include btnAdmin
         }
-        select{
+        select, input{
             width: 100%;
             height: 56px;
         }
