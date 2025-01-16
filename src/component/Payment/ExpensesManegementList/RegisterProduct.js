@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
-import product from '../../../assets/styles/RegisterProduct.module.css';
+import product from '../../../assets/styles/RegisterProduct.module.scss';
 import CloseBtn from '../../closeBtn';
 import {
   getFirestore,
@@ -83,30 +83,42 @@ const RegisterProvider = ({ setShowPopup }) => {
     if (listProvider && listProvider.length > 0) {
     }
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Volume mínimo</th>
-            <th>Unidade de medida</th>
-            <th>Editar</th>
-            <th>Excluir</th>
-          </tr>
-        </thead>
-        <tbody>
-          {listProvider &&
-            listProvider.length > 0 &&
-            listProvider.map((requestItem, index) => (
-              <tr key={index}>
-                <td>{requestItem.name}</td>
-                <td>{requestItem.minimumAmount || 0}</td>
-                <td>{requestItem.unitOfMeasurement}</td>
-                <td onClick={() => EditItem(requestItem)}>Editar</td>
-                <td onClick={() => deleteItem(requestItem)}>X</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <div className={product.containerProductRegisterTable}>
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Volume mínimo</th>
+              <th>Unidade de medida</th>
+              <th>Editar</th>
+              <th>Excluir</th>
+            </tr>
+          </thead>
+          <tbody>
+            {listProvider &&
+              listProvider.length > 0 &&
+              listProvider.map((requestItem, index) => (
+                <tr key={index}>
+                  <td>{requestItem.name}</td>
+                  <td>{requestItem.minimumAmount || 0}</td>
+                  <td>{requestItem.unitOfMeasurement}</td>
+                  <td
+                    className={product.edit}
+                    onClick={() => EditItem(requestItem)}
+                  >
+                    Editar
+                  </td>
+                  <td
+                    className={product.exclude}
+                    onClick={() => deleteItem(requestItem)}
+                  >
+                    X
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
 
