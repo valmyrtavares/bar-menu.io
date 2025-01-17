@@ -157,7 +157,6 @@ const RequestManagementModule = () => {
     let amount = 0;
     let profit = 0;
     let cost = 0;
-
     if (requestList && requestList.length > 0) {
       requestList.forEach((item) => {
         if (item && item.totalSum && item.repetitions) {
@@ -200,7 +199,11 @@ const RequestManagementModule = () => {
           });
         }
 
-        const mainDishData = fetchDishesGlobalCost(item.id, item.size);
+        const mainDishData = fetchDishesGlobalCost(
+          item.id,
+          item.size,
+          item.name
+        );
         // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
         if (mainDishData) {
           const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
@@ -215,15 +218,17 @@ const RequestManagementModule = () => {
         if (productMap[name]) {
           productMap[name].repetitions += 1;
           productMap[name].totalSum += FinalMainprice;
-          productMap[name].cost += sideDishesCost; // Acumula o cost
-          productMap[name].profit += sideDishesProfit; // Acumula o profit
+          productMap[name].cost += isNaN(sideDishesCost) ? 0 : sideDishesCost; // Acumula o cost
+          productMap[name].profit += isNaN(sideDishesProfit)
+            ? 0
+            : sideDishesProfit; // Acumula o profit
         } else {
           productMap[name] = {
             name: name,
             repetitions: 1,
             totalSum: FinalMainprice,
-            cost: sideDishesCost, // Inicia com o valor calculado
-            profit: sideDishesProfit, // Inicia com o valor calculado
+            cost: isNaN(sideDishesCost) ? 0 : sideDishesCost, // Inicia com o valor calculado
+            profit: isNaN(sideDishesProfit) ? 0 : sideDishesProfit, // Inicia com o valor calculado
           };
         }
       }
@@ -233,8 +238,14 @@ const RequestManagementModule = () => {
   };
 
   const fetchDishesGlobalCost = (id, size, name) => {
-    const selectedDish = dish.find((item) => item.id === id);
-
+    let selectedDish = dish.find((item) => item.id === id);
+    // Se não encontrado, tenta pelo título (name)
+    if (!selectedDish) {
+      selectedDish = dish.find((item) => {
+        // Ignora diferenças de maiúsculas/minúsculas e remove espaços extras
+        return item.title.trim().toLowerCase() === name.trim().toLowerCase();
+      });
+    }
     const { costProfitMarginCustomized = {}, costPriceObj = {} } =
       selectedDish || {};
 
