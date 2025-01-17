@@ -23,7 +23,6 @@ const RecipeDish = ({
   const fieldFocus = React.useRef();
   React.useEffect(() => {
     if (recipe) {
-      console.log('Como fica a receita    ', recipe);
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
         recipe.Explanation = '';
         recipe.FinalingridientsList = [];
@@ -39,8 +38,11 @@ const RecipeDish = ({
   React.useEffect(() => {
     console.log('Veja como bem o nossa receita    ', recipe);
     const fetchProduct = async () => {
-      const data = await getBtnData('product');
-      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+      const data = await getBtnData('stock');
+      const sortedData = data.sort((a, b) =>
+        a.product.localeCompare(b.product)
+      );
+      console.log('Produtos   ', sortedData);
       setProductList(sortedData);
     };
 
@@ -86,7 +88,7 @@ const RecipeDish = ({
 
       setIngridients((prevForm) => ({
         ...prevForm,
-        name: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
+        name: selectedProduct ? selectedProduct.product : '', // Define o nome do produto
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '', // Define a unidade de medida
@@ -152,7 +154,7 @@ const RecipeDish = ({
             <select
               id="name"
               value={productList?.findIndex(
-                (product) => product.name === ingridients.name
+                (product) => product.product === ingridients.name
               )}
               className="select-input"
               onChange={handleChange}
@@ -162,7 +164,7 @@ const RecipeDish = ({
                 productList.length > 0 &&
                 productList.map((item, index) => (
                   <option key={index} value={index}>
-                    {item.name}-{item.unitOfMeasurement}
+                    {`${item.product}-${item.unitOfMeasurement}`}
                   </option>
                 ))}
             </select>
@@ -221,7 +223,7 @@ const RecipeDish = ({
               <select
                 id="name"
                 value={productList?.findIndex(
-                  (product) => product.name === ingridients.name
+                  (product) => product.product === ingridients.name
                 )}
                 className="select-input"
                 onChange={handleChange}
@@ -231,7 +233,7 @@ const RecipeDish = ({
                   productList.length > 0 &&
                   productList.map((item, index) => (
                     <option key={index} value={index}>
-                      {item.name}-{item.unitOfMeasurement}
+                      {`${item.product}-${item.unitOfMeasurement}`}
                     </option>
                   ))}
               </select>
