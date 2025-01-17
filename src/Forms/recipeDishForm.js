@@ -18,7 +18,7 @@ const RecipeDish = ({
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
   const [recipeExplanation, setRecipeExplanation] = React.useState('');
   const [productList, setProductList] = React.useState(null);
-  const [ingredientsSimple, setIngredientsSimple] = React.useState(null);
+  const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
   const [ingredientsBySize, setIngredientsBySize] = React.useState({});
   const fieldFocus = React.useRef();
   React.useEffect(() => {
@@ -37,16 +37,10 @@ const RecipeDish = ({
   }, [recipe]);
 
   React.useEffect(() => {
-    console.log('ingredientsSimple atualizado:', ingredientsSimple);
-  }, [ingredientsSimple]);
-
-  React.useEffect(() => {
     console.log('Veja como bem o nossa receita    ', recipe);
     const fetchProduct = async () => {
-      const data = await getBtnData('stock');
-      const sortedData = data.sort((a, b) =>
-        a.product.localeCompare(b.product)
-      );
+      const data = await getBtnData('product');
+      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
       setProductList(sortedData);
     };
 
@@ -168,7 +162,7 @@ const RecipeDish = ({
                 productList.length > 0 &&
                 productList.map((item, index) => (
                   <option key={index} value={index}>
-                    {item.product}-{item.unitOfMeasurement}
+                    {item.name}-{item.unitOfMeasurement}
                   </option>
                 ))}
             </select>
@@ -237,7 +231,7 @@ const RecipeDish = ({
                   productList.length > 0 &&
                   productList.map((item, index) => (
                     <option key={index} value={index}>
-                      {item.product}-{item.unitOfMeasurement}
+                      {item.name}-{item.unitOfMeasurement}
                     </option>
                   ))}
               </select>
