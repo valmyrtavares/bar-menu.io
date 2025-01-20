@@ -4,7 +4,7 @@ import {
   fetchingByQuery,
   getOneItemColleciton,
 } from '../../api/Api.js';
-import '../../assets/styles/requestManagementModule.css';
+import '../../assets/styles/requestManagementModule.module.scss';
 import Input from '../Input.js';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';

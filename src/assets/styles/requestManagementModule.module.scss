@@ -1,0 +1,45 @@
+@import './adminStyleReuse.module.scss';
+
+.managementRequests{
+   border:solid black 2px;
+  
+   .containerDate{
+       display:flex;
+       justify-content: space-around;
+       align-items: center;
+       input{
+          max-width: 150px;
+      }
+    }
+       .containerRequestManagementTable{
+      @include tableContainer
+   }
+    table {
+       margin-bottom: 50px;
+   }
+}
+
+.score-total p {
+    border: solid 1px black;
+    text-align: center;
+}
+
+.management-requests table {
+    margin-bottom: 50px;
+}
+
+.management-requests .container-date .change-view {
+
+    width: 80%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 20px 10%;
+    font-family: var(--title-font) !important;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--title-font-color);
+    background: var(--btn-color);
+    max-width: 200px;
+    max-height: 50px;
+
+}

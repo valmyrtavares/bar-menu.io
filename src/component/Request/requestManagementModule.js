@@ -1,6 +1,6 @@
 import React from 'react';
 import { getBtnData } from '../../api/Api';
-import '../../assets/styles/requestManagementModule.css';
+import style from '../../assets/styles/requestManagementModule.module.scss';
 import Input from '../../component/Input.js';
 import AccountingManagementPopup from './AccountingManagementPopup';
 import Loading from '../Loading.js';
@@ -305,7 +305,7 @@ const RequestManagementModule = () => {
   };
 
   return (
-    <div className="management-requests">
+    <div className={style.managementRequests}>
       {showAccountingManagementPopup && (
         <AccountingManagementPopup
           dishesRequested={itemSelected}
@@ -317,7 +317,7 @@ const RequestManagementModule = () => {
       <Link to="/admin/admin">
         <Title mainTitle=" Vendas" />
       </Link>
-      <div className="container-date">
+      <div className={style.containerDate}>
         <div>
           <Input
             id="startDate"
@@ -339,53 +339,55 @@ const RequestManagementModule = () => {
           />
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>quantidade</th>
-            <th>valor total</th>
-            <th> Custo</th>
-            <th> Lucro</th>
-            <th>Desconto</th>
-          </tr>
-        </thead>
-        <tbody>
-          {requestList &&
-          requestList.length > 0 &&
-          requestList[0].repetitions ? (
-            requestList.map((item, index) => (
-              <tr key={index} onClick={() => sendAccountManagementData(item)}>
-                <td>{item.name}</td>
-                <td>{item.repetitions}</td>
-                <td>{item.totalSum}</td>
-                <td>{Number(item.cost).toFixed(2)}</td>
-                <td>{Number(item.profit).toFixed(2)}</td>
-                <td colSpan="1"></td>
-              </tr>
-            ))
-          ) : (
+      <div className={style.containerRequestManagementTable}>
+        <table>
+          <thead>
             <tr>
-              <td colSpan="3" className="empty-message">
-                Selecione alguma data válida
-              </td>
+              <th>Nome</th>
+              <th>quantidade</th>
+              <th>valor total</th>
+              <th> Custo</th>
+              <th> Lucro</th>
+              <th>Desconto</th>
             </tr>
-          )}
-          <tr className="score-total">
-            <td>Total</td>
-            <td>{totalParams.amount}</td>
-            <td>
-              {totalParams.discount
-                ? totalParams.totalValue - totalParams.discount
-                : totalParams.totalValue}
-              ,00
-            </td>
-            <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
-            <td>{Number(totalParams.profit || 0).toFixed(2)}</td>
-            <td>{totalParams.discount !== 0 ? totalParams.discount : 0}</td>
-          </tr>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {requestList &&
+            requestList.length > 0 &&
+            requestList[0].repetitions ? (
+              requestList.map((item, index) => (
+                <tr key={index} onClick={() => sendAccountManagementData(item)}>
+                  <td>{item.name}</td>
+                  <td>{item.repetitions}</td>
+                  <td>{item.totalSum}</td>
+                  <td>{Number(item.cost).toFixed(2)}</td>
+                  <td>{Number(item.profit).toFixed(2)}</td>
+                  <td colSpan="1"></td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="empty-message">
+                  Selecione alguma data válida
+                </td>
+              </tr>
+            )}
+            <tr className="score-total">
+              <td>Total</td>
+              <td>{totalParams.amount}</td>
+              <td>
+                {totalParams.discount
+                  ? totalParams.totalValue - totalParams.discount
+                  : totalParams.totalValue}
+                ,00
+              </td>
+              <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
+              <td>{Number(totalParams.profit || 0).toFixed(2)}</td>
+              <td>{totalParams.discount !== 0 ? totalParams.discount : 0}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
