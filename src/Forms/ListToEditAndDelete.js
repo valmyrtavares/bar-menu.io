@@ -31,9 +31,16 @@ const EditFormButton = () => {
           getBtnData('item'),
           getBtnData('sideDishes'),
         ]);
-        setMenuButton(data);
-        setDishes(dataItem);
-        setSideDishes(sideDishes);
+        const sortedDataItem = dataItem.sort((a, b) =>
+          a.title.localeCompare(b.title)
+        );
+        const sortedData = data.sort((a, b) => a.title.localeCompare(b.title));
+        const sortedSideDishes = sideDishes.sort((a, b) =>
+          a.sideDishes.localeCompare(b.sideDishes)
+        );
+        setMenuButton(sortedData);
+        setDishes(sortedDataItem);
+        setSideDishes(sortedSideDishes);
       } catch (error) {
         console.error('Error fetching data', error);
       }
