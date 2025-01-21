@@ -72,6 +72,10 @@ const AdminMainMenu = ({ children }) => {
               Lista de Clientes
             </Link>
 
+            <Link to="/admin/managementRecipes" className=" sidedishe">
+              Receitas
+            </Link>
+
             <Link to="/admin/request" className="  sidedishe">
               Vendas
             </Link>
