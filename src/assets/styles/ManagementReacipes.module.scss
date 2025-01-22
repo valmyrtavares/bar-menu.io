@@ -1,0 +1,25 @@
+.containerManagementRecipes{
+    h1{
+        margin-bottom: 100px;
+    }
+    .mainContainer{
+        select{
+            height: 40px;
+            border-radius: 10px;
+        }
+        display: grid;
+        grid-template-columns:  1fr 2fr;
+        gap:10px;
+        ul{display:flex;
+            flex-wrap:wrap;
+            gap:5px;
+            li{
+                max-width: 200px;
+                font-size:12px;
+                input{
+                    margin-right:5px;
+                }
+            }
+        }
+    }
+}

@@ -1,12 +1,19 @@
 import React from 'react';
 import style from '../../assets/styles/ManagementReacipes.module.scss';
 import { getBtnData } from '../../api/Api';
+import WarningMessage from '../WarningMessages';
+import { doc, updateDoc, getFirestore } from 'firebase/firestore';
+import { app } from '../../config-firebase/firebase';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
   const [stock, setStock] = React.useState([]);
   const [productSelected, setProductSelected] = React.useState('');
   const [displayedRecipes, setDisplayedRecipes] = React.useState([]);
+  const [selectedRecipes, setSelectedRecipes] = React.useState([]);
+  const [showWarningMessage, setShowWarningMessage] = React.useState(false);
+
+  const db = getFirestore(app);
 
   React.useEffect(() => {
     const fetchCollections = async () => {
@@ -15,7 +22,7 @@ const ManagementRecipes = () => {
           getBtnData('stock'),
           getBtnData('item'),
         ]);
-
+        console.log('prato  ', dishes);
         const sortedProductStock = stock.sort((a, b) =>
           a.product.localeCompare(b.product)
         );
@@ -32,6 +39,7 @@ const ManagementRecipes = () => {
   const handleChange = (e) => {
     setDisplayedRecipes([]);
     const productSelected = e.target.value;
+    setProductSelected(e.target.value);
     for (const item of dishes) {
       // Verifica se o item e item.recipe são válidos
       if (item && item.recipe && item.recipe.FinalingridientsList) {
@@ -77,30 +85,101 @@ const ManagementRecipes = () => {
     }
   };
 
+  const handleCheckboxChange = (recipeId) => {
+    setSelectedRecipes(
+      (prevSelected) =>
+        prevSelected.includes(recipeId)
+          ? prevSelected.filter((id) => id !== recipeId) // Remove se já estiver selecionado
+          : [...prevSelected, recipeId] // Adiciona se não estiver
+    );
+  };
+  const DeleteIngredient = (permition) => {
+    setShowWarningMessage(true);
+    if (permition) {
+      setShowWarningMessage(false);
+      console.log('Vai excluir');
+      console.log('Receitas selecionadas:', selectedRecipes);
+      debugger;
+      for (const recipeId of selectedRecipes) {
+        const selectedDish = dishes.filter((item) => item.id === recipeId);
+        if (selectedDish && selectedDish.length > 0) {
+          let { FinalingridientsList } = selectedDish[0].recipe || {};
+          if (Array.isArray(FinalingridientsList)) {
+            FinalingridientsList = FinalingridientsList.filter(
+              (ingredient) => ingredient.name !== productSelected
+            );
+          } else if (typeof FinalingridientsList === 'object') {
+            // Caso seja um objeto com múltiplos arrays
+            Object.keys(FinalingridientsList).forEach((key) => {
+              FinalingridientsList[key] = FinalingridientsList[key].filter(
+                (ingredient) => ingredient.name !== productSelected
+              );
+            });
+          }
+          console.log('Prato selecionado   ', FinalingridientsList);
+          const dishDocRef = doc(db, 'item', recipeId); // Referência ao documento no Firestore
+          updateDoc(dishDocRef, {
+            'recipe.FinalingridientsList': FinalingridientsList,
+          }).then(() => {
+            console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+          });
+        }
+      }
+    } else {
+      console.log('Não vai excluir');
+    }
+    // Aqui você pode fazer algo com as receitas selecionadas
+  };
+
   return (
     <div className={style.containerManagementRecipes}>
+      <div className={style.containerWarningMessage}>
+        {showWarningMessage && (
+          <WarningMessage
+            message={`Você está prestes a excluir o ingrediente ${productSelected} das receitas selecionadas `}
+            setWarningMsg={setShowWarningMessage}
+            sendRequestToKitchen={() => DeleteIngredient(true)}
+          />
+        )}
+      </div>
       <h1>Gerenciamento de Receitas</h1>
-      <select
-        id="productStock"
-        value={productSelected}
-        className="select-input"
-        onChange={handleChange}
-      >
-        <option value="">Selecione um produto</option>
-        {stock?.length > 0 &&
-          stock.map((item, index) => (
-            <option key={index} value={item.product}>
-              {item.product}
-            </option>
-          ))}
-      </select>
-      {displayedRecipes &&
-        displayedRecipes.length > 0 &&
-        displayedRecipes.map((item, index) => (
-          <ul key={index}>
-            <li>{item.name}</li>
-          </ul>
-        ))}
+      <div className={style.mainContainer}>
+        <select
+          id="productStock"
+          value={productSelected}
+          className="select-input"
+          onChange={handleChange}
+        >
+          <option value="">Selecione um ingrediente</option>
+          {stock?.length > 0 &&
+            stock.map((item, index) => (
+              <option key={index} value={item.product}>
+                {item.product}
+              </option>
+            ))}
+        </select>
+        <ul>
+          {displayedRecipes &&
+            displayedRecipes.length > 0 &&
+            displayedRecipes.map((item, index) => (
+              <li key={index}>
+                {' '}
+                <input
+                  type="checkbox"
+                  checked={selectedRecipes.includes(item.id)} // Verifica se está selecionado
+                  onChange={() => handleCheckboxChange(item.id)} // Atualiza seleção
+                />
+                {item.name}
+              </li>
+            ))}
+        </ul>
+        <button
+          onClick={() => DeleteIngredient(false)}
+          disabled={selectedRecipes.length === 0}
+        >
+          Excluir ingredientes selecionados das receitas
+        </button>
+      </div>
     </div>
   );
 };
