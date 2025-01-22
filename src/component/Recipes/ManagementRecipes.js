@@ -6,6 +6,7 @@ const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
   const [stock, setStock] = React.useState([]);
   const [productSelected, setProductSelected] = React.useState('');
+  const [displayedRecipes, setDisplayedRecipes] = React.useState([]);
 
   React.useEffect(() => {
     const fetchCollections = async () => {
@@ -29,9 +30,8 @@ const ManagementRecipes = () => {
   }, []);
 
   const handleChange = (e) => {
+    setDisplayedRecipes([]);
     const productSelected = e.target.value;
-    let RecipeList = [];
-
     for (const item of dishes) {
       // Verifica se o item e item.recipe são válidos
       if (item && item.recipe && item.recipe.FinalingridientsList) {
@@ -45,7 +45,10 @@ const ManagementRecipes = () => {
               name: item.title,
               id: item.id,
             };
-            RecipeList.push(recipeFilled);
+            setDisplayedRecipes((prevRecipes) => [
+              ...prevRecipes,
+              recipeFilled,
+            ]);
           }
         } else if (typeof item.recipe.FinalingridientsList === 'object') {
           // Caso FinalingridientsList seja um objeto contendo múltiplos arrays
@@ -61,16 +64,17 @@ const ManagementRecipes = () => {
                   name: item.title,
                   id: item.id,
                 };
-                RecipeList.push(recipeFilled);
-                break; // Para evitar múltiplas adições para o mesmo item
+                setDisplayedRecipes((prevRecipes) => [
+                  ...prevRecipes,
+                  recipeFilled,
+                ]);
+                break; //Sai do loop corrente Para evitar múltiplas adições para o mesmo item
               }
             }
           }
         }
       }
     }
-
-    console.log('Lista de receitas:', RecipeList);
   };
 
   return (
@@ -90,7 +94,13 @@ const ManagementRecipes = () => {
             </option>
           ))}
       </select>
-      <p>{productSelected}</p>
+      {displayedRecipes &&
+        displayedRecipes.length > 0 &&
+        displayedRecipes.map((item, index) => (
+          <ul key={index}>
+            <li>{item.name}</li>
+          </ul>
+        ))}
     </div>
   );
 };
