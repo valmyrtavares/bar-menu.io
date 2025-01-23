@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const WarningMessage = ({
   message,
+  style,
   customer,
   finalPriceRequest,
   setWarningMsg,
@@ -44,7 +45,7 @@ const WarningMessage = ({
       ) : (
         <div>
           <h1>Parabéns!</h1>
-          <h1>{message}</h1>
+          <h1 style={style}>{message}</h1>
           {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
           <div className="container-btn">
             <button onClick={() => setWarningMsg(false)}>Cancelar</button>
