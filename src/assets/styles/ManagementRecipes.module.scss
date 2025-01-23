@@ -1,0 +1,45 @@
+@import './adminStyleReuse.module.scss';
+
+.containerManagementRecipes{
+    h1{
+        margin-bottom: 100px;
+    }
+    .deleteContainer, .replaceModuleContainer{
+        display: grid;
+        grid-template-columns:  1fr 2fr;
+        gap:10px;
+        .leftSide{
+            display:grid;
+            grid-template-rows: 1 fr 1fr;
+            align-items: start;
+            gap:20px;
+            select{
+                height: 40px;
+                border-radius: 10px;
+            }
+            button{
+                @include btnAdmin;
+                height: 40px;
+            }
+
+        }
+        ul{display:flex;
+            flex-wrap:wrap;
+            gap:5px;
+            li{
+                max-width: 200px;
+                font-size:12px;
+                height: 44px;
+                input{
+                    margin-right:5px;
+                }
+            }
+        }
+    }
+    // .replaceModuleContainer{
+    //     select {
+    //             height: 40px;
+    //             border-radius: 10px;
+    //         }
+    // }
+}

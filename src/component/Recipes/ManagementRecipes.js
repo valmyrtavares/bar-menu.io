@@ -1,5 +1,5 @@
 import React from 'react';
-import style from '../../assets/styles/ManagementReacipes.module.scss';
+import style from '../../assets/styles/ManagementRecipes.module.scss';
 import { getBtnData } from '../../api/Api';
 import WarningMessage from '../WarningMessages';
 import { doc, updateDoc, getFirestore } from 'firebase/firestore';
@@ -38,6 +38,7 @@ const ManagementRecipes = () => {
 
   const handleChange = (e) => {
     setDisplayedRecipes([]);
+
     const productSelected = e.target.value;
     setProductSelected(e.target.value);
     for (const item of dishes) {
@@ -143,21 +144,30 @@ const ManagementRecipes = () => {
         )}
       </div>
       <h1>Gerenciamento de Receitas</h1>
-      <div className={style.mainContainer}>
-        <select
-          id="productStock"
-          value={productSelected}
-          className="select-input"
-          onChange={handleChange}
-        >
-          <option value="">Selecione um ingrediente</option>
-          {stock?.length > 0 &&
-            stock.map((item, index) => (
-              <option key={index} value={item.product}>
-                {item.product}
-              </option>
-            ))}
-        </select>
+      <h3>Use esse modulo para excluir ingredientes dos pratos selecionados</h3>
+      <div className={style.deleteContainer}>
+        <div className={style.leftSide}>
+          <select
+            id="productStock"
+            value={productSelected}
+            className="select-input"
+            onChange={handleChange}
+          >
+            <option value="">Selecione um ingrediente</option>
+            {stock?.length > 0 &&
+              stock.map((item, index) => (
+                <option key={index} value={item.product}>
+                  {item.product}
+                </option>
+              ))}
+          </select>
+          <button
+            onClick={() => DeleteIngredient(false)}
+            disabled={selectedRecipes.length === 0}
+          >
+            Excluir ingredientes
+          </button>
+        </div>
         <ul>
           {displayedRecipes &&
             displayedRecipes.length > 0 &&
@@ -173,12 +183,48 @@ const ManagementRecipes = () => {
               </li>
             ))}
         </ul>
-        <button
-          onClick={() => DeleteIngredient(false)}
-          disabled={selectedRecipes.length === 0}
-        >
-          Excluir ingredientes selecionados das receitas
-        </button>
+      </div>
+      <h3>
+        Use esse módulo para substituir ingredientes dos pratos selecionados
+      </h3>
+      <div className={style.replaceModuleContainer}>
+        <div className={style.leftSide}>
+          <select
+            id="productStock"
+            value={productSelected}
+            className="select-input"
+            onChange={handleChange}
+          >
+            <option value="">Selecione um ingrediente</option>
+            {stock?.length > 0 &&
+              stock.map((item, index) => (
+                <option key={index} value={item.product}>
+                  {item.product}
+                </option>
+              ))}
+          </select>
+          <button
+            onClick={() => DeleteIngredient(false)}
+            disabled={selectedRecipes.length === 0}
+          >
+            Substituir ingredientes
+          </button>
+        </div>
+        <ul>
+          {displayedRecipes &&
+            displayedRecipes.length > 0 &&
+            displayedRecipes.map((item, index) => (
+              <li key={index}>
+                {' '}
+                <input
+                  type="checkbox"
+                  checked={selectedRecipes.includes(item.id)} // Verifica se está selecionado
+                  onChange={() => handleCheckboxChange(item.id)} // Atualiza seleção
+                />
+                {item.name}
+              </li>
+            ))}
+        </ul>
       </div>
     </div>
   );
