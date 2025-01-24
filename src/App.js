@@ -38,6 +38,7 @@ import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 
 import './style.css';
+import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
 function App() {
   const [showHeader, setShowHeader] = React.useState(true);
@@ -93,6 +94,7 @@ function App() {
           <Route path="styles" element={<ScreenStylesForm />} />
           <Route path="welcome" element={<WelcomeSaluteForm />} />
           <Route path="requestlistcheck" element={<RequestList />} />
+          <Route path="managementRecipes" element={<ManagementRecipes />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
