@@ -9,21 +9,21 @@ const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
   const [stock, setStock] = React.useState([]);
   const [productSelectedToDelete, setProductSelectedToDelete] =
-    React.useState('');
+    React.useState(''); //item in the select
   const [productSelectedToReplace, setProductSelectedToReplace] =
-    React.useState('');
-  const [productSelectedToEdit, setProductSelectedToEdit] = React.useState('');
-  const [displayedRecipesToDelete, setDisplayedRecipesToDelete] =
+    React.useState(''); //item in the select
+  const [productSelectedToEdit, setProductSelectedToEdit] = React.useState(''); //item in the select
+  const [displayedRecipesToDelete, setDisplayedRecipesToDelete] = // recipe list to delete one ingredient
     React.useState([]);
   const [selectedRecipesToDelete, setSelectedRecipesToDelete] = React.useState(
     []
-  );
+  ); // list of recipes selected to delete
   const [displayedRecipesToEdit, setDisplayedRecipesToEdit] = React.useState(
     []
-  );
-  const [selectedRecipesToEdit, setSelectedRecipesToEdit] = React.useState([]);
-  const [showWarningMessage, setShowWarningMessage] = React.useState(false);
-  const [ConfirmAction, setConfirmAction] = React.useState(false);
+  ); // recipe list to edit one ingredient
+  const [selectedRecipesToEdit, setSelectedRecipesToEdit] = React.useState([]); // list of recipes selected to edit
+  const [showWarningMessage, setShowWarningMessage] = React.useState(false); // Open modal regarind delete action
+  const [ConfirmAction, setConfirmAction] = React.useState(false); // Open modal regardind confirm edit action
 
   const db = getFirestore(app);
 
@@ -116,29 +116,31 @@ const ManagementRecipes = () => {
     }
   };
 
-  const handleCheckboxChange = (recipeId, listType) => {
+  const handleCheckboxChange = (recipe, listType) => {
     if (listType === 'delete') {
-      setSelectedRecipesToDelete(
-        (prevSelected) =>
-          prevSelected.includes(recipeId)
-            ? prevSelected.filter((id) => id !== recipeId) // Remove se já estiver selecionado
-            : [...prevSelected, recipeId] // Adiciona se não estiver
-      );
+      setSelectedRecipesToDelete((prevSelected) => {
+        // Verifica se o item já está na lista baseado no id
+        const exists = prevSelected.find((item) => item.id === recipe.id);
+        return exists
+          ? prevSelected.filter((item) => item.id !== recipe.id) // Remove se já estiver
+          : [...prevSelected, recipe]; // Adiciona se não estiver
+      });
     } else if (listType === 'edit') {
-      setSelectedRecipesToEdit(
-        (prevSelected) =>
-          prevSelected.includes(recipeId)
-            ? prevSelected.filter((id) => id !== recipeId) // Remove se já estiver selecionado
-            : [...prevSelected, recipeId] // Adiciona se não estiver
-      );
+      setSelectedRecipesToEdit((prevSelected) => {
+        // Verifica se o item já está na lista baseado no id
+        const exists = prevSelected.find((item) => item.id === recipe.id);
+        return exists
+          ? prevSelected.filter((item) => item.id !== recipe.id) // Remove se já estiver
+          : [...prevSelected, recipe]; // Adiciona se não estiver
+      });
     }
   };
   const DeleteIngredient = (permition) => {
     setShowWarningMessage(true);
+
     if (permition) {
-      setShowWarningMessage(false);
       for (const recipeId of selectedRecipesToDelete) {
-        const selectedDish = dishes.filter((item) => item.id === recipeId);
+        const selectedDish = dishes.filter((item) => item.id === recipeId.id);
         if (selectedDish && selectedDish.length > 0) {
           let { FinalingridientsList } = selectedDish[0].recipe || {};
           if (Array.isArray(FinalingridientsList)) {
@@ -153,12 +155,14 @@ const ManagementRecipes = () => {
               );
             });
           }
-          console.log('Prato selecionado   ', FinalingridientsList);
-          const dishDocRef = doc(db, 'item', recipeId); // Referência ao documento no Firestore
+          const dishDocRef = doc(db, 'item', recipeId.id); // Referência ao documento no Firestore
           updateDoc(dishDocRef, {
             'recipe.FinalingridientsList': FinalingridientsList,
           }).then(() => {
             console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+            setShowWarningMessage(false);
+            setDisplayedRecipesToDelete([]);
+            setSelectedRecipesToDelete([]);
           });
         }
       }
@@ -168,60 +172,65 @@ const ManagementRecipes = () => {
     // Aqui você pode fazer algo com as receitas selecionadas
   };
 
-  const EditIngredient = () => {
-    for (const recipeId of selectedRecipesToEdit) {
-      const selectedDish = dishes.filter((item) => item.id === recipeId);
-      if (selectedDish && selectedDish.length > 0) {
-        let { FinalingridientsList } = selectedDish[0].recipe || {};
-        if (!FinalingridientsList) {
-          console.warn(
-            `FinalingridientsList não encontrado para recipeId ${recipeId}`
-          );
-          continue; // Pula para a próxima receita
-        }
-        if (Array.isArray(FinalingridientsList)) {
-          FinalingridientsList = FinalingridientsList.map((ingredient) => {
-            if (ingredient.name === productSelectedToEdit) {
-              return {
-                ...ingredient,
-                name: productSelectedToReplace, // Atualiza o valor do nome
-              };
-            }
-            return ingredient; // Retorna o restante dos ingredientes sem alterações
-          });
-          console.log('RECEITA MODIDICADA   ', FinalingridientsList);
-        } else if (typeof FinalingridientsList === 'object') {
-          // Caso seja um objeto com múltiplos arrays
-          Object.keys(FinalingridientsList).forEach((key) => {
-            FinalingridientsList[key] = FinalingridientsList[key].map(
-              (ingredient) => {
-                if (ingredient.name === productSelectedToEdit) {
-                  return {
-                    ...ingredient,
-                    name: productSelectedToReplace,
-                  };
-                }
-                return ingredient;
+  const EditIngredient = (permition) => {
+    setConfirmAction(true);
+    if (permition) {
+      for (const recipeId of selectedRecipesToEdit) {
+        const selectedDish = dishes.filter((item) => item.id === recipeId.id);
+        if (selectedDish && selectedDish.length > 0) {
+          let { FinalingridientsList } = selectedDish[0].recipe || {};
+          if (!FinalingridientsList) {
+            console.warn(
+              `FinalingridientsList não encontrado para recipeId ${recipeId}`
+            );
+            continue; // Pula para a próxima receita
+          }
+          if (Array.isArray(FinalingridientsList)) {
+            FinalingridientsList = FinalingridientsList.map((ingredient) => {
+              if (ingredient.name === productSelectedToEdit) {
+                return {
+                  ...ingredient,
+                  name: productSelectedToReplace, // Atualiza o valor do nome
+                };
               }
-            );
-          });
-        }
-        console.log('Prato selecionado   ', FinalingridientsList);
+              return ingredient; // Retorna o restante dos ingredientes sem alterações
+            });
+            console.log('RECEITA MODIDICADA   ', FinalingridientsList);
+          } else if (typeof FinalingridientsList === 'object') {
+            // Caso seja um objeto com múltiplos arrays
+            Object.keys(FinalingridientsList).forEach((key) => {
+              FinalingridientsList[key] = FinalingridientsList[key].map(
+                (ingredient) => {
+                  if (ingredient.name === productSelectedToEdit) {
+                    return {
+                      ...ingredient,
+                      name: productSelectedToReplace,
+                    };
+                  }
+                  return ingredient;
+                }
+              );
+            });
+          }
+          console.log('Prato selecionado   ', FinalingridientsList);
 
-        const dishDocRef = doc(db, 'item', recipeId); // Referência ao documento no Firestore
-        updateDoc(dishDocRef, {
-          'recipe.FinalingridientsList': FinalingridientsList,
-        })
-          .then(() => {
-            console.log(`Ingrediente removido com sucesso de ${recipeId}`);
-            setConfirmAction(true);
+          const dishDocRef = doc(db, 'item', recipeId.id); // Referência ao documento no Firestore
+          updateDoc(dishDocRef, {
+            'recipe.FinalingridientsList': FinalingridientsList,
           })
-          .catch((error) => {
-            console.error(
-              `Erro ao atualizar o ingrediente em ${recipeId}: `,
-              error
-            );
-          });
+            .then(() => {
+              console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+              setConfirmAction(false);
+              setSelectedRecipesToEdit([]);
+              setDisplayedRecipesToEdit([]);
+            })
+            .catch((error) => {
+              console.error(
+                `Erro ao atualizar o ingrediente em ${recipeId}: `,
+                error
+              );
+            });
+        }
       }
     }
 
@@ -233,7 +242,7 @@ const ManagementRecipes = () => {
       <div className={style.containerWarningMessage}>
         {showWarningMessage && (
           <WarningMessage
-            message={`Você está prestes a exclui o ingrediente ${productSelectedToDelete} das receitas ${displayedRecipesToDelete
+            message={`Você está prestes a exclui o ingrediente ${productSelectedToDelete} das receitas ${selectedRecipesToDelete
               .map((recipe) => recipe.name)
               .join(', ')
               .replace(/, ([^,]*)$/, ' e $1')}  `}
@@ -249,16 +258,16 @@ const ManagementRecipes = () => {
           displayedRecipesToEdit &&
           displayedRecipesToEdit.length > 0 && (
             <WarningMessage
-              message={`Você substituiu o ingrediente ${productSelectedToEdit} nas receitas ${displayedRecipesToEdit
+              message={`Você está prestes a  substituiu o ingrediente ${productSelectedToEdit}  pelo ingrediente ${productSelectedToReplace}, nas seguites receitas:  ${selectedRecipesToEdit
                 .map((recipe) => recipe.name)
                 .join(', ')
                 .replace(
                   /, ([^,]*)$/,
                   ' e $1'
-                )}, pelo ingrediente ${productSelectedToReplace}`}
+                )}. Lembre-se que somente o ingrediente foi substituido, as porçoes e a unidade de medida do ingrediente como litro ou grama, continuam as mesmas`}
               setWarningMsg={setConfirmAction}
-              sendRequestToKitchen={() => setConfirmAction(true)}
-              style={{ fontSize: '14px' }} // Adiciona o estilo aqui
+              sendRequestToKitchen={() => EditIngredient(true)}
+              style={{ fontSize: '20px' }} // Adiciona o estilo aqui
             />
           )}
       </div>
@@ -295,8 +304,10 @@ const ManagementRecipes = () => {
                 {' '}
                 <input
                   type="checkbox"
-                  checked={selectedRecipesToDelete.includes(item.id)} // Verifica se está selecionado
-                  onChange={() => handleCheckboxChange(item.id, 'delete')} // Atualiza seleção
+                  checked={selectedRecipesToDelete.some(
+                    (selected) => selected.id === item.id
+                  )} // Verifica se está selecionado
+                  onChange={() => handleCheckboxChange(item, 'delete')} // Atualiza seleção
                 />
                 {item.name}
               </li>
@@ -355,8 +366,10 @@ const ManagementRecipes = () => {
                 {' '}
                 <input
                   type="checkbox"
-                  checked={selectedRecipesToEdit.includes(item.id)} // Verifica se está selecionado
-                  onChange={() => handleCheckboxChange(item.id, 'edit')} // Atualiza seleção
+                  checked={selectedRecipesToEdit.some(
+                    (selected) => selected.id === item.id
+                  )} // Verifica se está selecionado
+                  onChange={() => handleCheckboxChange(item, 'edit')} // Atualiza seleção
                 />
                 {item.name}
               </li>
