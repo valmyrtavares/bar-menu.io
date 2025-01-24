@@ -1,5 +1,5 @@
 import React from 'react';
-import admin from '../assets/styles/AdminMainMenu.module.css';
+import admin from '../assets/styles/AdminMainMenu.module.scss';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 
@@ -70,6 +70,9 @@ const AdminMainMenu = ({ children }) => {
 
             <Link to="/admin/customer" className=" sidedishe">
               Lista de Clientes
+            </Link>
+            <Link to="/admin/operationCost" className=" sidedishe">
+              Cadastro de Custo de Operações
             </Link>
 
             <Link to="/admin/managementRecipes" className=" sidedishe">
