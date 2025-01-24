@@ -7,7 +7,7 @@ import StyleProvider from './StyleProvider';
 import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDom.createRoot(document.getElementById('root'));
-//const basename = '/';
+// const basename = '/';
 const basename = '/bar-menu.io';
 
 root.render(

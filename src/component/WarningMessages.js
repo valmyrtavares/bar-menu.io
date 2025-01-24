@@ -35,7 +35,7 @@ const WarningMessage = ({
         <div>
           {' '}
           <h1>Quer ganhar um desconto na sua compra? Cadastre-se! </h1>
-          <div className={style.containerBtn}>
+          <div className={styles.containerBtn}>
             <button onClick={() => setDeaingAnonymousCustomer(false)}>
               Cancelar
             </button>
