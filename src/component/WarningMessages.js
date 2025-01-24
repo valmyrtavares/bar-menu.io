@@ -1,5 +1,5 @@
 import React from 'react';
-import '../assets/styles/WarningMessages.css';
+import styles from '../assets/styles/WarningMessages.module.scss';
 import { GlobalContext } from '../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,12 +30,12 @@ const WarningMessage = ({
     navigate('/create-customer');
   };
   return (
-    <div className="container-warning-message">
+    <div className={styles.containerWarningMessage}>
       {dealingAnonymousCusomter ? (
         <div>
           {' '}
           <h1>Quer ganhar um desconto na sua compra? Cadastre-se! </h1>
-          <div className="container-btn">
+          <div className={style.containerBtn}>
             <button onClick={() => setDeaingAnonymousCustomer(false)}>
               Cancelar
             </button>
@@ -47,7 +47,7 @@ const WarningMessage = ({
           <h1>Parabéns!</h1>
           <h1 style={style}>{message}</h1>
           {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
-          <div className="container-btn">
+          <div className={styles.containerBtn}>
             <button onClick={() => setWarningMsg(false)}>Cancelar</button>
             <button onClick={sendRequestToKitchen}>Continuar</button>
           </div>

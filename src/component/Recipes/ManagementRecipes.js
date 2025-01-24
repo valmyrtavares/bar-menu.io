@@ -353,7 +353,10 @@ const ManagementRecipes = () => {
 
           <button
             onClick={() => EditIngredient(false)}
-            disabled={selectedRecipesToEdit.length === 0}
+            disabled={
+              selectedRecipesToEdit.length === 0 ||
+              productSelectedToReplace === ''
+            }
           >
             Substituir ingredientes
           </button>

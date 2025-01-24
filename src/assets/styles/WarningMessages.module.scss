@@ -1,0 +1,29 @@
+
+@import './adminStyleReuse.module.scss';
+
+.containerWarningMessage {
+   background-color: $bg-admin-default;
+    border:solid 3px yellow;
+    padding:10px;
+    margin:10px 10%;    
+    .containerBtn{
+        display:flex;
+         justify-content  : space-around;
+         button{   
+               @include btnAdmin
+              
+         }
+    }
+    p, h1{   
+       width: 80%;
+       border-radius: 10px;
+       padding: 10px 20px;
+       margin: 20px 10%;
+       font-family: $admin-title-fontfamily;
+       font-size: 34px;
+       font-weight: bold;
+       color: $admin-title-color;    
+     
+    }
+}
+
