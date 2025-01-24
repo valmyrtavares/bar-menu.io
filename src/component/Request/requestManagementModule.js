@@ -66,6 +66,7 @@ const RequestManagementModule = () => {
               return {
                 ...item,
                 dateTime: currentOrder.dateTime,
+                paymentMethod: item.paymentMethod,
               };
             }) || [];
           return [...accumulator, ...requestsWithDate];
