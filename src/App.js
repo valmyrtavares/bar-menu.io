@@ -17,6 +17,7 @@ import Login from './Forms/Login/login';
 import Admin from './Pages/FormMenu';
 import AdminMainMenu from './Pages/AdminMainMenu';
 import Protected from './component/Protected';
+import OperationCostRegister from './component/Request/OperationCostRegister';
 import FormFrontImage from './Forms/formFrontImage';
 import ListToEditAndDelete from './Forms/ListToEditAndDelete';
 // import ProtectedUser from "./component/ProtectedUser";
@@ -92,6 +93,7 @@ function App() {
           <Route path="sidedishes" element={<AddSideDishesForm />} />
           <Route path="frontimage" element={<FormFrontImage />} />
           <Route path="styles" element={<ScreenStylesForm />} />
+          <Route path="operationCost" element={<OperationCostRegister />} />
           <Route path="welcome" element={<WelcomeSaluteForm />} />
           <Route path="requestlistcheck" element={<RequestList />} />
           <Route path="managementRecipes" element={<ManagementRecipes />} />
