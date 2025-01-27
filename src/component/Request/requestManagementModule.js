@@ -106,8 +106,7 @@ const RequestManagementModule = () => {
           const statusList = await calculateProductsStatus(
             originalRequestListArray
           );
-
-          console.log('VOUCHER   ', voucher);
+          console.log('statusList   ', statusList);
           const voucherFiltered = filteredRequests(voucher, startDate, endDate);
 
           showDiscountsVoucher(voucherFiltered);
@@ -156,6 +155,7 @@ const RequestManagementModule = () => {
   const totalScore = () => {
     let price = 0;
     let amount = 0;
+    let card = 0;
     let profit = 0;
     let cost = 0;
     if (requestList && requestList.length > 0) {
@@ -164,6 +164,7 @@ const RequestManagementModule = () => {
           price += Number(item.totalSum);
           amount += Number(item.repetitions);
           profit += Number(item.profit);
+          card += Number(item.card);
           cost += Number(item.cost);
         }
       });
@@ -172,22 +173,39 @@ const RequestManagementModule = () => {
     setTotalParams({
       ...totalParams,
       amount: amount,
+      card: card,
       totalValue: price,
       cost: cost,
       profit: profit,
     });
   };
 
+  const calculateTransactionFee = (totalSum, paymentMethod) => {
+    const fees = {
+      debit: 0.025, // 2.5%
+      pix: 0.025, // 2.5%
+      cash: 0, // 0% para dinheiro
+      credite: 0.029, // 2.9%
+      vr: 0.07, // 7% para VR
+    };
+
+    const feeRate = fees[paymentMethod] || 0; // Padrão 0 caso o método não seja encontrado
+    let result = totalSum * feeRate;
+    return result;
+  };
+
   const calculateProductsStatus = async (filteredRequestsSended) => {
     const productMap = {};
+
     setFilterRequests(filteredRequestsSended);
+
     if (filteredRequestsSended && filteredRequestsSended.length > 0) {
       for (const item of filteredRequestsSended) {
         let sideDishesCost = 0;
         let sideDishesProfit = 0;
 
+        // Calcula custos e lucros dos acompanhamentos
         if (item.sideDishes && item.sideDishes.length > 0) {
-          // Verifica se há acompanhamentos e obtém os custos e lucros
           const sideDishesResults = item.sideDishes.map((sidedish) =>
             fetchSideDishesGlobalCost(sidedish.name)
           );
@@ -200,41 +218,49 @@ const RequestManagementModule = () => {
           });
         }
 
+        // Obtém dados do prato principal
         const mainDishData = fetchDishesGlobalCost(
           item.id,
           item.size,
           item.name
         );
-        // Verifique se `mainDishData` existe antes de tentar acessar `cost` e `price`
         if (mainDishData) {
-          const { cost = 0, price = 0 } = mainDishData; // Define valores padrão
+          const { cost = 0, price = 0 } = mainDishData;
           sideDishesCost += Number(cost);
           sideDishesProfit += Number(price) - Number(cost);
         }
 
-        const { name, finalPrice } = item;
+        const { name, finalPrice, paymentMethod } = item;
         const FinalMainprice = Number(finalPrice) || 0;
+
+        // Calcula a taxa do cartão com base no método de pagamento
+        const transactionFee = calculateTransactionFee(
+          FinalMainprice,
+          paymentMethod
+        );
 
         // Verifica se o produto já está no productMap e acumula os valores
         if (productMap[name]) {
           productMap[name].repetitions += 1;
           productMap[name].totalSum += FinalMainprice;
-          productMap[name].cost += isNaN(sideDishesCost) ? 0 : sideDishesCost; // Acumula o cost
-          productMap[name].profit += isNaN(sideDishesProfit)
-            ? 0
-            : sideDishesProfit; // Acumula o profit
+          productMap[name].cost += isNaN(sideDishesCost) ? 0 : sideDishesCost;
+          productMap[name].profit +=
+            FinalMainprice - (transactionFee + sideDishesCost); // Atualiza o lucro
+          productMap[name].card += transactionFee; // Acumula a taxa do cartão
         } else {
           productMap[name] = {
             name: name,
             repetitions: 1,
             totalSum: FinalMainprice,
-            cost: isNaN(sideDishesCost) ? 0 : sideDishesCost, // Inicia com o valor calculado
-            profit: isNaN(sideDishesProfit) ? 0 : sideDishesProfit, // Inicia com o valor calculado
+            cost: isNaN(sideDishesCost) ? 0 : sideDishesCost,
+            profit: FinalMainprice - (transactionFee + sideDishesCost), // Calcula o lucro inicial
+            card: transactionFee, // Inicia com a taxa do cartão
           };
         }
       }
     }
-    console.log('productMap   ', productMap);
+
+    console.log('productMap:', productMap);
     return Object.values(productMap);
   };
 
@@ -347,6 +373,7 @@ const RequestManagementModule = () => {
               <th>Nome</th>
               <th>quantidade</th>
               <th>valor total</th>
+              <th>Cartão</th>
               <th> Custo</th>
               <th> Lucro</th>
               <th>Desconto</th>
@@ -361,6 +388,7 @@ const RequestManagementModule = () => {
                   <td>{item.name}</td>
                   <td>{item.repetitions}</td>
                   <td>{item.totalSum}</td>
+                  <td>{Number(item.card).toFixed(2)}</td>
                   <td>{Number(item.cost).toFixed(2)}</td>
                   <td>{Number(item.profit).toFixed(2)}</td>
                   <td colSpan="1"></td>
@@ -382,6 +410,7 @@ const RequestManagementModule = () => {
                   : totalParams.totalValue}
                 ,00
               </td>
+              <td>{Number(totalParams.card || 0).toFixed(2)}</td>
               <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
               <td>{Number(totalParams.profit || 0).toFixed(2)}</td>
               <td>{totalParams.discount !== 0 ? totalParams.discount : 0}</td>
