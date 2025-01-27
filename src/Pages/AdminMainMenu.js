@@ -1,6 +1,6 @@
 import React from 'react';
 import admin from '../assets/styles/AdminMainMenu.module.scss';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 
 const AdminMainMenu = ({ children }) => {
@@ -36,78 +36,185 @@ const AdminMainMenu = ({ children }) => {
       <div className={admin.containerAdminMainMenu}>
         <nav>
           <div className={admin.sideMenu}>
-            <Link to="/" className="  sidedishe">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Sair do Administrador
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/item" className="  sidedishe">
+            <NavLink
+              to="/admin/item"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Adcione um prato
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/editButton/dishes" className=" ">
+            <NavLink
+              to="/admin/editButton/dishes"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Edite seus pratos
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/category" className="  ">
+            <NavLink
+              to="/admin/category"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Adicione Botão{' '}
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/editButton/cat" className=" ">
+            <NavLink
+              to="/admin/editButton/cat"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Edite suas categorias
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/sidedishes" className="  sidedishe">
+            <NavLink
+              to="/admin/sidedishes"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Adicione um novo acompanhamento
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/editButton/sidedishes" className=" sidedishe">
+            <NavLink
+              to="/admin/editButton/sidedishes"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Edite seus acompanhamentos
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/stock" className="  sidedishe">
+            <NavLink
+              to="/admin/stock"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Estoque
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/customer" className=" sidedishe">
+            <NavLink
+              to="/admin/customer"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Lista de Clientes
-            </Link>
-            <Link to="/admin/operationCost" className=" sidedishe">
+            </NavLink>
+            <NavLink
+              to="/admin/operationCost"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Cadastro de Custo de Operações
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/managementRecipes" className=" sidedishe">
+            <NavLink
+              to="/admin/managementRecipes"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Receitas
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/request" className="  sidedishe">
+            <NavLink
+              to="/admin/request"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Vendas
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/sell-flow" className="  sidedishe">
+            <NavLink
+              to="/admin/sell-flow"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Fechamento de Caixa
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/frontimage" className=" ">
+            <NavLink
+              to="/admin/frontimage"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Adicione sua marca
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/expenses" className=" ">
+            <NavLink
+              to="/admin/expenses"
+              c
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Despesas
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/styles" className="">
+            <NavLink
+              to="/admin/styles"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Gerenciando Estilos
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/welcome" className="">
+            <NavLink
+              to="/admin/welcome"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Saudação inicial
-            </Link>
+            </NavLink>
 
-            <Link to="/admin/requestlist">Cozinha</Link>
+            <NavLink
+              to="/admin/requestlist"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Cozinha
+            </NavLink>
 
-            <Link to="/admin/requestlistcheck">Lista de Pedidos</Link>
+            <NavLink
+              to="/admin/requestlistcheck"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Lista de Pedidos
+            </NavLink>
 
-            <button onClick={logoutAdmin}>Log out</button>
+            <button
+              onClick={logoutAdmin}
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Log out
+            </button>
           </div>
         </nav>
         <section>

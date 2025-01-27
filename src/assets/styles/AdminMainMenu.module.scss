@@ -8,6 +8,21 @@
         padding: 3%;
         height: 99vh;
         overflow-y: auto;
+        link {
+                color: black;
+                text-decoration: none;
+                transition: color 0.3s;
+        
+                &:hover {
+                    color: gray;
+                }
+            }
+        
+            .active {
+                color: white !important;
+                font-weight: bold;
+                background: #14213dce !important;
+            }
     }
     section {
         background-color: rgb(196, 194, 194);
