@@ -213,7 +213,7 @@ const RequestListToBePrepared = () => {
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {
-      const currentItem = itemsStock[i];
+      let currentItem = itemsStock[i];
 
       // Verifica se o item já existe no banco de dados
       const itemFinded = data?.find(
@@ -262,7 +262,7 @@ const RequestListToBePrepared = () => {
             currentItem.totalVolume
           )
         );
-        console.log('Item atual  ', currentItem);
+        currentItem = cleanObject(currentItem);
 
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
@@ -279,9 +279,21 @@ const RequestListToBePrepared = () => {
             currentItem.totalVolume
           ),
         ];
+        currentItem = cleanObject(currentItem);
         await addDoc(collection(db, 'stock'), currentItem);
       }
     }
+  };
+
+  const cleanObject = (obj) => {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      return Object.fromEntries(
+        Object.entries(obj)
+          .filter(([_, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [key, cleanObject(value)]) // Limpa recursivamente
+      );
+    }
+    return obj; // Retorna o valor se não for objeto
   };
 
   const stockHistoryList = (
