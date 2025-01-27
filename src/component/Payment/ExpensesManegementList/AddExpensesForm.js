@@ -155,34 +155,36 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const renderTableItem = () => {
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Custo por unidade</th>
-            <th>Custo Total</th>
-            <th>Volume</th>
-            <th>Unidade de medida</th>
-            <th>Excluir</th>
-          </tr>
-        </thead>
-        <tbody>
-          {itemArrayList &&
-            itemArrayList.length > 0 &&
-            itemArrayList.map((requestItem, index) => (
-              <tr key={index}>
-                <td>{requestItem.product}</td>
-                <td>{requestItem.amount}</td>
-                <td>{requestItem.CostPerUnit}</td>
-                <td>{requestItem.totalCost}</td>
-                <td>{requestItem.volumePerUnit}</td>
-                <td>{requestItem.unitOfMeasurement}</td>
-                <td onClick={() => deleteItem(index)}>X</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <div className={style.ContainerTableIngredients}>
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Custo por unidade</th>
+              <th>Custo Total</th>
+              <th>Volume</th>
+              <th>Unidade de medida</th>
+              <th>Excluir</th>
+            </tr>
+          </thead>
+          <tbody>
+            {itemArrayList &&
+              itemArrayList.length > 0 &&
+              itemArrayList.map((requestItem, index) => (
+                <tr key={index}>
+                  <td>{requestItem.product}</td>
+                  <td>{requestItem.amount}</td>
+                  <td>{requestItem.CostPerUnit}</td>
+                  <td>{requestItem.totalCost}</td>
+                  <td>{requestItem.volumePerUnit}</td>
+                  <td>{requestItem.unitOfMeasurement}</td>
+                  <td onClick={() => deleteItem(index)}>X</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
 

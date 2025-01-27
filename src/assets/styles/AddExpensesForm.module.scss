@@ -105,6 +105,9 @@
             max-width: 150px;
         }
     }
+    .ContainerTableIngredients{
+        @include tableContainer;
+    }
 }
 
 @media (max-width: 750px) {
