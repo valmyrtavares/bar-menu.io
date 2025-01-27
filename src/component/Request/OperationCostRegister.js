@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getBtnData, deleteData } from '../../api/Api'; // Ajuste o caminho conforme necessário
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase'; // Ajuste o caminho do firebaseConfig conforme necessário
+import style from '../../assets/styles/CostOperations.module.scss';
+import { Link } from 'react-router-dom';
+import Title from '../title';
 
 export default function CostOperations() {
   const db = getFirestore(app);
@@ -52,8 +55,10 @@ export default function CostOperations() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Gerenciar Operações de Custo</h1>
+    <div className={`${style.containerOperationCostRegister} p-4`}>
+      <Link to="/admin/admin">
+        <Title mainTitle="Gerenciar Operações de Custo" />
+      </Link>
 
       {/* Formulário */}
       <form onSubmit={handleSubmit} className="mb-6">
@@ -92,10 +97,7 @@ export default function CostOperations() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
+        <button type="submit" className={style.btn}>
           Enviar
         </button>
       </form>
@@ -105,27 +107,20 @@ export default function CostOperations() {
         <thead>
           <tr>
             <th className="border border-gray-300 px-4 py-2">Tipo</th>
-            <th className="border border-gray-300 px-4 py-2">Valor</th>
-            <th className="border border-gray-300 px-4 py-2">Ações</th>
+            <th className="border border-gray-300 px-4 py-2">
+              Taxa da operação
+            </th>
+            <th className="border border-gray-300 px-4 py-2">
+              Excluir operação
+            </th>
           </tr>
         </thead>
         <tbody>
           {operations.map((operation) => (
             <tr key={operation.id}>
-              <td className="border border-gray-300 px-4 py-2">
-                {operation.typeOfOperation}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {operation.valueOfOperation}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                <button
-                  onClick={() => handleDelete(operation.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                >
-                  X
-                </button>
-              </td>
+              <td>{operation.typeOfOperation}</td>
+              <td>{operation.valueOfOperation}</td>
+              <td onClick={() => handleDelete(operation.id)}>x</td>
             </tr>
           ))}
         </tbody>
