@@ -99,8 +99,8 @@ function App() {
           <Route path="managementRecipes" element={<ManagementRecipes />} />
         </Route>
 
-        {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
+        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
       </Routes>
     </div>
   );
