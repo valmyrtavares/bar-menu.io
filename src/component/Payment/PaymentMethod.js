@@ -1,10 +1,10 @@
-import React from "react";
-import "../../assets/styles/PaymentMethod.css";
-import { cardClasses } from "@mui/material";
+import React from 'react';
+import '../../assets/styles/PaymentMethod.css';
+import { cardClasses } from '@mui/material';
 
 const PaymentMethod = ({ onPaymentMethodChange, item }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    React.useState("cash");
+    React.useState('cash');
 
   const handleChange = (e) => {
     const { value } = e.target;
@@ -21,7 +21,7 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
           value="cash"
           name="options"
           type="radio"
-          checked={selectedPaymentMethod === "cash"} // Define se está selecionado
+          checked={selectedPaymentMethod === 'cash'} // Define se está selecionado
           onChange={handleChange}
         />
         <label className="form-check-label">Dinheiro</label>
@@ -33,7 +33,7 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
           value="credite"
           name="options"
           type="radio"
-          checked={selectedPaymentMethod === "credite"} // Define se está selecionado
+          checked={selectedPaymentMethod === 'credite'} // Define se está selecionado
           onChange={handleChange}
         />
         <label className="form-check-label">Crédito</label>
@@ -45,7 +45,7 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
           value="debit"
           name="options"
           type="radio"
-          checked={selectedPaymentMethod === "debit"}
+          checked={selectedPaymentMethod === 'debit'}
           onChange={handleChange}
         />
         <label className="form-check-label">Débito</label>
@@ -57,7 +57,7 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
           value="pix"
           name="options"
           type="radio"
-          checked={selectedPaymentMethod === "pix"}
+          checked={selectedPaymentMethod === 'pix'}
           onChange={handleChange}
         />
         <label className="form-check-label">Pix</label>
