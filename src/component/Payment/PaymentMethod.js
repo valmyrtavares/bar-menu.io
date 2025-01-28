@@ -62,6 +62,18 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
         />
         <label className="form-check-label">Pix</label>
       </div>
+      <div>
+        <input
+          className="form-check-input"
+          id="vr"
+          value="vr"
+          name="options"
+          type="radio"
+          checked={selectedPaymentMethod === 'vr'}
+          onChange={handleChange}
+        />
+        <label className="form-check-label">VR</label>
+      </div>
     </div>
   );
 };
