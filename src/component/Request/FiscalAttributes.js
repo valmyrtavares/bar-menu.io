@@ -169,6 +169,7 @@ const FiscalAttributes = () => {
     let op = {
       debit: '04',
       credite: '03',
+      vr: '03',
       cash: '01',
       pix: '99',
     };
@@ -178,7 +179,7 @@ const FiscalAttributes = () => {
   const cpfAndCardFlagValidation = () => {
     const typePayment = paymentMethodWay(paymentMethod);
 
-    if (typePayment === '04' || typePayment === '05') {
+    if (typePayment === '04' || typePayment === '03') {
       if (card) {
         setBtnValidation(false);
       } else {
