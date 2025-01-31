@@ -28,6 +28,7 @@ import WelcomeSaluteForm from './Forms/WelcomeSaluteForm';
 import RequestListToBePrepared from './component/Request/RequestListToBePrepared';
 import OrderQueue from './component/orderQueue';
 import RequestList from './component/Request/RequestList';
+import Promotions from './component/Promotions/CreatePromotions';
 import RecipeDish from './Forms/recipeDishForm';
 import CustomerList from './component/Customers/customerList';
 import ExpensesManegementList from './component/Payment/ExpensesManegementList/ExpensesManegementList';
@@ -94,6 +95,7 @@ function App() {
           <Route path="frontimage" element={<FormFrontImage />} />
           <Route path="styles" element={<ScreenStylesForm />} />
           <Route path="operationCost" element={<OperationCostRegister />} />
+          <Route path="promotions" element={<Promotions />} />
           <Route path="welcome" element={<WelcomeSaluteForm />} />
           <Route path="requestlistcheck" element={<RequestList />} />
           <Route path="managementRecipes" element={<ManagementRecipes />} />

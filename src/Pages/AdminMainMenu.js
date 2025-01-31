@@ -188,6 +188,14 @@ const AdminMainMenu = ({ children }) => {
             >
               Saudação inicial
             </NavLink>
+            <NavLink
+              to="/admin/promotions"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Promoções
+            </NavLink>
 
             <NavLink
               to="/admin/requestlist"
