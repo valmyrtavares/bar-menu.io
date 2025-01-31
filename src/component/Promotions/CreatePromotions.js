@@ -174,7 +174,7 @@ const CreatePromotions = () => {
           </select>
         </div>
         <div>
-          <label>Calor Embutido:</label>
+          <label>Valor mínimo da promoção para resgate do desconto:</label>
           <input
             type="text"
             name="minimumValue"

@@ -26,6 +26,8 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
+import MessagePromotions from '../Promotions/MessagePromotions.js';
+import { debugErrorMap } from 'firebase/auth';
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -41,15 +43,27 @@ const RequestListToBePrepared = () => {
   });
 
   // const { isOpen, toggle } = useModal();
+  const [promotions, setPromotions] = React.useState([]);
+  const [selectedPromotion, setSelectedPromotion] = React.useState('');
+  const [benefitedClient, setBenefitedClient] = React.useState([]);
+  const [messagePromotionPopup, setMessagePromotionPopup] =
+    React.useState(false);
+  const [textPromotion, setTextPromotion] = React.useState('');
+  const [AddPromotion, setAddPromotion] = React.useState(false);
+  const [benefitedClientEdited, setBenefitedClientEdited] = React.useState({});
+  const [operation, setOperation] = React.useState('');
+  const [currentDiscount, setCurrentDiscount] = React.useState(0);
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('request', (data) => {
       let requestList = data.filter((item) => item.orderDelivered == false);
       requestList = requestSorter(requestList);
-      console.log('requestList   ', requestList);
 
       setRequestDoneList(requestList);
     });
+
+    fetchData();
+
     return () => unsubscribe();
   }, []);
 
@@ -58,6 +72,19 @@ const RequestListToBePrepared = () => {
     requestList = requestList.filter((item) => item.orderDelivered == false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
+  };
+
+  const fetchData = async () => {
+    try {
+      const [promotionsData, benefitedClientData] = await Promise.all([
+        getBtnData('Promotions'),
+        getBtnData('BenefitedCustomer'),
+      ]);
+      setPromotions(promotionsData);
+      setBenefitedClient(benefitedClientData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   const handleDeleteRequest = async (id) => {
@@ -325,6 +352,129 @@ const RequestListToBePrepared = () => {
     return stockEventRegistration;
   };
 
+  // disparada quando o usuário seleciona uma promoção
+  const handleSelectChange = async (e, item) => {
+    const currentPromotion = promotions[e.target.value]; // Obtém a promoção selecionada
+    const { title, reusable, rules, discount } = currentPromotion; // Extrai os dados da promoção
+
+    setSelectedPromotion(e.target.value);
+
+    // Objeto para ser enviado pela primeira vez
+    const benefitedClientObj = {
+      name: item.name,
+      idUser: item.idUser,
+      promotionTitle: [title],
+      dateTime: item.dateTime,
+      currentFinalPriceRequest: item.finalPriceRequest,
+      benefitUsed: [],
+    };
+    benefitedClientObj.benefitUsed.push({
+      date: item.dateTime,
+      nomeDaPromocao: title,
+      discount: currentPromotion.discount,
+      listaDeProdutos: item.request.map((req) => req.name),
+    });
+
+    // Verifica se o cliente já foi beneficiado
+    const benefitedClientFinded = benefitedClient.find(
+      (client) => client.idUser === item.idUser
+    );
+    // Se o cliente não foi beneficiado
+    if (!benefitedClientFinded) {
+      setMessagePromotionPopup(true); // Abre o modal
+      setAddPromotion(true); // Habilita o botão de continuar
+      setTextPromotion(
+        `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
+      );
+      setSelectedPromotion(''); // Limpa o select
+      setBenefitedClientEdited(benefitedClientObj); //Guarda o objeto para ser enviado de forma global
+      setOperation('add'); // Define a operação como adição
+      //fetchData(); I'll remove this line cause this data still not updated
+      return;
+    } else if (benefitedClientFinded) {
+      // Se o cliente foi beneficiado
+
+      if (reusable === 'false') {
+        // Se a promoção não é reutilizável
+        const promotionFinded = benefitedClientFinded.promotionTitle.find(
+          (item) => item === title
+        );
+        if (promotionFinded) {
+          setAddPromotion(false);
+          setMessagePromotionPopup(true);
+
+          const purchasedProducts =
+            benefitedClientFinded.benefitUsed.find(
+              (item) => item.nomeDaPromocao === title
+            )?.listaDeProdutos || [];
+
+          setSelectedPromotion('');
+          setTextPromotion(
+            `O cliente ${
+              benefitedClientFinded.name
+            } já usou a promoção ${title} na data ${
+              item.dateTime
+            } na compra dos itens ${purchasedProducts
+              .map((item) => item)
+              .join(', ')}`
+          );
+          return;
+        } else {
+          redeemingBenefits(benefitedClientFinded, item, currentPromotion);
+          return;
+        }
+      }
+      redeemingBenefits(benefitedClientFinded, item, currentPromotion);
+      return;
+    }
+  };
+
+  const redeemingBenefits = (benefitedClientFinded, item, currentPromotion) => {
+    if (
+      !benefitedClientFinded.promotionTitle.includes(currentPromotion.title)
+    ) {
+      benefitedClientFinded.promotionTitle.push(currentPromotion.title);
+    }
+
+    benefitedClientFinded.benefitUsed.push({
+      date: item.dateTime,
+      nomeDaPromocao: currentPromotion.title,
+      discount: currentPromotion.discount,
+      listaDeProdutos: item.request.map((req) => req.name),
+    });
+    setMessagePromotionPopup(true);
+    setAddPromotion(true);
+    setTextPromotion(
+      `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+    );
+    setCurrentDiscount(currentPromotion.discount);
+    setSelectedPromotion('');
+    setOperation('edit');
+    setBenefitedClientEdited(benefitedClientFinded);
+  };
+
+  const addEditBenefitedClient = async (item) => {
+    if (operation === 'add') {
+      const newFinalPriceDescounted =
+        Number(item.finalPriceRequest) -
+        Number(benefitedClientEdited.benefitUsed[0].discount);
+      item.finalPriceRequest = newFinalPriceDescounted;
+      const docRef = await addDoc(
+        collection(db, 'BenefitedCustomer'),
+        benefitedClientEdited
+      );
+      console.log('Document written with ID: ', docRef.id);
+      fetchData();
+    } else if (operation === 'edit') {
+      const newFinalPriceDescounted =
+        Number(item.finalPriceRequest) - Number(currentDiscount);
+      item.finalPriceRequest = newFinalPriceDescounted;
+      const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
+      await updateDoc(docRef, benefitedClientEdited);
+      console.log('Document updated with ID: ', benefitedClientEdited.id);
+    }
+  };
+
   const orderDelivery = (item) => {
     if (item.name === 'anonimo') {
       deleteData('user', item.idUser);
@@ -375,6 +525,22 @@ const RequestListToBePrepared = () => {
                   item={item}
                   onPaymentMethodChange={handlePaymentMethodChange}
                 />
+                <div className={style.promotionSelect}>
+                  <select
+                    name="selectedPromotion"
+                    value={selectedPromotion}
+                    onChange={(e) => handleSelectChange(e, item)}
+                  >
+                    <option value="">Selecione uma promoção </option>
+                    {promotions &&
+                      promotions.length > 0 &&
+                      promotions.map((promotion, index) => (
+                        <option key={index} value={index}>
+                          {promotion.title}
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
               <div className={style.btnStatus}>
                 <button
@@ -389,6 +555,16 @@ const RequestListToBePrepared = () => {
                       msg="Você está prestes a excluir esse pedido"
                       onClose={closeModal}
                       onConfirm={() => handleDeleteRequest(selectedRequestId)}
+                    />
+                  )}
+                </div>
+                <div>
+                  {messagePromotionPopup && (
+                    <MessagePromotions
+                      message={textPromotion}
+                      AddPromotion={AddPromotion}
+                      setClose={setMessagePromotionPopup}
+                      onContinue={() => addEditBenefitedClient(item)}
                     />
                   )}
                 </div>
