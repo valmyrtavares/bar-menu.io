@@ -56,7 +56,7 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('request', (data) => {
-      let requestList = data.filter((item) => item.orderDelivered == false);
+      let requestList = data.filter((item) => item.orderDelivered === false);
       requestList = requestSorter(requestList);
 
       setRequestDoneList(requestList);
@@ -69,7 +69,7 @@ const RequestListToBePrepared = () => {
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData('request');
-    requestList = requestList.filter((item) => item.orderDelivered == false);
+    requestList = requestList.filter((item) => item.orderDelivered === false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
   };
@@ -355,7 +355,7 @@ const RequestListToBePrepared = () => {
   // disparada quando o usuário seleciona uma promoção
   const handleSelectChange = async (e, item) => {
     const currentPromotion = promotions[e.target.value]; // Obtém a promoção selecionada
-    const { title, reusable, rules, discount } = currentPromotion; // Extrai os dados da promoção
+    const { title, reusable, rules, discount, minimumValue } = currentPromotion; // Extrai os dados da promoção
 
     setSelectedPromotion(e.target.value);
 
@@ -383,6 +383,9 @@ const RequestListToBePrepared = () => {
     if (!benefitedClientFinded) {
       setMessagePromotionPopup(true); // Abre o modal
       setAddPromotion(true); // Habilita o botão de continuar
+      if (minimumValue) {
+        acumulativePurcahse(item, benefitedClientObj, currentPromotion);
+      }
       setTextPromotion(
         `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
       );
@@ -458,21 +461,49 @@ const RequestListToBePrepared = () => {
       const newFinalPriceDescounted =
         Number(item.finalPriceRequest) -
         Number(benefitedClientEdited.benefitUsed[0].discount);
-      item.finalPriceRequest = newFinalPriceDescounted;
+      item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      setDoc(doc(db, 'request', item.id), item);
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
         benefitedClientEdited
       );
       console.log('Document written with ID: ', docRef.id);
       fetchData();
+      fetchUserRequests();
     } else if (operation === 'edit') {
       const newFinalPriceDescounted =
         Number(item.finalPriceRequest) - Number(currentDiscount);
-      item.finalPriceRequest = newFinalPriceDescounted;
+      item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      setDoc(doc(db, 'request', item.id), item);
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
       console.log('Document updated with ID: ', benefitedClientEdited.id);
+      fetchData();
+      fetchUserRequests();
     }
+  };
+
+  const acumulativePurcahse = (item, benefitedClientObj, currentPromotion) => {
+    debugger;
+    const { finalPriceRequest } = item;
+    const { minimumValue } = currentPromotion;
+    if (finalPriceRequest >= minimumValue) {
+      benefitedClientObj.benefitUsed.push({
+        date: item.dateTime,
+        nomeDaPromocao: currentPromotion.title,
+        discount: currentPromotion.discount,
+        listaDeProdutos: item.request.map((req) => req.name),
+      });
+      setMessagePromotionPopup(true);
+      setAddPromotion(true);
+      setTextPromotion(
+        `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+      );
+      setSelectedPromotion('');
+      setOperation('add');
+      setBenefitedClientEdited(benefitedClientObj);
+    }
+    console.log('acumulativePurcahse');
   };
 
   const orderDelivery = (item) => {
