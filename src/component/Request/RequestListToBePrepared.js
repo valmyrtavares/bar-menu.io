@@ -80,7 +80,15 @@ const RequestListToBePrepared = () => {
         getBtnData('Promotions'),
         getBtnData('BenefitedCustomer'),
       ]);
-      setPromotions(promotionsData);
+
+      const today = new Date();
+      const promotionsFilter = promotionsData.filter((promotion) => {
+        const startDate = new Date(promotion.startDate);
+        const finalDate = new Date(promotion.finalDate);
+        return today >= startDate && today < finalDate;
+      });
+
+      setPromotions(promotionsFilter);
       setBenefitedClient(benefitedClientData);
     } catch (error) {
       console.error('Error fetching data:', error);
