@@ -26,7 +26,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
-import MessagePromotions from '../Promotions/MessagePromotions.js';
+import MessagePromotions from '../Promotions/MessagePromotions';
 import { debugErrorMap } from 'firebase/auth';
 
 const RequestListToBePrepared = () => {
@@ -392,15 +392,16 @@ const RequestListToBePrepared = () => {
       setMessagePromotionPopup(true); // Abre o modal
       setAddPromotion(true); // Habilita o botão de continuar
       if (minimumValue) {
-        acumulativePurcahse(item, benefitedClientObj, currentPromotion);
+        acumulativePurchase(item, benefitedClientObj, currentPromotion);
+      } else {
+        setTextPromotion(
+          `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
+        );
+        setSelectedPromotion(''); // Limpa o select
+        setBenefitedClientEdited(benefitedClientObj); //Guarda o objeto para ser enviado de forma global
+        setOperation('add'); // Define a operação como adição
+        //fetchData(); I'll remove this line cause this data still not updated
       }
-      setTextPromotion(
-        `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
-      );
-      setSelectedPromotion(''); // Limpa o select
-      setBenefitedClientEdited(benefitedClientObj); //Guarda o objeto para ser enviado de forma global
-      setOperation('add'); // Define a operação como adição
-      //fetchData(); I'll remove this line cause this data still not updated
       return;
     } else if (benefitedClientFinded) {
       // Se o cliente foi beneficiado
@@ -453,6 +454,7 @@ const RequestListToBePrepared = () => {
       discount: currentPromotion.discount,
       listaDeProdutos: item.request.map((req) => req.name),
     });
+
     setMessagePromotionPopup(true);
     setAddPromotion(true);
     setTextPromotion(
@@ -462,11 +464,16 @@ const RequestListToBePrepared = () => {
     setSelectedPromotion('');
     setOperation('edit');
     setBenefitedClientEdited(benefitedClientFinded);
+    if (currentPromotion.minimumValue) {
+      // If the client has a minimum value to use the promotion
+      benefitedClientFinded.score += Number(item.finalPriceRequest); //
+      acumulativePurchase(item, benefitedClientFinded, currentPromotion);
+    }
   };
 
   const addEditBenefitedClient = async (item) => {
     if (operation === 'add') {
-      const newFinalPriceDescounted =
+      const newFinalPriceDescounted = //calculate the new final price with discount
         Number(item.finalPriceRequest) -
         Number(benefitedClientEdited.benefitUsed[0].discount);
       item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
@@ -491,8 +498,7 @@ const RequestListToBePrepared = () => {
     }
   };
 
-  const acumulativePurcahse = (item, benefitedClientObj, currentPromotion) => {
-    debugger;
+  const acumulativePurchase = (item, benefitedClientObj, currentPromotion) => {
     const { finalPriceRequest } = item;
     const { minimumValue } = currentPromotion;
     if (finalPriceRequest >= minimumValue) {
@@ -502,6 +508,7 @@ const RequestListToBePrepared = () => {
         discount: currentPromotion.discount,
         listaDeProdutos: item.request.map((req) => req.name),
       });
+      benefitedClientObj.score = 0;
       setMessagePromotionPopup(true);
       setAddPromotion(true);
       setTextPromotion(
@@ -510,8 +517,45 @@ const RequestListToBePrepared = () => {
       setSelectedPromotion('');
       setOperation('add');
       setBenefitedClientEdited(benefitedClientObj);
+    } else {
+      setMessagePromotionPopup(true);
+      // benefitedClientObj.benefitUsed.push({
+      //   date: item.dateTime,
+      //   nomeDaPromocao: currentPromotion.title,
+      //   discount: currentPromotion.discount,
+      //   acumulativeValue: finalPriceRequest,
+      //   listaDeProdutos: item.request.map((req) => req.name),
+      // });
+      benefitedClientObj.score = Number(finalPriceRequest);
+      setOperation('add');
+      setBenefitedClientEdited(benefitedClientObj);
+      setTextPromotion(
+        `O cliente ${
+          item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
+          item.finalPriceRequest
+        } e o valor mínimo necessário é de ${
+          currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${
+          currentPromotion.minimumValue - finalPriceRequest
+        }. As regras são:${currentPromotion.rules} `
+      );
+      setAddPromotion(false);
+      setSelectedPromotion('');
+      addBenefitedClientWithNoDescount(benefitedClientObj);
+      return;
     }
-    console.log('acumulativePurcahse');
+  };
+
+  const addBenefitedClientWithNoDescount = async (benefitedClientObj) => {
+    //
+    const docRef = await addDoc(
+      collection(db, 'BenefitedCustomer'),
+      benefitedClientObj
+    );
+    console.log('Document written with ID: ', docRef.id);
+    fetchData();
+    fetchUserRequests();
   };
 
   const orderDelivery = (item) => {
