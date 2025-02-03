@@ -32,12 +32,12 @@
 }
 .registration-promotion h4{
     text-align: center;
-    font-size: 35px;
+    font-size: 13px;
     color: var(--title-font-color);
     font-family: var(--title-font) !important;
 }
 .registration-promotion{
-    margin-top: 55px
+    margin-top: 20px
 }
 .registration-promotion button{
     max-width: 200px;

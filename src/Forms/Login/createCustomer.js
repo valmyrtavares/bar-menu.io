@@ -29,7 +29,6 @@ const CreateCustomer = () => {
       phone: '',
       cpf: '',
       birthday: '',
-      email: '',
     });
 
   const [welcome, setWelcome] = React.useState({
@@ -446,23 +445,6 @@ const CreateCustomer = () => {
 
         {error.birthday && <div className="error-form">{error.birthday}</div>}
 
-        <Input
-          id="email"
-          required
-          autoComplete="off"
-          label="Email"
-          value={form.email}
-          type="email"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
-        {showEmailKeyboard && global.isToten && (
-          <TextKeyboard
-            addCharacter={addCharacter}
-            id="email"
-            closeKeyboard={() => closeKeyboard(form.name, 'email')}
-          />
-        )}
         <div className="create-new-customer-btns">
           <button type="submit" className="btn btn-primary">
             Cadastrar
