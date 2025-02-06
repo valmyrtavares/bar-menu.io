@@ -53,6 +53,8 @@ const RequestListToBePrepared = () => {
   const [benefitedClientEdited, setBenefitedClientEdited] = React.useState({});
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
+  //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
+  //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('request', (data) => {
@@ -67,6 +69,19 @@ const RequestListToBePrepared = () => {
     return () => unsubscribe();
   }, []);
 
+  // React.useEffect(() => {
+  //   if (shouldRunEffect) {
+  //     if (newCustomerPromotion !== true) {
+  //       if (newCustomerPromotion) {
+  //         addBenefitedClientWithNoDescount(benefitedClientEdited, 'add');
+  //       } else if (newCustomerPromotion === false) {
+  //         addBenefitedClientWithNoDescount(benefitedClientEdited, 'edit');
+  //       }
+  //       setShouldRunEffect(false); // Resetar para evitar chamadas indesejadas
+  //     }
+  //   }
+  // }, [newCustomerPromotion, shouldRunEffect]);
+
   const fetchUserRequests = async () => {
     let requestList = await getBtnData('request');
     requestList = requestList.filter((item) => item.orderDelivered === false);
@@ -80,7 +95,7 @@ const RequestListToBePrepared = () => {
         getBtnData('Promotions'),
         getBtnData('BenefitedCustomer'),
       ]);
-
+      console.log('promotionsData      ', promotionsData);
       const today = new Date();
       const promotionsFilter = promotionsData.filter((promotion) => {
         const startDate = new Date(promotion.startDate);
@@ -362,11 +377,11 @@ const RequestListToBePrepared = () => {
 
   // disparada quando o usuário seleciona uma promoção
   const handleSelectChange = async (e, item) => {
-    const currentPromotion = promotions[e.target.value]; // Obtém a promoção selecionada
+    const index = Number(e.target.value);
+    const currentPromotion = promotions[index]; // Obtém a promoção selecionada
     const { title, reusable, rules, discount, minimumValue } = currentPromotion; // Extrai os dados da promoção
-
-    setSelectedPromotion(e.target.value);
-
+    debugger;
+    setSelectedPromotion(index);
     // Objeto para ser enviado pela primeira vez
     const benefitedClientObj = {
       name: item.name,
@@ -376,12 +391,12 @@ const RequestListToBePrepared = () => {
       currentFinalPriceRequest: item.finalPriceRequest,
       benefitUsed: [],
     };
-    benefitedClientObj.benefitUsed.push({
-      date: item.dateTime,
-      nomeDaPromocao: title,
-      discount: currentPromotion.discount,
-      listaDeProdutos: item.request.map((req) => req.name),
-    });
+    // benefitedClientObj.benefitUsed.push({
+    //   date: item.dateTime,
+    //   nomeDaPromocao: title,
+    //   discount: currentPromotion.discount,
+    //   listaDeProdutos: item.request.map((req) => req.name),
+    // });
 
     // Verifica se o cliente já foi beneficiado
     const benefitedClientFinded = benefitedClient.find(
@@ -389,6 +404,7 @@ const RequestListToBePrepared = () => {
     );
     // Se o cliente não foi beneficiado
     if (!benefitedClientFinded) {
+      // setNewCustomerPromotion(true);Remove
       setMessagePromotionPopup(true); // Abre o modal
       setAddPromotion(true); // Habilita o botão de continuar
       if (minimumValue) {
@@ -397,15 +413,19 @@ const RequestListToBePrepared = () => {
         setTextPromotion(
           `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
         );
+        benefitedClientObj.benefitUsed.push({
+          date: item.dateTime,
+          nomeDaPromocao: title,
+          discount: currentPromotion.discount,
+          listaDeProdutos: item.request.map((req) => req.name),
+        });
         setSelectedPromotion(''); // Limpa o select
         setBenefitedClientEdited(benefitedClientObj); //Guarda o objeto para ser enviado de forma global
         setOperation('add'); // Define a operação como adição
-        //fetchData(); I'll remove this line cause this data still not updated
       }
       return;
     } else if (benefitedClientFinded) {
       // Se o cliente foi beneficiado
-
       if (reusable === 'false') {
         // Se a promoção não é reutilizável
         const promotionFinded = benefitedClientFinded.promotionTitle.find(
@@ -442,11 +462,11 @@ const RequestListToBePrepared = () => {
   };
 
   const redeemingBenefits = (benefitedClientFinded, item, currentPromotion) => {
-    if (
-      !benefitedClientFinded.promotionTitle.includes(currentPromotion.title)
-    ) {
-      benefitedClientFinded.promotionTitle.push(currentPromotion.title);
+    if (currentPromotion.minimumValue) {
+      acumulativePurchase(item, benefitedClientFinded, currentPromotion);
+      return;
     }
+    setAddPromotion(true); // Habilita o botão de continuar
 
     benefitedClientFinded.benefitUsed.push({
       date: item.dateTime,
@@ -456,7 +476,7 @@ const RequestListToBePrepared = () => {
     });
 
     setMessagePromotionPopup(true);
-    setAddPromotion(true);
+    setAddPromotion(true); // Habilita o botão de continuar
     setTextPromotion(
       `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
     );
@@ -476,7 +496,31 @@ const RequestListToBePrepared = () => {
       const newFinalPriceDescounted = //calculate the new final price with discount
         Number(item.finalPriceRequest) -
         Number(benefitedClientEdited.benefitUsed[0].discount);
-      item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      if (newFinalPriceDescounted < 0) {
+        item.finalPriceRequest = 0; //update the final price in firebase
+      } else {
+        item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      }
+      if (benefitedClientEdited.score) {
+        benefitedClientEdited.score = 0.1;
+      }
+      if (
+        Array.isArray(benefitedClientEdited.benefitUsed) &&
+        benefitedClientEdited.benefitUsed.length > 0 &&
+        Array.isArray(benefitedClientEdited.promotionTitle) &&
+        !benefitedClientEdited.promotionTitle.includes(
+          benefitedClientEdited.benefitUsed[
+            benefitedClientEdited.benefitUsed.length - 1
+          ]?.nomeDaPromocao
+        )
+      ) {
+        benefitedClientEdited.promotionTitle.push(
+          benefitedClientEdited.benefitUsed[
+            benefitedClientEdited.benefitUsed.length - 1
+          ]?.nomeDaPromocao
+        );
+      }
+      //add the promotion title to the list of promotions used by the client
       setDoc(doc(db, 'request', item.id), item);
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
@@ -488,7 +532,34 @@ const RequestListToBePrepared = () => {
     } else if (operation === 'edit') {
       const newFinalPriceDescounted =
         Number(item.finalPriceRequest) - Number(currentDiscount);
-      item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      if (newFinalPriceDescounted < 0) {
+        item.finalPriceRequest = 0; //update the final price in firebase
+      } else {
+        item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+      }
+
+      if (benefitedClientEdited.score) {
+        benefitedClientEdited.score = 0.1;
+      }
+      if (
+        Array.isArray(benefitedClientEdited.benefitUsed) &&
+        benefitedClientEdited.benefitUsed.length > 0 &&
+        Array.isArray(benefitedClientEdited.promotionTitle) &&
+        !benefitedClientEdited.promotionTitle.includes(
+          benefitedClientEdited.benefitUsed[
+            benefitedClientEdited.benefitUsed.length - 1
+          ]?.nomeDaPromocao
+        )
+      ) {
+        benefitedClientEdited.promotionTitle.push(
+          benefitedClientEdited.benefitUsed[
+            benefitedClientEdited.benefitUsed.length - 1
+          ]?.nomeDaPromocao
+        );
+      }
+
+      const NoEmpty = cleanObject(benefitedClientEdited);
+      setBenefitedClientEdited(NoEmpty);
       setDoc(doc(db, 'request', item.id), item);
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
@@ -501,6 +572,59 @@ const RequestListToBePrepared = () => {
   const acumulativePurchase = (item, benefitedClientObj, currentPromotion) => {
     const { finalPriceRequest } = item;
     const { minimumValue } = currentPromotion;
+
+    if (benefitedClientObj.score) {
+      //if the client has a score means he already bought something
+      benefitedClientObj.score += Number(item.finalPriceRequest);
+      if (benefitedClientObj.score >= currentPromotion.minimumValue) {
+        //benefitedClientObj.score = 0.1;
+        setMessagePromotionPopup(true);
+        setAddPromotion(true);
+        setTextPromotion(
+          `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+        );
+        benefitedClientObj.benefitUsed.push({
+          date: item.dateTime,
+          nomeDaPromocao: currentPromotion.title,
+          discount: currentPromotion.discount,
+          listaDeProdutos: item.request.map((req) => req.name),
+        });
+        setSelectedPromotion('');
+        setCurrentDiscount(currentPromotion.discount);
+        setOperation('edit');
+        setBenefitedClientEdited(benefitedClientObj);
+        return;
+      }
+      setMessagePromotionPopup(true);
+      //benefitedClientObj.score += Number(finalPriceRequest);
+      benefitedClientObj.benefitUsed.push({
+        date: item.dateTime,
+        nomeDaPromocao: currentPromotion.title,
+        discount: currentPromotion.discount,
+        listaDeProdutos: item.request.map((req) => req.name),
+      });
+      setBenefitedClientEdited(benefitedClientObj);
+      setTextPromotion(
+        `O cliente ${
+          item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
+          benefitedClientObj.score
+        } e o valor mínimo necessário é de ${
+          currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${
+          currentPromotion.minimumValue - benefitedClientObj.score
+        }. As regras são:${currentPromotion.rules} `
+      );
+      setAddPromotion(false);
+      setSelectedPromotion('');
+      if (benefitedClientObj.benefitUsed.length === 1) {
+        addBenefitedClientWithNoDescount(benefitedClientObj, 'add');
+      } else {
+        addBenefitedClientWithNoDescount(benefitedClientObj, 'edit');
+      }
+      return;
+    }
+
     if (finalPriceRequest >= minimumValue) {
       benefitedClientObj.benefitUsed.push({
         date: item.dateTime,
@@ -508,7 +632,7 @@ const RequestListToBePrepared = () => {
         discount: currentPromotion.discount,
         listaDeProdutos: item.request.map((req) => req.name),
       });
-      benefitedClientObj.score = 0;
+      //benefitedClientObj.score = 0.1;
       setMessagePromotionPopup(true);
       setAddPromotion(true);
       setTextPromotion(
@@ -518,16 +642,16 @@ const RequestListToBePrepared = () => {
       setOperation('add');
       setBenefitedClientEdited(benefitedClientObj);
     } else {
+      benefitedClientObj.benefitUsed.push({
+        date: item.dateTime,
+        nomeDaPromocao: currentPromotion.title,
+        discount: currentPromotion.discount,
+        listaDeProdutos: item.request.map((req) => req.name),
+      });
+
       setMessagePromotionPopup(true);
-      // benefitedClientObj.benefitUsed.push({
-      //   date: item.dateTime,
-      //   nomeDaPromocao: currentPromotion.title,
-      //   discount: currentPromotion.discount,
-      //   acumulativeValue: finalPriceRequest,
-      //   listaDeProdutos: item.request.map((req) => req.name),
-      // });
       benefitedClientObj.score = Number(finalPriceRequest);
-      setOperation('add');
+
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
         `O cliente ${
@@ -542,20 +666,43 @@ const RequestListToBePrepared = () => {
       );
       setAddPromotion(false);
       setSelectedPromotion('');
-      addBenefitedClientWithNoDescount(benefitedClientObj);
+
+      console.log(benefitedClientObj);
+      if (benefitedClientObj.benefitUsed.length === 1) {
+        addBenefitedClientWithNoDescount(benefitedClientObj, 'add');
+      } else {
+        addBenefitedClientWithNoDescount(benefitedClientObj, 'edit');
+      }
+      // setOperation('add');
+
       return;
     }
   };
 
-  const addBenefitedClientWithNoDescount = async (benefitedClientObj) => {
+  const addBenefitedClientWithNoDescount = async (
+    benefitedClientObj,
+    action
+  ) => {
+    //add the client to the benefited list without discount, cause he didn't reach the minimum value
     //
-    const docRef = await addDoc(
-      collection(db, 'BenefitedCustomer'),
-      benefitedClientObj
-    );
-    console.log('Document written with ID: ', docRef.id);
-    fetchData();
-    fetchUserRequests();
+
+    if (action === 'edit') {
+      const docRef = doc(db, 'BenefitedCustomer', benefitedClientObj.id);
+      await updateDoc(docRef, benefitedClientObj);
+      console.log('Document updated with ID: ', benefitedClientObj.id);
+      fetchData();
+      fetchUserRequests();
+      return;
+    }
+    if (action === 'add') {
+      const docRef = await addDoc(
+        collection(db, 'BenefitedCustomer'),
+        benefitedClientObj
+      );
+      console.log('Document written with ID: ', docRef.id);
+      fetchData();
+      fetchUserRequests();
+    }
   };
 
   const orderDelivery = (item) => {
