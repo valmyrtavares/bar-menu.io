@@ -53,6 +53,7 @@ const RequestListToBePrepared = () => {
   const [benefitedClientEdited, setBenefitedClientEdited] = React.useState({});
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
+  const [currentRequest, setCurrentRequest] = React.useState(null);
   //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
   //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
@@ -380,7 +381,8 @@ const RequestListToBePrepared = () => {
     const index = Number(e.target.value);
     const currentPromotion = promotions[index]; // Obtém a promoção selecionada
     const { title, reusable, rules, discount, minimumValue } = currentPromotion; // Extrai os dados da promoção
-    debugger;
+    setCurrentRequest(item);
+
     setSelectedPromotion(index);
     // Objeto para ser enviado pela primeira vez
     const benefitedClientObj = {
@@ -491,15 +493,15 @@ const RequestListToBePrepared = () => {
     }
   };
 
-  const addEditBenefitedClient = async (item) => {
+  const addEditBenefitedClient = async () => {
     if (operation === 'add') {
       const newFinalPriceDescounted = //calculate the new final price with discount
-        Number(item.finalPriceRequest) -
+        Number(currentRequest.finalPriceRequest) -
         Number(benefitedClientEdited.benefitUsed[0].discount);
       if (newFinalPriceDescounted < 0) {
-        item.finalPriceRequest = 0; //update the final price in firebase
+        currentRequest.finalPriceRequest = 0; //update the final price in firebase
       } else {
-        item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
       }
       if (benefitedClientEdited.score) {
         benefitedClientEdited.score = 0.1;
@@ -521,7 +523,7 @@ const RequestListToBePrepared = () => {
         );
       }
       //add the promotion title to the list of promotions used by the client
-      setDoc(doc(db, 'request', item.id), item);
+      setDoc(doc(db, 'request', currentRequest.id), currentRequest);
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
         benefitedClientEdited
@@ -531,11 +533,11 @@ const RequestListToBePrepared = () => {
       fetchUserRequests();
     } else if (operation === 'edit') {
       const newFinalPriceDescounted =
-        Number(item.finalPriceRequest) - Number(currentDiscount);
+        Number(currentRequest.finalPriceRequest) - Number(currentDiscount);
       if (newFinalPriceDescounted < 0) {
-        item.finalPriceRequest = 0; //update the final price in firebase
+        currentRequest.finalPriceRequest = 0; //update the final price in firebase
       } else {
-        item.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
       }
 
       if (benefitedClientEdited.score) {
@@ -560,7 +562,7 @@ const RequestListToBePrepared = () => {
 
       const NoEmpty = cleanObject(benefitedClientEdited);
       setBenefitedClientEdited(NoEmpty);
-      setDoc(doc(db, 'request', item.id), item);
+      setDoc(doc(db, 'request', currentRequest.id), currentRequest);
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
       console.log('Document updated with ID: ', benefitedClientEdited.id);
@@ -794,7 +796,7 @@ const RequestListToBePrepared = () => {
                       message={textPromotion}
                       AddPromotion={AddPromotion}
                       setClose={setMessagePromotionPopup}
-                      onContinue={() => addEditBenefitedClient(item)}
+                      onContinue={addEditBenefitedClient}
                     />
                   )}
                 </div>
