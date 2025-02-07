@@ -54,14 +54,11 @@ const RequestListToBePrepared = () => {
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
   const [currentRequest, setCurrentRequest] = React.useState(null);
-  //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
-  //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('request', (data) => {
       let requestList = data.filter((item) => item.orderDelivered === false);
       requestList = requestSorter(requestList);
-
       setRequestDoneList(requestList);
     });
 
@@ -70,18 +67,23 @@ const RequestListToBePrepared = () => {
     return () => unsubscribe();
   }, []);
 
-  // React.useEffect(() => {
-  //   if (shouldRunEffect) {
-  //     if (newCustomerPromotion !== true) {
-  //       if (newCustomerPromotion) {
-  //         addBenefitedClientWithNoDescount(benefitedClientEdited, 'add');
-  //       } else if (newCustomerPromotion === false) {
-  //         addBenefitedClientWithNoDescount(benefitedClientEdited, 'edit');
-  //       }
-  //       setShouldRunEffect(false); // Resetar para evitar chamadas indesejadas
-  //     }
-  //   }
-  // }, [newCustomerPromotion, shouldRunEffect]);
+  React.useEffect(() => {
+    const grabCustomerInRequest = async () => {
+      for (let i = 0; i < requestsDoneList.length; i++) {
+        const user = await getOneItemColleciton(
+          'user',
+          requestsDoneList[i].idUser
+        );
+
+        if (user.name === 'anonimo') {
+          requestsDoneList[i].promotionSelect = false;
+        } else {
+          requestsDoneList[i].promotionSelect = true;
+        }
+      }
+    };
+    grabCustomerInRequest();
+  }, [requestsDoneList]);
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData('request');
@@ -96,7 +98,6 @@ const RequestListToBePrepared = () => {
         getBtnData('Promotions'),
         getBtnData('BenefitedCustomer'),
       ]);
-      console.log('promotionsData      ', promotionsData);
       const today = new Date();
       const promotionsFilter = promotionsData.filter((promotion) => {
         const startDate = new Date(promotion.startDate);
@@ -669,7 +670,6 @@ const RequestListToBePrepared = () => {
       setAddPromotion(false);
       setSelectedPromotion('');
 
-      console.log(benefitedClientObj);
       if (benefitedClientObj.benefitUsed.length === 1) {
         addBenefitedClientWithNoDescount(benefitedClientObj, 'add');
       } else {
@@ -759,6 +759,7 @@ const RequestListToBePrepared = () => {
                 />
                 <div className={style.promotionSelect}>
                   <select
+                    disabled={item.promotionSelect === false}
                     name="selectedPromotion"
                     value={selectedPromotion}
                     onChange={(e) => handleSelectChange(e, item)}
