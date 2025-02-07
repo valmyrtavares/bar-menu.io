@@ -5,7 +5,7 @@ import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
 import MenuButton from '../component/menuHamburguerButton';
 import RequestModal from '../component/Request/requestModal.js';
 import { Link, useNavigate } from 'react-router-dom';
-import '../assets/styles/mainMenu.css';
+import style from '../assets/styles/mainMenu.module.scss';
 import { common } from '@mui/material/colors';
 import { GlobalContext } from '../GlobalContext';
 import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
@@ -23,9 +23,9 @@ function MainMenu() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (!global.authorizated) {
-      CheckLogin();
-    }
+    // if (!global.authorizated) {
+    //   CheckLogin();
+    // }
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
@@ -103,22 +103,21 @@ function MainMenu() {
 
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         {true && <CarrosselImages />}
-        <div className="container-btn">
-          {nameClient && (
-            <section>
-              <div>
-                <p onClick={logoutCustomer}>
-                  Bem vindo <span>{nameClient}</span>
-                </p>
-              </div>
-              <button>
-                <Link to="/request">Seus Pedidos</Link>
-              </button>
-              <button>
-                <Link to="/orderqueue">Fila de pedidos</Link>
-              </button>
-            </section>
-          )}
+        <div className={style.containerBtn}>
+          <section>
+            <div>
+              <p onClick={logoutCustomer}>
+                Bem vindo <span>nameClient</span>
+              </p>
+            </div>
+            <button>
+              <Link to="/request">Seus Pedidos</Link>
+            </button>
+            <button>
+              <Link to="/orderqueue">Fila de pedidos</Link>
+            </button>
+          </section>
+
           {menuButton &&
             dishes &&
             menuButton.map((item, index) => (

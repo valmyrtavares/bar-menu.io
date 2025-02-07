@@ -1,0 +1,90 @@
+
+@import 'variables.css';
+
+.containerBtn {
+    
+    
+    section{
+        margin:30px 10%;
+        max-width: 80%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        justify-content: center;
+        align-items: center;
+        padding: 22px 27px 10px 22px;
+      
+        div{
+            max-width: 139px;
+            margin: 0 auto;
+            p{
+                color: var(--btn-color);
+                font-weight: 700;
+                font-size: 19px;                  
+                font-family: var(--text-font);
+                margin: 0;
+                text-align: center;
+            }
+        }
+        p, button{                
+                color: var(--btn-color);
+                border: none;
+                font-weight: 700;
+                font-size: 16px;
+                background: var(--bg-color);
+                font-family: var(--text-font);
+                a {
+                    font-size: 19px;
+                    color: var(--font-color);
+                    text-decoration: none;
+                    
+                }
+                
+            }
+    }
+}
+
+@media (max-width: 600px) {
+    
+    .containerBtn{
+        section{
+            div{
+                p{
+                    font-size: 14px;
+                }
+            }
+            button{
+                a{
+                    font-size: 14px;
+                }
+            }
+        }
+   
+    }
+}
+
+
+
+
+
+  
+
+.container-btn section button a{
+      color: var(--font-color);
+      text-decoration: none;
+
+  }
+  .container-btn section p{   
+      font-weight: 700;
+      font-size: 19px;
+      color: var(--font-color);
+      font-family: var(--text-font);
+      margin: 0;
+      text-align: center;
+  }
+  .footer{
+    width: 100%;
+    min-height:70px;
+  }
+
+
+
