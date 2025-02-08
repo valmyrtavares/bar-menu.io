@@ -2,6 +2,7 @@ import React from 'react';
 import styles from '../assets/styles/WarningMessages.module.scss';
 import { GlobalContext } from '../GlobalContext';
 import { useNavigate } from 'react-router-dom';
+import NameForm from '../Forms/Login/NameForm';
 
 const WarningMessage = ({
   message,
@@ -14,6 +15,7 @@ const WarningMessage = ({
 }) => {
   const [dealingAnonymousCusomter, setDeaingAnonymousCustomer] =
     React.useState(false);
+  const [popupName, setPopupName] = React.useState(false);
   const global = React.useContext(GlobalContext);
   const navigate = useNavigate();
 
@@ -23,6 +25,15 @@ const WarningMessage = ({
     }
     console.log('requests', requests);
   }, []);
+
+  const hadleAnonymousCustomer = () => {
+    localStorage.setItem('backorder', JSON.stringify(requests));
+    localStorage.setItem('noFantasyName', JSON.stringify({ id: true }));
+    global.setAuthorizated(false);
+    localStorage.removeItem('userMenu');
+    navigate('/create-customer');
+  };
+
   const newCustomerRegistration = () => {
     localStorage.setItem('backorder', JSON.stringify(requests));
     localStorage.removeItem('userMenu');
@@ -36,9 +47,10 @@ const WarningMessage = ({
           {' '}
           <h1>Quer ganhar um desconto na sua compra? Cadastre-se! </h1>
           <div className={styles.containerBtn}>
-            <button onClick={() => setDeaingAnonymousCustomer(false)}>
+            {/* <button onClick={() => setDeaingAnonymousCustomer(false)}>
               Cancelar
-            </button>
+            </button> */}
+            <button onClick={hadleAnonymousCustomer}>Cancelar</button>
             <button onClick={newCustomerRegistration}>Cadastrar</button>
           </div>
         </div>

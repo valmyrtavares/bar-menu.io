@@ -9,7 +9,9 @@ import style from '../assets/styles/mainMenu.module.scss';
 import { common } from '@mui/material/colors';
 import { GlobalContext } from '../GlobalContext';
 import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import WarningMessage from '../component/WarningMessages';
+import { app } from '../config-firebase/firebase.js';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -21,6 +23,34 @@ function MainMenu() {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   const navigate = useNavigate();
+
+  const db = getFirestore(app);
+
+  React.useEffect(() => {
+    const noCustomer = {
+      name: 'anonimo',
+      phone: '777',
+      birthday: '77',
+      email: 'anonimo@anonimo.com',
+    };
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+      if (currentUserNew) {
+        setNameClient(currentUserNew.name);
+        global.setId(currentUserNew.name);
+      }
+    } else {
+      addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
+        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+        console.log('Document written with ID: ', docRef.id);
+        setNameClient('anonimo');
+        localStorage.setItem(
+          'userMenu',
+          JSON.stringify({ id: docRef.id, name: 'anonimo' })
+        );
+      });
+    }
+  }, []);
 
   React.useEffect(() => {
     // if (!global.authorizated) {
@@ -107,7 +137,7 @@ function MainMenu() {
           <section>
             <div>
               <p onClick={logoutCustomer}>
-                Bem vindo <span>nameClient</span>
+                Bem vindo {nameClient && <span>{nameClient}</span>}
               </p>
             </div>
             <button>
@@ -134,7 +164,7 @@ function MainMenu() {
         </div>
       </div>
       <Link to="/admin/admin">
-        <div className="footer"></div>
+        <div className={style.footer}></div>
       </Link>
     </>
   );
