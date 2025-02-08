@@ -13,12 +13,15 @@ import {
 import { app } from '../../config-firebase/firebase.js';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomizedPrice from './CustomizedPrice.js';
+import { GlobalContext } from '../../GlobalContext';
+import { CheckUser } from '../../Helpers/Helpers.js';
 
 //React variables
 const DishesModal = ({ item, setModal }) => {
   const [totalPrice, setTotalPrice] = React.useState(Number(item.price));
   const [currentUser, setCurrentUser] = React.useState('');
   const [disabledSelect, setDisabledSelect] = React.useState(true);
+  const global = React.useContext(GlobalContext);
   const [form, setForm] = React.useState({
     //this object is regarding  to all dishes inside of request
     name: item.title,
@@ -45,7 +48,6 @@ const DishesModal = ({ item, setModal }) => {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       setCurrentUser(currentUserNew.id);
     }
-    console.log('prato   ', item);
   }, [item]);
 
   //load side dishes on  screen
@@ -118,6 +120,10 @@ const DishesModal = ({ item, setModal }) => {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    console.log('Cliente atual   ', currentUser);
+    // if (!global.authorizated) {
+    //   CheckLogin();
+    // }
     try {
       const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
@@ -157,6 +163,11 @@ const DishesModal = ({ item, setModal }) => {
       console.log(error);
     }
   }
+
+  // async function CheckLogin() {
+  //   const userId = await CheckUser('userMenu');
+  //   navigate(userId);
+  // }
 
   function onPriceChange(item) {
     console.log('O que vem do customize price   ', item);

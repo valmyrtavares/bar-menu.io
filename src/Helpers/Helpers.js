@@ -13,8 +13,6 @@ export function firstNameClient(nameCustomer) {
 
 export function getFirstFourLetters(inputString, max) {
   return inputString ? inputString.slice(0, max) : '';
-
-  console.log('inputString   ', inputString);
 }
 
 export async function CheckUser(check) {
@@ -23,7 +21,7 @@ export async function CheckUser(check) {
     const userList = await getBtnData('user');
     const currentUser = userList.filter((item) => item.id === userMenu.id);
     if (currentUser && currentUser.length > 0 && currentUser[0].name) {
-      return '/';
+      return '/'; // return to main screen
     } else {
       localStorage.removeItem(check);
       return '/admin/check-customer-nologr';

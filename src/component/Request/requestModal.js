@@ -197,6 +197,17 @@ const RequestModal = () => {
     return formattedDateTime;
   };
 
+  const cleanObject = (obj) => {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      return Object.fromEntries(
+        Object.entries(obj)
+          .filter(([_, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [key, cleanObject(value)]) // Limpa recursivamente
+      );
+    }
+    return obj; // Retorna o valor se não for objeto
+  };
+
   //send request with finel price
   const addRequestUser = async (id) => {
     if (id) {
@@ -216,7 +227,8 @@ const RequestModal = () => {
       //global.setUserNewRequest(userNewRequest);
 
       if (userNewRequest) {
-        addDoc(collection(db, 'request'), userNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        const cleanedUserNewRequest = cleanObject(userNewRequest);
+        addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
 
         const userDocRef = doc(db, 'user', id);
         await updateDoc(userDocRef, {
@@ -227,7 +239,6 @@ const RequestModal = () => {
   };
 
   const duplicateDish = async (index) => {
-    console.log('OBJETO DE USUÁRIO   ', userData);
     // Cria uma cópia do array original
     const updatedRequest = [...userData.request];
 
