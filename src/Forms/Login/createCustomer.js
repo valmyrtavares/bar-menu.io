@@ -84,9 +84,9 @@ const CreateCustomer = () => {
   const requestDiscount = () => {
     if (localStorage.hasOwnProperty('backorder')) {
       setPopupName(false);
-      if (localStorage.hasOwnProperty('noFantasyName')) {
-        setPopupName(true);
-      }
+      // if (localStorage.hasOwnProperty('noFantasyName')) {
+      //   setPopupName(true);
+      // }
     }
   };
 
@@ -174,7 +174,7 @@ const CreateCustomer = () => {
         });
       })
       .then(() => {
-        navigate('/');
+        navigate('/request');
       })
       .catch((error) => {
         console.log(error);

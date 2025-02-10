@@ -78,6 +78,7 @@ function MainMenu() {
         localStorage.removeItem('userMenu');
         global.setAuthorizated(false);
         CheckLogin();
+        navigate('/admin/admin');
       }
       setLogoutAdminPopup(true);
     }
@@ -137,14 +138,14 @@ function MainMenu() {
           <section>
             <div>
               <p onClick={logoutCustomer}>
-                Bem vindo {nameClient && <span>{nameClient}</span>}
+                Bem Vindo {nameClient && <span>{nameClient}</span>}
               </p>
             </div>
             <button>
               <Link to="/request">Seus Pedidos</Link>
             </button>
             <button>
-              <Link to="/orderqueue">Fila de pedidos</Link>
+              <Link to="/orderqueue">Fila de Pedidos</Link>
             </button>
           </section>
 

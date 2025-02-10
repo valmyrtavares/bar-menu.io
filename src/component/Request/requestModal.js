@@ -18,6 +18,7 @@ import {
   getBtnData,
 } from '../../api/Api.js';
 import WarningMessages from '../WarningMessages';
+import PromotionsRegisterMessages from '../Messages/PromotionsRegisterMessages';
 import PrintRequestCustomer from './PrintRequestCustomer';
 import { GlobalContext } from '../../GlobalContext';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
@@ -164,22 +165,35 @@ const RequestModal = () => {
     }
   };
 
-  const sendRequestToKitchen = () => {
-    if (!warningMsg) {
-      setWarningMsg(true);
+  const sendRequestToKitchen = (item) => {
+    if (!userData.fantasyName) {
+      debugger;
+      navigate('/admin/check-customer-nolog');
+      localStorage.setItem('backorder', JSON.stringify(userData?.request));
     } else {
       addRequestUser(currentUser);
-      if (isToten) {
-        setTotenMessage(true);
-        setTimeout(() => {
-          setTotenMessage(false);
-          localStorage.removeItem('userMenu');
-          navigate('/create-customer');
-        }, 5000);
-      } else {
-        navigate('/orderqueue');
-      }
+      navigate('/orderqueue');
     }
+    // if (customer?.fantasyName){
+
+    //}
+    //  if (!warningMsg) {
+    //    setWarningMsg(true);
+    //    localStorage.removeItem('fantasyName');
+    //  } else {
+    //    addRequestUser(currentUser);
+    //    if (isToten) {
+    //      setTotenMessage(true);
+    //      setTimeout(() => {
+    //        setTotenMessage(false);
+    //        localStorage.removeItem('userMenu');
+    //        localStorage.removeItem('backorder');
+    //        navigate('/');
+    //      }, 5000);
+    //    } else {
+    //      navigate('/orderqueue');
+    //    }
+    //  }
   };
 
   const takeDataTime = () => {
@@ -286,9 +300,9 @@ const RequestModal = () => {
       </div>
 
       {warningMsg && (
-        <WarningMessages
+        <PromotionsRegisterMessages
           message="Agora você pode ir ao caixa "
-          customer={userData?.name}
+          customer={userData}
           finalPriceRequest={finalPriceRequest}
           sendRequestToKitchen={sendRequestToKitchen}
           setWarningMsg={setWarningMsg}
@@ -329,7 +343,7 @@ const RequestModal = () => {
         <button
           disabled={disabledBtn}
           className="send-request"
-          onClick={sendRequestToKitchen}
+          onClick={() => sendRequestToKitchen(item)}
         >
           Finalizar
         </button>

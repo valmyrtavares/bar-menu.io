@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.71094e52.css",
-    "main.js": "/static/js/main.34123261.js",
+    "main.css": "/static/css/main.e6b777e6.css",
+    "main.js": "/static/js/main.7535356a.js",
     "static/media/brand-icons.svg": "/static/media/brand-icons.6729d29753e000c17489.svg",
     "static/media/icons.svg": "/static/media/icons.62d9dae4e0040e81c980.svg",
     "static/media/duelosteve.mp3": "/static/media/duelosteve.1e369fa81a43e3380b86.mp3",
@@ -24,11 +24,11 @@
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
-    "main.71094e52.css.map": "/static/css/main.71094e52.css.map",
-    "main.34123261.js.map": "/static/js/main.34123261.js.map"
+    "main.e6b777e6.css.map": "/static/css/main.e6b777e6.css.map",
+    "main.7535356a.js.map": "/static/js/main.7535356a.js.map"
   },
   "entrypoints": [
-    "static/css/main.71094e52.css",
-    "static/js/main.34123261.js"
+    "static/css/main.e6b777e6.css",
+    "static/js/main.7535356a.js"
   ]
 }
