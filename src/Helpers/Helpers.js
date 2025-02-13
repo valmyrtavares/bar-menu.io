@@ -1,6 +1,9 @@
 import React from 'react';
 import { getBtnData } from '../api/Api';
 import { cardClasses } from '@mui/material';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { app } from '../config-firebase/firebase.js';
+const db = getFirestore(app);
 
 export function firstNameClient(nameCustomer) {
   if (nameCustomer) {
@@ -42,4 +45,32 @@ export const requestSorter = (ObjList, direction) => {
   });
 
   return sortedList;
+};
+
+export const logToAnounimousInToten = (setNameClient) => {
+  const noCustomer = {
+    name: 'anonimo',
+    phone: '777',
+    birthday: '77',
+    email: 'anonimo@anonimo.com',
+  };
+  if (localStorage.hasOwnProperty('isToten')) {
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+      if (currentUserNew) {
+        setNameClient(currentUserNew.name);
+        global.setId(currentUserNew.name);
+      }
+    } else {
+      addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
+        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+        console.log('Document written with ID: ', docRef.id);
+        setNameClient('anonimo');
+        localStorage.setItem(
+          'userMenu',
+          JSON.stringify({ id: docRef.id, name: 'anonimo' })
+        );
+      });
+    }
+  }
 };

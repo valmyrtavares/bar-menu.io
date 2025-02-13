@@ -1,0 +1,27 @@
+/* Overlay para escurecer o fundo */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    /* Fundo escurecido, mas translúcido */
+    z-index: 1;
+    /* Certifica-se de que o overlay fique atrás do container */
+}
+.totenRegisterPopupSecondContainer{
+    max-width: 600px;
+    text-align: center;
+    border: solid 2px red;
+    padding: 20px;
+    background-color: var(--secundary-bg-color);
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    /* Certifica-se de que o container fique acima do overlay */
+    width: 160%;
+    /* Aumenta o tamanho proporcionalmente em 60% */
+}

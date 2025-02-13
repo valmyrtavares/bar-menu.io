@@ -12,6 +12,10 @@ import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import WarningMessage from '../component/WarningMessages';
 import { app } from '../config-firebase/firebase.js';
+import {
+  useEnsureAnonymousUser,
+  getAnonymousUser,
+} from '../Hooks/useEnsureAnonymousUser.js';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -24,38 +28,23 @@ function MainMenu() {
 
   const navigate = useNavigate();
 
+  useEnsureAnonymousUser();
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    const noCustomer = {
-      name: 'anonimo',
-      phone: '777',
-      birthday: '77',
-      email: 'anonimo@anonimo.com',
-    };
-    if (localStorage.hasOwnProperty('userMenu')) {
-      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
-      if (currentUserNew) {
-        setNameClient(currentUserNew.name);
-        global.setId(currentUserNew.name);
+    if (!localStorage.hasOwnProperty('isToten')) {
+      if (!global.authorizated) {
+        CheckLogin();
       }
-    } else {
-      addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
-        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-        console.log('Document written with ID: ', docRef.id);
-        setNameClient('anonimo');
-        localStorage.setItem(
-          'userMenu',
-          JSON.stringify({ id: docRef.id, name: 'anonimo' })
-        );
-      });
     }
   }, []);
 
   React.useEffect(() => {
-    // if (!global.authorizated) {
-    //   CheckLogin();
-    // }
+    if (!global.isToten) {
+      if (!global.authorizated) {
+        CheckLogin();
+      }
+    }
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
@@ -72,16 +61,48 @@ function MainMenu() {
     fetchData();
   }, [global.authorizated]);
 
-  const logoutCustomer = () => {
+  // const logToAnounimousInToten = () => {
+  const noCustomer = {
+    name: 'anonimo',
+    phone: '777',
+    birthday: '77',
+    email: 'anonimo@anonimo.com',
+  };
+  //   if (localStorage.hasOwnProperty('isToten')) {
+  //     if (localStorage.hasOwnProperty('userMenu')) {
+  //       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+  //       if (currentUserNew) {
+  //         setNameClient(currentUserNew.name);
+  //         global.setId(currentUserNew.name);
+  //       }
+  //     } else {
+  //       addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
+  //         global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+  //         console.log('Document written with ID: ', docRef.id);
+  //         setNameClient('anonimo');
+  //         localStorage.setItem(
+  //           'userMenu',
+  //           JSON.stringify({ id: docRef.id, name: 'anonimo' })
+  //         );
+  //       });
+  //     }
+  //   }
+  // };
+
+  const logoutCustomer = async () => {
     if (global.isToten) {
       if (logoutAdminPopup) {
-        localStorage.removeItem('userMenu');
-        global.setAuthorizated(false);
-        CheckLogin();
+        const anonymousUser = await getAnonymousUser();
+        localStorage.setItem(
+          'userMenu',
+          JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+        );
+        return;
       }
       setLogoutAdminPopup(true);
     }
   };
+
   async function CheckLogin() {
     const userId = await CheckUser('userMenu');
     navigate(userId);

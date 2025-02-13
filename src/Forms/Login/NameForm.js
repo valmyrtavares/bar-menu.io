@@ -5,7 +5,7 @@ import TextKeyboard from '../../component/Textkeyboard';
 import useFormValidation from '../../Hooks/useFormValidation.js';
 import { GlobalContext } from '../../GlobalContext';
 
-const NameForm = ({ justNameFantasy, setPopupName }) => {
+const NameForm = ({ justNameFantasy, setPopupName, totenForm }) => {
   //    const [nameFantasey, setNameFantasy] = React.useState("")
   const global = React.useContext(GlobalContext);
   const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
@@ -116,14 +116,16 @@ const NameForm = ({ justNameFantasy, setPopupName }) => {
       <button className="goon-btn" onClick={() => justNameFantasy(form.name)}>
         Continue
       </button>
-      <div className="registration-promotion">
-        <h4>Cadastre-se aqui e participe de nossas promoções</h4>
-        <div className="container-registration-btn">
-          <button className="goon-btn" onClick={() => setPopupName(false)}>
-            Cadastre-se
-          </button>
+      {!totenForm && (
+        <div className="registration-promotion">
+          <h4>Cadastre-se aqui e participe de nossas promoções</h4>
+          <div className="container-registration-btn">
+            <button className="goon-btn" onClick={() => setPopupName(false)}>
+              Cadastre-se
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

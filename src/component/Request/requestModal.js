@@ -6,6 +6,9 @@ import {
   collection,
   updateDoc,
   setDoc,
+  query,
+  where,
+  getDocs,
   addDoc,
   doc,
 } from 'firebase/firestore';
@@ -18,10 +21,12 @@ import {
   getBtnData,
 } from '../../api/Api.js';
 import WarningMessages from '../WarningMessages';
+import TotenRegisterPopup from './TotenRegisterPopup.js';
 import PrintRequestCustomer from './PrintRequestCustomer';
 import { GlobalContext } from '../../GlobalContext';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 //import { cardClasses } from "@mui/material";
+import { getAnonymousUser } from '../../Hooks/useEnsureAnonymousUser.js';
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState('');
@@ -35,6 +40,7 @@ const RequestModal = () => {
   const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
+  const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
@@ -65,17 +71,17 @@ const RequestModal = () => {
     if (userData && Array.isArray(userData.request)) {
       // Mudança aqui: Verificação de que userData existe e que request é um array
 
-      // if (localStorage.hasOwnProperty('backorder')) {
-      //   const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
-      //   if (orderStoraged && orderStoraged.length > 0) {
-      //     if (userData.request && userData.request) {
-      //       orderStoraged.forEach((element) => {
-      //         userData.request.push(element);
-      //       });
-      //     }
-      //   }
-      //   console.log('order Storaged   ', orderStoraged);
-      // }
+      if (localStorage.hasOwnProperty('backorder')) {
+        const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+        if (orderStoraged && orderStoraged.length > 0) {
+          if (userData.request && userData.request) {
+            orderStoraged.forEach((element) => {
+              userData.request.push(element);
+            });
+          }
+        }
+        console.log('order Storaged   ', orderStoraged);
+      }
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -164,22 +170,61 @@ const RequestModal = () => {
     }
   };
 
-  const sendRequestToKitchen = () => {
-    if (!warningMsg) {
-      setWarningMsg(true);
-    } else {
-      addRequestUser(currentUser);
-      if (isToten) {
-        setTotenMessage(true);
-        setTimeout(() => {
-          setTotenMessage(false);
-          localStorage.removeItem('userMenu');
-          navigate('/create-customer');
-        }, 5000);
-      } else {
-        navigate('/orderqueue');
+  const openRegisterPopup = async () => {
+    if (isToten && userData.name === 'anonymous') {
+      if (userData.request) {
+        // Salvar os pedidos do anonymous no localStorage antes de trocar o usuário
+        localStorage.setItem('backorder', JSON.stringify(userData.request));
+
+        try {
+          // Buscar o documento do usuário "anonymous" pelo campo 'name'
+          const userQuery = query(
+            collection(db, 'user'),
+            where('name', '==', 'anonymous')
+          );
+          const querySnapshot = await getDocs(userQuery);
+
+          if (!querySnapshot.empty) {
+            // Pegar o primeiro documento encontrado (deve ser único)
+            const anonymousUserDoc = querySnapshot.docs[0];
+            const userDocRef = doc(db, 'user', anonymousUserDoc.id);
+            // Atualizar o campo 'request' para []
+            await updateDoc(userDocRef, { request: [] });
+            // Buscar o documento atualizado
+            const updatedDoc = await getDoc(userDocRef);
+            console.log('Dados atualizados:', updatedDoc.data());
+          } else {
+            console.warn('Usuário anonymous não encontrado no Firestore.');
+          }
+        } catch (error) {
+          console.error(
+            'Erro ao buscar ou atualizar usuário anonymous:',
+            error
+          );
+        }
       }
+
+      setOpenCloseTotenPopup(true);
     }
+  };
+
+  const sendRequestToKitchen = () => {
+    debugger;
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+      console.log(currentUserNew.id);
+      addRequestUser(currentUserNew.id);
+    }
+
+    // if (isToten) {
+    //   setTotenMessage(true);
+    //   setTimeout(() => {
+    //     setTotenMessage(false);
+    //     localStorage.removeItem('userMenu');
+    //     navigate('/create-customer');
+    //   }, 5000);
+    // } else {
+    navigate('/orderqueue');
   };
 
   const takeDataTime = () => {
@@ -210,8 +255,13 @@ const RequestModal = () => {
 
   //send request with finel price
   const addRequestUser = async (id) => {
+    debugger;
     if (id) {
       const data = await getOneItemColleciton('user', id);
+
+      // Recuperar os pedidos do anonymous, se existirem
+      const storedRequests = localStorage.getItem('backorder');
+      const previousRequests = storedRequests ? JSON.parse(storedRequests) : [];
 
       const userNewRequest = {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
@@ -219,17 +269,16 @@ const RequestModal = () => {
         done: true,
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
-        request: data.request,
+        request: previousRequests, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
       //global.setUserNewRequest(userNewRequest);
-
+      localStorage.removeItem('backorder');
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
         addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
-
         const userDocRef = doc(db, 'user', id);
         await updateDoc(userDocRef, {
           request: [],
@@ -278,6 +327,13 @@ const RequestModal = () => {
 
   return (
     <section className="container-modal-request">
+      {openCloseTotenPupup && (
+        <TotenRegisterPopup
+          setOpenCloseTotenPopup={setOpenCloseTotenPopup}
+          setCurrentUser={setCurrentUser}
+          sendRequestToKitchen={sendRequestToKitchen}
+        />
+      )}
       {totenMessage && (
         <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
       )}
@@ -329,7 +385,7 @@ const RequestModal = () => {
         <button
           disabled={disabledBtn}
           className="send-request"
-          onClick={sendRequestToKitchen}
+          onClick={openRegisterPopup}
         >
           Finalizar
         </button>
