@@ -205,15 +205,26 @@ const RequestModal = () => {
       }
 
       setOpenCloseTotenPopup(true);
+      return;
     }
+    sendRequestToKitchen();
   };
 
-  const sendRequestToKitchen = () => {
-    debugger;
+  const sendRequestToKitchen = async () => {
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
-      console.log(currentUserNew.id);
-      addRequestUser(currentUserNew.id);
+      if (isToten) {
+        addRequestUserToten(currentUserNew.id);
+        navigate('/orderqueue');
+        return;
+      } else if (warningMsg) {
+        const data = await getOneItemColleciton('user', currentUserNew.id);
+        console.log('Atual cliente   ', data);
+        if (data) {
+          addRequestUser(data);
+        }
+      }
+      setWarningMsg(true);
     }
 
     // if (isToten) {
@@ -224,7 +235,7 @@ const RequestModal = () => {
     //     navigate('/create-customer');
     //   }, 5000);
     // } else {
-    navigate('/orderqueue');
+    //navigate('/orderqueue');
   };
 
   const takeDataTime = () => {
@@ -253,9 +264,33 @@ const RequestModal = () => {
     return obj; // Retorna o valor se não for objeto
   };
 
+  const addRequestUser = async (data) => {
+    const userNewRequest = {
+      name: data.name === 'anonimo' ? data.fantasyName : data.name,
+      idUser: data.id,
+      done: true,
+      // recipe: item.recipe ? item.recipe : {},
+      orderDelivered: false,
+      request: data.request, // Atribuir os pedidos recuperados
+      finalPriceRequest: finalPriceRequest,
+      dateTime: takeDataTime(),
+      countRequest: await countingRequest(),
+    };
+    console.log(userNewRequest);
+
+    if (userNewRequest) {
+      const cleanedUserNewRequest = cleanObject(userNewRequest);
+      addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+      const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
+      await updateDoc(userDocRef, {
+        request: [],
+      });
+    }
+    navigate('/orderqueue');
+  };
+
   //send request with finel price
-  const addRequestUser = async (id) => {
-    debugger;
+  const addRequestUserToten = async (id) => {
     if (id) {
       const data = await getOneItemColleciton('user', id);
 
