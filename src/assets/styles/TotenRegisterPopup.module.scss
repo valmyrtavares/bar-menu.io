@@ -12,6 +12,7 @@
 }
 .totenRegisterPopupSecondContainer{
     max-width: 600px;
+    h1{font-size:24px}
     text-align: center;
     border: solid 2px red;
     padding: 20px;
@@ -24,4 +25,10 @@
     /* Certifica-se de que o container fique acima do overlay */
     width: 160%;
     /* Aumenta o tamanho proporcionalmente em 60% */
+    .goonBtn{
+        cursor: pointer;
+        padding: 18px 86px;
+        font-size: 22px;
+        border-radius: 10px;
+    }
 }

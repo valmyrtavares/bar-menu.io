@@ -208,14 +208,14 @@ const TotenRegisterPopup = ({
         <DefaultComumMessage msg="Infelizmente não achamos o seu registro, Cadastre-se ou ou preencha um nome sem registro para ser chamado" />
       )}
       <div className={style.totenRegisterPopupSecondContainer}>
-        <h1>How should we call you?</h1>
-        <h1>keep with no register but write us a name to call you</h1>
+        <h1>Como devemos chamar você ?</h1>
+
         <Input
           id="name"
           required
-          label="Nome"
           autoComplete="off"
           value={form.name}
+          placeholder="Nome"
           type="text"
           onChange={handleChange}
           onFocus={handleFocus}
@@ -233,7 +233,7 @@ const TotenRegisterPopup = ({
             id="cpf"
             autoComplete="off"
             required
-            label="CPF"
+            placeholder="CPF"
             value={form.cpf}
             type="text"
             onChange={handleChange}
@@ -249,7 +249,7 @@ const TotenRegisterPopup = ({
             />
           )}
         </div>
-        <button className="goon-btn" onClick={addNickname}>
+        <button className={style.goonBtn} onClick={addNickname}>
           Continue
         </button>
       </div>

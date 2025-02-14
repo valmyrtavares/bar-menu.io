@@ -215,7 +215,7 @@ const RequestModal = () => {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       if (isToten) {
         addRequestUserToten(currentUserNew.id);
-        navigate('/orderqueue');
+        navigate('/');
         return;
       } else if (warningMsg) {
         const data = await getOneItemColleciton('user', currentUserNew.id);
