@@ -92,6 +92,7 @@ function MainMenu() {
   // };
 
   const logoutCustomer = async () => {
+    debugger;
     if (global.isToten) {
       if (logoutAdminPopup) {
         const anonymousUser = await getAnonymousUser();
@@ -105,7 +106,7 @@ function MainMenu() {
     } else {
       localStorage.removeItem('userMenu');
       global.setAuthorizated(false);
-      navigate('/');
+      navigate('create-customer');
     }
   };
 

@@ -30,9 +30,9 @@ const WarningMessage = ({
   const hadleAnonymousCustomer = () => {
     localStorage.setItem('backorder', JSON.stringify(requests));
     localStorage.setItem('noFantasyName', JSON.stringify({ id: true }));
+    setDeaingAnonymousCustomer(false);
     global.setAuthorizated(false);
-    localStorage.removeItem('userMenu');
-    navigate('/create-customer');
+    // localStorage.removeItem('userMenu');
   };
 
   const newCustomerRegistration = () => {
