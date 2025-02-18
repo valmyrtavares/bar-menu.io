@@ -36,6 +36,8 @@ function MainMenu() {
       if (!global.authorizated) {
         CheckLogin();
       }
+    } else {
+      CheckLogin();
     }
   }, []);
 
@@ -100,6 +102,10 @@ function MainMenu() {
         return;
       }
       setLogoutAdminPopup(true);
+    } else {
+      localStorage.removeItem('userMenu');
+      global.setAuthorizated(false);
+      navigate('/');
     }
   };
 

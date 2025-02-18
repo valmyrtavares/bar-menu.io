@@ -14,6 +14,7 @@ const TotenRegisterPopup = ({
   setOpenCloseTotenPopup,
   setCurrentUser,
   sendRequestToKitchen,
+  isSubmitting,
 }) => {
   const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
     name: '',
@@ -249,7 +250,11 @@ const TotenRegisterPopup = ({
             />
           )}
         </div>
-        <button className={style.goonBtn} onClick={addNickname}>
+        <button
+          disabled={isSubmitting}
+          className={style.goonBtn}
+          onClick={addNickname}
+        >
           Continue
         </button>
       </div>

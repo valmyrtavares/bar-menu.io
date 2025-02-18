@@ -35,7 +35,8 @@ export const getAnonymousUser = async () => {
 export const useEnsureAnonymousUser = () => {
   useEffect(() => {
     const checkAndSetAnonymousUser = async () => {
-      if (!localStorage.hasOwnProperty('isToten')) return;
+      if (localStorage.getItem('isToten') === 'false') return;
+      // if (!localStorage.hasOwnProperty('isToten')) return;
 
       const storedUser = localStorage.getItem('userMenu');
       if (storedUser) {

@@ -12,7 +12,7 @@ import {
   addDoc,
   doc,
 } from 'firebase/firestore';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
 import '../../assets/styles/requestModal.css';
 import {
@@ -41,9 +41,11 @@ const RequestModal = () => {
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
+  const location = useLocation();
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -97,6 +99,14 @@ const RequestModal = () => {
       updateingNewCustomer(backorder);
     }
   }, [currentUser]);
+
+  React.useEffect(() => {
+    setIsSubmitting(false); // Reabilita o botão quando a rota mudar
+  }, [location]);
+
+  React.useEffect(() => {
+    console.log('isSubmitting mudou:', isSubmitting);
+  }, [isSubmitting]);
 
   //Take just one item of user collection
 
@@ -231,16 +241,6 @@ const RequestModal = () => {
       }
       setWarningMsg(true);
     }
-
-    // if (isToten) {
-    //   setTotenMessage(true);
-    //   setTimeout(() => {
-    //     setTotenMessage(false);
-    //     localStorage.removeItem('userMenu');
-    //     navigate('/create-customer');
-    //   }, 5000);
-    // } else {
-    //navigate('/orderqueue');
   };
 
   const takeDataTime = () => {
@@ -270,28 +270,32 @@ const RequestModal = () => {
   };
 
   const addRequestUser = async (data) => {
-    const userNewRequest = {
-      name: data.name === 'anonimo' ? data.fantasyName : data.name,
-      idUser: data.id,
-      done: true,
-      // recipe: item.recipe ? item.recipe : {},
-      orderDelivered: false,
-      request: data.request, // Atribuir os pedidos recuperados
-      finalPriceRequest: finalPriceRequest,
-      dateTime: takeDataTime(),
-      countRequest: await countingRequest(),
-    };
-    console.log(userNewRequest);
-
-    if (userNewRequest) {
-      const cleanedUserNewRequest = cleanObject(userNewRequest);
-      addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
-      const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
-      await updateDoc(userDocRef, {
-        request: [],
-      });
+    try {
+      const userNewRequest = {
+        name: data.name === 'anonimo' ? data.fantasyName : data.name,
+        idUser: data.id,
+        done: true,
+        // recipe: item.recipe ? item.recipe : {},
+        orderDelivered: false,
+        request: data.request, // Atribuir os pedidos recuperados
+        finalPriceRequest: finalPriceRequest,
+        dateTime: takeDataTime(),
+        countRequest: await countingRequest(),
+      };
+      console.log(userNewRequest);
+      setIsSubmitting(true);
+      if (userNewRequest) {
+        const cleanedUserNewRequest = cleanObject(userNewRequest);
+        addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
+        await updateDoc(userDocRef, {
+          request: [],
+        });
+      }
+      navigate('/orderqueue');
+    } catch (error) {
+      console.error('Erro ao adicionar pedido:', error);
     }
-    navigate('/orderqueue');
   };
 
   //send request with finel price
@@ -372,6 +376,7 @@ const RequestModal = () => {
           setOpenCloseTotenPopup={setOpenCloseTotenPopup}
           setCurrentUser={setCurrentUser}
           sendRequestToKitchen={sendRequestToKitchen}
+          isSubmitting={isSubmitting}
         />
       )}
       {totenMessage && (
@@ -389,6 +394,7 @@ const RequestModal = () => {
           sendRequestToKitchen={sendRequestToKitchen}
           setWarningMsg={setWarningMsg}
           requests={userData.request}
+          isSubmitting={isSubmitting}
         />
       )}
 
@@ -421,9 +427,9 @@ const RequestModal = () => {
           Continue Comprando
         </Link>
       </div>
-      <div disabled={disabledBtn} className="btnFinalRequest">
+      <div className="btnFinalRequest">
         <button
-          disabled={disabledBtn}
+          disabled={isSubmitting}
           className="send-request"
           onClick={openRegisterPopup}
         >

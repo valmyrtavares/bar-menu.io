@@ -12,6 +12,7 @@ const WarningMessage = ({
   setWarningMsg,
   sendRequestToKitchen,
   requests,
+  isSubmitting,
 }) => {
   const [dealingAnonymousCusomter, setDeaingAnonymousCustomer] =
     React.useState(false);
@@ -61,7 +62,9 @@ const WarningMessage = ({
           {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
           <div className={styles.containerBtn}>
             <button onClick={() => setWarningMsg(false)}>Cancelar</button>
-            <button onClick={sendRequestToKitchen}>Continuar</button>
+            <button disabled={isSubmitting} onClick={sendRequestToKitchen}>
+              Continuar
+            </button>
           </div>
         </div>
       )}
