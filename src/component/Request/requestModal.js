@@ -220,7 +220,12 @@ const RequestModal = () => {
     sendRequestToKitchen();
   };
 
-  const sendRequestToKitchen = async () => {
+  const isProcessing = React.useRef(false); // Bloqueia múltiplas execuções
+
+  const sendRequestToKitchen = async (e) => {
+    if (isProcessing.current) return; // Impede cliques repetidos
+    isProcessing.current = true; // Bloqueia a função
+
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       if (isToten) {
@@ -230,17 +235,25 @@ const RequestModal = () => {
           setTotenMessage(false);
           navigate('/');
         }, 5000);
+        isProcessing.current = false; // Libera novamente após a ação
         //mostrar mensagem
         return;
       } else if (warningMsg) {
         const data = await getOneItemColleciton('user', currentUserNew.id);
         console.log('Atual cliente   ', data);
         if (data) {
+          if (isSubmitting) return;
+          setIsSubmitting(true);
+          e.target.onclick = null;
           addRequestUser(data);
         }
       }
       setWarningMsg(true);
     }
+    setTimeout(() => {
+      setIsSubmitting(false);
+      isProcessing.current = false; // Libera o botão novamente após um tempo
+    }, 2000);
   };
 
   const takeDataTime = () => {

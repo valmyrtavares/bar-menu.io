@@ -206,7 +206,7 @@ const TotenRegisterPopup = ({
         <DefaultComumMessage msg="Preencha o número de CPF se for cadastrado, ou nome para que possamos chamar" />
       )}
       {warningMessageCustomerNotFinded && (
-        <DefaultComumMessage msg="Infelizmente não achamos o seu registro, Cadastre-se ou ou preencha um nome sem registro para ser chamado" />
+        <DefaultComumMessage msg="Infelizmente não achamos o seu registro, Cadastre-se ou preencha um nome/apelido sem registro para ser chamado" />
       )}
       <div className={style.totenRegisterPopupSecondContainer}>
         <h1>Como devemos chamar você ?</h1>
