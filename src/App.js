@@ -38,6 +38,7 @@ import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
+import MainPictureMenu from './Pages/MainPictureMenu';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
@@ -61,6 +62,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<MainMenu />} />
+        <Route path="/new-layout" element={<MainPictureMenu />} />
         <Route path="/create-customer" element={<CreateCustomer />} />
         <Route path="/request" element={<RequestModal />} />
         <Route path="/orderqueue" element={<OrderQueue />} />

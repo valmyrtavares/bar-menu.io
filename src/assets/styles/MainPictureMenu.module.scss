@@ -1,0 +1,77 @@
+.containerPictureMenu {
+    .submenu {
+        display: grid;
+        grid-template-columns: 1fr 4fr;
+
+        .categories {
+            max-height: 70vh; // Limita a altura máxima
+            overflow-y: auto; // Adiciona barra de rolagem caso necessário
+            .categoryItem {
+                width: 100%;
+                aspect-ratio: 1 / 1; // Torna a div quadrada
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                overflow: hidden;
+                position: relative;
+
+                h3 {
+                    height: 20%; // Ocupa 1/5 da altura total
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    background-color: rgba(255, 255, 255, 0.8); // Opcional, melhora a leitura
+                    width: 100%;
+                    z-index: 2;
+                }
+
+                img {
+                    width: 120%; // Faz a imagem ficar mais larga que alta
+                    height: 80%; // Ocupa o restante do espaço disponível
+                    object-fit: cover; // Garante que as bordas sejam cortadas
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+            }
+        }
+        .dishes{
+            max-height: 70vh; // Limita a altura máxima
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            .itemContainer{
+                margin:5px 0;
+                width: 47%;
+                height: 250px;
+                background-color:yellow;
+                display:grid;
+                grid-template-columns: 3fr 2fr;
+                .text{
+                   
+                    display: grid;
+                    grid-template-rows: 2fr 4fr 2fr;
+                }
+                .image{
+                    background-color: pink;
+                    overflow: hidden;
+                        position: relative;
+                    img{
+                        width: 100%;
+                        overflow: hidden;
+                          
+                    }
+                }
+            
+            }
+        }
+
+        .dishes {
+            background-color: red;
+        }
+    }
+}
