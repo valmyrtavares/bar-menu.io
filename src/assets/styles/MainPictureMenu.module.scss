@@ -39,6 +39,10 @@
             }
         }
         .dishes{
+            .mainTilte{
+                color:var(--btn-color); 
+                font-size:30px;
+            }
             .subContainer{
                 max-height: 70vh; // Limita a altura máxima
                 overflow-y: auto;
@@ -49,16 +53,40 @@
                     margin:5px 0;
                     width: 47%;
                     height: 250px;
-                    background-color:yellow;
+                    background-color: var(--secundary-bg-color);
                     display:grid;
                     grid-template-columns: 3fr 2fr;
                     .text{
-                    
-                        display: grid;
-                        grid-template-rows: 2fr 4fr 2fr;
+                      display: flex;
+                      flex-direction: column;
+                      justify-content:space-around;
+                        max-height:300px;
+                        h3{
+                            max-height: 30px;
+                            font-size: 19px;
+                            margin-bottom:4px;
+                        }
+                        p{
+                            font-size: 19px;
+                            padding: 4%;
+                            margin-bottom: 4px;
+                        }
+                        button{
+                            width: 80%;
+                            border-radius: 10px;
+                            padding: 10px 20px;
+                            border: none;
+                            margin: 0px 10%;
+                            font-family: var(--title-font) !important;
+                            font-size: 1.2rem;
+                            font-weight: bold;
+                            color: var(--title-font-color);
+                            background: var(--btn-color);
+                            max-height: 40px;
+                        }
                     }
                     .image{
-                        background-color: pink;
+                        background-color:var(--secundary-bg-color);
                         overflow: hidden;
                             position: relative;
                         img{
@@ -73,7 +101,7 @@
         }
 
         .dishes {
-            background-color: red;
+            background-color: var(--bg-color);
         }
     }
 }

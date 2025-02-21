@@ -53,7 +53,7 @@ const MainPictureMenu = () => {
             ))}
         </nav>
         <section className={style.dishes}>
-          <h3>{categorySelected}</h3>
+          <h3 className={style.mainTilte}>{categorySelected}</h3>
           <div className={style.subContainer}>
             {dishesFiltered &&
               dishesFiltered.length > 0 &&
