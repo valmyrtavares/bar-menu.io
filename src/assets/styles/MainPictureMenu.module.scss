@@ -16,6 +16,7 @@
                 justify-content: space-between;
                 overflow: hidden;
                 position: relative;
+                    background-color: #330838;
 
                 h3 {
                     height: 20%; // Ocupa 1/5 da altura total
@@ -24,13 +25,13 @@
                     align-items: center;
                     justify-content: center;
                     text-align: center;
-                    background-color:var(--secundary-bg-color);
+                    background-color: var(--bg-color);
                     width: 100%;
                     z-index: 2;
                 }
 
                 img {
-                    width: 120%; // Faz a imagem ficar mais larga que alta
+                    width: 85%; // Faz a imagem ficar mais larga que alta
                     height: 80%; // Ocupa o restante do espaço disponível
                     object-fit: cover; // Garante que as bordas sejam cortadas
                     position: absolute;

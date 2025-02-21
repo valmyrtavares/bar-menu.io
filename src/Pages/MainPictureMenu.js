@@ -46,7 +46,11 @@ const MainPictureMenu = () => {
               >
                 <h3>{item.title}</h3>
                 <img
-                  src="https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg"
+                  src={
+                    item.image
+                      ? item.image
+                      : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
+                  }
                   alt=""
                 />
               </div>
