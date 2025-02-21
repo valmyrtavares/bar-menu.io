@@ -1,4 +1,10 @@
 .containerPictureMenu {
+    .containerDishes{
+        position: absolute;
+        top:20%;
+        left:200px;
+        z-index:50;
+    }
     .submenu {
         display: grid;
         grid-template-columns: 1fr 4fr;

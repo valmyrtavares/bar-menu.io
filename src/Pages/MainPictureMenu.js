@@ -1,20 +1,34 @@
 import React from 'react';
 import style from '../assets/styles/MainPictureMenu.module.scss';
 import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
+import DishesModal from '../component/Dishes/dishesModal';
 
 const MainPictureMenu = () => {
   const [dishes, setDishes] = React.useState([]);
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishesFiltered, setDishesFiltered] = React.useState([]);
   const [categorySelected, setCategorySelected] = React.useState('');
+  const [item, setItem] = React.useState({});
+  const [openModalDishes, setOpenModalDishes] = React.useState(false);
 
-  React.useState(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
           getBtnData('button'),
           getBtnData('item'),
         ]);
+
+        const bestSeller = {
+          category: 'main',
+          parent: 'bestSellers',
+          title: 'OS MAIS VENDIDOS ',
+          image:
+            'https://firebasestorage.googleapis.com/v0/b/react-bar-67f33.appspot.com/o/frontImage%2FWhatsApp%20Image%202024-07-26%20at%2011.19.36.png?alt=media&token=f129a337-ee65-4402-90b2-8ce8a5fb593f',
+        };
+        if (Array.isArray(data) && data.length > 0) {
+          data.unshift(bestSeller);
+        }
         setMenuButton(data);
         setDishes(dataItem);
       } catch (error) {
@@ -22,19 +36,40 @@ const MainPictureMenu = () => {
       }
     };
     fetchData();
-  });
+  }, []);
+
+  React.useEffect(() => {
+    if (dishes.length > 0) {
+      chooseCategory('bestSellers', 'OS MAIS VENDIDOS');
+    }
+  }, [dishes]);
 
   const chooseCategory = (parent, title) => {
     console.log('Essa é a minha categoria   ', parent);
     if (dishes && dishes.length > 0) {
-      const filtered = dishes.filter((item) => item.category === parent);
-      setDishesFiltered(filtered);
-      setCategorySelected(title);
+      if (parent !== 'bestSellers') {
+        const filtered = dishes.filter((item) => item.category === parent);
+        setDishesFiltered(filtered);
+        setCategorySelected(title);
+      } else {
+        const filtered = dishes.filter((item) => item.carrossel === true);
+        setDishesFiltered(filtered);
+        setCategorySelected(title);
+      }
     }
+  };
+  const preparedRequest = (item) => {
+    setItem(item);
+    setOpenModalDishes(true);
   };
 
   return (
     <div className={style.containerPictureMenu}>
+      <div className={style.containerDishes}>
+        {openModalDishes && (
+          <DishesModal item={item} setModal={setOpenModalDishes} />
+        )}
+      </div>
       <div className={style.submenu}>
         <nav className={style.categories}>
           {menuButton &&
@@ -66,7 +101,9 @@ const MainPictureMenu = () => {
                   <div className={style.text}>
                     <h3>{item.title}</h3>
                     <p>{item.comment}</p>
-                    <button>Faça o seu pedido</button>
+                    <button onClick={() => preparedRequest(item)}>
+                      Faça o seu pedido
+                    </button>
                   </div>
                   <div className={style.image}>
                     <img src={item.image} alt="" />
