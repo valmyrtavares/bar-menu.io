@@ -6,6 +6,7 @@ const MainPictureMenu = () => {
   const [dishes, setDishes] = React.useState([]);
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishesFiltered, setDishesFiltered] = React.useState([]);
+  const [categorySelected, setCategorySelected] = React.useState('');
 
   React.useState(() => {
     const fetchData = async () => {
@@ -23,17 +24,17 @@ const MainPictureMenu = () => {
     fetchData();
   });
 
-  const chooseCategory = (parent) => {
+  const chooseCategory = (parent, title) => {
     console.log('Essa é a minha categoria   ', parent);
     if (dishes && dishes.length > 0) {
       const filtered = dishes.filter((item) => item.category === parent);
       setDishesFiltered(filtered);
+      setCategorySelected(title);
     }
   };
 
   return (
     <div className={style.containerPictureMenu}>
-      <h1>Novo layout menu</h1>
       <div className={style.submenu}>
         <nav className={style.categories}>
           {menuButton &&
@@ -41,7 +42,7 @@ const MainPictureMenu = () => {
             menuButton.map((item, index) => (
               <div
                 className={style.categoryItem}
-                onClick={() => chooseCategory(item.parent)}
+                onClick={() => chooseCategory(item.parent, item.title)}
               >
                 <h3>{item.title}</h3>
                 <img
@@ -52,26 +53,23 @@ const MainPictureMenu = () => {
             ))}
         </nav>
         <section className={style.dishes}>
-          {dishesFiltered &&
-            dishesFiltered.length > 0 &&
-            dishesFiltered.map((item, index) => (
-              <div className={style.itemContainer}>
-                <div className={style.text}>
-                  <h3>{item.title}</h3>
-                  <p>
-                    A nossa super segestão de um prato que combina a delicadesa
-                    do vinho com o sabor do açai de do cupuaçu.
-                  </p>
-                  <button>Faça o seu pedido</button>
+          <h3>{categorySelected}</h3>
+          <div className={style.subContainer}>
+            {dishesFiltered &&
+              dishesFiltered.length > 0 &&
+              dishesFiltered.map((item, index) => (
+                <div className={style.itemContainer}>
+                  <div className={style.text}>
+                    <h3>{item.title}</h3>
+                    <p>{item.comment}</p>
+                    <button>Faça o seu pedido</button>
+                  </div>
+                  <div className={style.image}>
+                    <img src={item.image} alt="" />
+                  </div>
                 </div>
-                <div className={style.image}>
-                  <img
-                    src="https://i.pinimg.com/736x/30/03/b0/3003b05e468c7ae52d1fbe4861077a8a.jpg"
-                    alt=""
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </section>
       </div>
     </div>
