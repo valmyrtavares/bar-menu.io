@@ -12,7 +12,7 @@
         .categories {
             max-height: 70vh; // Limita a altura máxima
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
-            background-color: var(--secundary-bg-color);
+            background-color: var(--bg-color);
             .categoryItem {
                 width: 100%;
                 aspect-ratio: 1 / 1; // Torna a div quadrada
@@ -22,7 +22,8 @@
                 justify-content: space-between;
                 overflow: hidden;
                 position: relative;
-                    background-color: #330838;
+                background-color: var(--secundary-bg-color);
+                margin-bottom: 10px;
 
                 h3 {
                     height: 20%; // Ocupa 1/5 da altura total
@@ -31,7 +32,7 @@
                     align-items: center;
                     justify-content: center;
                     text-align: center;
-                    background-color: var(--bg-color);
+                   
                     width: 100%;
                     z-index: 2;
                 }
@@ -47,39 +48,50 @@
                 }
             }
         }
-        .dishes{
-            .mainTilte{
-                color:var(--btn-color); 
-                font-size:30px;
+        .dishes {
+            .mainTilte {
+                color: var(--btn-color);
+                font-size: 30px;
             }
-            .subContainer{
+
+            .subContainer {
                 max-height: 70vh; // Limita a altura máxima
                 overflow-y: auto;
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: space-around;
-                .itemContainer{
-                    margin:5px 0;
-                    width: 47%;                  
+
+                .itemContainer {
+                    margin: 5px 0;
+                    width: 47%;
                     background-color: var(--secundary-bg-color);
-                    display:grid;
+                    display: grid;
                     grid-template-columns: 3fr 2fr;
-                    .text{
-                      display: flex;
-                      flex-direction: column;
-                      justify-content:space-around;
-                        max-height:300px;
-                        h3{
+
+                    /* Adicionamos a animação ao itemContainer */
+                    opacity: 0;
+                    transform: translateY(20px); // Começa um pouco abaixo
+                    animation: fadeInUp 0.5s ease-out forwards;
+
+                    .text {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-around;
+                        max-height: 300px;
+
+                        h3 {
                             max-height: 30px;
                             font-size: 19px;
-                            margin-bottom:4px;
+                            margin-bottom: 4px;
                         }
-                        p{
+
+                        p {
                             font-size: 19px;
                             padding: 4%;
                             margin-bottom: 4px;
                         }
-                        button{
+
+                        button {
                             width: 80%;
                             border-radius: 10px;
                             padding: 10px 20px;
@@ -93,18 +105,31 @@
                             max-height: 40px;
                         }
                     }
-                    .image{
-                        background-color:var(--secundary-bg-color);
+
+                    .image {
+                        background-color: var(--secundary-bg-color);
                         overflow: hidden;
-                            position: relative;
-                        img{
+                        position: relative;
+
+                        img {
                             width: 100%;
                             overflow: hidden;
-                            
                         }
                     }
-                
                 }
+            }
+        }
+
+        /* Animação fadeInUp */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 

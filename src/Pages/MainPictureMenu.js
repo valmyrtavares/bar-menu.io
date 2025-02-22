@@ -97,7 +97,10 @@ const MainPictureMenu = () => {
             {dishesFiltered &&
               dishesFiltered.length > 0 &&
               dishesFiltered.map((item, index) => (
-                <div className={style.itemContainer}>
+                <div
+                  className={style.itemContainer}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   <div className={style.text}>
                     <h3>{item.title}</h3>
                     <p>{item.comment}</p>
