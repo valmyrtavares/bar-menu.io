@@ -19,12 +19,16 @@ export function getFirstFourLetters(inputString, max) {
 }
 
 export async function CheckUser(check, isToten) {
+  console.log('IsToten é ', isToten);
+
   if (localStorage.hasOwnProperty(check)) {
     const userMenu = JSON.parse(localStorage.getItem(check));
     const userList = await getBtnData('user');
     const currentUser = userList.filter((item) => item.id === userMenu.id);
     if (currentUser && currentUser.length > 0 && currentUser[0].name) {
+      console.log('Passei por aqui');
       if (isToten) {
+        console.log('IsToten é ', isToten);
         return '/new-layout';
       } else {
         return '/'; // return to main screen

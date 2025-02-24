@@ -48,6 +48,7 @@ function MainMenu() {
         CheckLogin();
       }
     }
+
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
@@ -64,6 +65,21 @@ function MainMenu() {
     fetchData();
   }, [global.authorizated]);
 
+  React.useEffect(() => {
+    if (global.isToten === null) return; // Espera até que tenha um valor válido
+
+    if (!global.authorizated) {
+      CheckLogin();
+    }
+  }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
+
+  async function CheckLogin() {
+    console.log('Valor antes de chamar CheckUser:', global.isToten);
+    const userId = await CheckUser('userMenu', global.isToten);
+    console.log('UserId é ', userId);
+    navigate(userId);
+  }
+
   // const logToAnounimousInToten = () => {
   const noCustomer = {
     name: 'anonimo',
@@ -71,26 +87,6 @@ function MainMenu() {
     birthday: '77',
     email: 'anonimo@anonimo.com',
   };
-  //   if (localStorage.hasOwnProperty('isToten')) {
-  //     if (localStorage.hasOwnProperty('userMenu')) {
-  //       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
-  //       if (currentUserNew) {
-  //         setNameClient(currentUserNew.name);
-  //         global.setId(currentUserNew.name);
-  //       }
-  //     } else {
-  //       addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
-  //         global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-  //         console.log('Document written with ID: ', docRef.id);
-  //         setNameClient('anonimo');
-  //         localStorage.setItem(
-  //           'userMenu',
-  //           JSON.stringify({ id: docRef.id, name: 'anonimo' })
-  //         );
-  //       });
-  //     }
-  //   }
-  // };
 
   const logoutCustomer = async () => {
     if (global.isToten) {
@@ -109,11 +105,6 @@ function MainMenu() {
       navigate('create-customer');
     }
   };
-
-  async function CheckLogin() {
-    const userId = await CheckUser('userMenu', global.isToten);
-    navigate(userId);
-  }
 
   function grabClient() {
     if (localStorage.hasOwnProperty('userMenu')) {
