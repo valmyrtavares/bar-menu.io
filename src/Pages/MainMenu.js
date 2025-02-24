@@ -16,6 +16,7 @@ import {
   useEnsureAnonymousUser,
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
+import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -92,7 +93,6 @@ function MainMenu() {
   // };
 
   const logoutCustomer = async () => {
-    debugger;
     if (global.isToten) {
       if (logoutAdminPopup) {
         const anonymousUser = await getAnonymousUser();
@@ -111,14 +111,14 @@ function MainMenu() {
   };
 
   async function CheckLogin() {
-    const userId = await CheckUser('userMenu');
+    const userId = await CheckUser('userMenu', global.isToten);
     navigate(userId);
   }
 
   function grabClient() {
     if (localStorage.hasOwnProperty('userMenu')) {
       const nameCustomer = JSON.parse(localStorage.getItem('userMenu'));
-      console.log('nameCustomer   ', nameCustomer);
+
       if (nameCustomer.name === 'anonimo') {
         deleteAnonymousWithnoItem(nameCustomer.id);
       }
@@ -162,20 +162,10 @@ function MainMenu() {
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         {true && <CarrosselImages />}
         <div className={style.containerBtn}>
-          <section>
-            <div>
-              <p onClick={logoutCustomer}>
-                Bem vindo {nameClient && <span>{nameClient}</span>}
-              </p>
-            </div>
-            <button>
-              <Link to="/request">Seus Pedidos</Link>
-            </button>
-            <button>
-              <Link to="/orderqueue">Fila de pedidos</Link>
-            </button>
-          </section>
-
+          <SubHeaderCustomer
+            logoutCustomer={logoutCustomer}
+            nameClient={nameClient}
+          />
           {menuButton &&
             dishes &&
             menuButton.map((item, index) => (

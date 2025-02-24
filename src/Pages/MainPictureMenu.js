@@ -2,6 +2,15 @@ import React from 'react';
 import style from '../assets/styles/MainPictureMenu.module.scss';
 import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
 import DishesModal from '../component/Dishes/dishesModal';
+import SubHeaderCustomer from '../component/subHeaderCustomer.js';
+import { Link, useNavigate } from 'react-router-dom';
+import { CheckUser } from '../Helpers/Helpers.js';
+import { GlobalContext } from '../GlobalContext';
+import {
+  useEnsureAnonymousUser,
+  getAnonymousUser,
+} from '../Hooks/useEnsureAnonymousUser.js';
+import WarningMessage from '../component/WarningMessages.js';
 
 const MainPictureMenu = () => {
   const [dishes, setDishes] = React.useState([]);
@@ -10,8 +19,17 @@ const MainPictureMenu = () => {
   const [categorySelected, setCategorySelected] = React.useState('');
   const [item, setItem] = React.useState({});
   const [openModalDishes, setOpenModalDishes] = React.useState(false);
+  const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
+  const [nameClient, setNameClient] = React.useState('');
+
+  const global = React.useContext(GlobalContext);
+  useEnsureAnonymousUser();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
+    if (!global.isToten) {
+      navigate('/');
+    }
     const fetchData = async () => {
       try {
         const [data, dataItem] = await Promise.all([
@@ -26,6 +44,7 @@ const MainPictureMenu = () => {
           image:
             'https://firebasestorage.googleapis.com/v0/b/react-bar-67f33.appspot.com/o/frontImage%2FWhatsApp%20Image%202024-07-26%20at%2011.19.36.png?alt=media&token=f129a337-ee65-4402-90b2-8ce8a5fb593f',
         };
+        grabClient();
         if (Array.isArray(data) && data.length > 0) {
           data.unshift(bestSeller);
         }
@@ -63,8 +82,50 @@ const MainPictureMenu = () => {
     setOpenModalDishes(true);
   };
 
+  const logoutCustomer = async () => {
+    if (logoutAdminPopup) {
+      const anonymousUser = await getAnonymousUser();
+      localStorage.setItem(
+        'userMenu',
+        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+      );
+      setLogoutAdminPopup(false);
+      return;
+    }
+    setLogoutAdminPopup(true);
+  };
+
+  function grabClient() {
+    if (localStorage.hasOwnProperty('userMenu')) {
+      const nameCustomer = JSON.parse(localStorage.getItem('userMenu'));
+
+      let firstName = nameCustomer.name.split(' ')[0];
+      firstName =
+        firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+      setNameClient(firstName);
+    }
+  }
+
+  async function CheckLogin() {
+    const userId = await CheckUser('userMenu');
+    navigate(userId);
+  }
+
   return (
     <div className={style.containerPictureMenu}>
+      <div className="WarningMessage-container">
+        {logoutAdminPopup && (
+          <WarningMessage
+            message="Você está prestes a sair do sistema"
+            setWarningMsg={setLogoutAdminPopup}
+            sendRequestToKitchen={logoutCustomer}
+          />
+        )}
+      </div>
+      <SubHeaderCustomer
+        logoutCustomer={logoutCustomer}
+        nameClient={nameClient}
+      />
       <div className={style.containerDishes}>
         {openModalDishes && (
           <DishesModal item={item} setModal={setOpenModalDishes} />

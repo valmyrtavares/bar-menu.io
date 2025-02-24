@@ -12,6 +12,7 @@
         .categories {
             max-height: 70vh; // Limita a altura máxima
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
+            margin-top: 56px;
             background-color: var(--bg-color);
             .categoryItem {
                 width: 100%;
