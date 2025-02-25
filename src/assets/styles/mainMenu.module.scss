@@ -2,7 +2,10 @@
 @import 'variables.css';
 
 .containerBtn {
-    
+    .headerToten {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
     
     section{
         margin:30px 10%;
@@ -47,6 +50,7 @@
 .toten {
     margin: 30px 2% 20px 24%;
 }
+
 
 @media (max-width: 600px) {
     

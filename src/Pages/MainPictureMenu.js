@@ -47,8 +47,12 @@ const MainPictureMenu = () => {
         grabClient();
         if (Array.isArray(data) && data.length > 0) {
           data.unshift(bestSeller);
+          const filteredButtonCategory = data.filter(
+            (item) => item.parent !== 'hide'
+          );
+
+          setMenuButton(filteredButtonCategory);
         }
-        setMenuButton(data);
         setDishes(dataItem);
       } catch (error) {
         console.error('Erro fetching data', error);
