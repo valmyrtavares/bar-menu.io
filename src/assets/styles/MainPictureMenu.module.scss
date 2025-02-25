@@ -1,9 +1,17 @@
 .containerPictureMenu {
+    position: relative;
+    top:-260px;
     .containerDishes{
         position: absolute;
         top:20%;
         left:200px;
         z-index:50;
+    }
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+
+    &.loaded {
+        opacity: 1;
     }
     .submenu {
         display: grid;
@@ -29,7 +37,7 @@
                 h3 {
                     height: 20%; // Ocupa 1/5 da altura total
                     display: flex;
-                    color:var(--btn-color);
+                    color:var(--title-font-color);
                     align-items: center;
                     justify-content: center;
                     text-align: center;
@@ -50,9 +58,10 @@
             }
         }
         .dishes {
-            .mainTilte {
+            .mainTitle {
                 color: var(--btn-color);
-                font-size: 30px;
+                font-size: 30px !important;
+                color: var(--title-font-color);
             }
 
             .subContainer {
@@ -84,6 +93,7 @@
                             max-height: 30px;
                             font-size: 19px;
                             margin-bottom: 4px;
+                            
                         }
 
                         p {

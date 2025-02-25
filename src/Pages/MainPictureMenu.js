@@ -13,6 +13,7 @@ import {
 import WarningMessage from '../component/WarningMessages.js';
 
 const MainPictureMenu = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
   const [dishes, setDishes] = React.useState([]);
   const [menuButton, setMenuButton] = React.useState([]);
   const [dishesFiltered, setDishesFiltered] = React.useState([]);
@@ -54,6 +55,7 @@ const MainPictureMenu = () => {
           setMenuButton(filteredButtonCategory);
         }
         setDishes(dataItem);
+        setIsLoading(false);
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -81,6 +83,7 @@ const MainPictureMenu = () => {
       }
     }
   };
+
   const preparedRequest = (item) => {
     setItem(item);
     setOpenModalDishes(true);
@@ -116,73 +119,80 @@ const MainPictureMenu = () => {
   }
 
   return (
-    <div className={style.containerPictureMenu}>
-      <div className="WarningMessage-container">
-        {logoutAdminPopup && (
-          <WarningMessage
-            message="Você está prestes a sair do sistema"
-            setWarningMsg={setLogoutAdminPopup}
-            sendRequestToKitchen={logoutCustomer}
-          />
-        )}
-      </div>
-      <SubHeaderCustomer
-        logoutCustomer={logoutCustomer}
-        nameClient={nameClient}
-        isToten={global.isToten}
-      />
-      <div className={style.containerDishes}>
-        {openModalDishes && (
-          <DishesModal item={item} setModal={setOpenModalDishes} />
-        )}
-      </div>
-      <div className={style.submenu}>
-        <nav className={style.categories}>
-          {menuButton &&
-            menuButton.length > 0 &&
-            menuButton.map((item, index) => (
-              <div
-                className={style.categoryItem}
-                onClick={() => chooseCategory(item.parent, item.title)}
-              >
-                <h3>{item.title}</h3>
-                <img
-                  src={
-                    item.image
-                      ? item.image
-                      : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
-                  }
-                  alt=""
-                />
-              </div>
-            ))}
-        </nav>
-        <section className={style.dishes}>
-          <h3 className={style.mainTilte}>{categorySelected}</h3>
-          <div className={style.subContainer}>
-            {dishesFiltered &&
-              dishesFiltered.length > 0 &&
-              dishesFiltered.map((item, index) => (
+    !isLoading && (
+      <div
+        className={`${style.containerPictureMenu} ${
+          !isLoading ? style.loaded : ''
+        }`}
+      >
+        <div className="WarningMessage-container">
+          {logoutAdminPopup && (
+            <WarningMessage
+              message="Você está prestes a sair do sistema"
+              setWarningMsg={setLogoutAdminPopup}
+              sendRequestToKitchen={logoutCustomer}
+            />
+          )}
+        </div>
+        <SubHeaderCustomer
+          logoutCustomer={logoutCustomer}
+          nameClient={nameClient}
+          isToten={global.isToten}
+        />
+        <div className={style.containerDishes}>
+          {openModalDishes && (
+            <DishesModal item={item} setModal={setOpenModalDishes} />
+          )}
+        </div>
+        <div className={style.submenu}>
+          <nav className={style.categories}>
+            {menuButton &&
+              menuButton.length > 0 &&
+              menuButton.map((item, index) => (
                 <div
-                  className={style.itemContainer}
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className={style.categoryItem}
+                  onClick={() => chooseCategory(item.parent, item.title)}
                 >
-                  <div className={style.text}>
-                    <h3>{item.title}</h3>
-                    <p>{item.comment}</p>
-                    <button onClick={() => preparedRequest(item)}>
-                      Faça o seu pedido
-                    </button>
-                  </div>
-                  <div className={style.image}>
-                    <img src={item.image} alt="" />
-                  </div>
+                  <h3>{item.title}</h3>
+                  <img
+                    src={
+                      item.image
+                        ? item.image
+                        : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
+                    }
+                    alt=""
+                  />
                 </div>
               ))}
-          </div>
-        </section>
+          </nav>
+          <section className={style.dishes}>
+            <h3 className={style.mainTitle}>{categorySelected}</h3>
+            <div className={style.subContainer}>
+              {dishesFiltered &&
+                dishesFiltered.length > 0 &&
+                dishesFiltered.map((item, index) => (
+                  <div
+                    className={style.itemContainer}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                    key={item.id || index} // Evita recriação desnecessária
+                  >
+                    <div className={style.text}>
+                      <h3>{item.title}</h3>
+                      <p>{item.comment}</p>
+                      <button onClick={() => preparedRequest(item)}>
+                        Faça o seu pedido
+                      </button>
+                    </div>
+                    <div className={style.image}>
+                      <img src={item.image} alt="" />
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 export default MainPictureMenu;

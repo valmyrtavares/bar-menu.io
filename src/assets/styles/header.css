@@ -3,13 +3,17 @@
     width: 100%;
     max-width: 100%; /* Ajuste conforme necessário */
     height: auto;
-    overflow: hidden;
+    overflow: hidden;    
+}
+.main_header .toten{
+    height: 5vh;
 }
 .main_header.toten nav {
     height: 242px;
     width: 261px;
     position: relative;    
     overflow: visible;
+    
 }
 .main_header.orderqueue nav {
     /* Estilos específicos para o header quando a URL contém /orderqueue */
