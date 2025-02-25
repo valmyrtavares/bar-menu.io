@@ -125,6 +125,7 @@ const MainPictureMenu = () => {
       <SubHeaderCustomer
         logoutCustomer={logoutCustomer}
         nameClient={nameClient}
+        isToten={global.isToten}
       />
       <div className={style.containerDishes}>
         {openModalDishes && (

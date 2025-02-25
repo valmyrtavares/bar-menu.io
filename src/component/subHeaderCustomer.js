@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import style from '../assets/styles/mainMenu.module.scss';
 
-const SubHeaderCustomer = ({ logoutCustomer, nameClient }) => {
+const SubHeaderCustomer = ({ logoutCustomer, nameClient, isToten }) => {
   return (
-    <div className={style.containerBtn}>
+    <div className={`${style.containerBtn} ${isToten ? style.toten : ''}`}>
       <section>
         <div>
           <p onClick={logoutCustomer}>

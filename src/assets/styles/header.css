@@ -8,8 +8,8 @@
 .main_header.toten nav {
     height: 242px;
     width: 261px;
-    position: absolute;
-    left: 320px;
+    position: relative;    
+    overflow: visible;
 }
 .main_header.orderqueue nav {
     /* Estilos específicos para o header quando a URL contém /orderqueue */
@@ -20,7 +20,7 @@
     /* Adicione outros estilos conforme necessário */
   }
   .main_header.toten nav img {
-      left: 0;
+      left: -10px;
   }
 
 
