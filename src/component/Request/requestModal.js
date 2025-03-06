@@ -239,6 +239,7 @@ const RequestModal = () => {
         //mostrar mensagem
         return;
       } else if (warningMsg) {
+        setTotenMessage(true);
         const data = await getOneItemColleciton('user', currentUserNew.id);
         console.log('Atual cliente   ', data);
         if (data) {
@@ -295,7 +296,7 @@ const RequestModal = () => {
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
-      console.log(userNewRequest);
+
       setIsSubmitting(true);
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
@@ -305,6 +306,7 @@ const RequestModal = () => {
           request: [],
         });
       }
+      setTotenMessage(false);
       navigate('/orderqueue');
     } catch (error) {
       console.error('Erro ao adicionar pedido:', error);
