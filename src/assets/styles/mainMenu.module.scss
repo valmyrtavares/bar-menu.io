@@ -4,7 +4,15 @@
 .containerBtn {
     .headerToten {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 8fr 1fr;
+            column-gap: 160px;
+            margin: 20px 5px;
+            min-width: 917px;
+            a{
+                font-size:35px;
+                min-width: 40px;
+                min-height: 40px;
+            }
         }
     
     section{

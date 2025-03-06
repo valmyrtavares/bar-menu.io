@@ -6,11 +6,13 @@ const SubHeaderCustomer = ({ logoutCustomer, nameClient, isToten }) => {
   return (
     <div className={`${style.containerBtn} ${isToten ? style.toten : ''}`}>
       <section className={isToten ? style.headerToten : ''}>
-        <div>
-          <p onClick={logoutCustomer}>
-            Bem vindo {nameClient && <span>{nameClient}</span>}
-          </p>
-        </div>
+        {!isToten && (
+          <div>
+            <p onClick={logoutCustomer}>
+              Bem vindo {nameClient && <span>{nameClient}</span>}
+            </p>
+          </div>
+        )}
         <button>
           <Link to="/request">Seus Pedidos</Link>
         </button>
@@ -19,6 +21,7 @@ const SubHeaderCustomer = ({ logoutCustomer, nameClient, isToten }) => {
             <Link to="/orderqueue">Fila de pedidos</Link>
           </button>
         )}
+        {isToten && <Link to="/admin/admin"></Link>}
       </section>
     </div>
   );
