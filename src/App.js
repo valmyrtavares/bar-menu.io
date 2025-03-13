@@ -7,7 +7,7 @@ import {
   Routes,
   Navigate,
 } from 'react-router-dom';
-import MainMenu from './Pages/MainMenu';
+import MainMenu from './Pages/MainPictureMobileMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import AddSideDishesForm from './Forms/AddSideDishesForm';
 import FormItem from './Forms/AddDishesForm';
