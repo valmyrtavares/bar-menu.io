@@ -90,16 +90,21 @@ const MainPictureMenu = () => {
   };
 
   const logoutCustomer = async () => {
-    if (logoutAdminPopup) {
-      const anonymousUser = await getAnonymousUser();
-      localStorage.setItem(
-        'userMenu',
-        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
-      );
-      setLogoutAdminPopup(false);
-      return;
+    if (global.isToten) {
+      if (logoutAdminPopup) {
+        const anonymousUser = await getAnonymousUser();
+        localStorage.setItem(
+          'userMenu',
+          JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+        );
+        return;
+      }
+      setLogoutAdminPopup(true);
+    } else {
+      localStorage.removeItem('userMenu');
+      global.setAuthorizated(false);
+      navigate('create-customer');
     }
-    setLogoutAdminPopup(true);
   };
 
   function grabClient() {
