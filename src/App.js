@@ -7,7 +7,8 @@ import {
   Routes,
   Navigate,
 } from 'react-router-dom';
-import MainMenu from './Pages/MainMenu';
+import MainMenuDefault from './Pages/MainMenu';
+import MainPictureMobileMenu from './Pages/MainPictureMobileMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import AddSideDishesForm from './Forms/AddSideDishesForm';
 import FormItem from './Forms/AddDishesForm';
@@ -45,15 +46,19 @@ import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
 function App() {
   const [showHeader, setShowHeader] = React.useState(true);
+  const [MainMenu, setMainMenu] = React.useState(() => MainMenuDefault);
   const location = useLocation();
 
   React.useEffect(() => {
-    // Verifica se a URL atual é exatamente "/admin"
-    if (location.pathname.startsWith('/admin')) {
-      setShowHeader(false);
-    } else {
-      setShowHeader(true);
+    if (location.pathname === '/') {
+      const modePictureMobile =
+        localStorage.getItem('modePictureMobile') === 'true';
+      setMainMenu(() =>
+        modePictureMobile ? MainPictureMobileMenu : MainMenuDefault
+      );
     }
+    // Verifica se a URL atual é exatamente "/admin"
+    setShowHeader(!location.pathname.startsWith('/admin'));
   }, [location.pathname]); // Reexecuta sempre que a URL muda
 
   return (
@@ -61,7 +66,7 @@ function App() {
       {showHeader && <Header />}
 
       <Routes>
-        <Route path="/" element={<MainMenu />} />
+        <Route path="/" element={React.createElement(MainMenu)} />
         <Route path="/new-layout" element={<MainPictureMenu />} />
         <Route path="/create-customer" element={<CreateCustomer />} />
         <Route path="/request" element={<RequestModal />} />

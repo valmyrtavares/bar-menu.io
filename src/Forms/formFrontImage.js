@@ -19,6 +19,10 @@ const FormFrontImage = () => {
     'isToten',
     false
   );
+  const [modePictureMobilePhone, setModePictureMobilePhone] = useLocalStorage(
+    'modePictureMobile',
+    false
+  );
 
   //Navigate
   const navigate = useNavigate();
@@ -28,6 +32,10 @@ const FormFrontImage = () => {
 
   const changePublicStatement = () => {
     setPublicStatement((prev) => !prev);
+  };
+
+  const changeModePicture = () => {
+    setModePictureMobilePhone((prev) => !prev);
   };
 
   React.useState(() => {
@@ -90,8 +98,23 @@ const FormFrontImage = () => {
           onChange={changePublicStatement}
         />
         <label className="form-check-label">
-          Manter selecionado para que o cliente seja deslogado logo após o envio
-          do pedido
+          Manter selecionado para entrar no modo Toten que faráque o cliente
+          seja deslogado logo após o envio do pedido e o sistema retornará para
+          a tela inicial.
+        </label>
+      </div>
+
+      <div className="form-check my-1">
+        <input
+          className="form-check-input"
+          id="modePicture"
+          type="checkbox"
+          checked={modePictureMobilePhone}
+          onChange={changeModePicture}
+        />
+        <label className="form-check-label">
+          Para acionar o modo de imagem de celular, mantenha selecionado. node
+          os botões serão substituidos por imagens.
         </label>
       </div>
     </>
