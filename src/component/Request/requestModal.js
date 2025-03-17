@@ -91,12 +91,16 @@ const RequestModal = () => {
         setDisabledBtn(true);
       }
     }
+    console.log('userData mudou:', userData);
   }, [userData]);
 
   React.useEffect(() => {
     if (currentUser) {
       fetchUser();
-      updateingNewCustomer(backorder);
+
+      if (backorder) {
+        updateingNewCustomer(backorder);
+      }
     }
   }, [currentUser]);
 
@@ -112,15 +116,17 @@ const RequestModal = () => {
 
   async function fetchUser() {
     try {
+      console.log('Buscando usuário:', currentUser);
       const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
+      if (data) {
+        setUserData(data);
 
-      setUserData(data);
-
-      if (userData) {
-        if (userData.request.length > 0) {
-          setDisabledBtn(true);
+        if (userData) {
+          if (userData.request.length > 0) {
+            setDisabledBtn(true);
+          }
         }
       }
     } catch (error) {
@@ -136,7 +142,8 @@ const RequestModal = () => {
       if (userDocSnap.exists()) {
         // Se o documento do usuário já existir, atualiza o array request
         const currentRequests = userDocSnap.data().request || [];
-
+        console.log('DATA É    ', data);
+        console.log('currentRequests É    ', currentRequests);
         // Acrescente o novo objeto 'form' ao array 'request'
         currentRequests.push(...data);
         console.log('form   ', currentRequests);

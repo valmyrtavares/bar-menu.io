@@ -12,7 +12,7 @@ import {
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 
-const MainPictureMenu = () => {
+const MainPictureMobileMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [dishes, setDishes] = React.useState([]);
   const [menuButton, setMenuButton] = React.useState([]);
@@ -28,7 +28,7 @@ const MainPictureMenu = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (!global.isToten) {
+    if (global.isToten) {
       navigate('/');
     }
     const fetchData = async () => {
@@ -156,6 +156,7 @@ const MainPictureMenu = () => {
               menuButton.length > 0 &&
               menuButton.map((item, index) => (
                 <div
+                  key={index}
                   className={style.categoryItem}
                   onClick={() => chooseCategory(item.parent, item.title)}
                 >
@@ -202,4 +203,4 @@ const MainPictureMenu = () => {
     </div>
   );
 };
-export default MainPictureMenu;
+export default MainPictureMobileMenu;

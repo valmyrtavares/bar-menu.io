@@ -33,11 +33,14 @@ function MainMenu() {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    if (!localStorage.hasOwnProperty('isToten')) {
+    const totenExist = localStorage.getItem('toten');
+    if (!totenExist || global.isToten !== true) {
+      global.setIsToten(false);
       if (!global.authorizated) {
         CheckLogin();
       }
     } else {
+      global.setIsToten(true);
       CheckLogin();
     }
   }, []);
@@ -74,7 +77,6 @@ function MainMenu() {
   }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
 
   async function CheckLogin() {
-    console.log('Valor antes de chamar CheckUser:', global.isToten);
     const userId = await CheckUser('userMenu', global.isToten);
     console.log('UserId é ', userId);
     navigate(userId);

@@ -7,7 +7,7 @@ import {
   Routes,
   Navigate,
 } from 'react-router-dom';
-import MainMenu from './Pages/MainPictureMobileMenu';
+import MainMenu from './Pages/MainMenu';
 import AddButtonForm from './Forms/AddButtonForm';
 import AddSideDishesForm from './Forms/AddSideDishesForm';
 import FormItem from './Forms/AddDishesForm';
@@ -103,8 +103,8 @@ function App() {
           <Route path="managementRecipes" element={<ManagementRecipes />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/bar-menu.io" replace />} />
-        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
+        {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

@@ -28,7 +28,9 @@ const MainPictureMenu = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (!global.isToten) {
+    if (global.isToten) {
+      navigate('/new-layout');
+    } else {
       navigate('/');
     }
     const fetchData = async () => {
@@ -150,6 +152,7 @@ const MainPictureMenu = () => {
               menuButton.length > 0 &&
               menuButton.map((item, index) => (
                 <div
+                  key={index}
                   className={style.categoryItem}
                   onClick={() => chooseCategory(item.parent, item.title)}
                 >
