@@ -235,7 +235,7 @@ const RequestModal = () => {
 
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
-      if (isToten) {
+      if (isToten && isToten === true) {
         addRequestUserToten(currentUserNew.id);
         setTotenMessage(true);
         setTimeout(() => {

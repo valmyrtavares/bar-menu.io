@@ -1,7 +1,7 @@
-import React from "react";
-import "../assets/styles/cpfMessage.css";
-import { useNavigate } from "react-router-dom";
-import { GlobalContext } from "../GlobalContext";
+import React from 'react';
+import '../assets/styles/cpfMessage.css';
+import { useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../GlobalContext';
 
 const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
   const navigate = useNavigate();
@@ -14,8 +14,8 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
       id: clientFinded[0].id,
       name: clientFinded[0].name,
     };
-    localStorage.setItem("userMenu", JSON.stringify(currentUser));
-    navigate("/");
+    localStorage.setItem('userMenu', JSON.stringify(currentUser));
+    navigate('/');
     setCpfModal(false);
   };
   const backToCreateProfile = () => {

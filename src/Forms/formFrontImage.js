@@ -30,6 +30,22 @@ const FormFrontImage = () => {
   //FIRESTORE
   const db = getFirestore(app);
 
+  React.useEffect(() => {
+    if (publicStatement && modePictureMobilePhone) {
+      if (publicStatement) {
+        setModePictureMobilePhone(false);
+        alert(
+          'O aplicativo está em modo Totem, ele não pode ser usado em um celular.'
+        );
+      } else if (modePictureMobilePhone) {
+        setPublicStatement(false);
+        alert(
+          'O aplicativo está em modo de imagem de celular, ele não pode ser usado como Totem.'
+        );
+      }
+    }
+  }, [publicStatement, modePictureMobilePhone]);
+
   const changePublicStatement = () => {
     setPublicStatement((prev) => !prev);
   };
@@ -66,6 +82,7 @@ const FormFrontImage = () => {
           })
             .then(() => {
               console.log('Document successfully updated !');
+              console.log('formFrontImage  85');
               navigate('/');
             })
             .catch((error) => {
