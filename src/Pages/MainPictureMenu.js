@@ -7,6 +7,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CheckUser } from '../Helpers/Helpers.js';
 import { GlobalContext } from '../GlobalContext';
 import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getFirestore,
+} from 'firebase/firestore';
+import { app } from '../config-firebase/firebase.js';
+import {
   useEnsureAnonymousUser,
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
@@ -22,10 +30,35 @@ const MainPictureMenu = () => {
   const [openModalDishes, setOpenModalDishes] = React.useState(false);
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
+  const [orders, setOrders] = React.useState([]);
+
+  const db = getFirestore(app);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const q = query(collection(db, 'orders'), where('done', '==', false));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setOrders((prevOrders) => {
+        const updatedOrders = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Apenas atualiza o estado se os dados realmente mudarem
+        if (JSON.stringify(prevOrders) !== JSON.stringify(updatedOrders)) {
+          return updatedOrders;
+        }
+
+        return prevOrders;
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   React.useEffect(() => {
     if (global.isToten) {
