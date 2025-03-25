@@ -39,10 +39,7 @@ const RequestManagementModule = () => {
   // USEEFFECTS SESSION  **********************************************************************************
 
   React.useEffect(() => {
-    console.log('ENTREI NO USEEFFECT');
     const fetchRequest = async () => {
-      console.log('ESTOU AQUI NA fetchRequest');
-
       try {
         const [requestData, voucherData, sideDishesList, item] =
           await Promise.all([
@@ -91,14 +88,14 @@ const RequestManagementModule = () => {
       if (form.startDate && form.endDate) {
         const startDate = new Date(form.startDate);
         const endDate = new Date(form.endDate);
-
         if (startDate > endDate) {
           alert('Data de início não pode ser maior que a data de fim.');
         } else {
           setLoadMessage(true);
           const originalRequestListArray = filteredRequests(
+            //return an array with requests between the dates
             //traz somente os pedidos do filtro de data
-            originalRequestList,
+            originalRequestList, // all requests
             startDate,
             endDate
           );

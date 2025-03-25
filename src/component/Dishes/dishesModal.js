@@ -121,9 +121,9 @@ const DishesModal = ({ item, setModal }) => {
   async function handleSubmit(event) {
     event.preventDefault();
     console.log('Cliente atual   ', currentUser);
-    // if (!global.authorizated) {
-    //   CheckLogin();
-    // }
+    if (!global.authorizated) {
+      CheckLogin();
+    }
     try {
       const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
@@ -164,10 +164,10 @@ const DishesModal = ({ item, setModal }) => {
     }
   }
 
-  // async function CheckLogin() {
-  //   const userId = await CheckUser('userMenu');
-  //   navigate(userId);
-  // }
+  async function CheckLogin() {
+    const userId = await CheckUser('userMenu');
+    navigate(userId);
+  }
 
   function onPriceChange(item) {
     console.log('O que vem do customize price   ', item);
