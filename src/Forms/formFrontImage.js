@@ -2,7 +2,7 @@ import React from 'react';
 import Input from '../component/Input';
 import { app, storage } from '../config-firebase/firebase.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { setDoc, doc, getFirestore } from 'firebase/firestore';
+import { setDoc, doc, getFirestore, updateDoc } from 'firebase/firestore';
 import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';
 import Title from '../component/title.js';
@@ -47,10 +47,24 @@ const FormFrontImage = () => {
   }, [publicStatement, modePictureMobilePhone]);
 
   const changePublicStatement = () => {
+    debugger;
     setPublicStatement((prev) => !prev);
   };
 
   const changeModePicture = () => {
+    const isChecked = document.getElementById('modePicture').checked;
+    console.log('Fui chamado', isChecked);
+    const updateMenuPictureMode = async (value) => {
+      try {
+        const docRef = doc(db, 'styles', 'EO7my10ncSacl0AZYAao');
+        await updateDoc(docRef, { menuPictureMode: value });
+        console.log('Document successfully updated!');
+      } catch (error) {
+        console.error('Error updating document: ', error);
+      }
+    };
+
+    updateMenuPictureMode(isChecked);
     setModePictureMobilePhone((prev) => !prev);
   };
 
