@@ -56,7 +56,7 @@ const FormFrontImage = () => {
     console.log('Fui chamado', isChecked);
     const updateMenuPictureMode = async (value) => {
       try {
-        const docRef = doc(db, 'styles', 'EO7my10ncSacl0AZYAao');
+        const docRef = doc(db, 'PictureMode', '7OQE7SP75uGlSokNrpNE');
         await updateDoc(docRef, { menuPictureMode: value });
         console.log('Document successfully updated!');
       } catch (error) {

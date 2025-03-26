@@ -40,6 +40,7 @@ import RequestManagementModule from './component/Request/requestManagementModule
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 import MainPictureMenu from './Pages/MainPictureMenu';
+import { getOneItemColleciton } from './api/Api';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
@@ -50,16 +51,31 @@ function App() {
   const location = useLocation();
 
   React.useEffect(() => {
-    if (location.pathname === '/') {
-      const modePictureMobile =
-        localStorage.getItem('modePictureMobile') === 'true';
-      setMainMenu(() =>
-        modePictureMobile ? MainPictureMobileMenu : MainMenuDefault
-      );
-    }
-    // Verifica se a URL atual é exatamente "/admin"
+    const setSystemMode = async () => {
+      if (location.pathname === '/') {
+        const modePictureMobile = await checkPictureMenuMode();
+        console.log('Modo de figura   ', modePictureMobile);
+        setMainMenu(() =>
+          modePictureMobile ? MainPictureMobileMenu : MainMenuDefault
+        );
+      }
+      // Verifica se a URL atual é exatamente "/admin"
+    };
     setShowHeader(!location.pathname.startsWith('/admin'));
+    setSystemMode();
   }, [location.pathname]); // Reexecuta sempre que a URL muda
+
+  const checkPictureMenuMode = async () => {
+    try {
+      const mode = await getOneItemColleciton(
+        'PictureMode',
+        '7OQE7SP75uGlSokNrpNE'
+      );
+      return mode.menuPictureMode;
+    } catch (error) {
+      console.error('Erro fetching data', error);
+    }
+  };
 
   return (
     <div className="ultra-wrapper">
