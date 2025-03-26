@@ -47,7 +47,6 @@ const FormFrontImage = () => {
   }, [publicStatement, modePictureMobilePhone]);
 
   const changePublicStatement = () => {
-    debugger;
     setPublicStatement((prev) => !prev);
   };
 
