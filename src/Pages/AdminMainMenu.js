@@ -69,7 +69,7 @@ const AdminMainMenu = ({ children }) => {
                 isActive ? `${admin.link} ${admin.active}` : admin.link
               }
             >
-              Adicione Botão{' '}
+              Adicione Categoria{' '}
             </NavLink>
 
             <NavLink

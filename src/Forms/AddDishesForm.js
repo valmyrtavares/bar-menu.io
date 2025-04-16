@@ -16,6 +16,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import IncludeSideDishesForm from './IncludeSideDishesForm.js';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
 import '../assets/styles/form.css';
+import style from '../assets/styles/AddDishesForm.module.scss';
 import CustomizePriceForm from './CustomizePriceForm';
 import RecipeDish from './recipeDishForm.js';
 import useFormValidation from '../Hooks/useFormValidation.js';
@@ -302,7 +303,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           type="text"
           onChange={handleChange}
         />
-        <div className="box-price">
+        <div className={style.boxPrice}>
           <button
             className="btn btn-success"
             type="button"
@@ -320,29 +321,34 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         </div>
         <Input
           id="image"
-          label="Image"
+          label="Link da imagem"
           value={form.image}
           type="text"
           onChange={handleChange}
         />
-        <Input
-          id="sideDishesElementList"
-          label="Image"
-          value={form.sideDishesElementList}
-          type="hidden"
-          onChange={handleChange}
-        />
-        <Input
-          id="maxLimitSideDishes"
-          value={form.maxLimitSideDishes}
-          type="hidden"
-          onChange={handleChange}
-        />
-
-        <input type="file" onChange={onfileChange} />
-        <progress value={progress} max="100" />
-        {url && <img className="image-preview" src={url} alt="Uploaded file" />}
-        <div className="form-check my-1">
+        <div className={style.hiddenInput}>
+          <Input
+            id="sideDishesElementList"
+            value={form.sideDishesElementList}
+            type="hidden"
+            onChange={handleChange}
+          />
+          <Input
+            id="maxLimitSideDishes"
+            value={form.maxLimitSideDishes}
+            type="hidden"
+            onChange={handleChange}
+          />
+        </div>
+        <div className={style.uploadImage}>
+          <label className="form-label">Carregar imagem</label>
+          <input type="file" onChange={onfileChange} />
+          <progress value={progress} max="100" />
+          {url && (
+            <img className="image-preview" src={url} alt="Uploaded file" />
+          )}
+        </div>
+        <div className={style.checkInput}>
           <input
             className="form-check-input"
             id="carrossel"
@@ -354,7 +360,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             Adicionar item ao carrossel
           </label>
         </div>
-        <button className="btn btn-primary">Enviar</button>
+        <div className={style.formButtonSubmit}>
+          <button className="btn btn-primary">Enviar</button>
+        </div>
       </form>
       {showPopupSideDishes && (
         <div className="container-new-sideDishes">
@@ -376,7 +384,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           />
         )}
       </div>
-      <div className="sidedishes-recipe-btn-container">
+      <div className={style.sidedishesRecipeBtnContainer}>
         <button className="btn btn-success " onClick={openModalSideDishes}>
           {' '}
           Acompanhamentos

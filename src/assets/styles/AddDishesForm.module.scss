@@ -1,0 +1,93 @@
+@use './mixin' as *;
+
+
+.formButtonSubmit{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    button{
+    @include btnSubmit;
+    }
+}
+
+.sidedishesRecipeBtnContainer{
+    margin-top: 40px;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    button{
+        @include btnUtility;
+    }
+}
+.boxPrice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+
+    button {
+        @include btnUtility;
+    }
+}
+.uploadImage input[type="file"]::-webkit-file-upload-button {
+    background: none;
+    border: none;
+    color: whitesmoke;
+    font: inherit;
+    cursor: pointer;
+}
+.uploadImage input[type="file"] {
+    color: whitesmoke;
+}
+.uploadImage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 12vh;
+    
+
+    input[type="file"] {
+        @include btnUtility(50%);
+        margin-bottom: 10px;
+    }
+
+    progress {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 10px;
+    }
+   
+        }
+    
+form{
+    label{
+        font-size:$fontSizeFormLabel;
+    }
+    .hiddenInput {
+        display: none !important;
+    }
+    .checkInput{
+        display:flex;
+        justify-content:start;
+        align-items:center;
+        margin: 20px 0;
+        label{
+            font-size:$fontSizeForm;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    }
+    select {
+        font-size: $fontSizeForm !important;
+    }
+    
+
+}

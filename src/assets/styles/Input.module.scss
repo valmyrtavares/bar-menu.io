@@ -1,0 +1,7 @@
+@use './mixin' as *;
+
+.labelForm {
+    font-size: $fontSizeFormLabel;
+    padding: 10px;
+    border-radius: 4px;
+}

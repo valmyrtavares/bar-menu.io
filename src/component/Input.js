@@ -1,15 +1,17 @@
 import React from 'react';
+import style from '../assets/styles/Input.module.scss';
+import PropTypes from 'prop-types';
 
 const Input = ({ label, fieldFocus, id, ...props }) => {
   const inputStyle = {
-    fontSize: window.innerWidth > 900 ? '25px' : '16px', // Estilo condicional
+    fontSize: window.innerWidth > 900 ? 'fontSizeForm' : '16px',
     padding: '10px',
     borderRadius: '4px',
   };
-
+  inputStyle.fontSize = props.fontSizeForm || inputStyle.fontSize;
   return (
     <div className="mb-3">
-      <label style={inputStyle} className="form-label" htmlFor={label}>
+      <label className={style.labelForm} htmlFor={label}>
         {label}
       </label>
       <input
@@ -23,3 +25,10 @@ const Input = ({ label, fieldFocus, id, ...props }) => {
   );
 };
 export default Input;
+
+Input.propTypes = {
+  label: PropTypes.string.isRequired,
+  fieldFocus: PropTypes.object,
+  id: PropTypes.string,
+  fontSizeForm: PropTypes.string,
+};

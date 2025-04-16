@@ -1,0 +1,21 @@
+$fontSizeForm: 1.3rem;
+$fontSizeFormLabel: 2rem;
+
+@mixin btnSubmit {
+    background-color: #119b5a;
+        width: 242px;
+        padding: 13px 26px;
+        border: none;
+        font-size:$fontSizeForm
+}
+
+@mixin btnUtility ($width: 242px) {
+    background-color: #c79809;
+    width: $width;
+    padding: 13px 26px;
+    border: none;
+    font-size: $fontSizeForm
+}
+
+
+
