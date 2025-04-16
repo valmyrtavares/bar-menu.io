@@ -1,0 +1,23 @@
+@use './mixin' as *;
+
+
+.formButtonSubmit {
+    @include containerButtonSubmit;
+    button {
+        @include btnSubmit;
+    }
+}
+.uploadImage {
+    @include uploadImage;
+}
+form{
+    .hiddenInput {
+        display: none !important;
+    }
+    label {
+        font-size: $fontSizeFormLabel;
+    }
+    select {
+        font-size: $fontSizeForm !important;
+    }
+}

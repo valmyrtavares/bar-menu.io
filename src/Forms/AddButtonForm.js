@@ -18,6 +18,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/form.css';
+import style from '../assets/styles/AddButtonForm.module.scss';
 import { Link } from 'react-router-dom';
 
 function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
@@ -168,7 +169,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
           <label className="form-label">Categoria</label>
           <select
             id="category"
-            className="form-select custom-select"
+            className="form-select"
             value={form.category}
             required
             onChange={handleChange}
@@ -184,8 +185,10 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
               ))}
           </select>
         </div>
-        <Input id="parent" value={form.parent} type="hidden" />
-        <Input id="display" value={form.display} type="hidden" />
+        <div className={style.hiddenInput}>
+          <Input id="parent" value={form.parent} type="hidden" />
+          <Input id="display" value={form.display} type="hidden" />
+        </div>
         <Input
           id="image"
           label="Image"
@@ -193,11 +196,16 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
           type="text"
           onChange={handleChange}
         />
-        <input type="file" onChange={onfileChange} />
-        <progress value={progress} max="100" />
-        {url && <img className="image-preview" src={url} alt="Uploaded file" />}
-
-        <button className="btn btn-primary">Enviar</button>
+        <div className={style.uploadImage}>
+          <input type="file" onChange={onfileChange} />
+          <progress value={progress} max="100" />
+          {url && (
+            <img className="image-preview" src={url} alt="Uploaded file" />
+          )}
+        </div>
+        <div className={style.formButtonSubmit}>
+          <button className="btn btn-primary">Enviar</button>
+        </div>
       </form>
     </div>
   );
