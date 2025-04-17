@@ -10,14 +10,18 @@
 .uploadImage {
     @include uploadImage;
 }
-form{
-    .hiddenInput {
-        display: none !important;
-    }
-    label {
-        font-size: $fontSizeFormLabel;
-    }
-    select {
-        font-size: $fontSizeForm !important;
+.containerAddButtonForm{
+    background-color: $bgColorForm;
+    padding: 20px;
+    form{
+        .hiddenInput {
+            display: none !important;
+        }
+        label {
+            font-size: $fontSizeFormLabel;
+        }
+        select {
+            font-size: $fontSizeForm !important;
+        }
     }
 }

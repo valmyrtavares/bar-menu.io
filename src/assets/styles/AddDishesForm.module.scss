@@ -32,29 +32,33 @@
     @include uploadImage;
 }
 
-form{
-    label{
-        font-size:$fontSizeFormLabel;
-    }
-    .hiddenInput {
-        display: none !important;
-    }
-    .checkInput{
-        display:flex;
-        justify-content:start;
-        align-items:center;
-        margin: 20px 0;
+.containerAddDishesForm{
+    background-color:$bgColorForm;
+    
+    form{
         label{
-            font-size:$fontSizeForm;
+            font-size:$fontSizeFormLabel;
+        }
+        .hiddenInput {
+            display: none !important;
+        }
+        .checkInput{
+            display:flex;
+            justify-content:start;
+            align-items:center;
+            margin: 20px 0;
+            label{
+                font-size:$fontSizeForm;
+            }
+            
+            input[type="checkbox"] {
+                margin-right: 10px;
+            }
+        }
+        select {
+            font-size: $fontSizeForm !important;
         }
         
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
+        
     }
-    select {
-        font-size: $fontSizeForm !important;
-    }
-    
-
 }

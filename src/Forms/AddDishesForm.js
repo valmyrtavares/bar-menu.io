@@ -73,7 +73,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   React.useEffect(() => {
     if (recipe) {
       form.recipe = recipe;
-      console.log(form);
     }
   }, [recipe]);
 
@@ -241,7 +240,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
   }, [form]);
 
   return (
-    <div className="Edit-Add-Popup mt-5 p-3 bg-body-tertiar">
+    <div className={style.containerAddDishesForm}>
       {showPopupCostAndPrice && (
         <PriceAndExpenseBuilder
           setShowPopupCostAndPrice={setShowPopupCostAndPrice}

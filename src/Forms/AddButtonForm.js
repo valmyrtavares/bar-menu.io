@@ -141,7 +141,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   };
 
   return (
-    <div className="Edit-Add-Popup mt-2 p-3 bg-body-tertiar">
+    <div className={style.containerAddButtonForm}>
       <div className="close-btn">
         {setModalEditButton ? (
           <button onClick={() => setModalEditButton(false)}>X</button>
