@@ -1,6 +1,6 @@
 import React from 'react';
 import Input from '../Input';
-import '../../assets/styles/PriceAndExpenseBuilder.css';
+import style from '../../assets/styles/PriceAndExpenseBuilder.module.scss';
 import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
 
@@ -64,6 +64,22 @@ const PriceAndExpenseBuilder = ({
     console.log('FORM    ', form);
   }, [form]);
 
+  React.useEffect(() => {
+    if (labelPrice === undefined) {
+      document.querySelector(`.${style.allInputsContainer}`).style.cssText = `
+        background: #dad4d4;
+        max-width: 700px;
+        box-shadow: 6px 5px #8888889c;
+        position: fixed;
+        top: 31%;
+        left: 35%;
+        width: 86%;
+        padding: 1%;
+        border: solid 1px black;
+      `;
+    }
+  }, []);
+
   const handleBlur = (e) => {
     const { id, value } = e.target;
 
@@ -104,69 +120,73 @@ const PriceAndExpenseBuilder = ({
   };
 
   return (
-    <div className="Price-cost-container">
-      {setShowPopupCostAndPrice && (
-        <CloseBtn setClose={setShowPopupCostAndPrice} />
-      )}
-      <div className="inputs-container">
-        <Input
-          id="price"
-          label="Preço"
-          value={form.price}
-          type="number"
-          onChange={
-            handleFatherChange
-              ? (e) => handleFatherChange(e, labelPrice)
-              : handleChange
-          }
-          onBlur={
-            handleFatherBlur
-              ? (e) => handleFatherBlur(e, labelPrice)
-              : handleBlur
-          }
-        />
-        <Input
-          id="cost"
-          label="Custo"
-          value={form.cost}
-          type="number"
-          onChange={
-            handleFatherChange
-              ? (e) => handleFatherChange(e, labelPrice)
-              : handleChange
-          }
-          onBlur={
-            handleFatherBlur
-              ? (e) => handleFatherBlur(e, labelPrice)
-              : handleBlur
-          }
-        />
-        <Input
-          id="percentage"
-          label="Porcentagem"
-          value={form.percentage}
-          type="number"
-          onChange={
-            handleFatherChange
-              ? (e) => handleFatherChange(e, labelPrice)
-              : handleChange
-          }
-          onBlur={
-            handleFatherBlur
-              ? (e) => handleFatherBlur(e, labelPrice)
-              : handleBlur
-          }
-        />
+    <div className={style.container}>
+      <div className={style.allInputsContainer}>
+        {setShowPopupCostAndPrice && (
+          <CloseBtn setClose={setShowPopupCostAndPrice} />
+        )}
+        <div className={style.inputContainer}>
+          <Input
+            id="price"
+            label="Preço"
+            value={form.price}
+            type="number"
+            onChange={
+              handleFatherChange
+                ? (e) => handleFatherChange(e, labelPrice)
+                : handleChange
+            }
+            onBlur={
+              handleFatherBlur
+                ? (e) => handleFatherBlur(e, labelPrice)
+                : handleBlur
+            }
+          />
+          <Input
+            id="cost"
+            label="Custo"
+            value={form.cost}
+            type="number"
+            onChange={
+              handleFatherChange
+                ? (e) => handleFatherChange(e, labelPrice)
+                : handleChange
+            }
+            onBlur={
+              handleFatherBlur
+                ? (e) => handleFatherBlur(e, labelPrice)
+                : handleBlur
+            }
+          />
+          <Input
+            id="percentage"
+            label="Porcentagem"
+            value={form.percentage}
+            type="number"
+            onChange={
+              handleFatherChange
+                ? (e) => handleFatherChange(e, labelPrice)
+                : handleChange
+            }
+            onBlur={
+              handleFatherBlur
+                ? (e) => handleFatherBlur(e, labelPrice)
+                : handleBlur
+            }
+          />
+        </div>
+        {addPriceObj && (
+          <div className={style.btnContainer}>
+            <button
+              onClick={() => {
+                addPriceObj(form);
+              }}
+            >
+              Enviar
+            </button>
+          </div>
+        )}
       </div>
-      {addPriceObj && (
-        <button
-          onClick={() => {
-            addPriceObj(form);
-          }}
-        >
-          Enviar
-        </button>
-      )}
     </div>
   );
 };

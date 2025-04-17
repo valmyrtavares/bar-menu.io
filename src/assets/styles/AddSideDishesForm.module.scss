@@ -1,6 +1,7 @@
 @import "./adminStyleReuse.module.scss";
 
 .EditAddPopupContainer{
+    background-color: $bgColorForm;
     form{
         padding: 3%;
         display: grid;

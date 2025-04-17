@@ -1,5 +1,5 @@
 @use './mixin' as *;
-
+@import "./adminStyleReuse.module.scss";
 
 .formButtonSubmit{
   @include containerButtonSubmit;
@@ -24,7 +24,7 @@
     margin-top: 20px;
 
     button {
-        @include btnUtility;
+        @include btnAdmin
     }
 }
 
@@ -34,7 +34,8 @@
 
 .containerAddDishesForm{
     background-color:$bgColorForm;
-    
+    min-width:600px;
+    padding:3%;
     form{
         label{
             font-size:$fontSizeFormLabel;

@@ -1,5 +1,5 @@
 @use './mixin' as *;
-
+@import "./adminStyleReuse.module.scss";
 
 .formButtonSubmit {
     @include containerButtonSubmit;

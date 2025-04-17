@@ -360,7 +360,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           </label>
         </div>
         <div className={style.formButtonSubmit}>
-          <button className="btn btn-primary">Enviar</button>
+          <button>Enviar</button>
         </div>
       </form>
       {showPopupSideDishes && (
@@ -384,14 +384,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         )}
       </div>
       <div className={style.sidedishesRecipeBtnContainer}>
-        <button className="btn btn-success " onClick={openModalSideDishes}>
-          {' '}
-          Acompanhamentos
-        </button>
-        <button className="btn btn-success recipe" onClick={openRecipeModal}>
-          {' '}
-          Receita
-        </button>
+        <button onClick={openModalSideDishes}> Acompanhamentos</button>
+        <button onClick={openRecipeModal}> Receita</button>
       </div>
     </div>
   );

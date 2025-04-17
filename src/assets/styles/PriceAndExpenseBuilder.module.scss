@@ -1,0 +1,27 @@
+@import "variables.css";
+@import  "adminStyleReuse.module.scss";
+
+
+.container{
+    position:relative;
+    .allInputsContainer{
+        background:$bgColorForm;
+        max-width: 700px;
+        box-shadow: 6px 5px #8888889c;
+        
+        .inputContainer{
+            display:flex;
+            gap: 15px;
+            justify-content: space-around;
+            input{
+                max-width: 100px;
+            }
+        }
+        .btnContainer{
+            @include containerButtonSubmit;
+           button{
+            @include btnSubmit
+           }
+        }
+    }
+}

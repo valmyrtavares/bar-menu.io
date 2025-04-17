@@ -7,7 +7,70 @@ $bg-admin-default: rgb(218, 212, 212);
 $admin-title-fontsize: 30px;
 $admin-title-fontfamily:'arial';
 $table-text-fontsize:12px;
+$bgColorForm: #dad4d4;
+$fontSizeForm: 1.3rem;
+$fontSizeFormLabel: 2rem;
+$bgColorForm: #dad4d4;
 
+@mixin btnSubmit {
+    background-color: $btn-admin-bg-color;
+    width: 242px;
+    padding: 13px 26px;
+    border: none;
+    color: $btn-admin-text-color;
+    font-size: $fontSizeForm
+}
+
+@mixin btnUtility ($width: 242px) {
+    background-color: $btn-admin-bg-color;
+    width: $width;
+    padding: 13px 26px;
+    border: none;
+    font-size: $fontSizeForm;
+    color:$btn-admin-text-color;
+}
+
+@mixin containerButtonSubmit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@mixin uploadImage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 12vh;
+
+    input[type="file"] {
+        @include btnUtility(50%);
+        margin-bottom: 10px;
+
+        &::-webkit-file-upload-button {
+            background: none;
+            border: none;
+            color: $btn-admin-text-color;
+            font: inherit;
+            cursor: pointer;
+        }
+    }
+
+    input[type="file"] {
+        color: $btn-admin-text-color;
+    }
+
+    progress {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 10px;
+    }
+ }
 
 @mixin btnAdmin{
 
