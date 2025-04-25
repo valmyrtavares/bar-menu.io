@@ -1,0 +1,33 @@
+@import "variables";
+@import './adminStyleReuse.module.scss';
+
+.containerCustomePrice{
+    width: 206%;       
+    background-color:$bgColorForm;    
+    height: 80vh;      
+    overflow-y: auto;       
+    border:solid 1px black;
+    .wrapperInputs{
+        padding:5% 5%;
+        display:grid;
+        grid-template-columns: 5fr 2fr;
+        column-gap: 10px;
+        align-items: center;
+        
+        label{
+           font-size: 13px;
+           color:var(--font-color)
+       }
+       .customizedPriceBtn {
+         containerButtonSubmit {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                button{
+
+                }
+            }
+       }
+    }
+    
+}

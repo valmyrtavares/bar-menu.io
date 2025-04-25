@@ -1,5 +1,5 @@
 import React from 'react';
-import '../assets/styles/customizePriceForm.css';
+import style from '../assets/styles/customizePriceForm.module.scss';
 import Input from '../component/Input.js';
 import Title from '../component/title.js';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
@@ -44,28 +44,6 @@ function CustomizePriceForm({
         setFormPrice(customizedPriceObj);
       }
     }
-    //   setFormPrice({
-    //     firstPrice: {
-    //       price: 0,
-    //       cost: 0,
-    //       percentage: 0,
-    //       label: '',
-    //     },
-
-    //     secondPrice: {
-    //       price: 0,
-    //       cost: 0,
-    //       percentage: 0,
-    //       label: '',
-    //     },
-
-    //     thirdPrice: {
-    //       price: 0,
-    //       cost: 0,
-    //       percentage: 0,
-    //       label: '',
-    //     },
-    //   });
   }, [customizedPriceObj]);
 
   React.useEffect(() => {
@@ -97,14 +75,6 @@ function CustomizePriceForm({
     setShowPopupCostAndPrice(true);
   };
 
-  // const addPriceObj = (priceAndCost) => {
-  //   setFormPrice({
-  //     ...formPrice,
-  //     [labelPrice]: priceAndCost,
-  //   });
-  //   console.log('FORM PRICE    ', formPrice);
-  // };
-
   React.useEffect(() => {
     if (customizedPriceObj && Object.keys(customizedPriceObj).length > 0) {
       setFormPrice({
@@ -129,10 +99,6 @@ function CustomizePriceForm({
       });
     }
   }, [customizedPriceObj]);
-
-  const testando = () => {
-    console.log('FORM PRICE   ', formPrice);
-  };
 
   const handleFatherBlur = (e, priceType) => {
     const { id, value } = e.target;
@@ -183,7 +149,7 @@ function CustomizePriceForm({
   //  HTML++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   return (
-    <div className="container-custome-price">
+    <div className={style.containerCustomePrice}>
       {
         <div className="close-btn">
           <button onClick={close}>X</button>
@@ -191,7 +157,7 @@ function CustomizePriceForm({
       }
       <Title Preço mainTitle="Preço Customizado" />
 
-      <div className="wrapper-inputs">
+      <div className="wrapperInputs">
         {
           <PriceAndExpenseBuilder
             formPrice={formPrice}
@@ -208,7 +174,7 @@ function CustomizePriceForm({
           onChange={(e) => handleChange(e, 'firstPrice')}
         />
       </div>
-      <div className="wrapper-inputs">
+      <div className="wrapperInputs">
         {showPopupCostPrice && (
           <PriceAndExpenseBuilder
             formPrice={formPrice}
@@ -225,7 +191,7 @@ function CustomizePriceForm({
           onChange={(e) => handleChange(e, 'secondPrice')}
         />
       </div>
-      <div className="wrapper-inputs">
+      <div className="wrapperInputs">
         {showPopupCostPrice && (
           <PriceAndExpenseBuilder
             formPrice={formPrice}
@@ -242,9 +208,9 @@ function CustomizePriceForm({
           onChange={(e) => handleChange(e, 'thirdPrice')}
         />
       </div>
-      <button onClick={testando}>Botão de teste</button>
+
       <button
-        className="customized-price-btn"
+        className="customizedPriceBtn"
         type="button"
         onClick={() => onPriceChange(formPrice)}
       >
