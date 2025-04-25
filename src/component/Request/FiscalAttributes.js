@@ -51,8 +51,8 @@ const FiscalAttributes = () => {
   }, []);
 
   const nfce = {
-    cnpj_emitente: '19337953000178',
     data_emissao: '',
+    cnpj_emitente: '19337953000178',
     indicador_inscricao_estadual_destinatario: '9',
     cpf_destinatario: form.cpf,
     modalidade_frete: 9,
@@ -97,14 +97,16 @@ const FiscalAttributes = () => {
     const url = `http://localhost:4000/api/send-nfce?ref=${ref}`;
 
     // Transformar nfce em JSON
-    const nfceJson = JSON.stringify(nfce);
+    // const nfceJson = JSON.stringify(nfce);
 
-    const payload = {
-      ref: ref,
-      nfceData: nfce,
-    };
+    // const payload = {
+    //   ref: ref,
+    //   nfceData: nfce,
+    // };
+    const payload = nfce; // <-- aqui, só o conteúdo da NFC-e
 
-    console.log('Payload enviado:', payload);
+    // console.log('Payload enviado:', payload);
+    // console.log('URL da requisição:', url);
 
     try {
       const response = await fetch(url, {
@@ -270,11 +272,13 @@ const FiscalAttributes = () => {
     if (confirm) {
       setOpenpopCancelTax(null);
       const url = `http://localhost:4000/api/cancel-nfce/${ref.ref}`; // URL do backend
-      console.log(url);
+      console.log('Chamando backend com URL:', url);
 
       const body = {
-        justificativa: 'Desistencia do cliente', // Justificativa para o cancelamento
+        justificativa:
+          'O cliente desistiu da compra no momento do pagamento por motivos pessoais.', // Justificativa para o cancelamento
       };
+      console.log('Enviando corpo da requisição:', body);
       try {
         const response = await fetch(url, {
           method: 'DELETE',
@@ -284,6 +288,7 @@ const FiscalAttributes = () => {
           body: JSON.stringify(body), // Enviando a justificativa como corpo da requisição
         });
         const data = await response.json(); // Obtendo a resposta da API
+        console.log('Resposta do backend:', data);
         if (response.ok) {
           console.log('Cancelamento realizado com sucesso:', data); // Sucesso
           updateCollection(ref);
