@@ -45,10 +45,35 @@ const FiscalAttributes = () => {
     cpfAndCardFlagValidation();
     const fetchData = async () => {
       const data = await getBtnData('taxDocuments');
-      setTaxDocument(data);
+      const sortedData = sortByDateIssued(data);
+      setTaxDocument(sortedData);
     };
     fetchData();
   }, []);
+
+  /**
+   * Ordena um array de documentos fiscais pela data de emissão (mais recentes primeiro)
+   * @param {Array} documents - Array de objetos que possuem a propriedade 'date_issued'
+   * @returns {Array} - Novo array ordenado
+   */
+  function sortByDateIssued(documents, keyData) {
+    if (!Array.isArray(documents)) return [];
+
+    const parseDate = (str) => {
+      if (!str) return new Date(0); // Data muito antiga caso falhe
+      const [datePart, timePart] = str.split(' ');
+      const [day, month, year] = datePart.split('/');
+      return new Date(
+        `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`
+      );
+    };
+
+    return documents.sort((a, b) => {
+      const dateA = parseDate(a.date_issued);
+      const dateB = parseDate(b.date_issued);
+      return dateB - dateA;
+    });
+  }
 
   const nfce = {
     data_emissao: '',
