@@ -1,8 +1,8 @@
-import React from "react";
-import { getBtnData } from "../api/Api.js";
-import Title from "../component/title.js";
-import "../assets/styles/includeSideDishesForm.css";
-import Input from "../component/Input.js";
+import React from 'react';
+import { getBtnData } from '../api/Api.js';
+import Title from '../component/title.js';
+import style from '../assets/styles/includeSideDishesForm.module.scss';
+import Input from '../component/Input.js';
 
 function IncludeSideDishesForm({
   setShowPopupSideDisehs,
@@ -13,7 +13,7 @@ function IncludeSideDishesForm({
 }) {
   //React Data
   const [form, setForm] = React.useState({
-    sideDishesElement: "",
+    sideDishesElement: '',
   }); //Use State Obj
   const [selectedSideDishes, setSelectedSideDishes] = React.useState([]);
   const [sideDishes, setSideDishes] = React.useState([]); //Array que recebe os dados do Fetch
@@ -34,7 +34,7 @@ function IncludeSideDishesForm({
 
   //Fetch
   const fetchDataSideDishes = async () => {
-    const data = await getBtnData("sideDishes");
+    const data = await getBtnData('sideDishes');
     // data.unshift({ sideDishes: "Selecione uma categoria", price: 0, id: "" });
     setSideDishes(data);
   };
@@ -71,16 +71,14 @@ function IncludeSideDishesForm({
   };
 
   return (
-    <div className="internal-container">
+    <div className={style.includeSideDishesContainer}>
       <div className="close-btn">
         <button onClick={() => setShowPopupSideDisehs(false)}>X</button>
       </div>
       <Title mainTitle="Forumlário de acompanhamentos" />
       {sideDishes && (
         <div className="my-3">
-          <label className="form-label">
-            Selecione os acompanhamentos do prato
-          </label>
+          <label>Selecione os acompanhamentos do prato</label>
           <select
             id="sideDishesElement"
             value={form.sideDishesElement}
@@ -90,10 +88,10 @@ function IncludeSideDishesForm({
               setForm({ ...form, sideDishesElement: e.target.value });
             }}
           >
-            <option value="">Selecione um acompanhamento</option>
+            <option value="">Selecione </option>
             {sideDishes.map((item, index) => (
               <option key={index} value={item.id}>
-                {" "}
+                {' '}
                 {item.sideDishes}
               </option>
             ))}
@@ -111,18 +109,14 @@ function IncludeSideDishesForm({
       </div>
       <Input
         id="limitSideDishes"
-        label="Selecione uma quantidade máxima de acompanhamentos"
+        label="Quantidade máxima de acompanhamentos"
         value={maxLimitSideDishes}
         type="number"
         onChange={handleChange}
       />
-
-      <button
-        className="btn-add-side-dishes btn btn-success"
-        onClick={sendArrayList}
-      >
-        Adicionar Acompanhamentos ao prato
-      </button>
+      <div className={style.formButtonSubmit}>
+        <button onClick={sendArrayList}>Adicionar </button>
+      </div>
     </div>
   );
 }

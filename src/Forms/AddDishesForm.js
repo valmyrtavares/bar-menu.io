@@ -364,7 +364,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         </div>
       </form>
       {showPopupSideDishes && (
-        <div className="container-new-sideDishes">
+        <div className={style.containerNewSideDishes}>
           <IncludeSideDishesForm
             setShowPopupSideDisehs={setShowPopupSideDisehs}
             setNewSideDishesList={setNewSideDishesList}

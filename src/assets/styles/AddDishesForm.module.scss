@@ -1,12 +1,7 @@
 @use './mixin' as *;
 @import "./adminStyleReuse.module.scss";
 
-.formButtonSubmit{
-  @include containerButtonSubmit;
-    button{
-    @include btnSubmit;
-    }
-}
+
 
 .sidedishesRecipeBtnContainer{
     margin-top: 40px;
@@ -61,5 +56,19 @@
         }
         
         
+    }
+    .containerNewSideDishes{
+        background-color: $bgColorForm;
+        position: fixed;
+        top: 20%;
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.7);
+        border: 1px solid black;
+    }
+    .formButtonSubmit {
+        @include containerButtonSubmit;
+
+        button {
+            @include btnSubmit;
+        }
     }
 }
