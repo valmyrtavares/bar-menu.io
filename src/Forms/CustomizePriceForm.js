@@ -208,14 +208,15 @@ function CustomizePriceForm({
           onChange={(e) => handleChange(e, 'thirdPrice')}
         />
       </div>
-
-      <button
-        className="customizedPriceBtn"
-        type="button"
-        onClick={() => onPriceChange(formPrice)}
-      >
-        Enviar
-      </button>
+      <div className={style.formButtonSubmit}>
+        <button
+          className="customizedPriceBtn"
+          type="button"
+          onClick={() => onPriceChange(formPrice)}
+        >
+          Enviar
+        </button>
+      </div>
     </div>
   );
 }

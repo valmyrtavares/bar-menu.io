@@ -29,5 +29,11 @@
             }
        }
     }
-    
+    .formButtonSubmit {
+        @include containerButtonSubmit;
+
+        button {
+            @include btnSubmit;
+        }
+    }
 }
