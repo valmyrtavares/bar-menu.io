@@ -1,8 +1,10 @@
 import React from 'react';
-import '../assets/styles/recipeDish.css';
+import style from '../assets/styles/recipeDish.module.scss';
 import Input from '../component/Input';
 import CloseBtn from '../component/closeBtn';
 import { getBtnData } from '../api/Api';
+import Title from '../component/title.js';
+import { Link } from 'react-router-dom';
 
 const RecipeDish = ({
   setRecipeModal,
@@ -145,18 +147,21 @@ const RecipeDish = ({
   };
 
   return (
-    <div className="recipeDish-container">
+    <div className={style.recipeDisContainer}>
       <CloseBtn setClose={setRecipeModal} />
-      <h1>Faça sua receita</h1>
+
+      <Link to="/admin/admin">
+        <Title mainTitle="Faça sua receita" />
+      </Link>
       {isEmptyObject(customizedPriceObj) ? (
         <div>
-          <div className="ingridients">
+          <div className={style.ingridients}>
             <select
               id="name"
               value={productList?.findIndex(
                 (product) => product.product === ingridients.name
               )}
-              className="select-input"
+              className={style.selectInput}
               onChange={handleChange}
             >
               <option value="">Selecione um produto</option>
@@ -172,7 +177,7 @@ const RecipeDish = ({
               id="amount"
               fieldFocus={fieldFocus}
               placeholder="Quantidade"
-              className="number-input"
+              className={style.numberInput}
               value={ingridients.amount}
               type="text"
               onChange={handleChange}
@@ -182,7 +187,7 @@ const RecipeDish = ({
               Adicione
             </button>
           </div>
-          <div className="items-recipe">
+          <div className={style.itemsRecipe}>
             <table>
               <thead>
                 <tr>
@@ -217,15 +222,15 @@ const RecipeDish = ({
         extractLabelSizes() &&
         extractLabelSizes().length > 0 &&
         extractLabelSizes().map((label) => (
-          <div className="container-with-differents-sizes">
-            <div className="ingridients">
+          <div className={style.recipeDisContainer}>
+            <div className={style.ingridients}>
               {label}
               <select
                 id="name"
                 value={productList?.findIndex(
                   (product) => product.product === ingridients.name
                 )}
-                className="select-input"
+                className={style.selectInput}
                 onChange={handleChange}
               >
                 <option value="">Selecione um produto</option>
@@ -241,17 +246,17 @@ const RecipeDish = ({
                 id="amount"
                 fieldFocus={fieldFocus}
                 placeholder="Quantidade"
-                className="number-input"
+                className={style.numberInput}
                 value={ingridients.amount}
                 type="text"
                 onChange={handleChange}
               />
 
               <button type="button" onClick={() => addIngredient(label)}>
-                Adicionek
+                Adicione
               </button>
             </div>
-            <div className="items-recipe">
+            <div className={style.itemsRecipe}>
               <table>
                 <thead>
                   <tr>
@@ -284,18 +289,18 @@ const RecipeDish = ({
           </div>
         ))
       )}
-      <div>
+      <div className={style.textAreaContainer}>
         <label>Escreva sua receita</label>
         <textarea
           id="gift"
-          className="text-area"
+          className={style.textArea}
           value={recipeExplanation}
           onChange={({ target }) => setRecipeExplanation(target.value)}
         >
           Saudação
         </textarea>
       </div>
-      <div className="btn-container">
+      <div className={style.formButtonSubmit}>
         <button onClick={sendRecipe}>Enviar Receita</button>
       </div>
     </div>

@@ -255,7 +255,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           <Link to="/admin/admin">X</Link>
         )}
       </div>
-      <div className="recipeModal-container">
+      <div className={style.recipeModalContainer}>
         {recipeModal && (
           <RecipeDish
             setRecipeModal={setRecipeModal}

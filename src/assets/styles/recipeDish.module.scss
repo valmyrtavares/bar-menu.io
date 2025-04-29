@@ -1,0 +1,73 @@
+@import "variables";
+@import "./adminStyleReuse.module.scss";
+.recipeDisContainer{
+    background-color:$bg-admin-default;
+    padding: 3%;
+    max-height: 80vh;
+    overflow-y:auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);  
+    border:solid 3px var( --secundary-bg-color);
+    .ingridients{
+       display:flex;
+       justify-content: space-around;
+       align-items: center;
+       align-content: center;
+       .selectInput{
+          height: 45px;
+          max-width: 160px;
+          height: 45px;
+          max-width: 242px;
+       }
+       .numberInput{
+          max-width: 83px;
+          height: 45px;
+       }
+        button {
+                @include btnSubmit;
+            }
+    
+    }
+    .itemsRecipe {
+       margin:50px auto;
+       table{
+        @include tableadmin
+       }
+    }
+    .textAreaContainer{
+    label {
+            font-size: $fontSizeFormLabel;
+        }
+        .textArea{
+            width: 100%;
+            min-height: 15vh;
+        }
+    }
+    .formButtonSubmit {
+    @include containerButtonSubmit(20px 0);
+    button {
+        @include btnSubmit;
+    }
+
+    }
+    
+}
+.recipeDish-container button, 
+.recipeDish-container .ingridients button{
+    max-height: 50px;
+   
+        border-radius: 10px;
+        padding: 10px 10px;
+      
+        font-family: var(--title-font) !important;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--title-font-color);
+        background: var(--btn-color);
+}
+.recipeDish-container .ingridients input{
+    margin-bottom:0 !important;
+}
+
+
+
+

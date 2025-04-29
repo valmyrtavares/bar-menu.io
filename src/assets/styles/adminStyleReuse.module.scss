@@ -30,10 +30,11 @@ $bgColorForm: #dad4d4;
     color:$btn-admin-text-color;
 }
 
-@mixin containerButtonSubmit {
+@mixin containerButtonSubmit ($margin: 0 0){
     display: flex;
     justify-content: center;
     align-items: center;
+    margin:$margin
 }
 
 @mixin uploadImage {
