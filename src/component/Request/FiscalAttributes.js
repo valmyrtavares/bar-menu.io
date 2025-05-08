@@ -381,14 +381,18 @@ const FiscalAttributes = () => {
   };
 
   const isoDate = () => {
-    const now = new Date();
-    const maxDifference = 5 * 60 * 1000; // 5 minutos em milissegundos
-    const randomTime = new Date(
-      now.getTime() - Math.floor(Math.random() * maxDifference)
-    );
-    console.log(randomTime);
-    return randomTime;
+    return new Date().toISOString();
   };
+
+  //const isoDate = () => {
+  //   const now = new Date();
+  //   const maxDifference = 5 * 60 * 1000; // 5 minutos em milissegundos
+  //   const randomTime = new Date(
+  //     now.getTime() - Math.floor(Math.random() * maxDifference)
+  //   );
+  //   console.log(randomTime);
+  //   return randomTime;
+  // };
 
   const onConfirm = (ref, fonfirm) => {
     setConfirm(true);

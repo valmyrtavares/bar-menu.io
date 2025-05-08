@@ -159,13 +159,14 @@ const DishesModal = ({ item, setModal }) => {
 
       // Redireciona o usuário para a página de requisições
       navigate('/request');
+      return;
     } catch (error) {
       console.log(error);
     }
   }
 
   async function CheckLogin() {
-    const userId = await CheckUser('userMenu');
+    const userId = await CheckUser('userMenu', global.isToten);
     navigate(userId);
   }
 
