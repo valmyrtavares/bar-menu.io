@@ -133,6 +133,8 @@ const FiscalAttributes = () => {
     // console.log('Payload enviado:', payload);
     // console.log('URL da requisição:', url);
 
+    console.log('Esse é o payload   ', payload);
+
     try {
       const response = await fetch(url, {
         method: 'POST',
