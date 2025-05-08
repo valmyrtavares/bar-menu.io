@@ -250,6 +250,13 @@ const TotenRegisterPopup = ({
             />
           )}
         </div>
+        <h1
+          onClick={() => {
+            setOpenCloseTotenPopup(false);
+          }}
+        >
+          Volte para os seus pedidos
+        </h1>
         <button
           disabled={isSubmitting}
           className={style.goonBtn}
