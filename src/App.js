@@ -41,6 +41,7 @@ import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 import MainPictureMenu from './Pages/MainPictureMenu';
 import { getOneItemColleciton } from './api/Api';
+import { GlobalContext } from './GlobalContext.js';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
@@ -49,8 +50,13 @@ function App() {
   const [showHeader, setShowHeader] = React.useState(true);
   const [MainMenu, setMainMenu] = React.useState(() => MainMenuDefault);
   const location = useLocation();
+  const global = React.useContext(GlobalContext);
 
   React.useEffect(() => {
+    const isToten = localStorage.getItem('isToten') === 'true';
+    if (isToten) {
+      global.setIsToten(true);
+    }
     const setSystemMode = async () => {
       if (location.pathname === '/') {
         const modePictureMobile = await checkPictureMenuMode();
