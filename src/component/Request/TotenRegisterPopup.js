@@ -9,7 +9,7 @@ import { app } from '../../config-firebase/firebase.js';
 import { getOneItemColleciton, getBtnData } from '../../api/Api.js';
 import Keyboard from '../../component/Keyboard';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
-
+import CloseBtn from '../closeBtn.js';
 const TotenRegisterPopup = ({
   setOpenCloseTotenPopup,
   setCurrentUser,
@@ -209,8 +209,8 @@ const TotenRegisterPopup = ({
         <DefaultComumMessage msg="Infelizmente não achamos o seu registro, Cadastre-se ou preencha um nome/apelido sem registro para ser chamado" />
       )}
       <div className={style.totenRegisterPopupSecondContainer}>
+        <CloseBtn setClose={setOpenCloseTotenPopup} />
         <h1>Como devemos chamar você ?</h1>
-
         <Input
           id="name"
           required
@@ -250,13 +250,6 @@ const TotenRegisterPopup = ({
             />
           )}
         </div>
-        <h1
-          onClick={() => {
-            setOpenCloseTotenPopup(false);
-          }}
-        >
-          Volte para os seus pedidos
-        </h1>
         <button
           disabled={isSubmitting}
           className={style.goonBtn}
