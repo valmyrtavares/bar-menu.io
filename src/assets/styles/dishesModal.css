@@ -174,7 +174,7 @@
         border: solid 1px var(--secundary-bg-color);
         border-radius: 10px;
         width: 80%;
-        margin: 15px 10%;
+        margin: 4px 10%;
         display: flex;
         justify-content: space-between;
         align-items: center;
