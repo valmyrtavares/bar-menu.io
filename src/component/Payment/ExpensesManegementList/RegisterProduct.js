@@ -88,6 +88,7 @@ const RegisterProvider = ({ setShowPopup }) => {
               <th>Produto</th>
               <th>Volume mínimo</th>
               <th>Unidade de medida</th>
+              <th>Produtos de Suporte</th>
               <th>Editar</th>
               <th>Excluir</th>
             </tr>
@@ -100,6 +101,9 @@ const RegisterProvider = ({ setShowPopup }) => {
                   <td>{requestItem.name}</td>
                   <td>{requestItem.minimumAmount || 0}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
+                  <td>
+                    {requestItem.operationSupplies ? 'Insumo' : 'Materia Prima'}
+                  </td>
                   <td
                     className={product.edit}
                     onClick={() => EditItem(requestItem)}
@@ -267,6 +271,24 @@ const RegisterProvider = ({ setShowPopup }) => {
             type="text"
             onChange={handleChange}
           />
+
+          <div className="checkbox-form">
+            <label htmlFor="operationSupplies">
+              <input
+                id="operationSupplies"
+                type="checkbox"
+                checked={!!form.operationSupplies}
+                onChange={(e) =>
+                  setForm((prevForm) => ({
+                    ...prevForm,
+                    operationSupplies: e.target.checked,
+                  }))
+                }
+              />
+              Material de suporte
+            </label>
+          </div>
+
           <div className="select-form">
             <label></label>
             <select
