@@ -3,7 +3,44 @@ import { getBtnData } from '../api/Api';
 import { cardClasses } from '@mui/material';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { app } from '../config-firebase/firebase.js';
+import * as XLSX from 'xlsx';
 const db = getFirestore(app);
+
+export const exportToExcel = (ObjList, fileName = 'data.xlsx') => {
+  if (!ObjList.length) {
+    alert('Nenhum cliente para exportar!');
+    return;
+  }
+
+  try {
+    // Mantém apenas chaves com valores primitivos (string, number, boolean)
+    const simplifiedList = ObjList.map((obj) => {
+      const flatObj = {};
+      for (const key in obj) {
+        const value = obj[key];
+        if (
+          typeof value === 'string' ||
+          typeof value === 'number' ||
+          typeof value === 'boolean'
+        ) {
+          flatObj[key] = value;
+        }
+      }
+      return flatObj;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(simplifiedList);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
+    XLSX.writeFile(workbook, fileName);
+
+    console.log('Arquivo Excel gerado com sucesso!');
+    alert('Arquivo Excel foi baixado com sucesso!');
+  } catch (err) {
+    console.error('Erro ao exportar Excel:', err);
+    alert('Erro ao gerar o arquivo Excel');
+  }
+};
 
 export function firstNameClient(nameCustomer) {
   if (nameCustomer) {
