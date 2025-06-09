@@ -17,11 +17,18 @@
                 max-width: 100px;
             }
         }
-        .btnContainer{
-            @include containerButtonSubmit;
-           button{
-            @include btnSubmit
-           }
+        .buttonCostContainer{
+            margin-top: 20px;
+            display:flex;
+            justify-content: space-around;
+            
+            .btnContainer{
+                @include containerButtonSubmit;
+               button{
+                @include btnSubmit
+               }
+            }
         }
+
     }
 }

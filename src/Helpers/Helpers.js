@@ -1,6 +1,7 @@
 import React from 'react';
-import { getBtnData } from '../api/Api';
+import { getBtnData, getStockByProductName } from '../api/Api';
 import { cardClasses } from '@mui/material';
+
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { app } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
@@ -119,3 +120,48 @@ export const logToAnounimousInToten = (setNameClient) => {
     }
   }
 };
+
+export async function calculateItemCost(item) {
+  const results = {};
+
+  const processIngredientList = async (ingredientList) => {
+    let totalCost = 0;
+    console.log('Ingredient List:', ingredientList);
+    for (const ingredient of ingredientList) {
+      const stock = await getStockByProductName(ingredient.name);
+      if (stock && stock.totalVolume && stock.totalCost) {
+        const costPerUnit = stock.totalCost / stock.totalVolume;
+
+        const amount = parseFloat(ingredient.amount.replace(',', '.')); // garante conversão correta
+        totalCost += amount * costPerUnit;
+      }
+    }
+
+    return totalCost;
+  };
+
+  // Caso 1: FinalingredientList é um array
+  if (Array.isArray(item?.FinalingridientsList)) {
+    const cost = await processIngredientList(item?.FinalingridientsList);
+    return { default: cost }; // retorna com uma key padrão
+  }
+
+  // Caso 2: FinalingredientList é um objeto com arrays
+  if (
+    typeof item?.FinalingridientsList === 'object' &&
+    item?.FinalingridientsList !== null
+  ) {
+    const sizes = item.FinalingridientsList;
+
+    for (const [sizeName, ingredientList] of Object.entries(sizes)) {
+      const cost = await processIngredientList(ingredientList);
+      results[sizeName] = cost;
+    }
+
+    return results;
+  }
+
+  return null;
+}
+//There is no need to export this function, it is used only in the PriceAndExpenseBuilder.js
+//te

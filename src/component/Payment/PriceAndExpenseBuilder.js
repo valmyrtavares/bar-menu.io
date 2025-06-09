@@ -3,6 +3,8 @@ import Input from '../Input';
 import style from '../../assets/styles/PriceAndExpenseBuilder.module.scss';
 import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
+import { calculateItemCost } from '../../Helpers/Helpers';
+import { updateCollection } from '../../api/Api';
 
 const PriceAndExpenseBuilder = ({
   setShowPopupCostAndPrice, //close and open popup
@@ -12,6 +14,9 @@ const PriceAndExpenseBuilder = ({
   handleFatherChange,
   handleFatherBlur,
   objPriceCost,
+  costProfitMarginCustomized,
+  recipe,
+  id,
 }) => {
   const [form, setForm] = React.useState({
     price: 0,
@@ -37,7 +42,6 @@ const PriceAndExpenseBuilder = ({
 
   React.useEffect(() => {
     if (formPrice && labelPrice) {
-      console.log('formPrice     ', formPrice);
       const selectedPriceObj = formPrice[labelPrice];
       if (selectedPriceObj && selectedPriceObj.price !== undefined) {
         setForm({
@@ -61,10 +65,6 @@ const PriceAndExpenseBuilder = ({
   }, [objPriceCost]);
 
   React.useEffect(() => {
-    console.log('FORM    ', form);
-  }, [form]);
-
-  React.useEffect(() => {
     if (labelPrice === undefined) {
       document.querySelector(`.${style.allInputsContainer}`).style.cssText = `
         background: #dad4d4;
@@ -78,6 +78,7 @@ const PriceAndExpenseBuilder = ({
         border: solid 1px black;
       `;
     }
+    console.log('OBJETO DE RECEITA     ', recipe);
   }, []);
 
   const handleBlur = (e) => {
@@ -116,6 +117,52 @@ const PriceAndExpenseBuilder = ({
           percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta de lucro
         }));
       }
+    }
+  };
+  const calculatedRecipeCost = async () => {
+    try {
+      console.log('costProfitMarginCustomized', costProfitMarginCustomized);
+      const response = await calculateItemCost(recipe);
+      debugger;
+      if (response.default !== undefined) {
+        // Atualiza o campo específico costPriceObj.cost
+        await updateCollection('item', id, {
+          'costPriceObj.cost': response.default,
+        });
+        console.log('Custo padrão atualizado com sucesso no Firestore!');
+      } else if (
+        costProfitMarginCustomized &&
+        typeof costProfitMarginCustomized === 'object'
+      ) {
+        const updates = {};
+        const costMap = response;
+        debugger;
+        ['firstPrice', 'secondPrice', 'thirdPrice'].forEach((priceKey) => {
+          const priceData = costProfitMarginCustomized[priceKey];
+
+          if (priceData && priceData.label && costMap[priceData.label]) {
+            updates[`costProfitMarginCustomized.${priceKey}.cost`] =
+              costMap[priceData.label];
+          }
+        });
+        console.log('Updates to be made:', updates);
+        debugger;
+        if (Object.keys(updates).length > 0) {
+          await updateCollection('item', id, updates);
+          console.log(
+            'Custos por tamanho atualizados com sucesso no Firestore!'
+          );
+        } else {
+          console.warn('Nenhum campo para atualizar foi encontrado.');
+        }
+      } else {
+        console.warn('formPrice está ausente ou malformado.');
+      }
+    } catch (error) {
+      console.error(
+        'Erro ao calcular ou atualizar o custo no Firestore:',
+        error
+      );
     }
   };
 
@@ -175,17 +222,22 @@ const PriceAndExpenseBuilder = ({
             }
           />
         </div>
-        {addPriceObj && (
+        <div className={style.buttonCostContainer}>
           <div className={style.btnContainer}>
-            <button
-              onClick={() => {
-                addPriceObj(form);
-              }}
-            >
-              Enviar
-            </button>
+            <button onClick={calculatedRecipeCost}>Calcular Custo</button>
           </div>
-        )}
+          {addPriceObj && (
+            <div className={style.btnContainer}>
+              <button
+                onClick={() => {
+                  addPriceObj(form);
+                }}
+              >
+                Enviar
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

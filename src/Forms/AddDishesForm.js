@@ -246,6 +246,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
           setShowPopupCostAndPrice={setShowPopupCostAndPrice}
           addPriceObj={addPriceObj}
           objPriceCost={form.costPriceObj}
+          costProfitMarginCustomized={form.costProfitMarginCustomized}
+          recipe={form.recipe}
+          id={form.id}
         />
       )}
       <div className="close-btn">

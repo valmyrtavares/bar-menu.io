@@ -16,6 +16,24 @@ import {
 //FIRESTORE
 const db = getFirestore(app);
 
+export async function getStockByProductName(productName) {
+  try {
+    const stockCollection = collection(db, 'stock');
+    const q = query(stockCollection, where('product', '==', productName));
+    //“Quero todos os documentos da coleção stock onde o campo product é igual ao productName informado.”
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs[0].data(); // retornando o primeiro match
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar o stock:', error);
+    return null;
+  }
+}
+
 //Bringing by query data
 export async function fetchingByQuery(reference, collectionName) {
   try {
@@ -224,3 +242,26 @@ export const updateItemsSideDishes = async () => {
     console.error('Erro ao atualizar sideDishesElementList: ', error);
   }
 };
+
+/**
+ * Atualiza um documento dentro de uma coleção específica.
+ *
+ * @param {string} collectionName - Nome da coleção (ex: 'recipes', 'products')
+ * @param {string} docId - ID do documento a ser atualizado
+ * @param {object} data - Objeto com os campos que devem ser atualizados
+ */
+export async function updateCollection(collectionName, docId, data) {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await updateDoc(docRef, data);
+    console.log(
+      `Documento ${docId} na coleção "${collectionName}" atualizado com sucesso.`
+    );
+  } catch (error) {
+    console.error(
+      `Erro ao atualizar o documento ${docId} na coleção "${collectionName}":`,
+      error
+    );
+    throw error;
+  }
+}

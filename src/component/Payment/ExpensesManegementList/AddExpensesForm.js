@@ -3,6 +3,7 @@ import Input from '../../Input';
 import style from '../../../assets/styles/AddExpensesForm.module.scss';
 import CloseBtn from '../../closeBtn';
 import {
+  getDocs,
   getFirestore,
   collection,
   addDoc,
@@ -32,6 +33,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     totalCost: 0,
     volumePerUnit: 0,
     totalVolume: 0,
+    operationSupplies: false,
     unitOfMeasurement: '',
   });
   const [itemArrayList, setItemArrayList] = React.useState([]);
@@ -48,9 +50,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       ]);
 
       if (dataProduct && dataProduct.length > 0) {
-        const sortedData = dataProduct.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
+        const sortedData = dataProduct
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter((item) => !item.operationSupplies);
         setProductList(sortedData);
       }
       if (dataProvider && dataProvider.length > 0) {
@@ -60,9 +62,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     fetchProduct();
   }, []);
 
-  React.useEffect(() => {
-    if (productList) console.log('Lista de produtos   ', productList);
-  }, [productList]);
+  // React.useEffect(() => {
+  //   if (productList) console.log('Lista de produtos   ', productList);
+  // }, [productList]);
 
   React.useEffect(() => {
     if (itemArrayList) {
@@ -125,6 +127,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [item.volumePerUnit, item.amount]);
 
+  React.useEffect(() => {
+    console.log('FORM:', form);
+  }, [form]);
+
   const addItem = () => {
     if (item.product !== '') {
       setItem({
@@ -133,6 +139,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       });
 
       setItemArrayList((prevArrayList) => [...prevArrayList, item]);
+    } else {
+      alert('Produto não foi selecionado. Por favor, selecione o produto.');
     }
     console.log('total ', total);
     setItem({
@@ -190,7 +198,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleStock = async (itemsStock, account = '000', paymentDate) => {
     console.log('objeto recebido   ', itemsStock);
-    debugger;
+
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {
@@ -213,7 +221,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
         // Inicializa ou adiciona ao UsageHistory
         currentItem.UsageHistory = itemFinded.UsageHistory || [];
-
+        currentItem.operationSupplies =
+          'operationSupplies' in itemsStock[i]
+            ? itemsStock[i].operationSupplies
+            : false;
         currentItem.UsageHistory.push(
           stockHistoryList(
             itemFinded,
@@ -296,6 +307,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     event.preventDefault();
 
     if (form && form.items && form.items.length > 0) {
+      console.log('Formulário enviado:', form);
+      debugger;
       // Organize the items in stock
       handleStock(form.items, form.account, form.paymentDate);
     }
@@ -357,10 +370,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
     if (id === 'product') {
       selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
-
+      console.log('Produto selecionado:', selectedProduct);
+      debugger;
       setItem((prevForm) => ({
         ...prevForm,
         product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
+        operationSupplies: selectedProduct.operationSupplies ? true : false,
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '', // Define a unidade de medida
