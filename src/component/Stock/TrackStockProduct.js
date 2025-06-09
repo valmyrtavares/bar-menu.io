@@ -29,7 +29,9 @@ const TrackStockProduct = () => {
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
-    const sortedData = data.sort((a, b) => a.product.localeCompare(b.product));
+    const sortedData = data
+      .sort((a, b) => a.product.localeCompare(b.product))
+      .filter((item) => item.operationSupplies === false);
     setStock(sortedData);
   };
 
