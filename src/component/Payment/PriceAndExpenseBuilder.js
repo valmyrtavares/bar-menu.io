@@ -121,9 +121,37 @@ const PriceAndExpenseBuilder = ({
   };
   const calculatedRecipeCost = async () => {
     try {
+      // Verifica se recipe é um objeto vazio ou não existe
+      if (
+        !recipe ||
+        (typeof recipe === 'object' && Object.keys(recipe).length === 0)
+      ) {
+        alert(
+          'Esse produto não tem receita criada, por isso é impossível calcular o custo. '
+        );
+        return;
+      }
       console.log('costProfitMarginCustomized', costProfitMarginCustomized);
+
+      // Se finalingridientsList for um objeto com 3 arrays dentro dele
+      if (
+        typeof recipe.finalingridientsList === 'object' &&
+        !Array.isArray(recipe.finalingridientsList)
+      ) {
+        const lists = Object.values(recipe.finalingridientsList);
+        const allEmpty = lists.every(
+          (arr) => Array.isArray(arr) && arr.length === 0
+        );
+        if (allEmpty) {
+          alert(
+            'Esse produto não tem receita criada, por isso é impossível calcular o custo. Atualize a receita para que o custo possa ser preenchido corretamente pelo sistema.'
+          );
+          return;
+        }
+      }
+
       const response = await calculateItemCost(recipe);
-      debugger;
+      console.log('Custo calculado:', response);
       if (response.default !== undefined) {
         // Atualiza o campo específico costPriceObj.cost
         await updateCollection('item', id, {
@@ -136,7 +164,6 @@ const PriceAndExpenseBuilder = ({
       ) {
         const updates = {};
         const costMap = response;
-        debugger;
         ['firstPrice', 'secondPrice', 'thirdPrice'].forEach((priceKey) => {
           const priceData = costProfitMarginCustomized[priceKey];
 
@@ -146,7 +173,6 @@ const PriceAndExpenseBuilder = ({
           }
         });
         console.log('Updates to be made:', updates);
-        debugger;
         if (Object.keys(updates).length > 0) {
           await updateCollection('item', id, updates);
           console.log(

@@ -125,6 +125,7 @@ export async function calculateItemCost(item) {
 
   const processIngredientList = async (ingredientList) => {
     let totalCost = 0;
+    const invalidIngredients = [];
     console.log('Ingredient List:', ingredientList);
     for (const ingredient of ingredientList) {
       const stock = await getStockByProductName(ingredient.name);
@@ -132,11 +133,27 @@ export async function calculateItemCost(item) {
         const costPerUnit = stock.totalCost / stock.totalVolume;
 
         const amount = parseFloat(ingredient.amount.replace(',', '.')); // garante conversão correta
+
         totalCost += amount * costPerUnit;
+      } else {
+        invalidIngredients.push(ingredient.name);
+        console.warn(
+          `Stock not found or invalid for ingredient: ${ingredient.name}`
+        );
+        if (invalidIngredients.length > 0) {
+          alert(
+            `O valor do custo não está correto porque os seguintes ingredientes não têm valores válidos: ${invalidIngredients.join(
+              ', '
+            )}. O cálculo foi feito apenas com os ingredientes válidos.`
+          );
+        }
       }
     }
 
-    return totalCost;
+    // Arredonda para 2 casas decimais
+    totalCost = Math.round((totalCost + Number.EPSILON) * 100) / 100;
+
+    return Number(totalCost.toFixed(2));
   };
 
   // Caso 1: FinalingredientList é um array
@@ -154,7 +171,7 @@ export async function calculateItemCost(item) {
 
     for (const [sizeName, ingredientList] of Object.entries(sizes)) {
       const cost = await processIngredientList(ingredientList);
-      results[sizeName] = cost;
+      results[sizeName] = Number(cost.toFixed(2));
     }
 
     return results;
