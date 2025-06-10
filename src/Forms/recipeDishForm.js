@@ -23,7 +23,9 @@ const RecipeDish = ({
   const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
   const [ingredientsBySize, setIngredientsBySize] = React.useState({});
   const fieldFocus = React.useRef();
+
   React.useEffect(() => {
+    //#1
     if (recipe) {
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
         recipe.Explanation = '';
@@ -38,6 +40,7 @@ const RecipeDish = ({
   }, [recipe]);
 
   React.useEffect(() => {
+    //#2
     console.log('Veja como bem o nossa receita    ', recipe);
     const fetchProduct = async () => {
       const data = await getBtnData('stock');
@@ -54,6 +57,7 @@ const RecipeDish = ({
   }, []);
 
   React.useEffect(() => {
+    //#3
     if (ingredientsBySize)
       console.log('ingredientsBySize    ', ingredientsBySize);
     if (ingredientsSimple)
@@ -87,19 +91,37 @@ const RecipeDish = ({
     const { id, value } = e.target;
     if (id === 'name') {
       const selectedProduct = productList[value];
+      console.log('selectedProduct', selectedProduct);
+
+      const costPerUnit =
+        selectedProduct && selectedProduct.totalVolume > 0
+          ? selectedProduct.totalCost / selectedProduct.totalVolume
+          : 0;
 
       setIngridients((prevForm) => ({
         ...prevForm,
-        name: selectedProduct ? selectedProduct.product : '', // Define o nome do produto
+        name: selectedProduct ? selectedProduct.product : '',
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
-          : '', // Define a unidade de medida
+          : '',
+        costPerUnit: costPerUnit,
+        portionCost: prevForm.amount
+          ? parseFloat(prevForm.amount) * costPerUnit
+          : 0,
       }));
     } else {
       setIngridients({
         ...ingridients,
         [id]: value,
       });
+      if (id === 'amount') {
+        const costPerUnit = ingridients.costPerUnit || 0;
+        const newPortionCost = parseFloat(value) * costPerUnit;
+        setIngridients((prevForm) => ({
+          ...prevForm,
+          portionCost: newPortionCost,
+        }));
+      }
     }
   };
 
@@ -193,6 +215,8 @@ const RecipeDish = ({
                 <tr>
                   <th>Produto</th>
                   <th>Quantidade</th>
+                  <th>Valor cheio</th>
+                  <th>Valor da porção</th>
                   <th>Excluir</th>
                 </tr>
               </thead>
@@ -204,6 +228,18 @@ const RecipeDish = ({
                       <td className="items">
                         {item.amount}
                         {item.unitOfMeasurement}
+                      </td>
+                      <td className="items">
+                        R${' '}
+                        {item.costPerUnit
+                          ? item.costPerUnit.toFixed(2)
+                          : '0.00'}
+                      </td>
+                      <td className="items">
+                        R${' '}
+                        {item.portionCost
+                          ? item.portionCost.toFixed(2)
+                          : '0.00'}
                       </td>
                       <td
                         className="items"
