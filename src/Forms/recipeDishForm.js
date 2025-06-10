@@ -58,6 +58,7 @@ const RecipeDish = ({
 
   React.useEffect(() => {
     //#3
+    calculateItemCost(ingredientsSimple);
     if (ingredientsBySize)
       console.log('ingredientsBySize    ', ingredientsBySize);
     if (ingredientsSimple)
@@ -70,6 +71,15 @@ const RecipeDish = ({
     } else {
       return false;
     }
+  };
+  const calculateItemCost = (ingredients) => {
+    console.log('Calculando custo dos ingredientes:', ingredients);
+    if (!Array.isArray(ingredients)) return 0;
+    const total = ingredients.reduce((sum, item) => {
+      const value = parseFloat(item.costPerUnit) || 0;
+      return sum + value;
+    }, 0);
+    return Number(total.toFixed(2));
   };
   const formatterRecipes = (recipe) => {
     if (Array.isArray(recipe.FinalingridientsList)) {
@@ -251,6 +261,7 @@ const RecipeDish = ({
                     </tr>
                   ))}
               </tbody>
+              <h2>Custo do produto {calculateItemCost(ingredientsSimple)}</h2>
             </table>
           </div>
         </div>
@@ -298,6 +309,8 @@ const RecipeDish = ({
                   <tr>
                     <th>Produto</th>
                     <th>Quantidade</th>
+                    <th>Valor cheio</th>
+                    <th>Valor da porção</th>
                     <th>Excluir</th>
                   </tr>
                 </thead>
@@ -310,10 +323,22 @@ const RecipeDish = ({
                           {item.amount}
                           {item.unitOfMeasurement}
                         </td>
+                        <td className="items">
+                          R${' '}
+                          {item.costPerUnit
+                            ? item.costPerUnit.toFixed(2)
+                            : '0.00'}
+                        </td>
+                        <td className="items">
+                          R${' '}
+                          {item.portionCost
+                            ? item.portionCost.toFixed(2)
+                            : '0.00'}
+                        </td>
                         <td
                           className="items"
                           style={{ cursor: 'pointer' }}
-                          onClick={() => remveIten(label, index)}
+                          onClick={() => remveIten(index)}
                         >
                           x
                         </td>
