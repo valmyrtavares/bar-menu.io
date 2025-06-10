@@ -58,7 +58,7 @@ const RecipeDish = ({
 
   React.useEffect(() => {
     //#3
-    calculateItemCost(ingredientsSimple);
+    calculateItemCost(ingredientsBySize);
     if (ingredientsBySize)
       console.log('ingredientsBySize    ', ingredientsBySize);
     if (ingredientsSimple)
@@ -72,15 +72,31 @@ const RecipeDish = ({
       return false;
     }
   };
-  const calculateItemCost = (ingredients) => {
-    console.log('Calculando custo dos ingredientes:', ingredients);
+  const calculateItemCost = (ingredients, label) => {
+    if (label) {
+      const items = ingredients[label];
+
+      if (!Array.isArray(items)) return 0;
+
+      const total = items.reduce((sum, item) => {
+        const value = parseFloat(item.portionCost) || 0;
+        return sum + value;
+      }, 0);
+
+      return Number(total.toFixed(2));
+    }
+
+    // Fallback caso ingredients seja um array diretamente
     if (!Array.isArray(ingredients)) return 0;
+
     const total = ingredients.reduce((sum, item) => {
-      const value = parseFloat(item.costPerUnit) || 0;
+      const value = parseFloat(item.portionCost) || 0;
       return sum + value;
     }, 0);
+
     return Number(total.toFixed(2));
   };
+
   const formatterRecipes = (recipe) => {
     if (Array.isArray(recipe.FinalingridientsList)) {
       setIngredientsSimple(recipe.FinalingridientsList);
@@ -162,7 +178,7 @@ const RecipeDish = ({
     setRecipeModal(false);
   };
 
-  const remveIten = (sizeOrIndex, index) => {
+  const removeItem = (sizeOrIndex, index) => {
     if (!isEmptyObject(customizedPriceObj) && index !== undefined) {
       // Caso com `customizedPriceObj` e dois parâmetros (size e index)
       setIngredientsBySize((prev) => ({
@@ -254,7 +270,7 @@ const RecipeDish = ({
                       <td
                         className="items"
                         style={{ cursor: 'pointer' }}
-                        onClick={() => remveIten(index)}
+                        onClick={() => removeItem(index)}
                       >
                         x
                       </td>
@@ -338,7 +354,7 @@ const RecipeDish = ({
                         <td
                           className="items"
                           style={{ cursor: 'pointer' }}
-                          onClick={() => remveIten(index)}
+                          onClick={() => removeItem(label, index)}
                         >
                           x
                         </td>
@@ -346,6 +362,10 @@ const RecipeDish = ({
                     ))}
                 </tbody>
               </table>
+              <h2>
+                Custo do produto ({label}): R${' '}
+                {calculateItemCost(ingredientsBySize, label)}
+              </h2>
             </div>
           </div>
         ))
