@@ -50,9 +50,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       ]);
 
       if (dataProduct && dataProduct.length > 0) {
-        const sortedData = dataProduct
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .filter((item) => !item.operationSupplies);
+        const sortedData = dataProduct.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        // .filter((item) => !item.operationSupplies);
         setProductList(sortedData);
       }
       if (dataProvider && dataProvider.length > 0) {
@@ -371,7 +372,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     if (id === 'product') {
       selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
       console.log('Produto selecionado:', selectedProduct);
-      debugger;
+
       setItem((prevForm) => ({
         ...prevForm,
         product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
