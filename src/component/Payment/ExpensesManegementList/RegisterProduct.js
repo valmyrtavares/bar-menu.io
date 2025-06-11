@@ -17,11 +17,12 @@ import { app } from '../../../config-firebase/firebase.js';
 import { getBtnData, deleteData } from '../../../api/Api';
 import WarningMessage from '../../WarningMessages.js';
 
-const RegisterProvider = ({ setShowPopup }) => {
+const RegisterProduct = ({ setShowPopup }) => {
   const [form, setForm] = React.useState({
     name: '',
     minimumAmount: '',
     unitOfMeasurement: '',
+    operationSupplies: false,
   });
   const [listProvider, setListProvider] = React.useState(null);
   const [refreshScreen, setRefreshScreen] = React.useState(false);
@@ -205,6 +206,7 @@ const RegisterProvider = ({ setShowPopup }) => {
             name: '',
             minimumAmount: '',
             unitOfMeasurement: '',
+            operationSupplies: false,
           });
         })
         .catch((error) => {
@@ -220,6 +222,7 @@ const RegisterProvider = ({ setShowPopup }) => {
           name: '',
           unitOfMeasurement: '',
           minimumAmount: '',
+          operationSupplies: false,
         });
       })
       .catch((error) => {
@@ -229,7 +232,8 @@ const RegisterProvider = ({ setShowPopup }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-
+    if (id === 'operationSupplies') {
+    }
     setForm((prevForm) => ({
       ...prevForm,
       [id]: value,
@@ -319,4 +323,4 @@ const RegisterProvider = ({ setShowPopup }) => {
     </div>
   );
 };
-export default RegisterProvider;
+export default RegisterProduct;
