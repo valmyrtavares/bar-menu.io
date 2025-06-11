@@ -31,6 +31,8 @@
     background-color:$bgColorForm;
     min-width:600px;
     padding:3%;
+    max-height: 80vh;
+    overflow-y: auto;
     .recipeModalContainer{
        position:fixed;
        width: 800px;
