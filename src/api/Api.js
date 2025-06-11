@@ -16,6 +16,97 @@ import {
 //FIRESTORE
 const db = getFirestore(app);
 
+/**
+ * Atualiza ou cria uma chave em um documento de uma coleção específica.
+ * Após a atualização, recarrega a página para refletir as mudanças.
+ *
+ * @param {string} collectionName - Nome da coleção.
+ * @param {string} docId - ID do documento a ser atualizado.
+ * @param {string} key - Chave a ser atualizada/criada.
+ * @param {*} value - Valor a ser atribuído à chave.
+ * @returns {Promise<string>} Mensagem de sucesso ou erro detalhado.
+ */
+export async function updateOrCreateKeyInDocument(
+  collectionName,
+  docId,
+  key,
+  value
+) {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return `Erro: Documento com id "${docId}" não encontrado na coleção "${collectionName}".`;
+    }
+
+    const data = docSnap.data();
+    const updateData = {};
+    updateData[key] = value;
+
+    await updateDoc(docRef, updateData);
+
+    // Recarrega a página após a atualização
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.reload();
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      return `Chave "${key}" atualizada com sucesso no objeto ${docId} da coleção "${collectionName}".`;
+    } else {
+      return `Chave "${key}" criada e atribuída com sucesso no objeto ${docId} da coleção "${collectionName}".`;
+    }
+  } catch (error) {
+    if (error.code === 'not-found') {
+      return `Erro: Coleção "${collectionName}" não encontrada.`;
+    }
+    return `Erro ao atualizar/criar chave: ${error.message}`;
+  }
+}
+
+/**
+ * Atualiza ou cria uma chave em um documento de uma coleção específica.
+ *
+ * @param {string} collectionName - Nome da coleção.
+ * @param {string} docId - ID do documento a ser atualizado.
+ * @param {string} key - Chave a ser atualizada/criada.
+ * @param {*} value - Valor a ser atribuído à chave.
+ * @returns {Promise<string>} Mensagem de sucesso ou erro detalhado.
+ */
+// export async function updateOrCreateKeyInDocument(
+//   collectionName,
+//   docId,
+//   key,
+//   value
+// ) {
+
+//   try {
+//     const docRef = doc(db, collectionName, docId);
+//     const docSnap = await getDoc(docRef);
+
+//     if (!docSnap.exists()) {
+//       return `Erro: Documento com id "${docId}" não encontrado na coleção "${collectionName}".`;
+//     }
+
+//     const data = docSnap.data();
+//     const updateData = {};
+//     updateData[key] = value;
+
+//     await updateDoc(docRef, updateData);
+
+//     if (Object.prototype.hasOwnProperty.call(data, key)) {
+//       return `Chave "${key}" atualizada com sucesso no objeto ${docId} da coleção "${collectionName}".`;
+//     } else {
+//       return `Chave "${key}" criada e atribuída com sucesso no objeto ${docId} da coleção "${collectionName}".`;
+//     }
+//   } catch (error) {
+//     if (error.code === 'not-found') {
+//       return `Erro: Coleção "${collectionName}" não encontrada.`;
+//     }
+//     return `Erro ao atualizar/criar chave: ${error.message}`;
+//   }
+// }
+
 export async function getStockByProductName(productName) {
   try {
     const stockCollection = collection(db, 'stock');

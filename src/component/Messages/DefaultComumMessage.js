@@ -2,11 +2,6 @@ import React, { useEffect } from 'react';
 import '../../assets/styles/resultMessage.css';
 
 const DefaultComumMessage = ({ msg, onClose, onConfirm, item }) => {
-  useEffect(() => {
-    if (item) {
-      console.log('ITEM   ', item);
-    }
-  }, [item]);
   return (
     <>
       <div className="overlay"></div> {/* Overlay para o fundo escuro */}

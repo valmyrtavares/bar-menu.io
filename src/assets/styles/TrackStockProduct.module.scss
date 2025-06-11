@@ -11,4 +11,17 @@
         position: relative;
         z-index: 30;
     }
+    .containerBtnStockList{
+        position: relative;
+        bottom: 0;
+        right: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        .btnChangeStockList{
+            @include btnUtility(300px);
+        }
+    }
 }

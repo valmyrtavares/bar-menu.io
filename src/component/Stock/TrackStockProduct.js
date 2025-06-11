@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBtnData, deleteData } from '../../api/Api';
+import { getBtnData, updateOrCreateKeyInDocument } from '../../api/Api';
 import style from '../../assets/styles/TrackStockProduct.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
@@ -9,6 +9,7 @@ import Title from '../title';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
+  const [allStockItems, setAllStockItems] = React.useState(null);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
   const [excludeStockItem, setExcludeStockItem] = React.useState('');
@@ -17,6 +18,7 @@ const TrackStockProduct = () => {
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
+  const [showDeleted, setShowDeleted] = React.useState(false);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
 
@@ -29,18 +31,51 @@ const TrackStockProduct = () => {
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
-    const sortedData = data
-      .sort((a, b) => a.product.localeCompare(b.product))
-      .filter((item) => item.operationSupplies === false);
-    setStock(sortedData);
+    const sorted = data.sort((a, b) => a.product.localeCompare(b.product));
+
+    setAllStockItems(sorted);
+
+    // Padrão inicial: mostrar apenas os não deletados (activityStatus false ou undefined)
+    const filtered = sorted.filter(
+      (item) =>
+        item.operationSupplies === false &&
+        (item.activityStatus === undefined || item.activityStatus === false)
+    );
+
+    setStock(filtered);
   };
 
-  const deleteStockItem = (item, permission) => {
-    setExcludeStockItem(item);
+  const toggleDeletedProducts = () => {
+    const nextShowDeleted = !showDeleted;
+
+    const filtered = allStockItems.filter(
+      (item) =>
+        item.operationSupplies === false &&
+        (nextShowDeleted
+          ? item.activityStatus === true
+          : item.activityStatus === false || item.activityStatus === undefined)
+    );
+
+    setStock(filtered);
+    setShowDeleted(nextShowDeleted);
+  };
+
+  const disableStockItem = (item, permission) => {
+    console.log('item a ser excluido   ', item);
+
+    if (item) {
+      setExcludeStockItem(item);
+    }
     setShowWarningDeltePopup(true);
-    if (permission && excludeStockItem.product === item.product) {
+    if (permission) {
       setShowWarningDeltePopup(false);
-      deleteData('stock', item.id);
+      updateOrCreateKeyInDocument(
+        'stock',
+        excludeStockItem.id,
+        'activityStatus',
+        showDeleted ? false : true
+      );
+      // deleteData('stock', item.id);
       setRefreshData((prev) => !prev);
     }
   };
@@ -85,6 +120,7 @@ const TrackStockProduct = () => {
               <th>Estoque em volume</th>
               <th>Quantidade de embalagens</th>
               <th>Editar</th>
+              <th>Excluir</th>
             </tr>
           </thead>
           <tbody>
@@ -100,9 +136,11 @@ const TrackStockProduct = () => {
                   </td>
                   {showWarningDeletePopup && (
                     <DefaultComumMessage
-                      msg={`Você está prestes a excluir ${excludeStockItem.product}`}
+                      msg={`Você está prestes a ${
+                        showDeleted ? 'Restaurar' : 'Excluir'
+                      } ${excludeStockItem.product}`}
                       item={excludeStockItem}
-                      onConfirm={deleteStockItem}
+                      onConfirm={() => disableStockItem(undefined, true)}
                       onClose={() => setShowWarningDeltePopup(false)}
                     />
                   )}
@@ -113,10 +151,24 @@ const TrackStockProduct = () => {
                   >
                     Editar
                   </td>
+                  <td
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => disableStockItem(item, false)}
+                  >
+                    {showDeleted ? 'Restaurar' : 'Excluir'}
+                  </td>
                 </tr>
               ))}
           </tbody>
         </table>
+      </div>
+      <div className={style.containerBtnStockList}>
+        <button
+          className={style.btnChangeStockList}
+          onClick={toggleDeletedProducts}
+        >
+          {showDeleted ? 'Itens Habilitados' : 'Itens Excluidos'}
+        </button>
       </div>
     </div>
   );
