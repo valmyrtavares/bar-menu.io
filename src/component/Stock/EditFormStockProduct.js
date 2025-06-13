@@ -26,6 +26,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
   const db = getFirestore(app);
 
+  //delete this useEffect if not needed
+  React.useEffect(() => {
+    console.log('objeto recebido por pros  ', obj);
+  }, []);
+
   const handleStock = async (
     itemsStock,
     account = 'Editado',
@@ -139,18 +144,26 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     return stockEventRegistration;
   };
 
-  const updateCost = () => {
-    const newCost =
-      obj.totalCost * (stockProductObj.totalVolume / obj.totalVolume);
+  const updateCost = (e) => {
+    const { id, value } = e.target;
+    if (id === 'totalVolume') {
+      const newCost =
+        obj.totalCost * (stockProductObj.totalVolume / obj.totalVolume);
 
-    const newUnit =
-      Number(stockProductObj.totalVolume) / Number(obj.volumePerUnit);
+      const newUnit =
+        Number(stockProductObj.totalVolume) / Number(obj.volumePerUnit);
 
-    setStockProductObj({
-      ...stockProductObj,
-      totalCost: newCost,
-      amount: newUnit,
-    });
+      setStockProductObj({
+        ...stockProductObj,
+        totalCost: newCost,
+        amount: newUnit,
+      });
+    } else {
+      setStockProductObj({
+        ...stockProductObj,
+        totalCost: value,
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -204,9 +217,21 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
           />
         </div>
         <div className={edit.field}>
+          <Input
+            id="totalCost"
+            autoComplete="off"
+            className="num"
+            label="Custo Total"
+            value={stockProductObj.totalCost}
+            type="number"
+            onChange={handleChange}
+            onBlur={updateCost}
+          />
+        </div>
+        {/* <div className={edit.field}>
           <h3>Custo Total</h3>
           <p>{Number(stockProductObj.totalCost).toFixed(2)}</p>
-        </div>
+        </div> */}
         <div className={edit.field}>
           <h3>Quantidade de recipientes</h3>
           <p>{stockProductObj.amount}</p>
