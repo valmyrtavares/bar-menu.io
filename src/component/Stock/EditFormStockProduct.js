@@ -21,6 +21,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     totalVolume: Number(obj.totalVolume),
     unitOfMeasurement: obj.unitOfMeasurement,
     volumePerUnit: Number(obj.volumePerUnit),
+    minimumAmount: Number(obj.minimumAmount),
     id: obj.id,
   });
 
@@ -202,7 +203,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         </div>
         <div className={edit.field}>
           <h3>Produto</h3>
-          <p>{stockProductObj.product}</p>
+          <p>{`${stockProductObj.product}- ${stockProductObj.unitOfMeasurement}`}</p>
         </div>
         <div className={edit.field}>
           <Input
@@ -228,13 +229,20 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             onBlur={updateCost}
           />
         </div>
-        {/* <div className={edit.field}>
-          <h3>Custo Total</h3>
-          <p>{Number(stockProductObj.totalCost).toFixed(2)}</p>
-        </div> */}
+
         <div className={edit.field}>
-          <h3>Quantidade de recipientes</h3>
-          <p>{stockProductObj.amount}</p>
+          <Input
+            id="minimumAmount"
+            autoComplete="off"
+            className="num"
+            label="Volume Mínimo"
+            value={stockProductObj.minimumAmount}
+            type="text"
+            onChange={handleChange}
+            onBlur={updateCost}
+          />
+          {/* <h3>Quantidade de recipientes</h3>
+          <p>{stockProductObj.amount}</p> */}
         </div>
         <div className={edit.field}>
           <h3>Volume Total do Produto</h3>
