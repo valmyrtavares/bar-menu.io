@@ -5,6 +5,7 @@ import CloseBtn from '../component/closeBtn';
 import { getBtnData } from '../api/Api';
 import Title from '../component/title.js';
 import { Link } from 'react-router-dom';
+import { alertMinimunAmount } from '../Helpers/Helpers.js';
 
 const RecipeDish = ({
   setRecipeModal,
@@ -249,7 +250,19 @@ const RecipeDish = ({
               <tbody>
                 {ingredientsSimple &&
                   ingredientsSimple.map((item, index) => (
-                    <tr key={index}>
+                    <tr
+                      key={index}
+                      className={
+                        alertMinimunAmount(
+                          item.product,
+                          item.totalVolume,
+                          item.minimumAmount,
+                          item.totalCost
+                        )
+                          ? ''
+                          : 'warning'
+                      }
+                    >
                       <td className="items">{item.name}</td>
                       <td className="items">
                         {item.amount}

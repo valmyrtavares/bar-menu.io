@@ -5,6 +5,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
 import { Link } from 'react-router-dom';
+import { alertMinimunAmount } from '../../Helpers/Helpers';
 import Title from '../title';
 
 const TrackStockProduct = () => {
@@ -88,46 +89,6 @@ const TrackStockProduct = () => {
     setTitle(item.product);
     setEventLogData(item.UsageHistory);
     setShowAdjustmentRecords(true);
-  };
-
-  const alertMinimunAmount = (product, volume, minimum, cost) => {
-    if (volume < minimum) {
-      console.log(
-        `O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`
-      );
-      return false;
-    }
-    if (volume === 0) {
-      console.log(
-        `O produto ${product} foi recusado porque o volume está igual a 0`
-      );
-      return false;
-    }
-    if (minimum === undefined) {
-      console.log(
-        `O produto ${product} foi recusado porque o mínimo está indefinido`
-      );
-      return false;
-    }
-    if (isNaN(cost)) {
-      console.log(
-        `O produto ${product} foi recusado porque o custo não é um número`
-      );
-      return false;
-    }
-    if (cost === undefined) {
-      console.log(
-        `O produto ${product} foi recusado porque o custo está indefinido`
-      );
-      return false;
-    }
-    if (cost <= 0) {
-      console.log(
-        `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`
-      );
-      return false;
-    }
-    return true;
   };
 
   return (
