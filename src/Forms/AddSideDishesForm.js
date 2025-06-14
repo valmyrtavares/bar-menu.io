@@ -136,7 +136,7 @@ function AddSideDishesForm({
           mainTitle={
             EditSideDishesTitle
               ? EditSideDishesTitle
-              : 'Adicione um novo Acompanhamento123'
+              : 'Adicione um novo Acompanhamento'
           }
         />
       </Link>

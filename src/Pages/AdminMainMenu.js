@@ -196,6 +196,14 @@ const AdminMainMenu = ({ children }) => {
             >
               Promoções
             </NavLink>
+            <NavLink
+              to="/admin/documentation"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Documentação
+            </NavLink>
 
             <NavLink
               to="/admin/requestlist"

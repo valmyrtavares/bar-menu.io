@@ -39,6 +39,7 @@ import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
+import Documentation from './component/Documentation/documentation';
 import MainPictureMenu from './Pages/MainPictureMenu';
 import { getOneItemColleciton } from './api/Api';
 import { GlobalContext } from './GlobalContext.js';
@@ -114,6 +115,7 @@ function App() {
           <Route path="expenses" element={<ExpensesManegementList />} />
           <Route path="sell-flow" element={<SellFlowMangement />} />
           <Route path="request" element={<RequestManagementModule />} />
+          <Route path="documentation" element={<Documentation />} />
           <Route path="stock" element={<TrackStockProduct />} />
           <Route path="requestlist" element={<RequestListToBePrepared />} />
           <Route path="item" element={<FormItem />} />
