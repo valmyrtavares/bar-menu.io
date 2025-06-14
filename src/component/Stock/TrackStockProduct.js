@@ -90,6 +90,46 @@ const TrackStockProduct = () => {
     setShowAdjustmentRecords(true);
   };
 
+  const alertMinimunAmount = (product, volume, minimum, cost) => {
+    if (volume < minimum) {
+      console.log(
+        `O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`
+      );
+      return false;
+    }
+    if (volume === 0) {
+      console.log(
+        `O produto ${product} foi recusado porque o volume está igual a 0`
+      );
+      return false;
+    }
+    if (minimum === undefined) {
+      console.log(
+        `O produto ${product} foi recusado porque o mínimo está indefinido`
+      );
+      return false;
+    }
+    if (isNaN(cost)) {
+      console.log(
+        `O produto ${product} foi recusado porque o custo não é um número`
+      );
+      return false;
+    }
+    if (cost === undefined) {
+      console.log(
+        `O produto ${product} foi recusado porque o custo está indefinido`
+      );
+      return false;
+    }
+    if (cost <= 0) {
+      console.log(
+        `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`
+      );
+      return false;
+    }
+    return true;
+  };
+
   return (
     <div className={style.containerTrackStockproduct}>
       {showEditForm && (
@@ -127,7 +167,19 @@ const TrackStockProduct = () => {
             {stock &&
               stock.length > 0 &&
               stock.map((item, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  className={
+                    alertMinimunAmount(
+                      item.product,
+                      item.totalVolume,
+                      item.minimumAmount,
+                      item.totalCost
+                    )
+                      ? ''
+                      : style.warning
+                  }
+                >
                   <td onClick={() => usageHistory(item)}>{item.product}</td>
                   <td>R$ {Number(item.totalCost).toFixed(2)}</td>
                   <td>

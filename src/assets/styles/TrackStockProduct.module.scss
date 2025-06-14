@@ -24,4 +24,9 @@
             @include btnUtility(300px);
         }
     }
+    .warning {
+        background-color: #ffcccc;
+        color: #ff0000;
+        font-weight: bold;
+    }
 }
