@@ -14,7 +14,7 @@ const TrackStockProduct = () => {
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
   const [excludeStockItem, setExcludeStockItem] = React.useState('');
-  const [refreshData, setRefreshData] = React.useState(false);
+  // const [refreshData, setRefreshData] = React.useState(false);
   const [showEditForm, setShowEditForm] = React.useState(false);
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
@@ -26,9 +26,9 @@ const TrackStockProduct = () => {
   React.useEffect(() => {
     fetchStock();
   }, []);
-  React.useEffect(() => {
-    fetchStock();
-  }, [refreshData]);
+  // React.useEffect(() => {
+  //   fetchStock();
+  // }, [refreshData]);
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
@@ -77,7 +77,8 @@ const TrackStockProduct = () => {
         showDeleted ? false : true
       );
       // deleteData('stock', item.id);
-      setRefreshData((prev) => !prev);
+      // setRefreshData((prev) => !prev);
+      fetchStock();
     }
   };
   const editStockItem = (item) => {
