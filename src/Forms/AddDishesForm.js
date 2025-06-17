@@ -41,6 +41,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     costProfitMarginCustomized: {},
   });
   const [categories, setCategories] = React.useState([]);
+  const [costByRecipe, setCostByRecipe] = React.useState(null);
   const [url, setUrl] = React.useState('');
   const [showPopupCostAndPrice, setShowPopupCostAndPrice] =
     React.useState(false);
@@ -206,6 +207,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       setCustomizedPriceObj({
         firstLabel: costProfitMarginCustomized.firstPrice?.label,
         firstPrice: costProfitMarginCustomized.firstPrice?.price,
+        firstPrice: costProfitMarginCustomized.firstPrice?.price,
         secondLabel: costProfitMarginCustomized.secondPrice?.label,
         secondPrice: costProfitMarginCustomized.secondPrice?.price,
         thirdLabel: costProfitMarginCustomized.thirdPrice?.label,
@@ -239,6 +241,19 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
     }
   }, [form]);
 
+  React.useEffect(() => {
+    console.log('costByRecipe', costByRecipe);
+    if (typeof costByRecipe === 'number' && !isNaN(costByRecipe)) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        costPriceObj: {
+          ...prevForm.costPriceObj,
+          cost: costByRecipe,
+        },
+      }));
+    }
+  }, [costByRecipe]);
+
   return (
     <div className={style.containerAddDishesForm}>
       {showPopupCostAndPrice && (
@@ -265,6 +280,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
             setRecipe={setRecipe}
             recipe={recipe}
             customizedPriceObj={customizedPriceObj}
+            costByRecipe={form.costPriceObj}
+            costProfitMarginCustomized={form.costProfitMarginCustomized}
           />
         )}
       </div>

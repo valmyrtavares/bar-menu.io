@@ -10,8 +10,10 @@ import { alertMinimunAmount } from '../Helpers/Helpers.js';
 const RecipeDish = ({
   setRecipeModal,
   setRecipe,
-  recipe,
+  recipe, //object wiht contains raw material each size product and explanation
   customizedPriceObj,
+  costByRecipe, //object which contains the cost and label for single size
+  costProfitMarginCustomized, //object which contains the cost and label for each size
 }) => {
   const [ingridients, setIngridients] = React.useState({
     name: '',
@@ -42,29 +44,26 @@ const RecipeDish = ({
 
   React.useEffect(() => {
     //#2
-    console.log('Veja como bem o nossa receita    ', recipe);
+
     const fetchProduct = async () => {
       const data = await getBtnData('stock');
       const sortedData = data.sort((a, b) =>
         a.product.localeCompare(b.product)
       );
-      console.log('Produtos   ', sortedData);
       setProductList(sortedData);
     };
-
     fetchProduct();
     setIngridientsGroup([]);
-    console.log('Customized Price   ', customizedPriceObj);
   }, []);
 
-  React.useEffect(() => {
-    //#3
-    calculateItemCost(ingredientsBySize);
-    if (ingredientsBySize)
-      console.log('ingredientsBySize    ', ingredientsBySize);
-    if (ingredientsSimple)
-      console.log('ingredientsSimple    ', ingredientsSimple);
-  }, [ingredientsBySize, ingredientsSimple]);
+  // React.useEffect(() => {
+  //   //#3
+  //   calculateItemCost(ingredientsBySize);
+  //   if (ingredientsBySize)
+  //     console.log('ingredientsBySize    ', ingredientsBySize);
+  //   if (ingredientsSimple)
+  //     console.log('ingredientsSimple    ', ingredientsSimple);
+  // }, [ingredientsBySize, ingredientsSimple]);
 
   const isEmptyObject = (obj) => {
     if (obj.firstLabel === '' || obj.firstLabel === undefined) {
@@ -84,6 +83,12 @@ const RecipeDish = ({
         return sum + value;
       }, 0);
 
+      const LabelSize = ['firstPrice', 'secondPrice', 'thirdPrice'];
+      LabelSize.forEach((item) => {
+        if (costProfitMarginCustomized[item].label === label) {
+          costProfitMarginCustomized[item].cost = Number(total.toFixed(2));
+        }
+      });
       return Number(total.toFixed(2));
     }
 
@@ -94,6 +99,7 @@ const RecipeDish = ({
       const value = parseFloat(item.portionCost) || 0;
       return sum + value;
     }, 0);
+    costByRecipe.cost = Number(total.toFixed(2));
 
     return Number(total.toFixed(2));
   };
