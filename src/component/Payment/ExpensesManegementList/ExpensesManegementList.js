@@ -5,6 +5,7 @@ import { getBtnData, deleteData } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
 import RegisterProduct from './RegisterProduct.js';
+import RegisterExpenses from './RegisterExpenses';
 import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 import { Link } from 'react-router-dom';
@@ -15,6 +16,8 @@ const ExpensesManegementList = () => {
 
   const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
   const [showProviderRegisterPopup, setShowProviderRegisterPopup] =
+    React.useState(false);
+  const [showExpensesRegisterPopup, setShowExpensesRegisterPopup] =
     React.useState(false);
   const [showProductRegistePopup, setShowProductRegisterPopup] =
     React.useState(false);
@@ -77,6 +80,21 @@ const ExpensesManegementList = () => {
     setShowProviderRegisterPopup(true);
   };
 
+  const handleRegisterChange = (e) => {
+    const value = e.target.value;
+
+    if (value === 'product') {
+      setShowProductRegisterPopup(true);
+    } else if (value === 'provider') {
+      setShowProviderRegisterPopup(true);
+    } else if (value === 'expenses') {
+      setShowExpensesRegisterPopup(true);
+    }
+
+    // Opcional: resetar o select após a ação
+    e.target.value = '';
+  };
+
   const totalExpensesValue = () => {
     if (!expensesList || expensesList.length === 0) {
       return null;
@@ -123,6 +141,14 @@ const ExpensesManegementList = () => {
           onClose={() => setShowWarningDeltePopup(false)}
         />
       )}
+      <div className="containerAddExpenses">
+        {showExpensesRegisterPopup && (
+          <RegisterExpenses
+            setShowPopup={setShowExpensesRegisterPopup}
+            obj={obj}
+          />
+        )}
+      </div>
       <div className="container-add-expenses">
         {showProviderRegisterPopup && (
           <RegisterProvider
@@ -161,9 +187,17 @@ const ExpensesManegementList = () => {
       </div>
 
       <div className={expenses.btnAdd}>
-        <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button>
+        {/* <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button> */}
         <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
-        <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button>
+        {/* <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button> */}
+        <select id="register" onChange={handleRegisterChange} defaultValue="">
+          <option value="" disabled>
+            Selecione uma opção de cadastro
+          </option>
+          <option value="product">Cadastrar Produtos</option>
+          <option value="provider">Cadastrar Fornecedores</option>
+          <option value="expenses">Cadastrar Despesas</option>
+        </select>
       </div>
       <div className={expenses.containerExpensesManegementTable}>
         <table striped bordered hover>

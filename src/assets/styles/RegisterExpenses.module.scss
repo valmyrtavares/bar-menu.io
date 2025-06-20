@@ -1,0 +1,33 @@
+@import './adminStyleReuse.module.scss';
+
+.ContainerAddExpensesForm{
+    width: 80%;
+        position: fixed;
+        top: 9%;
+        left: 20%;
+        background-color: $bg-admin-default;
+        display: block !important;
+        padding: 16px;
+        max-width: 1100px;
+        height: 85vh;
+        overflow-y: auto;
+        z-index: 50;
+        .containerBtn {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 30px auto;
+    
+            button {
+                @include btnAdmin
+            }
+        }
+        .containerExpensesRegisterTable {
+            @include tableContainer;
+            .exclude,
+            .edit {
+                cursor: pointer;
+            }   
+        }
+   
+}

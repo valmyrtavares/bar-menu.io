@@ -64,49 +64,6 @@ export async function updateOrCreateKeyInDocument(
   }
 }
 
-/**
- * Atualiza ou cria uma chave em um documento de uma coleção específica.
- *
- * @param {string} collectionName - Nome da coleção.
- * @param {string} docId - ID do documento a ser atualizado.
- * @param {string} key - Chave a ser atualizada/criada.
- * @param {*} value - Valor a ser atribuído à chave.
- * @returns {Promise<string>} Mensagem de sucesso ou erro detalhado.
- */
-// export async function updateOrCreateKeyInDocument(
-//   collectionName,
-//   docId,
-//   key,
-//   value
-// ) {
-
-//   try {
-//     const docRef = doc(db, collectionName, docId);
-//     const docSnap = await getDoc(docRef);
-
-//     if (!docSnap.exists()) {
-//       return `Erro: Documento com id "${docId}" não encontrado na coleção "${collectionName}".`;
-//     }
-
-//     const data = docSnap.data();
-//     const updateData = {};
-//     updateData[key] = value;
-
-//     await updateDoc(docRef, updateData);
-
-//     if (Object.prototype.hasOwnProperty.call(data, key)) {
-//       return `Chave "${key}" atualizada com sucesso no objeto ${docId} da coleção "${collectionName}".`;
-//     } else {
-//       return `Chave "${key}" criada e atribuída com sucesso no objeto ${docId} da coleção "${collectionName}".`;
-//     }
-//   } catch (error) {
-//     if (error.code === 'not-found') {
-//       return `Erro: Coleção "${collectionName}" não encontrada.`;
-//     }
-//     return `Erro ao atualizar/criar chave: ${error.message}`;
-//   }
-// }
-
 export async function getStockByProductName(productName) {
   try {
     const stockCollection = collection(db, 'stock');
@@ -351,6 +308,50 @@ export async function updateCollection(collectionName, docId, data) {
   } catch (error) {
     console.error(
       `Erro ao atualizar o documento ${docId} na coleção "${collectionName}":`,
+      error
+    );
+    throw error;
+  }
+}
+/**
+ * Adiciona um item a uma coleção no Firestore. Se a coleção não existir, ela será criada automaticamente.
+ *
+ * @param {string} collectionName - Nome da coleção.
+ * @param {object} data - Dados do item a ser adicionado.
+ * @returns {Promise<string>} - ID do documento criado ou mensagem de erro.
+ */
+export async function addItemToCollection(collectionName, data) {
+  try {
+    const dbRef = collection(db, collectionName);
+    const docRef = await import('firebase/firestore').then((mod) =>
+      mod.addDoc(dbRef, data)
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error('Erro ao adicionar item à coleção:', error);
+    throw error;
+  }
+}
+/**
+ * Substitui completamente um documento pelo objeto fornecido na coleção especificada.
+ *
+ * @param {string} collectionName - Nome da coleção.
+ * @param {string} docId - ID do documento a ser substituído.
+ * @param {object} newData - Novo objeto que substituirá o documento existente.
+ * @returns {Promise<void>}
+ */
+export async function replaceDocument(collectionName, docId, newData) {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await import('firebase/firestore').then((mod) =>
+      mod.setDoc(docRef, newData, { merge: false })
+    );
+    console.log(
+      `Documento ${docId} na coleção "${collectionName}" substituído com sucesso.`
+    );
+  } catch (error) {
+    console.error(
+      `Erro ao substituir o documento ${docId} na coleção "${collectionName}":`,
       error
     );
     throw error;
