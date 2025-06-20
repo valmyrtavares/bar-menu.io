@@ -38,7 +38,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     paymentDate = null
   ) => {
     if (!Array.isArray(itemsStock)) {
-      itemsStock = [itemsStock];
+      itemsStock = [itemsStock]; // Coloca o objeto recebido em um array
     }
 
     if (!paymentDate) {
@@ -46,7 +46,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0'); // Mês é zero-based
       const year = today.getFullYear();
-      paymentDate = `${day}/${month}/${year}`;
+      paymentDate = `${day}/${month}/${year}`; //Cria a data no formato DD/MM/YYYY atual
     }
 
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
