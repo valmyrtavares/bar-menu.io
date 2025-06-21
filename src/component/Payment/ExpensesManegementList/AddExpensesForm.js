@@ -39,33 +39,34 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [itemArrayList, setItemArrayList] = React.useState([]);
   const [productList, setProductList] = React.useState(null);
   const [providerList, setProviderList] = React.useState(null);
+  const [expensesList, setExpensesList] = React.useState(null);
   const [total, setTotal] = React.useState(0);
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    const fetchProduct = async () => {
-      const [dataProduct, dataProvider, sideDishes] = await Promise.all([
+    const fetchRegisterLists = async () => {
+      const [dataProduct, dataProvider, dataExpenses] = await Promise.all([
         getBtnData('product'),
         getBtnData('provider'),
+        getBtnData('expenses'),
       ]);
 
       if (dataProduct && dataProduct.length > 0) {
-        const sortedData = dataProduct.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        // .filter((item) => !item.operationSupplies);
-        setProductList(sortedData);
+        setProductList(sortedData(dataProduct));
+      }
+      if (dataExpenses && dataExpenses.length > 0) {
+        setExpensesList(sortedData(dataExpenses));
       }
       if (dataProvider && dataProvider.length > 0) {
-        setProviderList(dataProvider);
+        setProviderList(sortedData(dataProvider));
       }
     };
-    fetchProduct();
+    fetchRegisterLists();
   }, []);
 
-  // React.useEffect(() => {
-  //   if (productList) console.log('Lista de produtos   ', productList);
-  // }, [productList]);
+  const sortedData = (list) => {
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  };
 
   React.useEffect(() => {
     if (itemArrayList) {
@@ -411,16 +412,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       <form onSubmit={handleSubmit} className="m-1">
         <div className={style.formProduct}>
-          <Input
-            id="name"
-            autoComplete="off"
-            required
-            label="Nome"
-            value={form.name}
-            type="text"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
+          <div className={style.selectform}>
+            <select
+              id="name"
+              value={form.name}
+              required
+              onChange={handleChange}
+              onFocus={handleFocus}
+            >
+              <option value="" disabled hidden>
+                Selecione uma despesa
+              </option>
+              {expensesList &&
+                expensesList.map((expense, index) => (
+                  <option key={index} value={expense.name}>
+                    {expense.name}
+                  </option>
+                ))}
+            </select>
+          </div>
           <Input
             id="value"
             autoComplete="off"
