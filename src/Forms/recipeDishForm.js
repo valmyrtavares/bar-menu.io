@@ -60,14 +60,14 @@ const RecipeDish = ({
     setIngridientsGroup([]);
   }, []);
 
-  // React.useEffect(() => {
-  //   //#3
-  //   calculateItemCost(ingredientsBySize);
-  //   if (ingredientsBySize)
-  //     console.log('ingredientsBySize    ', ingredientsBySize);
-  //   if (ingredientsSimple)
-  //     console.log('ingredientsSimple    ', ingredientsSimple);
-  // }, [ingredientsBySize, ingredientsSimple]);
+  React.useEffect(() => {
+    //#3
+    calculateItemCost(ingredientsBySize);
+    if (ingredientsBySize)
+      console.log('ingredientsBySize    ', ingredientsBySize);
+    if (ingredientsSimple)
+      console.log('ingredientsSimple    ', ingredientsSimple);
+  }, [ingredientsBySize, ingredientsSimple]);
 
   const isEmptyObject = (obj) => {
     if (obj.firstLabel === '' || obj.firstLabel === undefined) {
@@ -75,6 +75,17 @@ const RecipeDish = ({
     } else {
       return false;
     }
+  };
+
+  const grabSpecificItemInStock = (name) => {
+    if (productList && productList.length > 0 && name) {
+      const item = productList.find((item) => item.product === name);
+      if (item) {
+        const { product, totalVolume, minimumAmount, totalCost } = item;
+        return { product, totalVolume, minimumAmount, totalCost };
+      }
+    }
+    return null;
   };
   const calculateItemCost = (ingredients, label) => {
     if (label) {
@@ -259,47 +270,54 @@ const RecipeDish = ({
               </thead>
               <tbody>
                 {ingredientsSimple &&
-                  ingredientsSimple.map((item, index) => (
-                    <tr
-                      key={index}
-                      className={
-                        alertMinimunAmount(
-                          item.product,
-                          item.totalVolume,
-                          item.minimumAmount,
-                          item.totalCost
-                        )
-                          ? ''
-                          : 'warning'
-                      }
-                    >
-                      <td className="items">{item.name}</td>
-                      <td className="items">
-                        {item.amount}
-                        {item.unitOfMeasurement}
-                      </td>
-                      <td className="items">
-                        R${' '}
-                        {item.costPerUnit
-                          ? item.costPerUnit.toFixed(2)
-                          : '0.00'}
-                      </td>
-                      <td className="items">
-                        R${' '}
-                        {item.portionCost
-                          ? item.portionCost.toFixed(2)
-                          : '0.00'}
-                      </td>
-                      <td
-                        className="items"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => removeItem(index)}
+                  ingredientsSimple.map((item, index) => {
+                    const itemData = grabSpecificItemInStock(item.name);
+
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          itemData
+                            ? alertMinimunAmount(
+                                itemData.product,
+                                itemData.totalVolume,
+                                itemData.minimumAmount,
+                                itemData.totalCost
+                              )
+                              ? ''
+                              : 'warning'
+                            : ''
+                        }
                       >
-                        x
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="items">{item.name}</td>
+                        <td className="items">
+                          {item.amount}
+                          {item.unitOfMeasurement}
+                        </td>
+                        <td className="items">
+                          R${' '}
+                          {item.costPerUnit
+                            ? item.costPerUnit.toFixed(2)
+                            : '0.00'}
+                        </td>
+                        <td className="items">
+                          R${' '}
+                          {item.portionCost
+                            ? item.portionCost.toFixed(2)
+                            : '0.00'}
+                        </td>
+                        <td
+                          className="items"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => removeItem(index)}
+                        >
+                          x
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
+
               <h2>Custo do produto {calculateItemCost(ingredientsSimple)}</h2>
             </table>
           </div>
@@ -355,34 +373,52 @@ const RecipeDish = ({
                 </thead>
                 <tbody>
                   {ingredientsBySize &&
-                    ingredientsBySize[label]?.map((item, index) => (
-                      <tr key={index}>
-                        <td className="items">{item.name}</td>
-                        <td className="items">
-                          {item.amount}
-                          {item.unitOfMeasurement}
-                        </td>
-                        <td className="items">
-                          R${' '}
-                          {item.costPerUnit
-                            ? item.costPerUnit.toFixed(2)
-                            : '0.00'}
-                        </td>
-                        <td className="items">
-                          R${' '}
-                          {item.portionCost
-                            ? item.portionCost.toFixed(2)
-                            : '0.00'}
-                        </td>
-                        <td
-                          className="items"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => removeItem(label, index)}
+                    ingredientsBySize[label]?.map((item, index) => {
+                      const itemData = grabSpecificItemInStock(item.name);
+
+                      return (
+                        <tr
+                          key={index}
+                          className={
+                            itemData
+                              ? alertMinimunAmount(
+                                  itemData.product,
+                                  itemData.totalVolume,
+                                  itemData.minimumAmount,
+                                  itemData.totalCost
+                                )
+                                ? ''
+                                : 'warning'
+                              : ''
+                          }
                         >
-                          x
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="items">{item.name}</td>
+                          <td className="items">
+                            {item.amount}
+                            {item.unitOfMeasurement}
+                          </td>
+                          <td className="items">
+                            R${' '}
+                            {item.costPerUnit
+                              ? item.costPerUnit.toFixed(2)
+                              : '0.00'}
+                          </td>
+                          <td className="items">
+                            R${' '}
+                            {item.portionCost
+                              ? item.portionCost.toFixed(2)
+                              : '0.00'}
+                          </td>
+                          <td
+                            className="items"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => removeItem(label, index)}
+                          >
+                            x
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
               <h2>
