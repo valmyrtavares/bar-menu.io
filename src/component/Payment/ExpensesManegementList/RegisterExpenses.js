@@ -36,9 +36,6 @@ function RegisterExpenses({ setShowPopup }) {
       [id]: value,
     }));
   };
-  const keepDeleting = () => {
-    deleteItem(productSelectedToExclude, true);
-  };
 
   const fetchExpenses = async () => {
     const data = await getBtnData('expenses');
