@@ -13,6 +13,10 @@ import {
 function RegisterExpenses({ setShowPopup }) {
   const [form, setForm] = React.useState({
     name: '',
+    numberOfTimes: 0,
+    recurrent: '',
+    multiply: '',
+    description: '',
   });
   const [listExpenses, setListExpenses] = React.useState(null);
   const [refreshScreen, setRefreshScreen] = React.useState(false);
@@ -142,16 +146,75 @@ function RegisterExpenses({ setShowPopup }) {
 
       <form onSubmit={handleSubmit} className="m-1">
         <div className={style.containerInputs}>
-          <Input
-            id="name"
-            autoComplete="off"
-            required
-            label="Nome"
-            value={form.name}
-            type="text"
-            onChange={handleChange}
-          />
+          <div className={style.inputGroup}>
+            <Input
+              id="name"
+              autoComplete="off"
+              required
+              label="Nome"
+              value={form.name}
+              type="text"
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={style.inputGroup}>
+            <label htmlFor="multiply">
+              A despesa é composta (vários itens) ou é uma despesa simples
+              (único valor)?
+            </label>
+            <select
+              id="multiply"
+              value={form.multiply}
+              onChange={handleChange}
+              className={style.selectInput}
+            >
+              <option value="">Selecione seu tipo de despesa</option>
+              <option value="simples">Simples</option>
+              <option value="composto">Composto</option>
+            </select>
+          </div>
+
+          <div className={style.inputGroup}>
+            <label htmlFor="multiply">
+              A despesa é mensal ou ocorre várias vezes no mesmo mês?
+            </label>
+            <select
+              id="recurrent"
+              onChange={handleChange}
+              value={form.recurrent}
+              className={style.selectInput}
+            >
+              <option value="">Selecione a regularidade</option>
+              <option value="monthly">Mensal</option>
+              <option value="various">Recorrente</option>
+            </select>
+          </div>
+          <div className={style.inputGroup}>
+            <Input
+              disabled={!form.recurrent}
+              id="numberOfTimes"
+              autoComplete="off"
+              required
+              label="Quantidade de parcelas"
+              value={form.numberOfTimes}
+              type="text"
+              onChange={handleChange}
+            />
+          </div>
+          <div className={style.inputGroup}>
+            <Input
+              id="description"
+              autoComplete="off"
+              required
+              label="Breve descrição da despesa"
+              value={form.description}
+              type="text"
+              onChange={handleChange}
+            />
+          </div>
         </div>
+
         <div className={style.containerBtn}>
           <button className={style.btn}>
             {editForm ? 'Mandar alterações' : 'Enviar'}

@@ -31,7 +31,7 @@ const ExpensesManegementList = () => {
   const [oneExpense, setOneExpense] = React.useState(null);
 
   React.useEffect(() => {
-    const fetchCustomer = async () => {
+    const fetchExpensesData = async () => {
       const data = await getBtnData('outgoing');
       const sortedData = data.sort(
         (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
@@ -39,7 +39,7 @@ const ExpensesManegementList = () => {
 
       setExpensesList(sortedData);
     };
-    fetchCustomer();
+    fetchExpensesData();
   }, []);
 
   React.useEffect(() => {
