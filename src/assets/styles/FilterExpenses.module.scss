@@ -1,0 +1,60 @@
+@import './adminStyleReuse.module.scss';
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+
+    .btnContainer{
+        display: flex;
+        justify-content: space-around;
+        button {
+                @include btnAdmin;    }
+    }
+}
+
+.row {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.inputGroup label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #fff;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+.input:focus {
+    border-color: #0078d4;
+    outline: none;
+}
+
+@media (max-width: 900px) {
+    .row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

@@ -10,9 +10,11 @@ import SumaryExpensesListPopup from './SumaryExpensesListPopup.js';
 import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 import { Link } from 'react-router-dom';
 import Title from '../../title.js';
+import FilterExpenses from './filterExpenses.js';
 
 const ExpensesManegementList = () => {
   const [expensesList, setExpensesList] = React.useState(null);
+  const [originalExpensesList, setOriginalExpensesList] = React.useState(null);
 
   const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
   const [showProviderRegisterPopup, setShowProviderRegisterPopup] =
@@ -49,6 +51,7 @@ const ExpensesManegementList = () => {
         (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
       );
       setExpensesList(sortedData);
+      setOriginalExpensesList(sortedData);
     };
     fetchCustomer();
   }, [refreshData]);
@@ -125,6 +128,77 @@ const ExpensesManegementList = () => {
       </tr>
     );
   };
+  const filterExpenseList = (form) => {
+    const hasFilters =
+      form.expenseName?.trim() ||
+      form.rawMaterial?.trim() ||
+      form.supplier?.trim();
+
+    const hasDates = form.initialDate?.trim() && form.finalDate?.trim();
+
+    // Verificar se mais de um campo de filtro foi preenchido
+    const filterFields = [
+      form.expenseName?.trim(),
+      form.supplier?.trim(),
+      form.rawMaterial?.trim(),
+      form.invoice?.trim(),
+    ];
+
+    const filledCount = filterFields.filter(Boolean).length;
+
+    if (filledCount > 1) {
+      alert('Somente um parâmetro pode ser selecionado por pesquisa.');
+      return false;
+    }
+
+    if (hasFilters && !hasDates) {
+      alert(
+        'Para pesquisar por nome, matéria-prima ou fornecedor, as datas de filtro precisam estar preenchidas.'
+      );
+      return false;
+    }
+    grabSelectedItems(form);
+    return true;
+  };
+
+  const grabSelectedItems = (form) => {
+    if (!expensesList || expensesList.length === 0) return [];
+
+    const { initialDate, finalDate, expenseName, supplier } = form;
+
+    // Começa com todos os itens
+    let filteredItems = [...expensesList];
+
+    // Filtro obrigatório: entre datas
+    if (initialDate && finalDate) {
+      filteredItems = filteredItems.filter((expense) => {
+        return expense.dueDate >= initialDate && expense.dueDate <= finalDate;
+      });
+    }
+
+    // Filtro opcional: nome da despesa
+    if (expenseName?.trim()) {
+      filteredItems = filteredItems.filter((expense) => {
+        return expense.name?.toLowerCase() === expenseName.toLowerCase();
+      });
+    }
+
+    // Filtro opcional: fornecedor
+    if (supplier?.trim()) {
+      filteredItems = filteredItems.filter((expense) => {
+        return expense.supplier?.toLowerCase() === supplier.toLowerCase();
+      });
+    }
+
+    console.log('Filtrados:', filteredItems);
+    return filteredItems;
+
+    // Ou: setFilteredExpenses(filteredItems);
+  };
+
+  const cleanFilter = () => {
+    setExpensesList(originalExpensesList);
+  };
 
   const openLoadSumaryPopup = (item) => {
     setOpenSumaryPopup(true);
@@ -185,6 +259,10 @@ const ExpensesManegementList = () => {
           <Title mainTitle="Despesas"></Title>
         </Link>
       </div>
+      <FilterExpenses
+        filterExpenseList={filterExpenseList}
+        cleanFilter={cleanFilter}
+      />
 
       <div className={expenses.btnAdd}>
         {/* <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button> */}
