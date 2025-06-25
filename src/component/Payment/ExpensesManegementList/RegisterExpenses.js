@@ -13,7 +13,7 @@ import {
 function RegisterExpenses({ setShowPopup }) {
   const [form, setForm] = React.useState({
     name: '',
-    numberOfTimes: 0,
+    numberOfTimes: undefined,
     recurrent: '',
     multiply: '',
     description: '',
@@ -50,13 +50,32 @@ function RegisterExpenses({ setShowPopup }) {
   };
 
   const EditItem = (item) => {
-    console.log('EditItem', item);
+    // Verifica se o item já tem um humanId
+    const updatedItem = setIdKey(item);
+
     setEditForm(true);
     setId(item.id);
 
     setForm({
       name: item.name,
+      numberOfTimes: updatedItem.numberOfTimes,
+      recurrent: updatedItem.recurrent,
+      multiply: updatedItem.multiply,
+      description: updatedItem.description,
+      humanId: updatedItem.humanId,
     });
+  };
+
+  const setIdKey = (item) => {
+    if (!item.humanId) {
+      const existingIds = listExpenses
+        .map((exp) => exp.humanId)
+        .filter(Boolean);
+      const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+      const newHumanId = maxId + 1;
+      item.humanId = newHumanId;
+    }
+    return item;
   };
 
   const renderTableItem = () => {
@@ -67,7 +86,10 @@ function RegisterExpenses({ setShowPopup }) {
         <table>
           <thead>
             <tr>
-              <th>Nome da categoria de despesa</th>
+              <th>Identificador</th>
+              <th>Nome </th>
+              <th>Regularidade </th>
+              <th>Simples/Composta </th>
               <th>Editar</th>
               <th>Excluir</th>
             </tr>
@@ -77,7 +99,14 @@ function RegisterExpenses({ setShowPopup }) {
               listExpenses.length > 0 &&
               listExpenses.map((requestItem, index) => (
                 <tr key={index}>
+                  <td>{requestItem.humanId}</td>
                   <td>{requestItem.name}</td>
+                  <td>
+                    {requestItem.recurrent === 'various'
+                      ? 'Recorrente'
+                      : 'Mensal'}
+                  </td>
+                  <td>{requestItem.multiply}</td>
                   <td
                     className={style.edit}
                     onClick={() => EditItem(requestItem)}
@@ -109,20 +138,28 @@ function RegisterExpenses({ setShowPopup }) {
   };
 
   const handleSubmit = async (e) => {
+    debugger;
     e.preventDefault();
+    const updatedForm = setIdKey({ ...form });
     try {
       if (editForm) {
         if (form.name === undefined) return;
-        await replaceDocument('expenses', id, form);
+        await replaceDocument('expenses', id, updatedForm);
         setEditForm(false);
       } else {
-        const res = await addItemToCollection('expenses', form);
+        const res = await addItemToCollection('expenses', updatedForm);
         if (res) {
           console.log('Item added successfully', res);
           fetchExpenses();
         }
       }
-      setForm({ name: '' });
+      setForm({
+        name: '',
+        numberOfTimes: 0,
+        recurrent: '',
+        multiply: '',
+        description: '',
+      });
       fetchExpenses();
     } catch (error) {
       console.error('Error adding item:', error);
@@ -165,6 +202,7 @@ function RegisterExpenses({ setShowPopup }) {
             </label>
             <select
               id="multiply"
+              required
               value={form.multiply}
               onChange={handleChange}
               className={style.selectInput}
@@ -181,6 +219,7 @@ function RegisterExpenses({ setShowPopup }) {
             </label>
             <select
               id="recurrent"
+              required
               onChange={handleChange}
               value={form.recurrent}
               className={style.selectInput}
