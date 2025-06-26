@@ -130,10 +130,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [item.volumePerUnit, item.amount]);
 
-  // React.useEffect(() => {
-  //   console.log('FORM:', form);
-  // }, [form]);
-
   const addItem = () => {
     if (item.product !== '') {
       setItem({
@@ -309,11 +305,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   // import { collection, addDoc } from 'firebase/firestore';
   // import { db } from './firebaseConfig';
 
-  const distributeItemsToStock = async (
+  const distributeItemsToExpenseList = async (
     items,
     account,
-    paymentDate,
     provider,
+    paymentDate,
     expenseId
   ) => {
     try {
@@ -324,7 +320,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         paymentDate,
         expenseID: expenseId,
       }));
-      debugger;
 
       const writePromises = itemsWithAdditionalData.map(async (item) => {
         await addItemToCollection('expenseItems', item);
@@ -337,17 +332,19 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   };
 
+  const generateRandomId = () => {
+    return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const generateRandomId = () => {
-      return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-    };
     const expenseId = generateRandomId();
+    form.expenseId = expenseId;
 
     if (form && form.items && form.items.length > 0) {
       // Organize the items in stock
-      // handleStock(form.items, form.account, form.paymentDate);
-      distributeItemsToStock(
+      // handleStock(form.items, form.account, form.paymentDate); CUIDADO PARA NÃO DEIXAR ASSIM ESSA
+      distributeItemsToExpenseList(
         form.items,
         form.account,
         form.provider,
@@ -358,6 +355,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
     if (obj) {
       const docRef = doc(db, 'outgoing', obj.id);
+
       updateDoc(docRef, form) // Atualiza com os dados do estado "form"
         .then(() => {
           console.log('Documento atualizado com sucesso!');
@@ -380,6 +378,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           console.error('Erro ao atualizar o documento:', error);
         });
     } else {
+      console.log('Form  ', form);
+      debugger;
       addDoc(collection(db, 'outgoing'), form).then(() => {
         setRefreshData((prev) => !prev);
         setShowPopup(false);
@@ -390,6 +390,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           paymentDate: '',
           category: '',
           confirmation: 0,
+          expenseId: '',
         });
         obj = null;
         console.log('OBJ  ', obj);
@@ -398,8 +399,15 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   };
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
+    let { id, value } = e.target;
     toggleFormItemsByExpenseType(id, value);
+
+    if (id === 'name') {
+      const valueChanged = expensesList.filter(
+        (item) => item.humanId === Number(value)
+      );
+      value = valueChanged[0].name;
+    }
 
     setForm((prevForm) => ({
       ...prevForm,
