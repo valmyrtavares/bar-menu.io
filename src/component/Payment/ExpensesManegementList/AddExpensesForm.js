@@ -11,7 +11,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
-import { getBtnData } from '../../../api/Api';
+import { getBtnData, addItemToCollection } from '../../../api/Api';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [form, setForm] = React.useState({
@@ -36,6 +36,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     operationSupplies: false,
     unitOfMeasurement: '',
   });
+  const [showItemsDetilsForm, setShowItemsDetailsForm] = React.useState(false);
   const [itemArrayList, setItemArrayList] = React.useState([]);
   const [productList, setProductList] = React.useState(null);
   const [providerList, setProviderList] = React.useState(null);
@@ -129,9 +130,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [item.volumePerUnit, item.amount]);
 
-  React.useEffect(() => {
-    console.log('FORM:', form);
-  }, [form]);
+  // React.useEffect(() => {
+  //   console.log('FORM:', form);
+  // }, [form]);
 
   const addItem = () => {
     if (item.product !== '') {
@@ -200,7 +201,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleStock = async (itemsStock, account = '000', paymentDate) => {
     console.log('objeto recebido   ', itemsStock);
-
+    debugger;
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {
@@ -305,14 +306,54 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     return stockEventRegistration;
   };
 
+  // import { collection, addDoc } from 'firebase/firestore';
+  // import { db } from './firebaseConfig';
+
+  const distributeItemsToStock = async (
+    items,
+    account,
+    paymentDate,
+    provider,
+    expenseId
+  ) => {
+    try {
+      const itemsWithAdditionalData = items.map((item) => ({
+        ...item,
+        account,
+        provider,
+        paymentDate,
+        expenseID: expenseId,
+      }));
+      debugger;
+
+      const writePromises = itemsWithAdditionalData.map(async (item) => {
+        await addItemToCollection('expenseItems', item);
+      });
+
+      await Promise.all(writePromises);
+      console.log("Todos os itens foram adicionados à coleção 'stockItems'.");
+    } catch (error) {
+      console.error('Erro ao distribuir itens para o estoque:', error);
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    const generateRandomId = () => {
+      return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    };
+    const expenseId = generateRandomId();
 
     if (form && form.items && form.items.length > 0) {
-      console.log('Formulário enviado:', form);
-      debugger;
       // Organize the items in stock
-      handleStock(form.items, form.account, form.paymentDate);
+      // handleStock(form.items, form.account, form.paymentDate);
+      distributeItemsToStock(
+        form.items,
+        form.account,
+        form.provider,
+        form.paymentDate,
+        expenseId
+      );
     }
 
     if (obj) {
@@ -358,11 +399,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
+    toggleFormItemsByExpenseType(id, value);
 
     setForm((prevForm) => ({
       ...prevForm,
       [id]: value,
     }));
+  };
+
+  const toggleFormItemsByExpenseType = (id, value) => {
+    if (id === 'name') {
+      const selectedExpense = expensesList.filter(
+        (item) => item.humanId === Number(value)
+      );
+      if (selectedExpense[0].multiply === 'composto') {
+        setShowItemsDetailsForm(true);
+      } else {
+        setShowItemsDetailsForm(false);
+      }
+    }
   };
 
   const handleItemChange = (e) => {
@@ -425,7 +480,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               </option>
               {expensesList &&
                 expensesList.map((expense, index) => (
-                  <option key={index} value={expense.name}>
+                  <option key={index} value={expense.humanId}>
                     {expense.name}
                   </option>
                 ))}
@@ -507,70 +562,72 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             </select>
           </div>
         </div>
-        <fieldset>
-          <legend>Adicionar Item</legend>
-          <div className={style.selectform}>
-            <select
-              id="product"
-              value={productList?.findIndex(
-                (product) => product.name === item.product
-              )}
+        {showItemsDetilsForm && (
+          <fieldset>
+            <legend>Adicionar Item</legend>
+            <div className={style.selectform}>
+              <select
+                id="product"
+                value={productList?.findIndex(
+                  (product) => product.name === item.product
+                )}
+                onChange={handleItemChange}
+              >
+                <option value="">Selecione um produto</option>
+                {productList &&
+                  productList.map((category, index) => (
+                    <option key={index} value={index}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <Input
+              id="amount"
+              autoComplete="off"
+              className="num"
+              label="Qtd de volumes"
+              value={item.amount}
+              type="number"
               onChange={handleItemChange}
-            >
-              <option value="">Selecione um produto</option>
-              {productList &&
-                productList.map((category, index) => (
-                  <option key={index} value={index}>
-                    {category.name}
-                  </option>
-                ))}
-            </select>
-          </div>
+            />
+            <Input
+              id="CostPerUnit"
+              autoComplete="off"
+              className="num"
+              label="Custo por vol"
+              value={item.CostPerUnit}
+              type="number"
+              onChange={handleItemChange}
+            />
+            <Input
+              id="totalCost"
+              autoComplete="off"
+              className="num"
+              label="Custo Total"
+              value={item.totalCost}
+              type="number"
+              onChange={handleItemChange}
+            />
 
-          <Input
-            id="amount"
-            autoComplete="off"
-            className="num"
-            label="Qtd de volumes"
-            value={item.amount}
-            type="number"
-            onChange={handleItemChange}
-          />
-          <Input
-            id="CostPerUnit"
-            autoComplete="off"
-            className="num"
-            label="Custo por vol"
-            value={item.CostPerUnit}
-            type="number"
-            onChange={handleItemChange}
-          />
-          <Input
-            id="totalCost"
-            autoComplete="off"
-            className="num"
-            label="Custo Total"
-            value={item.totalCost}
-            type="number"
-            onChange={handleItemChange}
-          />
-
-          <Input
-            id="volumePerUnit"
-            autoComplete="off"
-            className="num"
-            label="Qtd por volume"
-            value={item.volumePerUnit}
-            type="number"
-            onChange={handleItemChange}
-          />
-          <button type="button" onClick={addItem}>
-            Adicionar
-          </button>
-        </fieldset>
+            <Input
+              id="volumePerUnit"
+              autoComplete="off"
+              className="num"
+              label="Qtd por volume"
+              value={item.volumePerUnit}
+              type="number"
+              onChange={handleItemChange}
+            />
+            <button type="button" onClick={addItem}>
+              Adicionar
+            </button>
+          </fieldset>
+        )}
         <button>Enviar</button>
       </form>
-      {item && renderTableItem()}
+      {showItemsDetilsForm && item && renderTableItem()}
     </div>
   );
 };
