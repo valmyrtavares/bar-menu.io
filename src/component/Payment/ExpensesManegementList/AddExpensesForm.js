@@ -32,6 +32,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     CostPerUnit: 0,
     totalCost: 0,
     volumePerUnit: 0,
+    idProduct: '',
     totalVolume: 0,
     operationSupplies: false,
     unitOfMeasurement: '',
@@ -148,6 +149,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       CostPerUnit: 0,
       totalCost: 0,
       volumePerUnit: 0,
+      idProduct: '',
       totalVolume: 0,
       unitOfMeasurement: '',
     });
@@ -197,7 +199,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleStock = async (itemsStock, account = '000', paymentDate) => {
     console.log('objeto recebido   ', itemsStock);
-    debugger;
+
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
 
     for (let i = 0; i < itemsStock.length; i++) {
@@ -430,13 +432,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     const { id, value } = e.target;
 
     let selectedProduct = {};
-
     if (id === 'product') {
       selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
       console.log('Produto selecionado:', selectedProduct);
 
       setItem((prevForm) => ({
         ...prevForm,
+        idProduct: selectedProduct.idProduct, // Define o ID do produto
         product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
         operationSupplies: selectedProduct.operationSupplies ? true : false,
         unitOfMeasurement: selectedProduct
