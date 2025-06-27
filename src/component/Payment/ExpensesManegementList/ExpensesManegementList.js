@@ -204,6 +204,9 @@ const ExpensesManegementList = () => {
     setOpenSumaryPopup(true);
     setOneExpense(item);
   };
+  const openPopupItens = () => {
+    alert('Ainda não implementado');
+  };
 
   return (
     <div className={expenses.customerListContainer}>
@@ -281,13 +284,14 @@ const ExpensesManegementList = () => {
         <table striped bordered hover>
           <thead>
             <tr>
-              <th>Nome da despesa</th>
+              <th>Tipo da despesa</th>
               <th>Valor</th>
-              <th>Data de Vencimento</th>
-              <th>Categoria</th>
-              <th>Data do Pagamento</th>
+              <th>Data </th>
+              {/* <th>Categoria</th> */}
+              {/* <th>Data do Pagamento</th> */}
               <th>Fornecedor</th>
-              <th>Confirmação</th>
+              <th>Nota Fiscal</th>
+              <th>Items</th>
               <th>Editar</th>
               <th>Excluir</th>
             </tr>
@@ -308,14 +312,25 @@ const ExpensesManegementList = () => {
                   </td>
                   <td>{Number(item.value).toFixed(2)}</td>
                   <td>{item.dueDate}</td>
-                  <td>{item.category}</td>
-                  <td>{item.paymentDate}</td>
+                  {/* <td>{item.category}</td> */}
+                  {/* <td>{item.paymentDate}</td> */}
                   <td title={item.provider}>
                     {item.provider?.length > 10
                       ? `${item.provider.slice(0, 10)}...`
-                      : item.paymentDate}
+                      : item.provider}
                   </td>
-                  <td>{Number(item.confirmation).toFixed(2)}</td>
+                  <td>
+                    {item.account?.length > 10
+                      ? `${item.account.slice(0, 10)}...`
+                      : item.account}
+                  </td>
+                  <td>
+                    {item.items && item.items.length > 0 ? (
+                      <p onClick={openPopupItens}>Itens</p>
+                    ) : (
+                      'sem items'
+                    )}
+                  </td>
                   <td>
                     <button onClick={() => editContent(item)}>Editar</button>
                   </td>
