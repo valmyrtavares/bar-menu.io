@@ -31,6 +31,7 @@ const ExpensesManegementList = () => {
     React.useState(false);
   const [openSumaryPopup, setOpenSumaryPopup] = React.useState(false);
   const [oneExpense, setOneExpense] = React.useState(null);
+  const [changeTable, setChangeTable] = React.useState(false);
 
   React.useEffect(() => {
     const fetchExpensesData = async () => {
@@ -60,6 +61,7 @@ const ExpensesManegementList = () => {
     setObj(data);
     setShowExpensesPopup(true);
   };
+
   const deleteExpenses = (item, permission) => {
     setExcludeCustomer(item);
     setShowWarningDeltePopup(true);
@@ -128,7 +130,21 @@ const ExpensesManegementList = () => {
       </tr>
     );
   };
+
+  const bringExpenseItemsSelected = async (idRawMaterial) => {
+    const data = await getBtnData('expenseItems');
+    if (data && data.length > 0) {
+      setChangeTable(true);
+    }
+    console.log('data', data);
+    return;
+  };
+
   const filterExpenseList = (form) => {
+    if (form.idRawMaterial) {
+      bringExpenseItemsSelected(form.idRawMaterial);
+      return;
+    }
     const hasFilters =
       form.expenseName?.trim() ||
       form.rawMaterial?.trim() ||
@@ -157,17 +173,24 @@ const ExpensesManegementList = () => {
       );
       return false;
     }
-    grabSelectedItems(form);
+
+    if (!hasFilters && !hasDates) {
+      alert('Preencha algum campo para efetuar o filtro de dados.');
+      return false;
+    }
+    setExpensesList(grabSelectedItems(form));
     return true;
   };
 
   const grabSelectedItems = (form) => {
     if (!expensesList || expensesList.length === 0) return [];
 
-    const { initialDate, finalDate, expenseName, supplier } = form;
+    const normalize = (str) => str?.toLowerCase().replace(/\s+/g, ' ').trim();
+
+    const { initialDate, finalDate, expenseName, supplier, invoice } = form;
 
     // Começa com todos os itens
-    let filteredItems = [...expensesList];
+    let filteredItems = [...originalExpensesList];
 
     // Filtro obrigatório: entre datas
     if (initialDate && finalDate) {
@@ -179,18 +202,25 @@ const ExpensesManegementList = () => {
     // Filtro opcional: nome da despesa
     if (expenseName?.trim()) {
       filteredItems = filteredItems.filter((expense) => {
-        return expense.name?.toLowerCase() === expenseName.toLowerCase();
+        return normalize(expense.name) === normalize(expenseName);
+      });
+    }
+
+    // Filtro opcional: nota fiscal
+    if (invoice?.trim()) {
+      filteredItems = filteredItems.filter((expense) => {
+        return normalize(expense.account) === normalize(invoice);
       });
     }
 
     // Filtro opcional: fornecedor
+
     if (supplier?.trim()) {
       filteredItems = filteredItems.filter((expense) => {
-        return expense.supplier?.toLowerCase() === supplier.toLowerCase();
+        return normalize(expense.provider) === normalize(supplier);
       });
     }
 
-    console.log('Filtrados:', filteredItems);
     return filteredItems;
 
     // Ou: setFilteredExpenses(filteredItems);
@@ -284,14 +314,14 @@ const ExpensesManegementList = () => {
         <table striped bordered hover>
           <thead>
             <tr>
-              <th>Tipo da despesa</th>
+              <th>{changeTable ? 'Produto' : 'Tipo da despesa'}</th>
               <th>Valor</th>
               <th>Data </th>
               {/* <th>Categoria</th> */}
               {/* <th>Data do Pagamento</th> */}
               <th>Fornecedor</th>
               <th>Nota Fiscal</th>
-              <th>Items</th>
+              <th>{changeTable ? 'Unidade' : 'Itens'}</th>
               <th>Editar</th>
               <th>Excluir</th>
             </tr>
@@ -301,11 +331,7 @@ const ExpensesManegementList = () => {
               expensesList.length > 0 &&
               expensesList.map((item, index) => (
                 <tr key={index}>
-                  <td
-                    Title={item.name}
-                    className="openPopup"
-                    onClick={() => openLoadSumaryPopup(item)}
-                  >
+                  <td Title={item.name} className="openPopup">
                     {item.name?.length > 10
                       ? `${item.name.slice(0, 10)}...`
                       : item.name}
@@ -326,9 +352,9 @@ const ExpensesManegementList = () => {
                   </td>
                   <td>
                     {item.items && item.items.length > 0 ? (
-                      <p onClick={openPopupItens}>Itens</p>
+                      <p onClick={() => openLoadSumaryPopup(item)}>Itens</p>
                     ) : (
-                      'sem items'
+                      <p>sem items</p>
                     )}
                   </td>
                   <td>

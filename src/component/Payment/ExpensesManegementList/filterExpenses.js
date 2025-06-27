@@ -8,6 +8,7 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
     expenseName: '',
     supplier: '',
     rawMaterial: '',
+    idRawMaterial: '',
     invoice: '',
   });
 
@@ -46,8 +47,14 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
         rawMaterial: '',
       }));
     } else {
-      // Executa o filtro de fato aqui se necessário
-      console.log('Filtrando...');
+      setForm({
+        initialDate: '',
+        finalDate: '',
+        expenseName: '',
+        supplier: '',
+        rawMaterial: '',
+        invoice: '',
+      });
     }
   };
 
@@ -57,10 +64,31 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'rawMaterial') {
+      const selectedProduct = productList[value];
+      setForm((prev) => ({
+        ...prev,
+        [name]: selectedProduct ? selectedProduct.name : '',
+        idRawMaterial: selectedProduct ? selectedProduct.idProduct : '',
+      }));
+      return;
+    }
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
+  };
+  const resetFilters = () => {
+    setForm({
+      initialDate: '',
+      finalDate: '',
+      expenseName: '',
+      supplier: '',
+      rawMaterial: '',
+      invoice: '',
+    });
+    cleanFilter();
   };
 
   return (
@@ -115,14 +143,13 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
           <select
             id="rawMaterial"
             name="rawMaterial"
-            value={form.rawMaterial}
             onChange={handleChange}
             // onBlur={handleFilter}
             className={style.input}
           >
             <option value="">Selecione</option>
-            {productList.map((product) => (
-              <option key={product.id} value={product.name}>
+            {productList.map((product, index) => (
+              <option key={product.id} value={index}>
                 {product.name}
               </option>
             ))}
@@ -161,7 +188,7 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
       </div>
       <div className={style.btnContainer}>
         <button onClick={handleFilter}>Filtrar</button>
-        <button onClick={cleanFilter}>Limpar filtro</button>
+        <button onClick={resetFilters}>Limpar filtro</button>
       </div>
     </div>
   );
