@@ -320,7 +320,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         paymentDate,
         expenseID: expenseId,
       }));
-
+      console.log('Formato dos itens  ', itemsWithAdditionalData);
       const writePromises = itemsWithAdditionalData.map(async (item) => {
         await addItemToCollection('expenseItems', item);
       });
@@ -378,8 +378,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           console.error('Erro ao atualizar o documento:', error);
         });
     } else {
-      console.log('Form  ', form);
-      debugger;
       addDoc(collection(db, 'outgoing'), form).then(() => {
         setRefreshData((prev) => !prev);
         setShowPopup(false);
