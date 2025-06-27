@@ -476,14 +476,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           <div className={style.selectform}>
             <select
               id="name"
-              value={form.name}
               required
               onChange={handleChange}
               onFocus={handleFocus}
             >
-              <option value="" disabled hidden>
-                Selecione uma despesa
-              </option>
+              <option>Selecione uma despesa</option>
               {expensesList &&
                 expensesList.map((expense, index) => (
                   <option key={index} value={expense.humanId}>
