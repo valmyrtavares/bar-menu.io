@@ -11,9 +11,30 @@ import DefaultComumMessage from '../../Messages/DefaultComumMessage';
 import { Link } from 'react-router-dom';
 import Title from '../../title.js';
 import FilterExpenses from './filterExpenses.js';
+import Table from '../../Table.js';
+import { tab } from '@testing-library/user-event/dist/tab.js';
+
+const Expensescolumns = [
+  { nomeDaColuna: 'Tipo de despesa', valorDaColuna: 'name' },
+  { nomeDaColuna: 'Valor', valorDaColuna: 'value' },
+  { nomeDaColuna: 'Data', valorDaColuna: 'dueDate' },
+  { nomeDaColuna: 'Fornecedor', valorDaColuna: 'provider' },
+  { nomeDaColuna: 'NotaFiscal', valorDaColuna: 'account' },
+  { nomeDaColuna: 'Items', valorDaColuna: 'items' },
+];
+
+const Itemscolumns = [
+  { nomeDaColuna: 'Item', valorDaColuna: 'product' },
+  { nomeDaColuna: 'Valor', valorDaColuna: 'totalCost' },
+  { nomeDaColuna: 'Data', valorDaColuna: 'paymentDate' },
+  { nomeDaColuna: 'Fornecedor', valorDaColuna: 'provider' },
+  { nomeDaColuna: 'NotaFiscal', valorDaColuna: 'account' },
+  { nomeDaColuna: 'Un medida', valorDaColuna: 'unitOfMeasurement' },
+];
 
 const ExpensesManegementList = () => {
   const [expensesList, setExpensesList] = React.useState(null);
+  const [itemList, setItemList] = React.useState(null);
   const [originalExpensesList, setOriginalExpensesList] = React.useState(null);
 
   const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
@@ -34,28 +55,27 @@ const ExpensesManegementList = () => {
   const [changeTable, setChangeTable] = React.useState(false);
 
   React.useEffect(() => {
-    const fetchExpensesData = async () => {
-      const data = await getBtnData('outgoing');
-      const sortedData = data.sort(
-        (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
-      );
-
-      setExpensesList(sortedData);
-    };
     fetchExpensesData();
   }, []);
 
   React.useEffect(() => {
-    const fetchCustomer = async () => {
-      const data = await getBtnData('outgoing');
-      const sortedData = data.sort(
-        (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
-      );
-      setExpensesList(sortedData);
-      setOriginalExpensesList(sortedData);
-    };
-    fetchCustomer();
+    fetchExpensesData();
   }, [refreshData]);
+
+  const fetchExpensesData = async () => {
+    const [expensesData, itemsData] = await Promise.all([
+      getBtnData('outgoing'),
+      getBtnData('expenseItems'),
+    ]);
+
+    setExpensesList(sortedData(expensesData));
+    setItemList(sortedData(itemsData));
+    setOriginalExpensesList(sortedData(expensesData));
+  };
+
+  const sortedData = (data) => {
+    return data.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+  };
 
   const editContent = (data) => {
     setObj(data);
@@ -77,13 +97,13 @@ const ExpensesManegementList = () => {
     setShowExpensesPopup(true);
     setObj(null);
   };
-  const registerProduct = () => {
-    setShowProductRegisterPopup(true);
-  };
-  const addRegisterProvider = () => {
-    console.log('Registrou');
-    setShowProviderRegisterPopup(true);
-  };
+  // const registerProduct = () => {
+  //   setShowProductRegisterPopup(true);
+  // };
+  // const addRegisterProvider = () => {
+  //   console.log('Registrou');
+  //   setShowProviderRegisterPopup(true);
+  // };
 
   const handleRegisterChange = (e) => {
     const value = e.target.value;
@@ -227,7 +247,13 @@ const ExpensesManegementList = () => {
   };
 
   const cleanFilter = () => {
-    setExpensesList(originalExpensesList);
+    if (!changeTable) {
+      setExpensesList(originalExpensesList);
+    } else {
+      setItemList(null);
+      setChangeTable(false);
+      setExpensesList(originalExpensesList);
+    }
   };
 
   const openLoadSumaryPopup = (item) => {
@@ -311,65 +337,23 @@ const ExpensesManegementList = () => {
         </select>
       </div>
       <div className={expenses.containerExpensesManegementTable}>
-        <table striped bordered hover>
-          <thead>
-            <tr>
-              <th>{changeTable ? 'Produto' : 'Tipo da despesa'}</th>
-              <th>Valor</th>
-              <th>Data </th>
-              {/* <th>Categoria</th> */}
-              {/* <th>Data do Pagamento</th> */}
-              <th>Fornecedor</th>
-              <th>Nota Fiscal</th>
-              <th>{changeTable ? 'Unidade' : 'Itens'}</th>
-              <th>Editar</th>
-              <th>Excluir</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expensesList &&
-              expensesList.length > 0 &&
-              expensesList.map((item, index) => (
-                <tr key={index}>
-                  <td Title={item.name} className="openPopup">
-                    {item.name?.length > 10
-                      ? `${item.name.slice(0, 10)}...`
-                      : item.name}
-                  </td>
-                  <td>{Number(item.value).toFixed(2)}</td>
-                  <td>{item.dueDate}</td>
-                  {/* <td>{item.category}</td> */}
-                  {/* <td>{item.paymentDate}</td> */}
-                  <td title={item.provider}>
-                    {item.provider?.length > 10
-                      ? `${item.provider.slice(0, 10)}...`
-                      : item.provider}
-                  </td>
-                  <td>
-                    {item.account?.length > 10
-                      ? `${item.account.slice(0, 10)}...`
-                      : item.account}
-                  </td>
-                  <td>
-                    {item.items && item.items.length > 0 ? (
-                      <p onClick={() => openLoadSumaryPopup(item)}>Itens</p>
-                    ) : (
-                      <p>sem items</p>
-                    )}
-                  </td>
-                  <td>
-                    <button onClick={() => editContent(item)}>Editar</button>
-                  </td>
-                  <td>
-                    <button onClick={() => deleteExpenses(item, false)}>
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            {totalExpensesValue()} {/* Linha de totais no final */}
-          </tbody>
-        </table>
+        {changeTable ? (
+          <Table
+            title="Lista de Matérias-Primas"
+            data={itemList}
+            columns={Itemscolumns}
+            onEdit={editContent}
+            onDelete={deleteExpenses}
+          />
+        ) : (
+          <Table
+            title="Lista de Despesas"
+            data={expensesList}
+            columns={Expensescolumns}
+            onEdit={editContent}
+            onDelete={deleteExpenses}
+          />
+        )}
       </div>
     </div>
   );
