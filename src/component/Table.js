@@ -1,7 +1,15 @@
 import React from 'react';
 import styles from '../assets/styles/Table.module.scss';
 
-const Table = ({ title, data = [], columns = [], onEdit, onDelete }) => {
+const Table = ({
+  title,
+  data = [],
+  columns = [],
+  onEdit,
+  onDelete,
+  eventClick,
+  labelEventClick,
+}) => {
   const hasData = Array.isArray(data) && data.length > 0;
   const hasColumns = Array.isArray(columns) && columns.length > 0;
 
@@ -43,6 +51,11 @@ const Table = ({ title, data = [], columns = [], onEdit, onDelete }) => {
                   </td>
                 ))}
                 <td className={styles.actions}>
+                  {eventClick && (
+                    <button onClick={() => eventClick(item)}>
+                      {labelEventClick}
+                    </button>
+                  )}
                   <button
                     onClick={() => onEdit && onEdit(item.id)}
                     className={styles.editBtn}

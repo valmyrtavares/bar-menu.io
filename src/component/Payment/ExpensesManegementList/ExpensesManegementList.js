@@ -21,7 +21,6 @@ const Expensescolumns = [
   { nomeDaColuna: 'Data', valorDaColuna: 'dueDate' },
   { nomeDaColuna: 'Fornecedor', valorDaColuna: 'provider' },
   { nomeDaColuna: 'NotaFiscal', valorDaColuna: 'account' },
-  { nomeDaColuna: 'Items', valorDaColuna: 'items' },
 ];
 
 const Itemscolumns = [
@@ -273,9 +272,6 @@ const ExpensesManegementList = () => {
     setOpenSumaryPopup(true);
     setOneExpense(item);
   };
-  const openPopupItens = () => {
-    alert('Ainda não implementado');
-  };
 
   return (
     <div className={expenses.customerListContainer}>
@@ -366,6 +362,8 @@ const ExpensesManegementList = () => {
             columns={Expensescolumns}
             onEdit={editContent}
             onDelete={deleteExpenses}
+            eventClick={openLoadSumaryPopup}
+            labelEventClick="Ver Itens"
           />
         )}
       </div>
