@@ -57,13 +57,13 @@ const Table = ({
                     </button>
                   )}
                   <button
-                    onClick={() => onEdit && onEdit(item.id)}
+                    onClick={() => onEdit && onEdit(item)}
                     className={styles.editBtn}
                   >
                     Editar
                   </button>
                   <button
-                    onClick={() => onDelete && onDelete(item.id)}
+                    onClick={() => onDelete && onDelete(item)}
                     className={styles.deleteBtn}
                   >
                     Excluir

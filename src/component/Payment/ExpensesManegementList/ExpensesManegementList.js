@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import React from 'react';
 import expenses from '../../../assets/styles/ExpensesManegementList.module.scss';
 //import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
-import { getBtnData, deleteData } from '../../../api/Api';
+import { getBtnData, deleteData, updateCollection } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
 import RegisterProduct from './RegisterProduct.js';
@@ -85,13 +85,51 @@ const ExpensesManegementList = () => {
     setShowExpensesPopup(true);
   };
 
-  const deleteExpenses = (item, permission) => {
+  const deleteExpenses = async (item, permission) => {
+    console.log('item  ', item);
+    debugger;
     setExcludeCustomer(item);
     setShowWarningDeltePopup(true);
 
     if (permission && excludeCustomer.name === item.name) {
       setShowWarningDeltePopup(false);
-      deleteData('outgoing', item.id);
+
+      if (Array.isArray(item.items)) {
+        // Primeiro tipo de exclusão
+        deleteData('outgoing', item.id);
+
+        const relatedItems = itemList.filter(
+          (i) => i.expenseID === item.expenseId
+        );
+
+        relatedItems.forEach((relatedItem) => {
+          deleteData('expenseItems', relatedItem.id);
+        });
+      } else {
+        // Segundo tipo de exclusão
+        deleteData('expenseItems', item.id);
+
+        // Agora vamos remover o item correspondente da coleção 'outgoing'
+        const targetExpense = expensesList.find(
+          (expense) => expense.expenseId === item.expenseID
+        );
+
+        if (targetExpense) {
+          const filteredItems = targetExpense.items.filter(
+            (i) => i.idProduct !== item.idProduct
+          );
+
+          // Atualiza o documento no Firestore com os items filtrados
+          const updatedExpense = {
+            ...targetExpense,
+            items: filteredItems,
+          };
+
+          // Chama a função para atualizar o documento na coleção 'outgoing'
+          await updateCollection('outgoing', targetExpense.id, updatedExpense);
+        }
+      }
+
       setRefreshData((prev) => !prev);
     }
   };
