@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import React from 'react';
 import expenses from '../../../assets/styles/ExpensesManegementList.module.scss';
 //import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
@@ -33,9 +34,11 @@ const Itemscolumns = [
 ];
 
 const ExpensesManegementList = () => {
+  const filterRef = useRef();
   const [expensesList, setExpensesList] = React.useState(null);
   const [itemList, setItemList] = React.useState(null);
   const [originalExpensesList, setOriginalExpensesList] = React.useState(null);
+  const [originalItemList, setOriginalItemList] = React.useState(null);
 
   const [showExpensesPopup, setShowExpensesPopup] = React.useState(false);
   const [showProviderRegisterPopup, setShowProviderRegisterPopup] =
@@ -71,6 +74,7 @@ const ExpensesManegementList = () => {
     setExpensesList(sortedData(expensesData));
     setItemList(sortedData(itemsData));
     setOriginalExpensesList(sortedData(expensesData));
+    setOriginalItemList(sortedData(itemsData));
   };
 
   const sortedData = (data) => {
@@ -152,11 +156,17 @@ const ExpensesManegementList = () => {
   };
 
   const bringExpenseItemsSelected = async (idRawMaterial) => {
-    const data = await getBtnData('expenseItems');
+    const data = originalItemList.filter(
+      (item) => item.idProduct === idRawMaterial
+    );
     if (data && data.length > 0) {
       setChangeTable(true);
+      setItemList(data);
+    } else {
+      setChangeTable(true);
+      setItemList([]);
+      filterRef.current?.clearForm();
     }
-    console.log('data', data);
     return;
   };
 
@@ -164,6 +174,9 @@ const ExpensesManegementList = () => {
     if (form.idRawMaterial) {
       bringExpenseItemsSelected(form.idRawMaterial);
       return;
+    }
+    if (changeTable) {
+      setChangeTable(false);
     }
     const hasFilters =
       form.expenseName?.trim() ||
@@ -250,7 +263,7 @@ const ExpensesManegementList = () => {
     if (!changeTable) {
       setExpensesList(originalExpensesList);
     } else {
-      setItemList(null);
+      setItemList(sortedData(originalItemList));
       setChangeTable(false);
       setExpensesList(originalExpensesList);
     }
@@ -319,6 +332,7 @@ const ExpensesManegementList = () => {
         </Link>
       </div>
       <FilterExpenses
+        ref={filterRef}
         filterExpenseList={filterExpenseList}
         cleanFilter={cleanFilter}
       />

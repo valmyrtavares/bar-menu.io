@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import style from '../../../assets/styles/FilterExpenses.module.scss';
 import { getBtnData } from '../../../api/Api';
-const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
+
+const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
   const [form, setForm] = useState({
     initialDate: '',
     finalDate: '',
@@ -66,11 +67,11 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
     const { name, value } = e.target;
 
     if (name === 'rawMaterial') {
-      const selectedProduct = productList[value];
+      const selectedProduct = productList.find((p) => p.idProduct === value);
       setForm((prev) => ({
         ...prev,
-        [name]: selectedProduct ? selectedProduct.name : '',
-        idRawMaterial: selectedProduct ? selectedProduct.idProduct : '',
+        rawMaterial: selectedProduct ? selectedProduct.name : '',
+        idRawMaterial: value, // value já é o idProduct selecionado
       }));
       return;
     }
@@ -80,16 +81,25 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
     }));
   };
   const resetFilters = () => {
+    clearForm();
+    cleanFilter();
+  };
+
+  const clearForm = () => {
     setForm({
       initialDate: '',
       finalDate: '',
       expenseName: '',
       supplier: '',
       rawMaterial: '',
+      idRawMaterial: '',
       invoice: '',
     });
-    cleanFilter();
   };
+
+  useImperativeHandle(ref, () => ({
+    clearForm,
+  }));
 
   return (
     <div className={style.container}>
@@ -119,7 +129,7 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
           />
         </div>
         <div className={style.inputGroup}>
-          <label htmlFor="expenseName">Nome da depesa</label>
+          <label htmlFor="expenseName">Nome da despesa</label>
           <select
             id="expenseName"
             name="expenseName"
@@ -143,13 +153,14 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
           <select
             id="rawMaterial"
             name="rawMaterial"
+            value={form.idRawMaterial || ''}
             onChange={handleChange}
             // onBlur={handleFilter}
             className={style.input}
           >
             <option value="">Selecione</option>
             {productList.map((product, index) => (
-              <option key={product.id} value={index}>
+              <option key={product.id} value={product.idProduct}>
                 {product.name}
               </option>
             ))}
@@ -192,6 +203,6 @@ const FilterExpenses = ({ filterExpenseList, cleanFilter }) => {
       </div>
     </div>
   );
-};
+});
 
 export default FilterExpenses;
