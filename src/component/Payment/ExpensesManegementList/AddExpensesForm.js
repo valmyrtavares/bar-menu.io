@@ -19,6 +19,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     value: 0,
     dueDate: '',
     paymentDate: '',
+    expenseId: '',
     category: '',
     account: '',
     provider: '',
@@ -37,7 +38,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     operationSupplies: false,
     unitOfMeasurement: '',
   });
-  const [showItemsDetilsForm, setShowItemsDetailsForm] = React.useState(false);
+  const [showItemsDetailsForm, setShowItemsDetailsForm] = React.useState(false);
   const [itemArrayList, setItemArrayList] = React.useState([]);
   const [productList, setProductList] = React.useState(null);
   const [providerList, setProviderList] = React.useState(null);
@@ -94,13 +95,22 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   React.useEffect(() => {
     if (obj) {
       setForm({
-        name: obj.name,
-        value: obj.value,
-        dueDate: obj.dueDate,
-        paymentDate: obj.paymentDate,
-        category: obj.category,
-        confirmation: obj.confirmation,
+        name: obj.name || '',
+        value: obj.value || 0,
+        dueDate: obj.dueDate || '',
+        paymentDate: obj.paymentDate || '',
+        category: obj.category || '',
+        confirmation: obj.confirmation || 0,
+        expenseId: String(obj.expenseId || ''),
+        account: obj.account || '',
+        provider: obj.provider || '',
+        items: obj.items || [],
       });
+
+      if (obj.items && obj.items.length > 0) {
+        setItemArrayList(obj.items);
+        setShowItemsDetailsForm(true);
+      }
     } else {
       setForm({
         name: '',
@@ -109,6 +119,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         paymentDate: '',
         category: '',
         confirmation: 0,
+        expenseId: '',
+        account: '',
+        provider: '',
+        items: [],
       });
     }
   }, [obj]);
@@ -314,6 +328,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     paymentDate,
     expenseId
   ) => {
+    debugger;
+    if (obj || Object.keys(obj).length > 0) {
+      console.warn('O objeto "obj" está vazio ou não possui valores.');
+      return;
+    }
     try {
       const itemsWithAdditionalData = items.map((item) => ({
         ...item,
@@ -340,73 +359,83 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const expenseId = generateRandomId();
-    form.expenseId = expenseId;
+    //const expenseId = generateRandomId();
+    // form.expenseId = expenseId;
 
     if (form && form.items && form.items.length > 0) {
       // Organize the items in stock
       // handleStock(form.items, form.account, form.paymentDate); CUIDADO PARA NÃO DEIXAR ASSIM ESSA
+      debugger;
       distributeItemsToExpenseList(
         form.items,
         form.account,
         form.provider,
         form.paymentDate,
-        expenseId
+        form.expenseId
       );
     }
 
-    if (obj) {
-      const docRef = doc(db, 'outgoing', obj.id);
+    // if (obj) {
+    //   const docRef = doc(db, 'outgoing', obj.id);
 
-      updateDoc(docRef, form) // Atualiza com os dados do estado "form"
-        .then(() => {
-          console.log('Documento atualizado com sucesso!');
-          setRefreshData((prev) => !prev); // Atualiza a interface, se necessário
-          console.log('Documento atualizado com sucesso!');
-          setShowPopup(false);
-          setForm({
-            name: '',
-            value: 0,
-            dueDate: '',
-            paymentDate: '',
-            category: '',
-            confirmation: 0,
-            items: [],
-          });
-          obj = null;
-          console.log('OBJ  ', obj);
-        })
-        .catch((error) => {
-          console.error('Erro ao atualizar o documento:', error);
-        });
-    } else {
-      addDoc(collection(db, 'outgoing'), form).then(() => {
-        setRefreshData((prev) => !prev);
-        setShowPopup(false);
-        setForm({
-          name: '',
-          value: 0,
-          dueDate: '',
-          paymentDate: '',
-          category: '',
-          confirmation: 0,
-          expenseId: '',
-        });
-        obj = null;
-        console.log('OBJ  ', obj);
-      });
-    }
+    //   updateDoc(docRef, form) // Atualiza com os dados do estado "form"
+    //     .then(() => {
+    //       console.log('Documento atualizado com sucesso!');
+    //       setRefreshData((prev) => !prev); // Atualiza a interface, se necessário
+    //       console.log('Documento atualizado com sucesso!');
+    //       setShowPopup(false);
+    //       setForm({
+    //         name: '',
+    //         value: 0,
+    //         dueDate: '',
+    //         paymentDate: '',
+    //         category: '',
+    //         confirmation: 0,
+    //         items: [],
+    //       });
+    //       obj = null;
+    //       console.log('OBJ  ', obj);
+    //     })
+    //     .catch((error) => {
+    //       console.error('Erro ao atualizar o documento:', error);
+    //     });
+    // } else {
+    //   addDoc(collection(db, 'outgoing'), form).then(() => {
+    //     setRefreshData((prev) => !prev);
+    //     setShowPopup(false);
+    //     setForm({
+    //       name: '',
+    //       value: 0,
+    //       dueDate: '',
+    //       paymentDate: '',
+    //       category: '',
+    //       confirmation: 0,
+    //       expenseId: '',
+    //     });
+    //     obj = null;
+    //     console.log('OBJ  ', obj);
+    //   });
+    // }
   };
 
   const handleChange = (e) => {
     let { id, value } = e.target;
+
     toggleFormItemsByExpenseType(id, value);
 
     if (id === 'name') {
-      const valueChanged = expensesList.filter(
+      const selectedExpense = expensesList.find(
         (item) => item.humanId === Number(value)
       );
-      value = valueChanged[0].name;
+
+      if (selectedExpense) {
+        setForm((prevForm) => ({
+          ...prevForm,
+          name: selectedExpense.name,
+          expenseId: selectedExpense.humanId,
+        }));
+        return;
+      }
     }
 
     setForm((prevForm) => ({
@@ -479,13 +508,14 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             <select
               id="name"
               required
+              value={form.expenseId}
               onChange={handleChange}
               onFocus={handleFocus}
             >
               <option>Selecione uma despesa</option>
               {expensesList &&
                 expensesList.map((expense, index) => (
-                  <option key={index} value={expense.humanId}>
+                  <option key={index} value={String(expense.humanId)}>
                     {expense.name}
                   </option>
                 ))}
@@ -532,7 +562,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             onChange={handleChange}
           />
           <div className={style.selectform}>
-            <select id="provider" required onChange={handleChange}>
+            <select
+              id="provider"
+              required
+              onChange={handleChange}
+              value={form.provider}
+            >
               <option>Selecione um fornecedor</option>
               {providerList &&
                 providerList.length > 0 &&
@@ -567,7 +602,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             </select>
           </div>
         </div>
-        {showItemsDetilsForm && (
+        {showItemsDetailsForm && (
           <fieldset>
             <legend>Adicionar Item</legend>
             <div className={style.selectform}>
@@ -632,7 +667,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         )}
         <button>Enviar</button>
       </form>
-      {showItemsDetilsForm && item && renderTableItem()}
+      {showItemsDetailsForm && item && renderTableItem()}
     </div>
   );
 };

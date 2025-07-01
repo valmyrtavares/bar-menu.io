@@ -81,20 +81,26 @@ const ExpensesManegementList = () => {
   };
 
   const editContent = (data) => {
+    if (data.product && data.idProduct) {
+      const expenseSelected = originalExpensesList.find(
+        (expense) => expense.expenseId === data.expenseID
+      );
+      setObj(expenseSelected);
+      setShowExpensesPopup(true);
+      return;
+    }
     setObj(data);
     setShowExpensesPopup(true);
   };
 
   const deleteExpenses = async (item, permission) => {
-    console.log('item  ', item);
-    debugger;
     setExcludeCustomer(item);
     setShowWarningDeltePopup(true);
 
     if (permission && excludeCustomer.name === item.name) {
       setShowWarningDeltePopup(false);
 
-      if (Array.isArray(item.items)) {
+      if (Array.isArray(item.items) || item.name) {
         // Primeiro tipo de exclusão
         deleteData('outgoing', item.id);
 
@@ -114,7 +120,7 @@ const ExpensesManegementList = () => {
           (expense) => expense.expenseId === item.expenseID
         );
 
-        if (targetExpense) {
+        if (targetExpense.items && targetExpense.items.length > 0) {
           const filteredItems = targetExpense.items.filter(
             (i) => i.idProduct !== item.idProduct
           );

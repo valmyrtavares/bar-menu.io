@@ -34,7 +34,10 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
             Valor Total<span>: {oneExpense.value}</span>
           </p>
           <p>
-            Quantidade de items<span>: {oneExpense.items.length}</span>
+            Quantidade de items
+            <span>
+              : {oneExpense && oneExpense.items && oneExpense.items.length}
+            </span>
           </p>
         </div>
         <div>
