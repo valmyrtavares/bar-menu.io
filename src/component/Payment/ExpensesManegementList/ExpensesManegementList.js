@@ -47,7 +47,7 @@ const ExpensesManegementList = () => {
   const [showProductRegistePopup, setShowProductRegisterPopup] =
     React.useState(false);
 
-  const [excludeCustomer, setExcludeCustomer] = React.useState('');
+  const [excludeExpense, setExcludeExpense] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
   const [obj, setObj] = React.useState(null);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
@@ -106,10 +106,9 @@ const ExpensesManegementList = () => {
   };
 
   const deleteExpenses = async (item, permission) => {
-    setExcludeCustomer(item);
+    setExcludeExpense(item);
     setShowWarningDeltePopup(true);
-
-    if (permission && excludeCustomer.name === item.name) {
+    if (permission && excludeExpense) {
       setShowWarningDeltePopup(false);
 
       if (Array.isArray(item.items) || item.name) {
@@ -125,11 +124,11 @@ const ExpensesManegementList = () => {
         });
       } else {
         // Segundo tipo de exclusão
-        deleteData('expenseItems', item.id);
+        // deleteData('expenseItems', item.id);
 
         // Agora vamos remover o item correspondente da coleção 'outgoing'
         const targetExpense = expensesList.find(
-          (expense) => expense.expenseId === item.expenseID
+          (expense) => expense.expenseId === item.expenseId
         );
 
         if (targetExpense.items && targetExpense.items.length > 0) {
@@ -333,8 +332,10 @@ const ExpensesManegementList = () => {
     <div className={expenses.customerListContainer}>
       {showWarningDeletePopup && (
         <DefaultComumMessage
-          msg={`Você está prestes a excluir ${excludeCustomer.name}`}
-          item={excludeCustomer}
+          msg={`Você está prestes a excluir ${
+            excludeExpense.name ? excludeExpense.name : excludeExpense.product
+          }. Tem certeza?`}
+          item={excludeExpense}
           onConfirm={deleteExpenses}
           onClose={() => setShowWarningDeltePopup(false)}
         />
