@@ -114,14 +114,6 @@ const ExpensesManegementList = () => {
       if (Array.isArray(item.items) || item.name) {
         // Primeiro tipo de exclusão
         deleteData('outgoing', item.id);
-
-        const relatedItems = itemList.filter(
-          (i) => i.expenseID === item.expenseId
-        );
-
-        relatedItems.forEach((relatedItem) => {
-          deleteData('expenseItems', relatedItem.id);
-        });
       } else {
         // Segundo tipo de exclusão
         // deleteData('expenseItems', item.id);
@@ -209,24 +201,55 @@ const ExpensesManegementList = () => {
     );
   };
 
-  const bringExpenseItemsSelected = async (idRawMaterial) => {
-    const data = originalItemList.filter(
-      (item) => item.idProduct === idRawMaterial
+  const bringExpenseItemsSelected = async (form) => {
+    let data = originalItemList.filter(
+      (item) => item.idProduct === form.idRawMaterial
     );
-    if (data && data.length > 0) {
-      setChangeTable(true);
+
+    if (
+      (form.initialDate && !form.finalDate) ||
+      (!form.initialDate && form.finalDate)
+    ) {
+      alert(
+        'Preencha **ambas** as datas de início e fim ou **nenhuma** delas.'
+      );
+      return;
+    }
+
+    // Verifica se initialDate e finalDate estão presentes e válidas
+    if (form.initialDate && form.finalDate) {
+      const initial = new Date(form.initialDate);
+      const final = new Date(form.finalDate);
+
+      // Ajusta a data final para incluir o último dia completo
+      final.setHours(23, 59, 59, 999);
+
+      data = data.filter((item) => {
+        const paymentDate = new Date(item.paymentDate);
+        return paymentDate >= initial && paymentDate <= final;
+      });
+    }
+
+    // Atualiza a tabela com os dados filtrados
+    setChangeTable(true);
+    if (data.length > 0) {
       setItemList(data);
     } else {
-      setChangeTable(true);
       setItemList([]);
       filterRef.current?.clearForm();
     }
+
     return;
   };
 
   const filterExpenseList = (form) => {
-    if (form.idRawMaterial) {
-      bringExpenseItemsSelected(form.idRawMaterial);
+    if (
+      form.idRawMaterial &&
+      !form.expenseName &&
+      !form.supplier &&
+      !form.invoice
+    ) {
+      bringExpenseItemsSelected(form);
       return;
     }
     if (changeTable) {
@@ -251,6 +274,7 @@ const ExpensesManegementList = () => {
 
     if (filledCount > 1) {
       alert('Somente um parâmetro pode ser selecionado por pesquisa.');
+      filterRef.current?.clearForm();
       return false;
     }
 
@@ -258,6 +282,7 @@ const ExpensesManegementList = () => {
       alert(
         'Para pesquisar por nome, matéria-prima ou fornecedor, as datas de filtro precisam estar preenchidas.'
       );
+      filterRef.current?.clearForm();
       return false;
     }
 
