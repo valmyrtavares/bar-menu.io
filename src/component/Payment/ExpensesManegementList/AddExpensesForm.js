@@ -357,65 +357,57 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    //const expenseId = generateRandomId();
-    // form.expenseId = expenseId;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (form && form.items && form.items.length > 0) {
-      // Organize the items in stock
-      // handleStock(form.items, form.account, form.paymentDate); CUIDADO PARA NÃO DEIXAR ASSIM ESSA
-      debugger;
-      distributeItemsToExpenseList(
-        form.items,
-        form.account,
-        form.provider,
-        form.paymentDate,
-        form.expenseId
-      );
+    /** 1. Garante que cada item tenha account, provider, paymentDate, expenseId */
+    const enrichedItems = form.items.map((item) => ({
+      ...item,
+      account: form.account,
+      provider: form.provider,
+      paymentDate: form.paymentDate,
+      expenseId: form.expenseId,
+    }));
+
+    /** 2. Cria um novo objeto form sem mutar o state original */
+    const dataToSave = { ...form, items: enrichedItems };
+
+    /** 3. (Opcional) Se ainda usa handleStock ou distributeItemsToExpenseList */
+    if (enrichedItems.length > 0) {
+      // handleStock(enrichedItems, form.account, form.paymentDate);
+      // distributeItemsToExpenseList(enrichedItems, ...);
     }
 
-    // if (obj) {
-    //   const docRef = doc(db, 'outgoing', obj.id);
+    try {
+      if (obj) {
+        // --- Atualização ---
+        const docRef = doc(db, 'outgoing', obj.id);
+        await updateDoc(docRef, dataToSave);
+        console.log('Documento atualizado com sucesso!');
+      } else {
+        // --- Criação ---
+        await addDoc(collection(db, 'outgoing'), dataToSave);
+        console.log('Documento criado com sucesso!');
+      }
 
-    //   updateDoc(docRef, form) // Atualiza com os dados do estado "form"
-    //     .then(() => {
-    //       console.log('Documento atualizado com sucesso!');
-    //       setRefreshData((prev) => !prev); // Atualiza a interface, se necessário
-    //       console.log('Documento atualizado com sucesso!');
-    //       setShowPopup(false);
-    //       setForm({
-    //         name: '',
-    //         value: 0,
-    //         dueDate: '',
-    //         paymentDate: '',
-    //         category: '',
-    //         confirmation: 0,
-    //         items: [],
-    //       });
-    //       obj = null;
-    //       console.log('OBJ  ', obj);
-    //     })
-    //     .catch((error) => {
-    //       console.error('Erro ao atualizar o documento:', error);
-    //     });
-    // } else {
-    //   addDoc(collection(db, 'outgoing'), form).then(() => {
-    //     setRefreshData((prev) => !prev);
-    //     setShowPopup(false);
-    //     setForm({
-    //       name: '',
-    //       value: 0,
-    //       dueDate: '',
-    //       paymentDate: '',
-    //       category: '',
-    //       confirmation: 0,
-    //       expenseId: '',
-    //     });
-    //     obj = null;
-    //     console.log('OBJ  ', obj);
-    //   });
-    // }
+      /** 4. Pós‑salvamento: reset UI */
+      setRefreshData((prev) => !prev);
+      setShowPopup(false);
+      setForm({
+        name: '',
+        value: 0,
+        dueDate: '',
+        paymentDate: '',
+        category: '',
+        confirmation: 0,
+        expenseId: '',
+        account: '',
+        provider: '',
+        items: [],
+      });
+    } catch (error) {
+      console.error('Erro ao salvar documento:', error);
+    }
   };
 
   const handleChange = (e) => {

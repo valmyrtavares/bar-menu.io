@@ -65,16 +65,28 @@ const ExpensesManegementList = () => {
   }, [refreshData]);
 
   const fetchExpensesData = async () => {
-    const [expensesData, itemsData] = await Promise.all([
-      getBtnData('outgoing'),
-      getBtnData('expenseItems'),
-    ]);
+    try {
+      const expensesData = await getBtnData('outgoing');
 
-    setExpensesList(sortedData(expensesData));
-    setItemList(sortedData(itemsData));
-    setOriginalExpensesList(sortedData(expensesData));
-    setOriginalItemList(sortedData(itemsData));
+      const outgoingList = Array.isArray(expensesData) ? expensesData : [];
+
+      const mergedItems = outgoingList.flatMap((expense) =>
+        Array.isArray(expense.items) ? expense.items : []
+      );
+
+      setExpensesList(sortedData(outgoingList));
+      setOriginalExpensesList(sortedData(outgoingList));
+      setItemList(sortedData(mergedItems));
+      setOriginalItemList(sortedData(mergedItems));
+    } catch (error) {
+      console.error('Erro ao buscar dados de despesas:', error);
+    }
   };
+
+  React.useEffect(() => {
+    console.log('item List:', itemList);
+    console.log('LISTA DE DESPESAS:', expensesList);
+  }, [itemList, expensesList]);
 
   const sortedData = (data) => {
     return data.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
@@ -83,7 +95,7 @@ const ExpensesManegementList = () => {
   const editContent = (data) => {
     if (data.product && data.idProduct) {
       const expenseSelected = originalExpensesList.find(
-        (expense) => expense.expenseId === data.expenseID
+        (expense) => expense.expenseId === data.expenseId
       );
       setObj(expenseSelected);
       setShowExpensesPopup(true);
