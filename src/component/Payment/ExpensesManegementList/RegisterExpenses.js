@@ -138,7 +138,6 @@ function RegisterExpenses({ setShowPopup }) {
   };
 
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault();
     const updatedForm = setIdKey({ ...form });
     try {

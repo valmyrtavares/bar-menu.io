@@ -43,6 +43,10 @@ const RecipeDish = ({
   }, [recipe]);
 
   React.useEffect(() => {
+    reloadCurrentRecipesValue();
+  }, [productList]);
+
+  React.useEffect(() => {
     //#2
 
     const fetchProduct = async () => {
@@ -183,6 +187,68 @@ const RecipeDish = ({
       setIngredientsSimple((prev) => [...prev, ingridients]);
     }
     setIngridients({ name: '', amount: '', unitOfMeasurement: '' });
+  };
+
+  const reloadCurrentRecipesValue = () => {
+    if (!productList || productList.length === 0) return;
+
+    const getUpdatedCostData = (ingredient) => {
+      const matchedProduct = productList.find(
+        (product) => product.product.trim() === ingredient.name.trim()
+      );
+
+      if (!matchedProduct || matchedProduct.totalVolume === 0)
+        return {
+          costPerUnit: 0,
+          portionCost: 0,
+        };
+
+      const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
+      const portionCost = parseFloat(ingredient.amount) * costPerUnit;
+
+      return {
+        costPerUnit,
+        portionCost,
+      };
+    };
+
+    // CASO 1: Receita simples (sem variação de tamanho)
+    if (isEmptyObject(customizedPriceObj)) {
+      const updatedIngredients = ingredientsSimple.map((ingredient) => {
+        const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+
+        return {
+          ...ingredient,
+          costPerUnit,
+          portionCost,
+        };
+      });
+
+      setIngredientsSimple(updatedIngredients);
+      console.log('Receita simples atualizada:', updatedIngredients);
+    }
+
+    // CASO 2: Receita com variação de tamanho (customizedPriceObj presente)
+    else {
+      const updatedBySize = {};
+
+      Object.entries(ingredientsBySize).forEach(
+        ([sizeLabel, ingredientList]) => {
+          updatedBySize[sizeLabel] = ingredientList.map((ingredient) => {
+            const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+
+            return {
+              ...ingredient,
+              costPerUnit,
+              portionCost,
+            };
+          });
+        }
+      );
+
+      setIngredientsBySize(updatedBySize);
+      console.log('Receitas por tamanho atualizadas:', updatedBySize);
+    }
   };
 
   const sendRecipe = () => {
