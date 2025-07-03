@@ -169,10 +169,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    const parsedValue = Number(value);
+    // const parsedValue = Number(value);
     setStockProductObj((prevForm) => ({
       ...prevForm,
-      [id]: isNaN(parsedValue) ? 0 : parsedValue, // Fallback para valores inválidos
+      [id]: isNaN(value) ? 0 : value, // Fallback para valores inválidos
     }));
   };
 
@@ -212,7 +212,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             className="num"
             label="Volume Total"
             value={stockProductObj.totalVolume}
-            type="number"
+            type="text"
             onChange={handleChange}
             onBlur={updateCost}
           />
@@ -224,7 +224,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             className="num"
             label="Custo Total"
             value={stockProductObj.totalCost}
-            type="number"
+            type="text"
             onChange={handleChange}
             onBlur={updateCost}
           />
