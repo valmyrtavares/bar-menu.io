@@ -60,6 +60,135 @@
 
 // src/components/admin/NormalizeOutgoingDataButton.tsx
 
+// import React, { useState } from 'react';
+// import {
+//   getFirestore,
+//   collection,
+//   getDocs,
+//   updateDoc,
+//   doc,
+//   deleteDoc,
+//   Timestamp,
+// } from 'firebase/firestore';
+
+// type OutgoingItem = {
+//   product: string;
+//   amount: number;
+//   CostPerUnit: number;
+//   totalCost: number;
+//   volumePerUnit: number;
+//   idProduct: string;
+//   totalVolume: number;
+//   operationSupplies: boolean;
+//   unitOfMeasurement: string;
+//   paymentDate?: string;
+//   expenseId?: string;
+//   account?: string;
+//   provider?: string;
+// };
+
+// type OutgoingDocument = {
+//   id: string;
+//   dueDate: string | Timestamp;
+//   paymentDate?: string;
+//   expenseId?: string;
+//   account?: string;
+//   provider?: string;
+//   items?: OutgoingItem[];
+// };
+
+// const NormalizeOutgoingDataButton = () => {
+//   const [loading, setLoading] = useState(false);
+//   const [status, setStatus] = useState<string | null>(null);
+
+//   const normalizeOutgoing = async () => {
+//     setLoading(true);
+//     setStatus(null);
+
+//     const db = getFirestore();
+//     const outgoingCollection = collection(db, 'outgoing');
+
+//     try {
+//       const snapshot = await getDocs(outgoingCollection);
+
+//       const documents: OutgoingDocument[] = snapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...(doc.data() as Omit<OutgoingDocument, 'id'>),
+//       }));
+
+//       // Ordenar por dueDate decrescente (mais recente primeiro)
+//       const sortedDocs = documents.sort((a, b) => {
+//         const dateA =
+//           a.dueDate instanceof Timestamp
+//             ? a.dueDate.toDate()
+//             : new Date(a.dueDate);
+//         const dateB =
+//           b.dueDate instanceof Timestamp
+//             ? b.dueDate.toDate()
+//             : new Date(b.dueDate);
+//         return dateB.getTime() - dateA.getTime();
+//       });
+
+//       const top10 = sortedDocs.slice(0, 10);
+//       const toDelete = sortedDocs.slice(10);
+
+//       // 🔥 1. Deletar os que não fazem parte dos 10 mais recentes
+//       for (const docData of toDelete) {
+//         const docRef = doc(db, 'outgoing', docData.id);
+//         await deleteDoc(docRef);
+//         console.log(`🗑️ Documento deletado: ${docData.id}`);
+//       }
+
+//       // 🔁 2. Atualizar os 10 restantes com os dados replicados dentro de items
+//       for (const docData of top10) {
+//         const docRef = doc(db, 'outgoing', docData.id);
+
+//         const { items, paymentDate, expenseId, account, provider } = docData;
+
+//         if (Array.isArray(items) && items.length > 0) {
+//           const updatedItems = items.map((item) => ({
+//             ...item,
+//             paymentDate: paymentDate || '',
+//             expenseId: expenseId || '',
+//             account: account || '',
+//             provider: provider || '',
+//           }));
+
+//           await updateDoc(docRef, {
+//             items: updatedItems,
+//           });
+
+//           console.log(`✅ Documento atualizado: ${docData.id}`);
+//         } else {
+//           console.log(`⏩ Documento ignorado (sem items): ${docData.id}`);
+//         }
+//       }
+
+//       setStatus('Coleção normalizada com sucesso.');
+//     } catch (error) {
+//       console.error('❌ Erro ao normalizar a coleção:', error);
+//       setStatus('Erro ao normalizar. Veja o console.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div style={{ padding: 20 }}>
+//       <h2>Normalizar coleção "outgoing"</h2>
+//       <p>
+//         Isso manterá apenas os 10 mais recentes e irá atualizar os{' '}
+//         <code>items</code>.
+//       </p>
+//       <button onClick={normalizeOutgoing} disabled={loading}>
+//         {loading ? 'Processando...' : 'Executar Normalização'}
+//       </button>
+//       {status && <p>{status}</p>}
+//     </div>
+//   );
+// };
+
+// export default NormalizeOutgoingDataButton;
 import React, { useState } from 'react';
 import {
   getFirestore,
@@ -67,125 +196,67 @@ import {
   getDocs,
   updateDoc,
   doc,
-  deleteDoc,
-  Timestamp,
 } from 'firebase/firestore';
 
-type OutgoingItem = {
-  product: string;
-  amount: number;
-  CostPerUnit: number;
-  totalCost: number;
-  volumePerUnit: number;
-  idProduct: string;
-  totalVolume: number;
-  operationSupplies: boolean;
-  unitOfMeasurement: string;
-  paymentDate?: string;
-  expenseId?: string;
-  account?: string;
-  provider?: string;
-};
+const CleanUsageHistoryButton = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
 
-type OutgoingDocument = {
-  id: string;
-  dueDate: string | Timestamp;
-  paymentDate?: string;
-  expenseId?: string;
-  account?: string;
-  provider?: string;
-  items?: OutgoingItem[];
-};
-
-const NormalizeOutgoingDataButton = () => {
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
-
-  const normalizeOutgoing = async () => {
-    setLoading(true);
-    setStatus(null);
+  const cleanUsageHistory = async () => {
+    setIsLoading(true);
+    setResultMessage('');
 
     const db = getFirestore();
-    const outgoingCollection = collection(db, 'outgoing');
+    const stockRef = collection(db, 'stock');
 
     try {
-      const snapshot = await getDocs(outgoingCollection);
+      const snapshot = await getDocs(stockRef);
+      let updatedCount = 0;
 
-      const documents: OutgoingDocument[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<OutgoingDocument, 'id'>),
-      }));
+      const updates = snapshot.docs.map(async (document) => {
+        const data = document.data();
+        const usageHistory = data.UsageHistory;
 
-      // Ordenar por dueDate decrescente (mais recente primeiro)
-      const sortedDocs = documents.sort((a, b) => {
-        const dateA =
-          a.dueDate instanceof Timestamp
-            ? a.dueDate.toDate()
-            : new Date(a.dueDate);
-        const dateB =
-          b.dueDate instanceof Timestamp
-            ? b.dueDate.toDate()
-            : new Date(b.dueDate);
-        return dateB.getTime() - dateA.getTime();
-      });
-
-      const top10 = sortedDocs.slice(0, 10);
-      const toDelete = sortedDocs.slice(10);
-
-      // 🔥 1. Deletar os que não fazem parte dos 10 mais recentes
-      for (const docData of toDelete) {
-        const docRef = doc(db, 'outgoing', docData.id);
-        await deleteDoc(docRef);
-        console.log(`🗑️ Documento deletado: ${docData.id}`);
-      }
-
-      // 🔁 2. Atualizar os 10 restantes com os dados replicados dentro de items
-      for (const docData of top10) {
-        const docRef = doc(db, 'outgoing', docData.id);
-
-        const { items, paymentDate, expenseId, account, provider } = docData;
-
-        if (Array.isArray(items) && items.length > 0) {
-          const updatedItems = items.map((item) => ({
-            ...item,
-            paymentDate: paymentDate || '',
-            expenseId: expenseId || '',
-            account: account || '',
-            provider: provider || '',
-          }));
+        if (Array.isArray(usageHistory) && usageHistory.length > 100) {
+          const last100Items = usageHistory.slice(-100); // mantém os últimos 100
+          const docRef = doc(db, 'stock', document.id);
 
           await updateDoc(docRef, {
-            items: updatedItems,
+            UsageHistory: last100Items,
           });
 
-          console.log(`✅ Documento atualizado: ${docData.id}`);
-        } else {
-          console.log(`⏩ Documento ignorado (sem items): ${docData.id}`);
+          updatedCount++;
         }
-      }
+      });
 
-      setStatus('Coleção normalizada com sucesso.');
+      await Promise.all(updates);
+      setResultMessage(
+        `Limpeza concluída com sucesso. ${updatedCount} documento(s) atualizados.`
+      );
     } catch (error) {
-      console.error('❌ Erro ao normalizar a coleção:', error);
-      setStatus('Erro ao normalizar. Veja o console.');
-    } finally {
-      setLoading(false);
+      console.error('Erro ao limpar UsageHistory:', error);
+      setResultMessage('Ocorreu um erro durante a limpeza.');
     }
+
+    setIsLoading(false);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Normalizar coleção "outgoing"</h2>
-      <p>
-        Isso manterá apenas os 10 mais recentes e irá atualizar os{' '}
-        <code>items</code>.
-      </p>
-      <button onClick={normalizeOutgoing} disabled={loading}>
-        {loading ? 'Processando...' : 'Executar Normalização'}
+    <div style={{ padding: '1rem' }}>
+      <button
+        onClick={cleanUsageHistory}
+        disabled={isLoading}
+        style={{
+          padding: '10px 20px',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}
+      >
+        {isLoading ? 'Limpando...' : 'Limpar UsageHistory'}
       </button>
-      {status && <p>{status}</p>}
+      {resultMessage && <p style={{ marginTop: '10px' }}>{resultMessage}</p>}
     </div>
   );
 };
 
-export default NormalizeOutgoingDataButton;
+export default CleanUsageHistoryButton;

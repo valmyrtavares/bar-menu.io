@@ -19,34 +19,32 @@ const EditFormButton = () => {
   const [modalEditSideDishes, setModalEditSideDishes] = React.useState(false); //Open and close Por-up Edit SideDishes
   const [dataObj, setDataObj] = React.useState({});
   const { id } = useParams();
-  const EditDishesTitle = 'Edite o Prato';
-  const EditButtonTitle = 'Edite o Botão';
-  const EditSideDishesTitle = 'Edite o Acompanhamento';
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [data, dataItem, sideDishes] = await Promise.all([
-          getBtnData('button'),
-          getBtnData('item'),
-          getBtnData('sideDishes'),
-        ]);
-        const sortedDataItem = dataItem.sort((a, b) =>
-          a.title.localeCompare(b.title)
-        );
-        const sortedData = data.sort((a, b) => a.title.localeCompare(b.title));
-        const sortedSideDishes = sideDishes.sort((a, b) =>
-          a.sideDishes.localeCompare(b.sideDishes)
-        );
-        setMenuButton(sortedData);
-        setDishes(sortedDataItem);
-        setSideDishes(sortedSideDishes);
-      } catch (error) {
-        console.error('Error fetching data', error);
-      }
-    };
-    fetchData();
+    fetchDataCollection();
   }, []);
+
+  const fetchDataCollection = async () => {
+    try {
+      const [data, dataItem, sideDishes] = await Promise.all([
+        getBtnData('button'),
+        getBtnData('item'),
+        getBtnData('sideDishes'),
+      ]);
+      const sortedDataItem = dataItem.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+      const sortedData = data.sort((a, b) => a.title.localeCompare(b.title));
+      const sortedSideDishes = sideDishes.sort((a, b) =>
+        a.sideDishes.localeCompare(b.sideDishes)
+      );
+      setMenuButton(sortedData);
+      setDishes(sortedDataItem);
+      setSideDishes(sortedSideDishes);
+    } catch (error) {
+      console.error('Error fetching data', error);
+    }
+  };
 
   async function grabItem(item) {
     alert(
@@ -121,7 +119,7 @@ const EditFormButton = () => {
         <div className="form-position">
           <AddButtonForm
             dataObj={dataObj}
-            EditButtonTitle={EditButtonTitle}
+            EditButtonTitle="Edite o Botão"
             setModalEditButton={setModalEditButton}
           />
         </div>
@@ -152,7 +150,7 @@ const EditFormButton = () => {
           {/* <CloseButton onClick={() => closeModal()} /> */}
           <AddDishesForm
             dataObj={dataObj}
-            mainTitle={EditDishesTitle}
+            mainTitle="Edite o Prato"
             setModalEditDishes={setModalEditDishes}
           />
         </div>
@@ -184,7 +182,7 @@ const EditFormButton = () => {
         <div className="form-position">
           <AddSideDishesForm
             dataObj={dataObj}
-            EditSideDishesTitle={EditSideDishesTitle}
+            EditSideDishesTitle="Edite o Acompanhamento"
             setModalEditSideDishes={setModalEditSideDishes}
           />
         </div>

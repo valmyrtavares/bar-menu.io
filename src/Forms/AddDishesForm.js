@@ -99,6 +99,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
 
   const fetchCategories = async () => {
     const categories = await fetchCategoriesItem('button');
+    console.log('Fetched categories:', categories);
     categories.unshift('Selecione uma categoria'); // Add a first option
     setCategories(categories);
   };
