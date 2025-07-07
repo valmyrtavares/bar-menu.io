@@ -37,7 +37,7 @@ import TrackStockProduct from './component/Stock/TrackStockProduct';
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
-import CleanUsageHistoryButton from './component/admin/UpdateProductsIdButton.tsx';
+import UpdateProductsIdButton from './component/admin/UpdateProductsIdButton.tsx';
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 import Documentation from './component/Documentation/documentation';
@@ -95,7 +95,7 @@ function App() {
         <Route path="/create-customer" element={<CreateCustomer />} />
         <Route path="/request" element={<RequestModal />} />
         <Route path="/orderqueue" element={<OrderQueue />} />
-        <Route path="/update" element={<CleanUsageHistoryButton />} />
+        {/* <Route path="/update" element={<UpdateProductsIdButton />} /> */}
 
         <Route path="/nfce" element={<FiscalAttributes />} />
         <Route path="/print" element={<PrintRequestCustomer />} />

@@ -189,74 +189,131 @@
 // };
 
 // export default NormalizeOutgoingDataButton;
-import React, { useState } from 'react';
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  updateDoc,
-  doc,
-} from 'firebase/firestore';
 
-const CleanUsageHistoryButton = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [resultMessage, setResultMessage] = useState('');
+//&&&&&&&******************************************************************************************
 
-  const cleanUsageHistory = async () => {
-    setIsLoading(true);
-    setResultMessage('');
+// import React, { useState } from 'react';
+// import {
+//   getFirestore,
+//   collection,
+//   getDocs,
+//   updateDoc,
+//   doc,
+// } from 'firebase/firestore';
 
-    const db = getFirestore();
-    const stockRef = collection(db, 'stock');
+// const CleanUsageHistoryButton = () => {
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [resultMessage, setResultMessage] = useState('');
 
+//   const cleanUsageHistory = async () => {
+//     setIsLoading(true);
+//     setResultMessage('');
+
+//     const db = getFirestore();
+//     const stockRef = collection(db, 'stock');
+
+//     try {
+//       const snapshot = await getDocs(stockRef);
+//       let updatedCount = 0;
+
+//       const updates = snapshot.docs.map(async (document) => {
+//         const data = document.data();
+//         const usageHistory = data.UsageHistory;
+
+//         if (Array.isArray(usageHistory) && usageHistory.length > 100) {
+//           const last100Items = usageHistory.slice(-100); // mantém os últimos 100
+//           const docRef = doc(db, 'stock', document.id);
+
+//           await updateDoc(docRef, {
+//             UsageHistory: last100Items,
+//           });
+
+//           updatedCount++;
+//         }
+//       });
+
+//       await Promise.all(updates);
+//       setResultMessage(
+//         `Limpeza concluída com sucesso. ${updatedCount} documento(s) atualizados.`
+//       );
+//     } catch (error) {
+//       console.error('Erro ao limpar UsageHistory:', error);
+//       setResultMessage('Ocorreu um erro durante a limpeza.');
+//     }
+
+//     setIsLoading(false);
+//   };
+
+//   return (
+//     <div style={{ padding: '1rem' }}>
+//       <button
+//         onClick={cleanUsageHistory}
+//         disabled={isLoading}
+//         style={{
+//           padding: '10px 20px',
+//           fontSize: '16px',
+//           cursor: 'pointer',
+//         }}
+//       >
+//         {isLoading ? 'Limpando...' : 'Limpar UsageHistory'}
+//       </button>
+//       {resultMessage && <p style={{ marginTop: '10px' }}>{resultMessage}</p>}
+//     </div>
+//   );
+// };
+
+// export default CleanUsageHistoryButton;
+
+//*********************************************************************************** */
+
+import React from 'react';
+import { getFirestore, collection, setDoc, doc } from 'firebase/firestore';
+
+const UpdateProductsIdButton = () => {
+  const handleImport = async () => {
+    debugger;
     try {
-      const snapshot = await getDocs(stockRef);
-      let updatedCount = 0;
+      const response = await fetch('/backup/request-2025-07-04.json');
+      const data = await response.json();
 
-      const updates = snapshot.docs.map(async (document) => {
-        const data = document.data();
-        const usageHistory = data.UsageHistory;
+      if (!Array.isArray(data)) {
+        console.error('❌ JSON não é um array de objetos.');
+        return;
+      }
 
-        if (Array.isArray(usageHistory) && usageHistory.length > 100) {
-          const last100Items = usageHistory.slice(-100); // mantém os últimos 100
-          const docRef = doc(db, 'stock', document.id);
+      // Ordena por countRequest do maior para o menor
+      const sortedData = data.sort((a, b) => b.countRequest - a.countRequest);
 
-          await updateDoc(docRef, {
-            UsageHistory: last100Items,
-          });
+      // Pega os 200 com maior countRequest
+      const top200 = sortedData.slice(0, 200);
+      debugger;
 
-          updatedCount++;
-        }
-      });
+      const db = getFirestore();
+      const collectionRef = collection(db, 'requests'); // nova coleção
 
-      await Promise.all(updates);
-      setResultMessage(
-        `Limpeza concluída com sucesso. ${updatedCount} documento(s) atualizados.`
+      // Adiciona os 200 ao Firestore
+      for (const item of top200) {
+        if (!item.id) continue; // pular se não tiver ID
+
+        const docRef = doc(collectionRef, item.id); // usa o mesmo ID do documento original
+        await setDoc(docRef, item);
+        console.log('✅ Documento inserido:', item.id);
+      }
+
+      alert(
+        '✅ 200 registros importados com sucesso para a nova coleção "requests".'
       );
     } catch (error) {
-      console.error('Erro ao limpar UsageHistory:', error);
-      setResultMessage('Ocorreu um erro durante a limpeza.');
+      console.error('❌ Erro ao importar JSON ou enviar ao Firestore:', error);
+      alert('❌ Falha ao importar dados. Verifique o console.');
     }
-
-    setIsLoading(false);
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <button
-        onClick={cleanUsageHistory}
-        disabled={isLoading}
-        style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        {isLoading ? 'Limpando...' : 'Limpar UsageHistory'}
-      </button>
-      {resultMessage && <p style={{ marginTop: '10px' }}>{resultMessage}</p>}
-    </div>
+    <button onClick={handleImport}>
+      Importar últimos 200 pedidos para "requests"
+    </button>
   );
 };
 
-export default CleanUsageHistoryButton;
+export default UpdateProductsIdButton;
