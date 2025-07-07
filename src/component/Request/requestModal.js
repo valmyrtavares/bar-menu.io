@@ -144,11 +144,11 @@ const RequestModal = () => {
         const currentRequests = userDocSnap.data().request || [];
         console.log('DATA É    ', data);
         console.log('currentRequests É    ', currentRequests);
-        // Acrescente o novo objeto 'form' ao array 'request'
+        // Acrescente o novo objeto 'form' ao array 'requests'
         currentRequests.push(...data);
         console.log('form   ', currentRequests);
 
-        // Atualize o documento com o novo array 'request'
+        // Atualize o documento com o novo array 'requests'
         await updateDoc(userDocRef, {
           request: currentRequests,
         });
@@ -205,7 +205,7 @@ const RequestModal = () => {
             // Pegar o primeiro documento encontrado (deve ser único)
             const anonymousUserDoc = querySnapshot.docs[0];
             const userDocRef = doc(db, 'user', anonymousUserDoc.id);
-            // Atualizar o campo 'request' para []
+            // Atualizar o campo 'requests' para []
             await updateDoc(userDocRef, { request: [] });
             // Buscar o documento atualizado
             const updatedDoc = await getDoc(userDocRef);
@@ -307,7 +307,7 @@ const RequestModal = () => {
       setIsSubmitting(true);
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
-        addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        addDoc(collection(db, 'requests'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
         const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
         await updateDoc(userDocRef, {
           request: [],
@@ -344,7 +344,7 @@ const RequestModal = () => {
       localStorage.removeItem('backorder');
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
-        addDoc(collection(db, 'request'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        addDoc(collection(db, 'requests'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
         const userDocRef = doc(db, 'user', id);
         await updateDoc(userDocRef, {
           request: [],
@@ -379,7 +379,7 @@ const RequestModal = () => {
   };
 
   const countingRequest = async () => {
-    const requestData = await getBtnData('request');
+    const requestData = await getBtnData('requests');
     const requestNumbers = requestData
       .filter((item) => item.countRequest !== undefined)
       .map((item) => item.countRequest);

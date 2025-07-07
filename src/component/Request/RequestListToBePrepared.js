@@ -58,7 +58,7 @@ const RequestListToBePrepared = () => {
   //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges('request', (data) => {
+    const unsubscribe = fetchInDataChanges('requests', (data) => {
       let requestList = data.filter((item) => item.orderDelivered === false);
       requestList = requestSorter(requestList);
 
@@ -84,7 +84,7 @@ const RequestListToBePrepared = () => {
   // }, [newCustomerPromotion, shouldRunEffect]);
 
   const fetchUserRequests = async () => {
-    let requestList = await getBtnData('request');
+    let requestList = await getBtnData('requests');
     requestList = requestList.filter((item) => item.orderDelivered === false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
@@ -112,8 +112,8 @@ const RequestListToBePrepared = () => {
   };
 
   const handleDeleteRequest = async (id) => {
-    const data = await getOneItemColleciton('request', id);
-    await deleteData('request', id);
+    const data = await getOneItemColleciton('requests', id);
+    await deleteData('requests', id);
     if (data.name === 'anonimo') {
       await deleteData('user', data.idUser);
     }
@@ -131,7 +131,7 @@ const RequestListToBePrepared = () => {
 
   const RequestDone = (item) => {
     item.done = false;
-    setDoc(doc(db, 'request', item.id), item)
+    setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');
         fetchUserRequests();
@@ -143,7 +143,7 @@ const RequestListToBePrepared = () => {
 
   const handlePaymentMethodChange = (method, item) => {
     item.paymentMethod = method;
-    setDoc(doc(db, 'request', item.id), item)
+    setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');
         fetchUserRequests();
@@ -155,7 +155,7 @@ const RequestListToBePrepared = () => {
 
   const descontFinalPrice = async (descont, idRequest) => {
     try {
-      const requestRef = doc(db, 'request', idRequest);
+      const requestRef = doc(db, 'requests', idRequest);
 
       const requestSnap = await getDoc(requestRef);
 
@@ -188,7 +188,7 @@ const RequestListToBePrepared = () => {
 
   const changeStatusPaid = (item) => {
     item.paymentDone = true;
-    setDoc(doc(db, 'request', item.id), item)
+    setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');
         fetchUserRequests();
@@ -523,7 +523,7 @@ const RequestListToBePrepared = () => {
         );
       }
       //add the promotion title to the list of promotions used by the client
-      setDoc(doc(db, 'request', currentRequest.id), currentRequest);
+      setDoc(doc(db, 'requests', currentRequest.id), currentRequest);
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
         benefitedClientEdited
@@ -562,7 +562,7 @@ const RequestListToBePrepared = () => {
 
       const NoEmpty = cleanObject(benefitedClientEdited);
       setBenefitedClientEdited(NoEmpty);
-      setDoc(doc(db, 'request', currentRequest.id), currentRequest);
+      setDoc(doc(db, 'requests', currentRequest.id), currentRequest);
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
       console.log('Document updated with ID: ', benefitedClientEdited.id);
@@ -714,7 +714,7 @@ const RequestListToBePrepared = () => {
     updateIngredientsStock(item);
 
     item.orderDelivered = true;
-    setDoc(doc(db, 'request', item.id), item)
+    setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');
         fetchUserRequests();

@@ -22,7 +22,7 @@ const OrderQueue = () => {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges('request', (data) => {
+    const unsubscribe = fetchInDataChanges('requests', (data) => {
       // Separando os dados em duas listas com base no campo `done`
       let waitingLineData = data.filter((item) => item.done);
       waitingLineData = requestSorter(waitingLineData);

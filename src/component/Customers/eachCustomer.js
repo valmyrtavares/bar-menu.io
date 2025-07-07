@@ -51,7 +51,7 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
   async function getRequestsByUserId(userId) {
     try {
       // Crie uma referência para a coleção "request"
-      const requestCollectionRef = collection(db, 'request');
+      const requestCollectionRef = collection(db, 'requests');
 
       // Crie a consulta para buscar documentos com o idUser especificado
       const q = query(requestCollectionRef, where('idUser', '==', userId));

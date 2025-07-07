@@ -132,11 +132,11 @@ const DishesModal = ({ item, setModal }) => {
         // Se o documento do usuário já existir, atualiza o array request
         const currentRequests = userDocSnap.data().request || [];
 
-        // Acrescente o novo objeto 'form' ao array 'request'
+        // Acrescente o novo objeto 'form' ao array 'requests'
         currentRequests.push(form);
         console.log('form   ', form);
 
-        // Atualize o documento com o novo array 'request'
+        // Atualize o documento com o novo array 'requests'
         await updateDoc(userDocRef, {
           request: currentRequests,
         });
