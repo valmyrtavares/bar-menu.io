@@ -43,7 +43,7 @@ const RequestManagementModule = () => {
       try {
         const [requestData, voucherData, sideDishesList, item] =
           await Promise.all([
-            getBtnData('request'),
+            getBtnData('requests'),
             getBtnData('voucherPromotion'),
             getBtnData('sideDishes'),
             getBtnData('item'),

@@ -38,7 +38,7 @@ const RequestManagementModule = () => {
   React.useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const [requestData] = await Promise.all([getBtnData('request')]);
+        const [requestData] = await Promise.all([getBtnData('requests')]);
         setCompleteRequests(requestData);
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);

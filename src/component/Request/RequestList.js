@@ -1,6 +1,7 @@
 import React from 'react';
+
 import '../../assets/styles/RequestList.css';
-import { fetchInDataChanges } from '../../api/Api.js';
+import { fetchInDataChanges, checkAndTrimRequests } from '../../api/Api.js';
 import { getFirstFourLetters } from '../../Helpers/Helpers.js';
 import { requestSorter } from '../../Helpers/Helpers.js';
 import Title from '../title.js';
@@ -9,16 +10,26 @@ import { Link } from 'react-router-dom';
 
 const RequestList = () => {
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
+  const [alreadyTrimmed, setAlreadyTrimmed] = React.useState(false);
   const [form, setForm] = React.useState({
     category: '',
     search: '',
   });
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges('request', (data) => {
+    const unsubscribe = fetchInDataChanges('requests', (data) => {
       const dataSorted = requestSorter(data, 'direction');
 
       setRequestDoneList(dataSorted);
+      if (!alreadyTrimmed && dataSorted.length > 500) {
+        setAlreadyTrimmed(true);
+
+        // const handleTrim = async () => {
+        //   await checkAndTrimRequests(dataSorted);
+        // };
+
+        // handleTrim();
+      }
     });
     return () => unsubscribe();
   }, []);
