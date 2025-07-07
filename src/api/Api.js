@@ -12,6 +12,13 @@ import {
   deleteDoc,
   updateDoc,
 } from 'firebase/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  getBytes,
+} from 'firebase/storage';
 
 //FIRESTORE
 const db = getFirestore(app);
