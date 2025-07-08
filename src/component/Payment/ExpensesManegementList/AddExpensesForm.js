@@ -374,7 +374,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
     /** 3. (Opcional) Se ainda usa handleStock ou distributeItemsToExpenseList */
     if (enrichedItems.length > 0) {
-      // handleStock(enrichedItems, form.account, form.paymentDate);
+      handleStock(enrichedItems, form.account, form.paymentDate);
       // distributeItemsToExpenseList(enrichedItems, ...);
     }
 

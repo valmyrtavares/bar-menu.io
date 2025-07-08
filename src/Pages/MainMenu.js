@@ -33,6 +33,10 @@ function MainMenu() {
   const db = getFirestore(app);
 
   React.useEffect(() => {
+    checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
+  }, []);
+
+  const checkToten = () => {
     const totenExist = localStorage.getItem('toten');
     if (!totenExist || global.isToten !== true) {
       global.setIsToten(false);
@@ -43,7 +47,7 @@ function MainMenu() {
       global.setIsToten(true);
       CheckLogin();
     }
-  }, []);
+  };
 
   React.useEffect(() => {
     if (!global.isToten) {
@@ -51,22 +55,22 @@ function MainMenu() {
         CheckLogin();
       }
     }
-
-    const fetchData = async () => {
-      try {
-        const [data, dataItem] = await Promise.all([
-          getBtnData('button'),
-          getBtnData('item'),
-        ]);
-        setMenuButton(data);
-        setDishes(dataItem);
-        grabClient();
-      } catch (error) {
-        console.error('Erro fetching data', error);
-      }
-    };
     fetchData();
   }, [global.authorizated]);
+
+  const fetchData = async () => {
+    try {
+      const [data, dataItem] = await Promise.all([
+        getBtnData('button'),
+        getBtnData('item'),
+      ]);
+      setMenuButton(data);
+      setDishes(dataItem);
+      grabClient();
+    } catch (error) {
+      console.error('Erro fetching data', error);
+    }
+  };
 
   React.useEffect(() => {
     if (global.isToten === null) return; // Espera até que tenha um valor válido
