@@ -228,6 +228,7 @@ const RequestListToBePrepared = () => {
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
+          ObjPadrao.CostPerUnit = ingredient.portionCost;
           const arrayParams = [ObjPadrao];
           await handleStock(arrayParams, account, dateTime);
         }
@@ -237,6 +238,7 @@ const RequestListToBePrepared = () => {
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
+          ObjPadrao.CostPerUnit = ingredient.portionCost;
           const arrayParams = [ObjPadrao];
           await handleStock(arrayParams, account, dateTime);
         }
@@ -288,7 +290,7 @@ const RequestListToBePrepared = () => {
           isNaN(account) // Não é um número
         ) {
           // Atualiza totalCost proporcionalmente
-          currentItem.totalCost = previousCost - previousCost / previousVolume;
+          currentItem.totalCost = previousCost - currentItem.CostPerUnit;
 
           // Mantém a atualização de totalVolume
           currentItem.totalVolume =
