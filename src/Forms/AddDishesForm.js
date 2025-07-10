@@ -240,6 +240,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
       console.log('form   ', form);
       console.log('costPriceObj   ', form.costPriceObj);
     }
+    console.log('form', form);
   }, [form]);
 
   React.useEffect(() => {

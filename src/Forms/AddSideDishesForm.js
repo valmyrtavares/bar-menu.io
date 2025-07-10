@@ -27,6 +27,7 @@ function AddSideDishesForm({
     price: 0,
     portionUsed: '',
     sideDishes: '',
+    unit: '',
     costPriceObj: {},
   });
   const [noNavigate, setNoNavigate] = React.useState(false);
@@ -43,18 +44,19 @@ function AddSideDishesForm({
       setHideShowCheckForm(false);
     }
 
-    const fetchProduct = async () => {
-      const dataProduct = await getBtnData('stock');
-
-      if (dataProduct && dataProduct.length > 0) {
-        const sortedData = dataProduct.sort((a, b) =>
-          a.product.localeCompare(b.product)
-        );
-        setProductList(sortedData);
-      }
-    };
     fetchProduct();
   }, []);
+
+  const fetchProduct = async () => {
+    const dataProduct = await getBtnData('stock');
+
+    if (dataProduct && dataProduct.length > 0) {
+      const sortedData = dataProduct.sort((a, b) =>
+        a.product.localeCompare(b.product)
+      );
+      setProductList(sortedData);
+    }
+  };
 
   const addPriceObj = (obj) => {
     obj.profit = obj.price - obj.cost;
@@ -69,23 +71,80 @@ function AddSideDishesForm({
     setShowPopupCostAndPrice(false);
   };
 
+  //After used delete this useEffect
   React.useEffect(() => {
     console.log('Form atualizado    ', form);
   }, [form]);
 
   function handleChange({ target }) {
     const { id, value } = target;
-    setForm({
-      ...form,
-      [id]: value,
-    });
+
+    if (id === 'sideDishes') {
+      const itemSelected = productList.find((item) => item.product === value);
+      itemSelected
+        ? setForm({
+            ...form,
+            sideDishes: itemSelected.product,
+            unit: itemSelected.unitOfMeasurement,
+            totalVolume: itemSelected.totalVolume,
+            totalCost: itemSelected.totalCost,
+          })
+        : setForm({
+            ...form,
+            sideDishes: '',
+            unit: '',
+          });
+    } else {
+      setForm({
+        ...form,
+        [id]: value,
+      });
+    }
+  }
+
+  function buildFormWithComputedData(form, productList) {
+    if (!form.sideDishes || !form.portionUsed) return form;
+
+    let totalVolume = 0;
+    let totalCost = 0;
+
+    if (!form.totalVolume && !form.totalCost) {
+      const itemSelected = productList.find(
+        (item) => item.product === form.sideDishes
+      );
+
+      totalVolume = parseFloat(itemSelected?.totalVolume || '1');
+      totalCost = parseFloat(itemSelected?.totalCost || '0');
+    } else {
+      totalVolume = parseFloat(form.totalVolume || '1');
+      totalCost = parseFloat(form.totalCost || '0');
+    }
+
+    if (totalVolume > 0 && totalCost > 0) {
+      const costPerUnit = parseFloat((totalCost / totalVolume).toFixed(2));
+      const portionUsed = parseFloat(form.portionUsed || '1');
+      const portionCost = parseFloat((costPerUnit * portionUsed).toFixed(2));
+
+      return {
+        ...form,
+        costPerUnit,
+        portionCost,
+        costPriceObj: {
+          ...form.costPriceObj,
+          cost: portionCost,
+        },
+      };
+    }
+
+    return form;
   }
 
   function handleSubmit(event) {
     event.preventDefault();
+    const enrichedForm = buildFormWithComputedData(form, productList);
     if (!dataObj) {
       if (form.price && form.sideDishes) {
-        addDoc(collection(db, 'sideDishes'), form)
+        addDoc(collection(db, 'sideDishes'), enrichedForm)
           .then((docRef) => {
             if (!noNavigate) {
               navigate('/admin/editButton/sidedishes');
@@ -98,7 +157,7 @@ function AddSideDishesForm({
           });
       }
     } else {
-      setDoc(doc(db, 'sideDishes', dataObj.id), form)
+      setDoc(doc(db, 'sideDishes', dataObj.id), enrichedForm)
         .then(() => {
           console.log('Document successfully updated !');
           setModalEditSideDishes(false);
@@ -109,6 +168,7 @@ function AddSideDishesForm({
       return;
     }
   }
+
   function changeUrl() {
     setNoNavigate(!noNavigate);
   }
@@ -128,8 +188,8 @@ function AddSideDishesForm({
           objPriceCost={form.costPriceObj}
         />
       )}
-      <div className="close-btn">
-        <Link to="/admin/admin">X</Link>
+      <div className={style.editCloseButton}>
+        <button onClick={() => setModalEditSideDishes(false)}>X</button>
       </div>
       <Link to="/admin/admin">
         <Title

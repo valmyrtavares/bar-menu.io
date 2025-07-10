@@ -10,6 +10,7 @@ function IncludeSideDishesForm({
   newSideDishesList,
   setMaxLimitSideDishes,
   maxLimitSideDishes,
+  closeModal,
 }) {
   //React Data
   const [form, setForm] = React.useState({
@@ -35,6 +36,7 @@ function IncludeSideDishesForm({
   //Fetch
   const fetchDataSideDishes = async () => {
     const data = await getBtnData('sideDishes');
+
     // data.unshift({ sideDishes: "Selecione uma categoria", price: 0, id: "" });
     setSideDishes(data);
   };
@@ -47,7 +49,16 @@ function IncludeSideDishesForm({
       selectedDish &&
       !selectedSideDishes.some((dish) => dish.id === selectedId) // It is a intersting way to check out if there is ond item inside another
     ) {
-      setSelectedSideDishes([...selectedSideDishes, selectedDish]); // If there is no similar id inside of  selectedSideDishes this new object is adding in selectedSideDishes
+      const newDish = {
+        id: selectedDish.id,
+        price: selectedDish.price,
+        portionUsed: selectedDish.portionUsed,
+        sideDishes: selectedDish.sideDishes,
+        ...(selectedDish.costPriceObj && {
+          costPriceObj: selectedDish.costPriceObj,
+        }),
+      };
+      setSelectedSideDishes([...selectedSideDishes, newDish]); // If there is no similar id inside of  selectedSideDishes this new object is adding in selectedSideDishes
     }
   };
 
@@ -73,7 +84,7 @@ function IncludeSideDishesForm({
   return (
     <div className={style.includeSideDishesContainer}>
       <div className="close-btn">
-        <button onClick={() => setShowPopupSideDisehs(false)}>X</button>
+        <button onClick={() => closeModal()}>X</button>
       </div>
       <Title mainTitle="Forumlário de acompanhamentos" />
       {sideDishes && (

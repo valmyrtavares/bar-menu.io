@@ -2,6 +2,16 @@
 
 .EditAddPopupContainer{
     background-color: $bgColorForm;
+    .editCloseButton{
+        display: flex;
+        justify-content: flex-end;
+        button{
+            background-color: transparent;
+            border:none;
+            font-size: 23px;
+            padding: 9px;
+        }
+    }
     form{
         padding: 3%;
         display: grid;

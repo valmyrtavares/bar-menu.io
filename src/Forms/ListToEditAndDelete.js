@@ -151,7 +151,8 @@ const EditFormButton = () => {
           <AddDishesForm
             dataObj={dataObj}
             mainTitle="Edite o Prato"
-            setModalEditDishes={setModalEditDishes}
+            setShowPopupSideDisehs={setModalEditDishes}
+            closeModal={closeModal}
           />
         </div>
       )}

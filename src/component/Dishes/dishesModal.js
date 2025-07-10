@@ -78,11 +78,14 @@ const DishesModal = ({ item, setModal }) => {
   const addSelectedMaximumNumberSideDishes = (e) => {
     const id = e.target.value;
     const selectedItem = item.sideDishesElementList[id];
+    console.log('selectedItem   ', selectedItem);
+    debugger;
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
     setItemOnScreen({
       name: selectedItem.sideDishes,
       price: selectedItem.price,
+      cost: selectedItem.costPriceObj.cost,
     });
     console.log('nome   ', selectedItem.sideDishes);
     console.log('preço   ', selectedItem.price);
