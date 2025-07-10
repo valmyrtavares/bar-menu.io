@@ -76,10 +76,10 @@ const DishesModal = ({ item, setModal }) => {
 
   //select side dishes
   const addSelectedMaximumNumberSideDishes = (e) => {
+    debugger;
     const id = e.target.value;
     const selectedItem = item.sideDishesElementList[id];
-    console.log('selectedItem   ', selectedItem);
-    debugger;
+
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
     setItemOnScreen({

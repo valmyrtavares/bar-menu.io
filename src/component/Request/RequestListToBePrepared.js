@@ -202,6 +202,7 @@ const RequestListToBePrepared = () => {
 
   const updateIngredientsStock = async (item) => {
     console.log('item', item);
+
     debugger;
     const ObjPadrao = {
       CostPerUnit: 0,

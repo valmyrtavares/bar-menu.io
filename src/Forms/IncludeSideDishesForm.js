@@ -84,7 +84,7 @@ function IncludeSideDishesForm({
   return (
     <div className={style.includeSideDishesContainer}>
       <div className="close-btn">
-        <button onClick={() => closeModal()}>X</button>
+        <button onClick={() => setShowPopupSideDisehs(false)}>X</button>
       </div>
       <Title mainTitle="Forumlário de acompanhamentos" />
       {sideDishes && (

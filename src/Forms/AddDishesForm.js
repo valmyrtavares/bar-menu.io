@@ -22,7 +22,7 @@ import RecipeDish from './recipeDishForm.js';
 import useFormValidation from '../Hooks/useFormValidation.js';
 //import { cardClasses } from "@mui/material";
 
-function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
+function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -272,7 +272,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes }) {
         {setModalEditDishes ? (
           <button onClick={() => setModalEditDishes(false)}>X</button>
         ) : (
-          <Link to="/admin/admin">X</Link>
+          <div onClick={closeModal}>X</div>
         )}
       </div>
       <div className={style.recipeModalContainer}>
