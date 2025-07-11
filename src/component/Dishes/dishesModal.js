@@ -78,15 +78,15 @@ const DishesModal = ({ item, setModal }) => {
   const addSelectedMaximumNumberSideDishes = (e) => {
     const id = e.target.value;
     const selectedItem = item.sideDishesElementList[id];
-
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
     setItemOnScreen({
       name: selectedItem.sideDishes,
       price: selectedItem.price,
+      portionUsed: selectedItem.portionUsed || 0,
+      portionCost: selectedItem.portionCost || 0,
+      costPerUnit: selectedItem.costPerUnit || 0,
     });
-    console.log('nome   ', selectedItem.sideDishes);
-    console.log('preço   ', selectedItem.price);
   };
 
   //Check number of side dishes to disabled select

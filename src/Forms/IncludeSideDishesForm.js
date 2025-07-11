@@ -53,12 +53,15 @@ function IncludeSideDishesForm({
         id: selectedDish.id,
         price: selectedDish.price,
         portionUsed: selectedDish.portionUsed,
+        portionCost: selectedDish.portionCost || 0,
+        costPerUnit: selectedDish.costPerUnit || 0,
         sideDishes: selectedDish.sideDishes,
         ...(selectedDish.costPriceObj && {
           costPriceObj: selectedDish.costPriceObj,
         }),
       };
       setSelectedSideDishes([...selectedSideDishes, newDish]); // If there is no similar id inside of  selectedSideDishes this new object is adding in selectedSideDishes
+      setNewSideDishesList([...newSideDishesList, newDish]); // It is a way to update the newSideDishesList with the new object
     }
   };
 
@@ -86,7 +89,7 @@ function IncludeSideDishesForm({
       <div className="close-btn">
         <button onClick={() => setShowPopupSideDisehs(false)}>X</button>
       </div>
-      <Title mainTitle="Forumlário de acompanhamentos" />
+      <Title mainTitle="Formulário de acompanhamentos" />
       {sideDishes && (
         <div className="my-3">
           <label>Selecione os acompanhamentos do prato</label>

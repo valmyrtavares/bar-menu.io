@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import "../assets/styles/nestedBtn.css";
-import Dishes from "./Dishes/Dishes";
+import React, { useState } from 'react';
+import '../assets/styles/nestedBtn.css';
+import Dishes from './Dishes/Dishes';
 
 const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
   const [display, setDisplay] = useState(false);
@@ -24,7 +24,7 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
       // Rola o contêiner para uma posição personalizada, movendo menos que o total
       container.scrollTo({
         top: container.scrollTop + offset, // Subtraia o offset para limitar o quanto ele rola
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     }
   };
@@ -36,7 +36,7 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
       const offset = 200;
       container.scrollTo({
         top: container.scrollTop + offset, // Rola até o fim do contêiner
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     }
   }, [display, childCategory, childItem]);

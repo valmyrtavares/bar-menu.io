@@ -54,6 +54,7 @@ const RequestListToBePrepared = () => {
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
   const [currentRequest, setCurrentRequest] = React.useState(null);
+  const [sideDishesList, setSideDishesList] = React.useState([]);
   //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
   //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
@@ -202,8 +203,6 @@ const RequestListToBePrepared = () => {
 
   const updateIngredientsStock = async (item) => {
     console.log('item', item);
-
-    debugger;
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -216,6 +215,7 @@ const RequestListToBePrepared = () => {
 
     const dateTime = item.dateTime;
     const { request } = item;
+    await updateSideDihesInStock(request, dateTime, ObjPadrao);
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
@@ -240,8 +240,34 @@ const RequestListToBePrepared = () => {
           const ingredient = FinalingridientsList[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
-          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
+          ObjPadrao.unitOfMeasurement = ingredient.unit || 'wo';
           ObjPadrao.CostPerUnit = ingredient.portionCost;
+          const arrayParams = [ObjPadrao];
+          await handleStock(arrayParams, account, dateTime);
+        }
+      }
+    }
+  };
+
+  const updateSideDihesInStock = async (request, dateTime, ObjPadrao) => {
+    if (!request || !Array.isArray(request) || request.length === 0) return;
+
+    for (let i = 0; i < request.length; i++) {
+      const currentItem = request[i];
+      const account = request[i].name;
+      if (
+        currentItem.sideDishes &&
+        Array.isArray(currentItem.sideDishes) &&
+        currentItem.sideDishes.length > 0
+      ) {
+        for (let j = 0; j < currentItem.sideDishes.length; j++) {
+          const sideDish = currentItem.sideDishes[j];
+          ObjPadrao.totalVolume = -Number(
+            sideDish.portionUsed.replace(',', '.')
+          );
+          ObjPadrao.product = sideDish.name;
+          ObjPadrao.unitOfMeasurement = sideDish.unit || 'wo';
+          ObjPadrao.CostPerUnit = sideDish.portionCost;
           const arrayParams = [ObjPadrao];
           await handleStock(arrayParams, account, dateTime);
         }
@@ -716,6 +742,7 @@ const RequestListToBePrepared = () => {
     if (item.name === 'anonimo') {
       deleteData('user', item.idUser);
     }
+
     updateIngredientsStock(item);
 
     item.orderDelivered = true;
