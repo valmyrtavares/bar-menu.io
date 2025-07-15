@@ -202,7 +202,6 @@ const RequestListToBePrepared = () => {
   };
 
   const updateIngredientsStock = async (item) => {
-    console.log('item', item);
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -215,7 +214,10 @@ const RequestListToBePrepared = () => {
 
     const dateTime = item.dateTime;
     const { request } = item;
-    await updateSideDihesInStock(request, dateTime, ObjPadrao);
+
+    // if (request && request.length > 0) {
+    //   await updateSideDihesInStock(request, dateTime, ObjPadrao);
+    // }
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
@@ -240,7 +242,7 @@ const RequestListToBePrepared = () => {
           const ingredient = FinalingridientsList[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
-          ObjPadrao.unitOfMeasurement = ingredient.unit || 'wo';
+          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement || '';
           ObjPadrao.CostPerUnit = ingredient.portionCost;
           const arrayParams = [ObjPadrao];
           await handleStock(arrayParams, account, dateTime);
@@ -262,11 +264,9 @@ const RequestListToBePrepared = () => {
       ) {
         for (let j = 0; j < currentItem.sideDishes.length; j++) {
           const sideDish = currentItem.sideDishes[j];
-          ObjPadrao.totalVolume = -Number(
-            sideDish.portionUsed.replace(',', '.')
-          );
+          ObjPadrao.totalVolume = -parseToNumber(sideDish.totalVolume);
           ObjPadrao.product = sideDish.name;
-          ObjPadrao.unitOfMeasurement = sideDish.unit || 'wo';
+          ObjPadrao.unitOfMeasurement = sideDish.unit || '';
           ObjPadrao.CostPerUnit = sideDish.portionCost;
           const arrayParams = [ObjPadrao];
           await handleStock(arrayParams, account, dateTime);
@@ -275,11 +275,23 @@ const RequestListToBePrepared = () => {
     }
   };
 
+  function parseToNumber(value) {
+    if (typeof value === 'string') {
+      return Number(value.replace(',', '.'));
+    }
+    return Number(value);
+  }
+
+  function round(value, decimals = 2) {
+    return Math.round(value * 10 ** decimals) / 10 ** decimals;
+  }
+
   const handleStock = async (
     itemsStock,
     account = 'Editado',
     paymentDate = null
   ) => {
+    console.log('item stock   ', itemsStock);
     if (!Array.isArray(itemsStock)) {
       itemsStock = [itemsStock];
     }
@@ -301,6 +313,8 @@ const RequestListToBePrepared = () => {
       const itemFinded = data?.find(
         (itemSearch) => itemSearch.product === currentItem.product
       );
+      console.log('itemFinded', itemFinded);
+
       if (itemFinded) {
         // Atualiza os valores de custo e volume totais
         const previousCost = itemFinded.totalCost;
@@ -319,11 +333,25 @@ const RequestListToBePrepared = () => {
           isNaN(account) // Não é um número
         ) {
           // Atualiza totalCost proporcionalmente
-          currentItem.totalCost = previousCost - currentItem.CostPerUnit;
+          // currentItem.totalCost = previousCost - currentItem.CostPerUnit;
+
+          const previousCost = parseToNumber(itemFinded.totalCost);
+          const costPerUnit = parseToNumber(currentItem.CostPerUnit);
+          currentItem.totalCost = round(previousCost - costPerUnit, 2);
 
           // Mantém a atualização de totalVolume
-          currentItem.totalVolume =
-            (currentItem.totalVolume || 0) + (itemFinded.totalVolume || 0);
+          // currentItem.totalVolume =
+          //   (currentItem.totalVolume || 0) + (itemFinded.totalVolume || 0);
+          const volumeBefore = parseToNumber(currentItem.totalVolume);
+          const volumeAdd = parseToNumber(itemFinded.totalVolume);
+          currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
+
+          if (currentItem.totalVolume < 0) {
+            alert(
+              `Volume do item ${currentItem.name} está negativo. Verifique o estoque.`
+            );
+            currentItem.totalVolume = 0;
+          }
         }
 
         // Inicializa ou adiciona ao UsageHistory
@@ -344,6 +372,7 @@ const RequestListToBePrepared = () => {
             currentItem.totalVolume
           )
         );
+        console.log('item atual atualizado   ', currentItem);
         currentItem = cleanObject(currentItem);
 
         // Atualiza o registro no banco de dados

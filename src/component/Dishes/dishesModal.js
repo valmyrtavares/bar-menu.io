@@ -86,6 +86,10 @@ const DishesModal = ({ item, setModal }) => {
       portionUsed: selectedItem.portionUsed || 0,
       portionCost: selectedItem.portionCost || 0,
       costPerUnit: selectedItem.costPerUnit || 0,
+      idSideDish: selectedItem.id || 0,
+      unit: selectedItem.unit || 0,
+      totalCost: selectedItem.totalCost || 0,
+      totalVolume: selectedItem.totalVolume || 0,
     });
   };
 
