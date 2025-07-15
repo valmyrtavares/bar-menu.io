@@ -215,9 +215,9 @@ const RequestListToBePrepared = () => {
     const dateTime = item.dateTime;
     const { request } = item;
 
-    // if (request && request.length > 0) {
-    //   await updateSideDihesInStock(request, dateTime, ObjPadrao);
-    // }
+    if (request && request.length > 0) {
+      await updateSideDihesInStock(request, dateTime, ObjPadrao);
+    }
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
@@ -264,7 +264,7 @@ const RequestListToBePrepared = () => {
       ) {
         for (let j = 0; j < currentItem.sideDishes.length; j++) {
           const sideDish = currentItem.sideDishes[j];
-          ObjPadrao.totalVolume = -parseToNumber(sideDish.totalVolume);
+          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionCost); // amount removed from stock
           ObjPadrao.product = sideDish.name;
           ObjPadrao.unitOfMeasurement = sideDish.unit || '';
           ObjPadrao.CostPerUnit = sideDish.portionCost;
@@ -291,7 +291,6 @@ const RequestListToBePrepared = () => {
     account = 'Editado',
     paymentDate = null
   ) => {
-    console.log('item stock   ', itemsStock);
     if (!Array.isArray(itemsStock)) {
       itemsStock = [itemsStock];
     }
