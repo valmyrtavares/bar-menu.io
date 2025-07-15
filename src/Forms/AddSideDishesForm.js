@@ -1,8 +1,7 @@
 import React from 'react';
-import Input from '../component/Input.js';
 import Title from '../component/title.js';
 import { app, storage } from '../config-firebase/firebase.js';
-import MenuButton from '../component/menuHamburguerButton.js';
+
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
 import {
@@ -26,8 +25,12 @@ function AddSideDishesForm({
   const [form, setForm] = React.useState({
     price: 0,
     portionUsed: '',
+    costPerUnit: '',
     sideDishes: '',
+    portionCost: '',
     unit: '',
+    totalVolume: '',
+    totalCost: '',
     costPriceObj: {},
   });
   const [noNavigate, setNoNavigate] = React.useState(false);
@@ -102,46 +105,77 @@ function AddSideDishesForm({
     }
   }
 
+  function isFormComplete(form) {
+    return (
+      form.sideDishes &&
+      form.portionUsed &&
+      form.totalVolume &&
+      form.totalCost &&
+      form.unit &&
+      form.portionCost &&
+      form.costPriceObj &&
+      typeof form.costPriceObj.cost === 'number'
+    );
+  }
+
   function buildFormWithComputedData(form, productList) {
     if (!form.sideDishes || !form.portionUsed) return form;
 
-    let totalVolume = 0;
-    let totalCost = 0;
+    const itemSelected = productList.find(
+      (item) => item.product === form.sideDishes
+    );
 
-    if (!form.totalVolume && !form.totalCost) {
-      const itemSelected = productList.find(
-        (item) => item.product === form.sideDishes
+    // Arredondar para 2 casas decimais
+    const totalVolume = form.totalVolume
+      ? parseFloat(parseFloat(form.totalVolume).toFixed(2))
+      : parseFloat(parseFloat(itemSelected?.totalVolume || '1').toFixed(2));
+
+    const totalCost = form.totalCost
+      ? parseFloat(parseFloat(form.totalCost).toFixed(2))
+      : parseFloat(parseFloat(itemSelected?.totalCost || '0').toFixed(2));
+
+    const unit = form.unit || itemSelected?.unitOfMeasurement || '';
+    if (
+      isNaN(totalVolume) ||
+      totalVolume <= 0 ||
+      isNaN(totalCost) ||
+      totalCost <= 0
+    ) {
+      alert(
+        'O acompanhamento selecionado parece estar com volume ou custo inválido.\n' +
+          'Verifique se o produto ainda está disponível no estoque e atualize ou remova o acompanhamento.'
       );
-
-      totalVolume = parseFloat(itemSelected?.totalVolume || '1');
-      totalCost = parseFloat(itemSelected?.totalCost || '0');
-    } else {
-      totalVolume = parseFloat(form.totalVolume || '1');
-      totalCost = parseFloat(form.totalCost || '0');
+      return form;
     }
 
-    if (totalVolume > 0 && totalCost > 0) {
+    let portionCost = form.portionCost;
+    const portionUsed = parseFloat(form.portionUsed || '1'); // Convertido para número
+
+    if (!portionCost && totalVolume > 0 && totalCost > 0) {
       const costPerUnit = parseFloat((totalCost / totalVolume).toFixed(2));
-      const portionUsed = parseFloat(form.portionUsed || '1');
-      const portionCost = parseFloat((costPerUnit * portionUsed).toFixed(2));
-
-      return {
-        ...form,
-        costPerUnit,
-        portionCost,
-        costPriceObj: {
-          ...form.costPriceObj,
-          cost: portionCost,
-        },
-      };
+      portionCost = parseFloat((costPerUnit * portionUsed).toFixed(2));
     }
 
-    return form;
+    return {
+      ...form,
+      totalVolume,
+      totalCost,
+      portionUsed, // agora como número
+      unit,
+      portionCost,
+      costPriceObj: {
+        ...form.costPriceObj,
+        cost: portionCost,
+      },
+    };
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    const enrichedForm = buildFormWithComputedData(form, productList);
+    debugger;
+    const enrichedForm = isFormComplete(form)
+      ? form
+      : buildFormWithComputedData(form, productList);
     if (!dataObj) {
       if (form.price && form.sideDishes) {
         addDoc(collection(db, 'sideDishes'), enrichedForm)
