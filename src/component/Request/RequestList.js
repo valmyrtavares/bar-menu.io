@@ -21,15 +21,15 @@ const RequestList = () => {
       const dataSorted = requestSorter(data, 'direction');
 
       setRequestDoneList(dataSorted);
-      if (!alreadyTrimmed && dataSorted.length > 500) {
-        setAlreadyTrimmed(true);
+      // if (!alreadyTrimmed && dataSorted.length > 500) {
+      //   setAlreadyTrimmed(true);
 
-        // const handleTrim = async () => {
-        //   await checkAndTrimRequests(dataSorted);
-        // };
+      // const handleTrim = async () => {
+      //   await checkAndTrimRequests(dataSorted);
+      // };
 
-        // handleTrim();
-      }
+      // handleTrim();
+      //   }
     });
     return () => unsubscribe();
   }, []);

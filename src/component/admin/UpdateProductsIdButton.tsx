@@ -266,54 +266,54 @@
 
 //*********************************************************************************** */
 
-import React from 'react';
-import { getFirestore, collection, setDoc, doc } from 'firebase/firestore';
+// import React from 'react';
+// import { getFirestore, collection, setDoc, doc } from 'firebase/firestore';
 
-const UpdateProductsIdButton = () => {
-  const handleImport = async () => {
-    debugger;
-    try {
-      const response = await fetch('/backup/request-2025-07-04.json');
-      const data = await response.json();
+// const UpdateProductsIdButton = () => {
+//   const handleImport = async () => {
+//     debugger;
+//     try {
+//       const response = await fetch('/backup/request-2025-07-04.json');
+//       const data = await response.json();
 
-      if (!Array.isArray(data)) {
-        console.error('❌ JSON não é um array de objetos.');
-        return;
-      }
+//       if (!Array.isArray(data)) {
+//         console.error('❌ JSON não é um array de objetos.');
+//         return;
+//       }
 
-      // Ordena por countRequest do maior para o menor
-      const sortedData = data.sort((a, b) => b.countRequest - a.countRequest);
+//       // Ordena por countRequest do maior para o menor
+//       const sortedData = data.sort((a, b) => b.countRequest - a.countRequest);
 
-      // Pega os 200 com maior countRequest
-      const top200 = sortedData.slice(0, 200);
-      debugger;
+//       // Pega os 200 com maior countRequest
+//       const top200 = sortedData.slice(0, 200);
+//       debugger;
 
-      const db = getFirestore();
-      const collectionRef = collection(db, 'requests'); // nova coleção
+//       const db = getFirestore();
+//       const collectionRef = collection(db, 'requests'); // nova coleção
 
-      // Adiciona os 200 ao Firestore
-      for (const item of top200) {
-        if (!item.id) continue; // pular se não tiver ID
+//       // Adiciona os 200 ao Firestore
+//       for (const item of top200) {
+//         if (!item.id) continue; // pular se não tiver ID
 
-        const docRef = doc(collectionRef, item.id); // usa o mesmo ID do documento original
-        await setDoc(docRef, item);
-        console.log('✅ Documento inserido:', item.id);
-      }
+//         const docRef = doc(collectionRef, item.id); // usa o mesmo ID do documento original
+//         await setDoc(docRef, item);
+//         console.log('✅ Documento inserido:', item.id);
+//       }
 
-      alert(
-        '✅ 200 registros importados com sucesso para a nova coleção "requests".'
-      );
-    } catch (error) {
-      console.error('❌ Erro ao importar JSON ou enviar ao Firestore:', error);
-      alert('❌ Falha ao importar dados. Verifique o console.');
-    }
-  };
+//       alert(
+//         '✅ 200 registros importados com sucesso para a nova coleção "requests".'
+//       );
+//     } catch (error) {
+//       console.error('❌ Erro ao importar JSON ou enviar ao Firestore:', error);
+//       alert('❌ Falha ao importar dados. Verifique o console.');
+//     }
+//   };
 
-  return (
-    <button onClick={handleImport}>
-      Importar últimos 200 pedidos para "requests"
-    </button>
-  );
-};
+//   return (
+//     <button onClick={handleImport}>
+//       Importar últimos 200 pedidos para "requests"
+//     </button>
+//   );
+// };
 
-export default UpdateProductsIdButton;
+// export default UpdateProductsIdButton;
