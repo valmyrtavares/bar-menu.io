@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Input from '../../Input';
 import style from '../../../assets/styles/AddExpensesForm.module.scss';
 import CloseBtn from '../../closeBtn';
+import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
 import {
   getDocs,
   getFirestore,
@@ -33,6 +34,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     CostPerUnit: 0,
     totalCost: 0,
     volumePerUnit: 0,
+    adjustmentExpenseNote: '',
+    currentAmountProduct: '',
     idProduct: '',
     totalVolume: 0,
     operationSupplies: false,
@@ -43,6 +46,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [productList, setProductList] = React.useState(null);
   const [providerList, setProviderList] = React.useState(null);
   const [expensesList, setExpensesList] = React.useState(null);
+  const [note, setNote] = React.useState('');
+  const [showPopupNote, setShowPopupNote] = React.useState(null);
+  //const [currentAmountProduct, setCurrentAmountProduct] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const db = getFirestore(app);
 
@@ -145,6 +151,15 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   }, [item.volumePerUnit, item.amount]);
 
+  React.useEffect(() => {
+    if (showPopupNote !== true) {
+      setItem({
+        ...item,
+        adjustmentExpenseNote: note,
+      });
+    }
+  }, [showPopupNote]);
+
   const addItem = () => {
     if (item.product !== '') {
       setItem({
@@ -161,6 +176,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       product: '',
       amount: 0,
       CostPerUnit: 0,
+      adjustmentExpenseNote: '',
       totalCost: 0,
       volumePerUnit: 0,
       idProduct: '',
@@ -169,8 +185,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     });
   };
   const deleteItem = (indexToRemove) => {
-    console.log('Index removido:', indexToRemove);
-
     setItemArrayList((prevArrayList) =>
       prevArrayList.filter((_, index) => index !== indexToRemove)
     );
@@ -188,6 +202,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               <th>Custo Total</th>
               <th>Volume</th>
               <th>Unidade de medida</th>
+              <th>Volume atual</th>
               <th>Excluir</th>
             </tr>
           </thead>
@@ -202,6 +217,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                   <td>{requestItem.totalCost}</td>
                   <td>{requestItem.volumePerUnit}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
+                  <td>{requestItem.currentAmountProduct}</td>
                   <td onClick={() => deleteItem(index)}>X</td>
                 </tr>
               ))}
@@ -328,7 +344,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     paymentDate,
     expenseId
   ) => {
-    debugger;
     if (obj || Object.keys(obj).length > 0) {
       console.warn('O objeto "obj" está vazio ou não possui valores.');
       return;
@@ -487,6 +502,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const handleFocus = () => {
     console.log('To aqui');
   };
+  const checkCurrentValue = () => {
+    if (item.currentAmountProduct !== '') {
+      setShowPopupNote(true);
+    }
+  };
 
   return (
     <div className={style.containerAddExpensesForm}>
@@ -642,6 +662,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="number"
               onChange={handleItemChange}
             />
+            <Input
+              id="currentAmountProduct"
+              autoComplete="off"
+              className="num"
+              label="Volume atual do produto"
+              value={item.currentAmountProduct}
+              type="text"
+              onChange={handleItemChange}
+              onBlur={checkCurrentValue}
+            />
 
             <Input
               id="volumePerUnit"
@@ -649,7 +679,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               className="num"
               label="Qtd por volume"
               value={item.volumePerUnit}
-              type="number"
+              type="text"
               onChange={handleItemChange}
             />
             <button type="button" onClick={addItem}>
@@ -659,6 +689,14 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         )}
         <button>Enviar</button>
       </form>
+
+      {showPopupNote && (
+        <ProductVolumeAdjustmentNote
+          setNote={setNote}
+          setShowPopupNote={setShowPopupNote}
+          showPopupNote={showPopupNote}
+        />
+      )}
       {showItemsDetailsForm && item && renderTableItem()}
     </div>
   );

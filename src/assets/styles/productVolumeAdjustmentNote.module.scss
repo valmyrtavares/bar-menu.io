@@ -1,0 +1,64 @@
+.ProductVolumeAdjustmentNote__container {
+    background: rgba(0, 0, 0, 0.55);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ProductVolumeAdjustmentNote__form {
+    background: #fff;
+    border-radius: 10px;
+    padding: 32px 28px 24px 28px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    min-width: 340px;
+    max-width: 90vw;
+}
+
+.ProductVolumeAdjustmentNote__message {
+    color: #222;
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.ProductVolumeAdjustmentNote__textarea {
+    resize: vertical;
+    min-height: 90px;
+    max-height: 220px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+        border-color: #007bff;
+    }
+}
+
+.ProductVolumeAdjustmentNote__button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+
+    &:hover {
+        background: #0056b3;
+    }
+}
