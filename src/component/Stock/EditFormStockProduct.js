@@ -27,11 +27,6 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
   const db = getFirestore(app);
 
-  //delete this useEffect if not needed
-  React.useEffect(() => {
-    console.log('objeto recebido por pros  ', obj);
-  }, []);
-
   const handleStock = async (
     itemsStock,
     account = 'Editado',
@@ -192,7 +187,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   return (
     <div className={edit.popupOverlay}>
       <div className={edit.containerEditStock}>
-        <div className={edit.closeBtnContainer}>
+        <div className={edit.closeBtnRow}>
           <button
             className={edit.closeBtn}
             type="button"
@@ -201,59 +196,83 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             X
           </button>
         </div>
-        <div className={edit.field}>
-          <h3>Produto</h3>
-          <p>{`${stockProductObj.product}- ${stockProductObj.unitOfMeasurement}`}</p>
-        </div>
-        <div className={edit.field}>
-          <Input
-            id="totalVolume"
-            autoComplete="off"
-            className="num"
-            label="Volume Total"
-            value={stockProductObj.totalVolume}
-            type="text"
-            onChange={handleChange}
-            onBlur={updateCost}
-          />
-        </div>
-        <div className={edit.field}>
-          <Input
-            id="totalCost"
-            autoComplete="off"
-            className="num"
-            label="Custo Total"
-            value={stockProductObj.totalCost}
-            type="text"
-            onChange={handleChange}
-            onBlur={updateCost}
-          />
+
+        <div className={edit.titleRow}>
+          <h2>{`${stockProductObj.product} - ${stockProductObj.unitOfMeasurement}`}</h2>
         </div>
 
-        <div className={edit.field}>
-          <Input
-            id="minimumAmount"
-            autoComplete="off"
-            className="num"
-            label="Volume Mínimo"
-            value={stockProductObj.minimumAmount}
-            type="text"
-            onChange={handleChange}
-            onBlur={updateCost}
-          />
-          {/* <h3>Quantidade de recipientes</h3>
-          <p>{stockProductObj.amount}</p> */}
+        <div className={edit.inputGrid}>
+          <div className={edit.field}>
+            <Input
+              id="totalVolume"
+              autoComplete="off"
+              className="num"
+              label="Volume Total"
+              value={stockProductObj.totalVolume}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
+            />
+          </div>
+
+          <div className={edit.field}>
+            <Input
+              id="totalCost"
+              autoComplete="off"
+              className="num"
+              label="Custo Total"
+              value={stockProductObj.totalCost}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
+            />
+          </div>
+
+          <div className={edit.field}>
+            <Input
+              id="minimumAmount"
+              autoComplete="off"
+              className="num"
+              label="Volume Mínimo"
+              value={stockProductObj.minimumAmount}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
+            />
+          </div>
+
+          <div className={edit.field}>
+            <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
+            <textarea
+              id="minimumAmountNote"
+              className="num"
+              value={stockProductObj.minimumAmountNote || ''}
+              onChange={(e) =>
+                setStockProductObj((prev) => ({
+                  ...prev,
+                  minimumAmountNote: e.target.value,
+                }))
+              }
+              autoComplete="off"
+              rows={3}
+              placeholder="Adicione uma observação sobre os motivos da sua edição"
+            />
+          </div>
         </div>
-        <div className={edit.field}>
+
+        <div className={edit.volumeRow}>
           <h3>Volume Total do Produto</h3>
           <p>
             {stockProductObj.totalVolume}
             {stockProductObj.unitOfMeasurement}
           </p>
         </div>
-        <button className={edit.addBtn} type="button" onClick={addItem}>
-          Adicionar
-        </button>
+
+        <div className={edit.btnRow}>
+          <button className={edit.addBtn} type="button" onClick={addItem}>
+            Adicionar
+          </button>
+        </div>
       </div>
     </div>
   );
