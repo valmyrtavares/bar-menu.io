@@ -35,7 +35,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     totalCost: 0,
     volumePerUnit: 0,
     adjustmentExpenseNote: '',
-    currentAmountProduct: '',
+    currentAmountProduct: 0,
     idProduct: '',
     totalVolume: 0,
     operationSupplies: false,
@@ -177,6 +177,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       amount: 0,
       CostPerUnit: 0,
       adjustmentExpenseNote: '',
+      currentAmountProduct: '',
       totalCost: 0,
       volumePerUnit: 0,
       idProduct: '',
@@ -219,10 +220,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                   <td>{requestItem.volumePerUnit}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
                   <td>{requestItem.currentAmountProduct}</td>
-                  <td
-                    title={requestItem.adjustmentExpenseNote}
-                    onClick={() => editNote(index)}
-                  >
+                  <td title={requestItem.adjustmentExpenseNote}>
                     {requestItem.adjustmentExpenseNote ? 'nota' : 'sem nota'}
                   </td>
                   <td onClick={() => deleteItem(index)}>X</td>
@@ -232,10 +230,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         </table>
       </div>
     );
-  };
-  const editNote = (index) => {
-    setNote(itemArrayList[index].adjustmentExpenseNote);
-    setShowPopupNote(true);
   };
 
   const handleStock = async (itemsStock, account = '000', paymentDate) => {
@@ -703,7 +697,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       {showPopupNote && (
         <ProductVolumeAdjustmentNote
-          editNote={note}
           setNote={setNote}
           setShowPopupNote={setShowPopupNote}
           showPopupNote={showPopupNote}

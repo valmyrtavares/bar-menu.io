@@ -7,14 +7,8 @@ const ProductVolumeAdjustmentNote = ({
   showPopupNote,
   setShowPopupNote,
   setNote,
-  editNote,
 }) => {
   const [noteValue, setNoteValue] = useState('');
-  React.useEffect(() => {
-    if (editNote) {
-      setNoteValue(editNote);
-    }
-  }, []);
 
   if (!showPopupNote) return null;
 
