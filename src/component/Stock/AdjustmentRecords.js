@@ -27,7 +27,7 @@ const AdjustmentRecords = ({
               <th>Investimento anterior</th>
               <th>Volume Atual</th>
               <th>Investimento Atual</th>
-              <th>Total de Embalagens</th>
+              <th>Anotações ou Embalagens</th>
             </tr>
           </thead>
           <tbody>
@@ -54,7 +54,13 @@ const AdjustmentRecords = ({
                       {item.unit}
                     </td>
                     <td>R$ {Number(item.totalResourceInvested).toFixed(2)}</td>
-                    <td>{item.package}</td>
+                    <td title={item.noteReasonsEditingProduct}>
+                      {item.category === 'Editado'
+                        ? item.noteReasonsEditingProduct
+                          ? 'notas'
+                          : 'sem notas '
+                        : item.package}
+                    </td>
                   </tr>
                 ))}
           </tbody>

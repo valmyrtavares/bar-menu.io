@@ -22,10 +22,20 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     unitOfMeasurement: obj.unitOfMeasurement,
     volumePerUnit: Number(obj.volumePerUnit),
     minimumAmount: Number(obj.minimumAmount),
+    noteReasonsEditingProduct: '',
     id: obj.id,
   });
+  const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
+    React.useState('');
 
   const db = getFirestore(app);
+
+  const updateNoteEdit = () => {
+    setStockProductObj((prevForm) => ({
+      ...prevForm,
+      noteReasonsEditingProduct: noteReasonsEditingProduct,
+    }));
+  };
 
   const handleStock = async (
     itemsStock,
@@ -58,6 +68,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         const previousCost = itemFinded.totalCost;
         const previousVolume = itemFinded.totalVolume;
         const cost = account === 'Editado' ? 0 : currentItem.totalCost;
+        const noteReasonsEditingProduct =
+          account === 'Editado' ? currentItem.noteReasonsEditingProduct : '';
         const pack =
           account === 'Editado'
             ? Number(currentItem.amount)
@@ -79,6 +91,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             itemFinded,
             account,
             paymentDate,
+            noteReasonsEditingProduct,
             pack,
             cost,
             unit,
@@ -115,6 +128,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     item,
     account,
     paymentDate,
+    noteReasonsEditingProduct,
     pack,
     cost,
     unit,
@@ -129,6 +143,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       outputProduct: 0,
       category: account || 0,
       unit: unit,
+      noteReasonsEditingProduct: noteReasonsEditingProduct,
       package: pack,
       inputProduct: volume,
       cost: cost,
@@ -244,18 +259,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
           <div className={edit.field}>
             <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
             <textarea
-              id="minimumAmountNote"
+              id="editAdminNote"
               className="num"
-              value={stockProductObj.minimumAmountNote || ''}
-              onChange={(e) =>
-                setStockProductObj((prev) => ({
-                  ...prev,
-                  minimumAmountNote: e.target.value,
-                }))
-              }
+              value={noteReasonsEditingProduct || ''}
+              onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
               autoComplete="off"
               rows={3}
               placeholder="Adicione uma observação sobre os motivos da sua edição"
+              onBlur={updateNoteEdit}
             />
           </div>
         </div>
