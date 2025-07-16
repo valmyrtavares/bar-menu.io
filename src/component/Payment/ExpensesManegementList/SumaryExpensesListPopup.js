@@ -74,6 +74,18 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
                     {item.unitOfMeasurement}
                   </span>
                 </p>
+                <p>
+                  Volume Anterior
+                  <span>
+                    {' '}
+                    {item.currentAmountProduct}
+                    {item.unitOfMeasurement}
+                  </span>
+                </p>
+                <p>
+                  Informações adicionais
+                  <span> {item.adjustmentExpenseNote}</span>
+                </p>
               </div>
             ))}
         </div>
