@@ -1,7 +1,11 @@
 import React from 'react';
 
 import '../../assets/styles/RequestList.css';
-import { fetchInDataChanges, checkAndTrimRequests } from '../../api/Api.js';
+import {
+  // fetchInDataChanges,
+  // checkAndTrimRequests,
+  getBtnData,
+} from '../../api/Api.js';
 import { getFirstFourLetters } from '../../Helpers/Helpers.js';
 import { requestSorter } from '../../Helpers/Helpers.js';
 import Title from '../title.js';
@@ -17,22 +21,19 @@ const RequestList = () => {
   });
 
   React.useEffect(() => {
-    const unsubscribe = fetchInDataChanges('requests', (data) => {
-      const dataSorted = requestSorter(data, 'direction');
-
-      setRequestDoneList(dataSorted);
-      // if (!alreadyTrimmed && dataSorted.length > 500) {
-      //   setAlreadyTrimmed(true);
-
-      // const handleTrim = async () => {
-      //   await checkAndTrimRequests(dataSorted);
-      // };
-
-      // handleTrim();
-      //   }
-    });
-    return () => unsubscribe();
+    fetchRequest();
   }, []);
+
+  const fetchRequest = async () => {
+    const data = await getBtnData('requests');
+
+    const dataSorted = requestSorter(data, 'direction');
+    console.log(
+      'Ordenados:',
+      dataSorted.map((item) => item.countRequest)
+    );
+    setRequestDoneList(dataSorted);
+  };
 
   return (
     <div className="container-request-list">

@@ -187,6 +187,12 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
 
   const addItem = async () => {
+    if (!noteReasonsEditingProduct) {
+      alert(
+        'A edição só pode ser cocluída, depois da anotação sobre a edição do produto'
+      );
+      return;
+    }
     try {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);

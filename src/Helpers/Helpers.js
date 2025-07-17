@@ -120,13 +120,15 @@ export async function CheckUser(check, isToten) {
 }
 
 export const requestSorter = (ObjList, direction) => {
-  const sortedList = [...ObjList];
+  const sortedList = [...ObjList].map((item) => ({
+    ...item,
+    countRequest: Number(item.countRequest) || 0, // força número ou 0
+  }));
+
   sortedList.sort((a, b) => {
-    if (!direction) {
-      return a.countRequest - b.countRequest;
-    } else {
-      return b.countRequest - a.countRequest;
-    }
+    return direction
+      ? b.countRequest - a.countRequest
+      : a.countRequest - b.countRequest;
   });
 
   return sortedList;
