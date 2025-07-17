@@ -54,9 +54,16 @@ const AdjustmentRecords = ({
                       {item.unit}
                     </td>
                     <td>R$ {Number(item.totalResourceInvested).toFixed(2)}</td>
-                    <td title={item.noteReasonsEditingProduct}>
-                      {item.category === 'Editado'
-                        ? item.noteReasonsEditingProduct
+                    <td
+                      title={
+                        item.noteReasonsEditingProduct
+                          ? item.noteReasonsEditingProduct
+                          : item.adjustmentExpenseNote
+                      }
+                    >
+                      {item.category === 'Editado' || item.adjustmentExpenseNote
+                        ? item.noteReasonsEditingProduct ||
+                          item.adjustmentExpenseNote
                           ? 'notas'
                           : 'sem notas '
                         : item.package}

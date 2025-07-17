@@ -246,14 +246,33 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       );
       if (itemFinded) {
         // Atualiza os valores de custo e volume totais
-        const previousCost = itemFinded.totalCost;
-        const previousVolume = itemFinded.totalVolume;
+        let previousCost = itemFinded.totalCost;
+        const adjustmentExpenseNote = currentItem.adjustmentExpenseNote;
+        let previousVolume = itemFinded.totalVolume;
+
+        if (currentItem.currentAmountProduct) {
+          previousVolume = Number(currentItem.currentAmountProduct);
+
+          // Evita divisão por zero
+          if (currentItem.totalVolume && currentItem.totalCost) {
+            const unitCost = currentItem.totalCost / currentItem.totalVolume;
+            previousCost = unitCost * currentItem.currentAmountProduct;
+          } else {
+            console.warn(
+              'Não foi possível calcular o custo unitário: totalVolume ou totalCost ausentes ou inválidos.'
+            );
+          }
+        }
         const cost = currentItem.totalCost;
         const pack = Number(itemFinded.amount) + Number(currentItem.amount);
         const volume = currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
-        currentItem.totalCost += itemFinded.totalCost || 0;
-        currentItem.totalVolume += itemFinded.totalVolume || 0;
+        currentItem.totalCost += currentItem.currentAmountProduct
+          ? previousCost
+          : itemFinded.totalCost || 0;
+        currentItem.totalVolume += currentItem.currentAmountProduct
+          ? previousVolume
+          : itemFinded.totalVolume || 0;
 
         // Inicializa ou adiciona ao UsageHistory
         currentItem.UsageHistory = itemFinded.UsageHistory || [];
@@ -265,6 +284,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           stockHistoryList(
             itemFinded,
             account,
+            adjustmentExpenseNote,
             paymentDate,
             pack,
             cost,
@@ -313,6 +333,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const stockHistoryList = (
     item,
     account,
+    adjustmentExpenseNote,
     paymentDate,
     pack,
     cost,
@@ -331,6 +352,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       package: pack,
       inputProduct: volume,
       cost: cost,
+      adjustmentExpenseNote: adjustmentExpenseNote,
       previousVolume: previousVolume,
       previousCost: previousCost,
       ContentsInStock: totalVolume,
