@@ -128,7 +128,11 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
             className={style.input}
           />
         </div>
-        <div className={style.inputGroup}>
+        <div
+          className={style.inputGroup}
+          title="selecione o nome do tipo da depesa que quer verificar, esses
+        tipos são registrados pelo próprio administrador no botão abaixo de 'opção de cadastro'"
+        >
           <label htmlFor="expenseName">Nome da despesa</label>
           <select
             id="expenseName"
@@ -184,7 +188,11 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
             ))}
           </select>
         </div>
-        <div className={style.inputGroup}>
+        <div
+          className={style.inputGroup}
+          title="Preencha manualmente a nota fiscal buscada 
+          para que possa ser selecionada na tabela abaixo"
+        >
           <label htmlFor="invoice">Nota Fiscal</label>
           <input
             type="text"
@@ -198,7 +206,12 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
         </div>
       </div>
       <div className={style.btnContainer}>
-        <button onClick={handleFilter}>Filtrar</button>
+        <button
+          onClick={handleFilter}
+          title="Os filtros só são acionados depois de clicar nesse botão"
+        >
+          Filtrar
+        </button>
         <button onClick={resetFilters}>Limpar filtro</button>
       </div>
     </div>

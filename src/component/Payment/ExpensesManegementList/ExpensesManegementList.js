@@ -404,7 +404,12 @@ const ExpensesManegementList = () => {
           oneExpense={oneExpense}
         />
       )}
-      <div className={expenses.titleTable}>
+      <div
+        className={expenses.titleTable}
+        title="Essa é uma tela para que o administrador registre todas as despesas,
+      e tenha controle dos gastos, que depois serão usados junto com os lucros, 
+      para o controle do negócio"
+      >
         <Link to="/admin/admin">
           <Title mainTitle="Despesas"></Title>
         </Link>
@@ -416,10 +421,20 @@ const ExpensesManegementList = () => {
       />
 
       <div className={expenses.btnAdd}>
-        {/* <button onClick={registerProduct}>Cadastrar Produtos de Estoque</button> */}
-        <button onClick={addNewExpense}>Adicione Despesa</button>{' '}
-        {/* <button onClick={addRegisterProvider}>Cadastrar Fornecedores</button> */}
-        <select id="register" onChange={handleRegisterChange} defaultValue="">
+        <button
+          onClick={addNewExpense}
+          title="Clique nesse botão para abrir o popup de registro de uma
+        nova receita"
+        >
+          Adicione Despesa
+        </button>{' '}
+        <select
+          id="register"
+          onChange={handleRegisterChange}
+          defaultValue=""
+          title="Essa tela abre janelas para o cadastro de despesas, de produtos e de fornecedores.
+           Selecione uma das opções para ver como funciona."
+        >
           <option value="" disabled>
             Selecione uma opção de cadastro
           </option>
@@ -428,7 +443,11 @@ const ExpensesManegementList = () => {
           <option value="expenses">Cadastrar Despesas</option>
         </select>
       </div>
-      <div className={expenses.containerExpensesManegementTable}>
+      <div
+        className={expenses.containerExpensesManegementTable}
+        title="Todas as depesas feitas das mais recentes para as mais antigas. 
+        Use os filtros acima para selecionar um grupo especifico"
+      >
         {changeTable ? (
           <Table
             title="Lista de Matérias-Primas"
