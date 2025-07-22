@@ -355,6 +355,21 @@ const ExpensesManegementList = () => {
 
   return (
     <div className={expenses.customerListContainer}>
+      <div className={expenses.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1fivBz-W4plvnU4f6pbeQbjp1CwxTlWkWZFB31X3sJvQ/edit?tab=t.6zko1a8dqs8y"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+          }}
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       {showWarningDeletePopup && (
         <DefaultComumMessage
           msg={`Você está prestes a excluir ${

@@ -19,6 +19,8 @@ const TrackStockProduct = () => {
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
+  const [tootleTooggleOfProducts, setToogleTypeOfProducts] =
+    React.useState(true);
   const [showDeleted, setShowDeleted] = React.useState(false);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
@@ -44,21 +46,6 @@ const TrackStockProduct = () => {
     );
 
     setStock(filtered);
-  };
-
-  const toggleDeletedProducts = () => {
-    const nextShowDeleted = !showDeleted;
-
-    const filtered = allStockItems.filter(
-      (item) =>
-        item.operationSupplies === false &&
-        (nextShowDeleted
-          ? item.activityStatus === true
-          : item.activityStatus === false || item.activityStatus === undefined)
-    );
-
-    setStock(filtered);
-    setShowDeleted(nextShowDeleted);
   };
 
   const disableStockItem = (item, permission) => {
@@ -92,6 +79,30 @@ const TrackStockProduct = () => {
     setShowAdjustmentRecords(true);
   };
 
+  const toggleDeletedProducts = () => {
+    const nextShowDeleted = !showDeleted;
+
+    const filtered = allStockItems.filter(
+      (item) =>
+        item.operationSupplies === false && //true = insumo false = matéria prima
+        (nextShowDeleted
+          ? item.activityStatus === true //if it is or not avaiable
+          : item.activityStatus === false || item.activityStatus === undefined)
+    );
+
+    setStock(filtered);
+    setShowDeleted(nextShowDeleted);
+  };
+
+  const changeProductView = () => {
+    setToogleTypeOfProducts((prev) => !prev);
+    const filtered = allStockItems.filter(
+      (item) => item.operationSupplies === tootleTooggleOfProducts
+    );
+
+    setStock(filtered);
+  };
+
   return (
     <div className={style.containerTrackStockproduct}>
       {showEditForm && (
@@ -113,6 +124,19 @@ const TrackStockProduct = () => {
       <Link to="/admin/admin">
         <Title mainTitle="Estoque" />
       </Link>
+      <div className={style.containerBtnView}>
+        <button
+          onClick={changeProductView}
+          title="Esse botão serve para que o administrador possa ver
+           todos os insumos ( produtos que não participam dos produtos vendidos) 
+           ou todas as matérias primas (produtos que participam dos produtos vendidos) incluindo
+        os disponívies e indisponíveis, por isso nessa categoria temos linhas vermelhas,
+         mostrando os itens e insumos, indisponíveis (pintado de vermelho) e disponíveis (sem coloração)
+         Observe que o titulo do botão muda conforme o uso"
+        >
+          {tootleTooggleOfProducts ? 'Insumos' : 'Matéria Prima'}
+        </button>
+      </div>
       <div className={style.tableStockContainer}>
         <table striped bordered hover>
           <thead>
@@ -160,12 +184,18 @@ const TrackStockProduct = () => {
                   )}
                   <td>{Number(item.amount).toFixed(2)}</td>
                   <td
+                    title="Aqui você pode editar os valores de um produto que não estejam corretos
+                  deixando uma justificativa sobre as mudanças"
                     style={{ cursor: 'pointer' }}
                     onClick={() => editStockItem(item)}
                   >
                     Editar
                   </td>
                   <td
+                    title="Esse botão alterna entre Excluir e Restaurar, dependendo da tela.
+                  Se está na tela de itens que podem ser excluídos porque estão disponíveis o 
+                  titulo do botão é Exluir e se estiver na tela de itens que já foram excluídos 
+                  tem o titulo de Reaturar, para que voltem a ficar disponíveis"
                     style={{ cursor: 'pointer' }}
                     onClick={() => disableStockItem(item, false)}
                   >
@@ -176,7 +206,12 @@ const TrackStockProduct = () => {
           </tbody>
         </table>
       </div>
-      <div className={style.containerBtnStockList}>
+      <div
+        className={style.containerBtnStockList}
+        title="Esse botão alterna entre o itens que pertencem ao estoque mais não estão
+      disponíveis no momento e os que estão disponíveis. Enfatizando que também nesse caso
+      o título do botão alterna entre itens excluídos e itens habilitados"
+      >
         <button
           className={style.btnChangeStockList}
           onClick={toggleDeletedProducts}

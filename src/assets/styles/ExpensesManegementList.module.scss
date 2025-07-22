@@ -4,6 +4,28 @@
 .customerListContainer{
     position: relative !important;
 
+    .containerIcon {
+        position: absolute;
+         top: 10;
+          right: 10;
+           z-index: 10;
+           a{
+            display:flex;
+            align-items: center;
+            text-decoration: none;
+            span{
+                font-size: 2rem;
+                color: '#ff9800';
+                font-weight: bold;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+           }
+    }
+
     .containerAddExpenses{
         position: relative;
     }

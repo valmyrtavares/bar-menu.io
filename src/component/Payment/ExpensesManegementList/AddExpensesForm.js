@@ -663,6 +663,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             </div>
 
             <Input
+              title="Quantos pacotes do produto foi adquirido. Dentro 
+              desse pacote pode ter muitas unidades desse produto que sera
+              registrada no campo seguinte de Qtd por volume EX: Um pacote de 
+              colheres que dentro possui 100 unidade de colheres"
               id="amount"
               autoComplete="off"
               className="num"
@@ -672,6 +676,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               onChange={handleItemChange}
             />
             <Input
+              title="O valor gasto em cada pacote"
               id="CostPerUnit"
               autoComplete="off"
               className="num"
@@ -681,6 +686,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               onChange={handleItemChange}
             />
             <Input
+              title="Campo preenchido automáticamente multiplica a quantidade
+            de volumes pelo seu valor unitário"
               id="totalCost"
               autoComplete="off"
               className="num"
@@ -690,6 +697,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               onChange={handleItemChange}
             />
             <Input
+              title="Caso o valor em estoque desse produto não seja verdadeiro atualize o valor correto
+              e na tela de 'digite sua Jusitificativa' escreva uma nota dizendo porque o valor restante
+              desse produto em estoque não correponde a realidade. Ex: data de validade vencida"
               id="currentAmountProduct"
               autoComplete="off"
               className="num"
@@ -701,6 +711,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             />
 
             <Input
+              title="Registre aqui a quantidade de itens por pacote Ex: 100 colheres ou 2kg de leite por volume"
               id="volumePerUnit"
               autoComplete="off"
               className="num"

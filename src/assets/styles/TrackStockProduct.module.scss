@@ -6,6 +6,16 @@
     .tableStockContainer{
         @include tableContainer
     }
+
+    .containerBtnView{
+        width: 100%;
+        display: flex;
+        justify-content: end;
+        padding:3%;
+    button {
+        @include btnAdmin;
+    }
+    }
    
     .containerAdjustmentScreen {
         position: relative;
