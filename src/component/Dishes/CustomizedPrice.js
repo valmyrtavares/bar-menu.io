@@ -6,10 +6,10 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   const [showCustomizedPrice, setShowCustomizedPrice] = React.useState(true);
 
   const handleChange = (e) => {
-    const [price, label] = e.target.value.split('-');
-    setFormPriceOnScreen(`${price}-${label}`);
+    const [price, label, cost] = e.target.value.split('-');
+    setFormPriceOnScreen(`${price}-${label}-${cost}`);
 
-    onPriceChange({ price, label });
+    onPriceChange({ price, label, cost });
   };
 
   React.useEffect(() => {
@@ -32,11 +32,12 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               disabled={radioDisabled}
               className="form-check-input"
               id={`radio-${item.firstLabel}`}
-              value={`${item.firstPrice}-${item.firstLabel}`}
+              value={`${item.firstPrice}-${item.firstLabel}-${item.firstCost}}`}
               name="options"
               type="radio"
               checked={
-                formPriceOnScreen === `${item.firstPrice}-${item.firstLabel}`
+                formPriceOnScreen ===
+                `${item.firstPrice}-${item.firstLabel}-${item.firstCost}`
               }
               onChange={handleChange}
             />
@@ -49,9 +50,10 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               className="form-check-input"
               id={`radio-${item.secondLabel}`}
               name="options"
-              value={`${item.secondPrice}-${item.secondLabel}`}
+              value={`${item.secondPrice}-${item.secondLabel}-${item.secondCost}`}
               checked={
-                formPriceOnScreen === `${item.secondPrice}-${item.secondLabel}`
+                formPriceOnScreen ===
+                `${item.secondPrice}-${item.secondLabel}-${item.secondCost}`
               }
               type="radio"
               onChange={handleChange}
@@ -64,11 +66,12 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
               disabled={radioDisabled}
               className="form-check-input"
               id={`radio-${item.thirdLabel}`}
-              value={`${item.thirdPrice}-${item.thirdLabel}`}
+              value={`${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`}
               name="options"
               type="radio"
               checked={
-                formPriceOnScreen === `${item.thirdPrice}-${item.thirdLabel}`
+                formPriceOnScreen ===
+                `${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`
               }
               onChange={handleChange}
             />

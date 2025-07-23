@@ -108,6 +108,7 @@ const RecipeDish = ({
           costProfitMarginCustomized[item].cost = Number(total.toFixed(2));
         }
       });
+      costByRecipe.cost = costProfitMarginCustomized['firstPrice'].cost;
       return Number(total.toFixed(2));
     }
 

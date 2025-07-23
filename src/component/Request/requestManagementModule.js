@@ -49,6 +49,8 @@ const RequestManagementModule = () => {
             getBtnData('item'),
           ]);
 
+        console.log('O pedido completo   ', requestData);
+
         const allRequests = requestData.reduce((accumulator, currentOrder) => {
           //grab all dishes inside of request put out of it and add in each dish the request's datatime creating a new list of dishes
           if (!Array.isArray(currentOrder.request)) {

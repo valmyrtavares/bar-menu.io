@@ -37,7 +37,7 @@ import TrackStockProduct from './component/Stock/TrackStockProduct';
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
-import UpdateProductsIdButton from './component/admin/UpdateProductsIdButton.tsx';
+// import UpdateCustomizedPriceButton from './component/admin/UpdateProductsIdButton.tsx';
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 import Documentation from './component/Documentation/documentation';

@@ -1,4 +1,4 @@
-// src/components/admin/UpdateProductsIdButton.tsx
+// src/components/admin/UpdateCustomizedPriceButton.tsx
 // import React, { useState } from 'react';
 // import {
 //   getFirestore,
@@ -8,38 +8,57 @@
 //   doc,
 // } from 'firebase/firestore';
 
-// const UpdateProductsIdButton = () => {
+// const UpdateCustomizedPriceButton = () => {
 //   const [loading, setLoading] = useState(false);
-//   const [status, setStatus] = useState<string | null>(null);
+//   const [status, setStatus] = useState('');
 
 //   const handleUpdate = async () => {
-//     setLoading(true);
-//     setStatus(null);
-
 //     const db = getFirestore();
-//     const productsCollection = collection(db, 'product');
+//     const itemsRef = collection(db, 'item');
 
 //     try {
-//       const snapshot = await getDocs(productsCollection);
+//       setLoading(true);
+//       setStatus('Buscando documentos...');
 
-//       for (const document of snapshot.docs) {
-//         const docRef = doc(db, 'product', document.id);
-//         const data = document.data();
+//       const snapshot = await getDocs(itemsRef);
+//       let count = 0;
 
-//         if (!data.idProduct) {
+//       for (const docSnap of snapshot.docs) {
+//         const data = docSnap.data();
+//         const docRef = doc(db, 'item', docSnap.id);
+
+//         const customizedPrice = data.CustomizedPrice;
+//         const costProfit = data.costProfitMarginCustomized;
+
+//         // Verifica se CustomizedPrice.firstLabel está preenchido
+//         if (
+//           customizedPrice &&
+//           typeof customizedPrice.firstLabel === 'string' &&
+//           customizedPrice.firstLabel.trim() !== ''
+//         ) {
+//           const firstCost = costProfit?.firstPrice?.cost ?? null;
+//           const secondCost = costProfit?.secondPrice?.cost ?? null;
+//           const thirdCost = costProfit?.thirdPrice?.cost ?? null;
+
+//           const updatedCustomizedPrice = {
+//             ...customizedPrice,
+//             firstCost,
+//             secondCost,
+//             thirdCost,
+//           };
+
 //           await updateDoc(docRef, {
-//             idProduct: document.id,
+//             CustomizedPrice: updatedCustomizedPrice,
 //           });
-//           console.log(`✅ Atualizado: ${document.id}`);
-//         } else {
-//           console.log(`⏩ Já possui idProduct: ${document.id}`);
+
+//           count++;
 //         }
 //       }
 
-//       setStatus('Todos os documentos foram atualizados com sucesso.');
+//       setStatus(`Atualização concluída. ${count} documentos modificados.`);
 //     } catch (error) {
-//       console.error('❌ Erro ao atualizar documentos:', error);
-//       setStatus('Erro ao atualizar documentos. Veja o console.');
+//       console.error('Erro ao atualizar documentos:', error);
+//       setStatus('Erro ao atualizar documentos.');
 //     } finally {
 //       setLoading(false);
 //     }
@@ -47,14 +66,16 @@
 
 //   return (
 //     <div style={{ padding: 20 }}>
-//       <h2>Atualizar idProduct dos documentos</h2>
+//       <h2>Atualizar CustomizedPrice dos documentos</h2>
 //       <button onClick={handleUpdate} disabled={loading}>
-//         {loading ? 'Atualizando...' : 'Atualizar Coleção "product"'}
+//         {loading ? 'Atualizando...' : 'Atualizar Coleção "item"'}
 //       </button>
 //       {status && <p>{status}</p>}
 //     </div>
 //   );
 // };
+
+// export default UpdateCustomizedPriceButton;
 
 // export default UpdateProductsIdButton;
 

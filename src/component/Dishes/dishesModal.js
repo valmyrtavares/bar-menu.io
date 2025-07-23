@@ -29,6 +29,7 @@ const DishesModal = ({ item, setModal }) => {
     category: item.category,
     recipeOpenCloseModal: false,
     finalPrice: Number(item.price),
+    finalCost: 0,
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
@@ -42,6 +43,10 @@ const DishesModal = ({ item, setModal }) => {
 
   const navigate = useNavigate();
   const db = getFirestore(app);
+
+  React.useEffect(() => {
+    calculateFinalCost();
+  }, []);
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -59,6 +64,26 @@ const DishesModal = ({ item, setModal }) => {
       disabledRadio();
     }
   }, [itemOnScreen]);
+
+  const calculateFinalCost = () => {
+    if (
+      item &&
+      item.costProfitMarginCustomized &&
+      item.costProfitMarginCustomized.firstPrice.label === ''
+    ) {
+      setForm((prev) => ({
+        ...prev,
+        finalCost: item.costPriceObj?.cost || 0,
+      }));
+    } else {
+      if (form.size === '') {
+        setForm((prev) => ({
+          ...prev,
+          finalCost: item.costProfitMarginCustomized?.firstPrice.cost || 0,
+        }));
+      }
+    }
+  };
 
   const disabledRadio = () => {
     if (itemOnScreen) {
@@ -178,6 +203,7 @@ const DishesModal = ({ item, setModal }) => {
   function onPriceChange(item) {
     console.log('O que vem do customize price   ', item);
     form.size = item.label;
+    form.finalCost = item.cost;
 
     setTotalPrice(Number(item.price));
   }
