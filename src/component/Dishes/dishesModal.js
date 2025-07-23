@@ -105,6 +105,17 @@ const DishesModal = ({ item, setModal }) => {
     const selectedItem = item.sideDishesElementList[id];
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
+    let previousCost = Number(form.finalCost) || 0;
+    let additionCost = Number(selectedItem.portionCost) || 0;
+
+    additionCost = additionCost > previousCost ? 0 : additionCost;
+
+    const totalCostChange = Number((previousCost + additionCost).toFixed(2));
+    setForm((prev) => ({
+      ...prev,
+      finalCost: Number(totalCostChange).toFixed(2),
+    }));
+
     setItemOnScreen({
       name: selectedItem.sideDishes,
       price: selectedItem.price,
@@ -219,6 +230,16 @@ const DishesModal = ({ item, setModal }) => {
       (item) => item != itemSelected
     ); //Tirar da tela
     setSideDishesListOnScreen(nameOnScreen); //atualiza a lista de nomes da tela
+
+    let previousCost = Number(form.finalCost) || 0;
+    let additionCost = Number(itemSelected.portionCost) || 0;
+    additionCost = additionCost > previousCost ? 0 : additionCost;
+
+    const totalCostChange = Number((previousCost - additionCost).toFixed(2));
+    setForm((prev) => ({
+      ...prev,
+      finalCost: Number(totalCostChange).toFixed(2),
+    }));
 
     setTotalPrice(totalPrice - Number(oneSideDishe[0].price)); //Troca o valor total na tela
     if (sideDishesListOnScreen.length == 1) {
