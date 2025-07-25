@@ -218,12 +218,12 @@ const AccountingManagementPopup = ({
         <table striped bordered hover>
           <thead>
             <tr>
-              <th>Nome</th>
+              <th>Produto</th>
               <th>Custo</th>
               <th>Preço</th>
               <th>Lucro</th>
               <th>Porcentagem</th>
-              <th>Nome</th>
+              <th>Acompanhamento</th>
               <th>Custo</th>
               <th>Preço</th>
               <th>Lucro</th>

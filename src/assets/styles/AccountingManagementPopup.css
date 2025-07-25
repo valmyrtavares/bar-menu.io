@@ -1,13 +1,15 @@
 .accounting-management-popup-container{
     width: 100%;
-        max-width: 900px;
+    max-width: 900px;
     background-color: var(--secundary-bg-color);
     position: fixed;
+    z-index: 50;
     left:16%;
     top:100px;
     height: 40vh;
     overflow-y: auto;
     background:white;
+    box-shadow: 4px 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .accounting-management-popup-container table  h1{

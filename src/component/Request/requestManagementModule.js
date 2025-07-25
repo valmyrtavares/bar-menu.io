@@ -344,13 +344,16 @@ const RequestManagementModule = () => {
 
   return (
     <div className={style.managementRequests}>
-      {showAccountingManagementPopup && (
-        <AccountingManagementPopup
-          dishesRequested={itemSelected}
-          setShowAccountingManagementPopup={setShowAccountingManagementPopup}
-          setTotals={setTotals}
-        />
-      )}
+      <div className={style.containerPopup}>
+        {showAccountingManagementPopup && (
+          <AccountingManagementPopup
+            dishesRequested={itemSelected}
+            setShowAccountingManagementPopup={setShowAccountingManagementPopup}
+            setTotals={setTotals}
+          />
+        )}
+      </div>
+
       {loadMessage && <Loading />}
       <Link to="/admin/admin">
         <Title mainTitle=" Vendas" />
