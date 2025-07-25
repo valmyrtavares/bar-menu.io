@@ -18,12 +18,15 @@
     }
    
     .containerAdjustmentScreen {
-        position: relative;
+        position: fixed;
         z-index: 30;
+        top: 20px; /* ou onde você quiser verticalmente */
+        left: 50%;
+        transform: translateX(-50%);
     }
     .containerBtnStockList{
         position: fixed;
-        bottom: 79px;
+        bottom: 2%;
         right:38%;
         z-index: 20;
         display: flex;

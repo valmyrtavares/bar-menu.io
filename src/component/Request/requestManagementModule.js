@@ -105,7 +105,7 @@ const RequestManagementModule = () => {
           const statusList = await calculateProductsStatus(
             originalRequestListArray
           );
-          console.log('statusList   ', statusList);
+
           const voucherFiltered = filteredRequests(voucher, startDate, endDate);
 
           showDiscountsVoucher(voucherFiltered);
@@ -195,7 +195,6 @@ const RequestManagementModule = () => {
 
   const calculateProductsStatus = async (filteredRequestsSended) => {
     const productMap = {};
-
     setFilterRequests(filteredRequestsSended);
 
     if (filteredRequestsSended && filteredRequestsSended.length > 0) {
@@ -229,7 +228,7 @@ const RequestManagementModule = () => {
           sideDishesProfit += Number(price) - Number(cost);
         }
 
-        const { name, finalPrice, paymentMethod } = item;
+        const { name, finalPrice, paymentMethod, finalCost } = item;
         const FinalMainprice = Number(finalPrice) || 0;
 
         // Calcula a taxa do cartão com base no método de pagamento
@@ -288,6 +287,7 @@ const RequestManagementModule = () => {
           (priceObj) => priceObj.label === size
         );
       }
+
       return currentCostData
         ? {
             ...currentCostData,
@@ -300,13 +300,25 @@ const RequestManagementModule = () => {
   };
 
   const fetchSideDishesGlobalCost = (name) => {
-    const obj = sideDish.find((dish) => dish.name === name);
+    const obj = sideDish.find((dish) => dish.sideDishes === name);
 
     if (!obj) {
       // Retorna valores padrão se o item não for encontrado
       return { cost: 0, profit: 0 };
     }
 
+    if (
+      Number(obj.costPriceObj.cost) > Number(obj.costPriceObj.price) ||
+      Number(obj.costPriceObj.profit) > Number(obj.costPriceObj.price)
+    ) {
+      alert(
+        `O custo ou lucro do acomapanhamento ${obj.sideDishes} está incorreto, por favor verifique no estoque algum valor incompativel`
+      );
+      return {
+        cost: 0,
+        profit: 0,
+      };
+    }
     return {
       cost: Number(obj.costPriceObj.cost),
       profit: obj.costPriceObj.profit,

@@ -172,7 +172,6 @@ function AddSideDishesForm({
 
   function handleSubmit(event) {
     event.preventDefault();
-    debugger;
     const enrichedForm = isFormComplete(form)
       ? form
       : buildFormWithComputedData(form, productList);
