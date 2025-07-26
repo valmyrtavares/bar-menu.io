@@ -69,6 +69,7 @@ const DishesModal = ({ item, setModal }) => {
     if (
       item &&
       item.costProfitMarginCustomized &&
+      item.costProfitMarginCustomized.firstPrice &&
       item.costProfitMarginCustomized.firstPrice.label === ''
     ) {
       setForm((prev) => ({
@@ -79,7 +80,7 @@ const DishesModal = ({ item, setModal }) => {
       if (form.size === '') {
         setForm((prev) => ({
           ...prev,
-          finalCost: item.costProfitMarginCustomized?.firstPrice.cost || 0,
+          finalCost: item.costPriceObj.cost || 0,
         }));
       }
     }
