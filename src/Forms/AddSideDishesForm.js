@@ -82,25 +82,50 @@ function AddSideDishesForm({
   function handleChange({ target }) {
     const { id, value } = target;
 
+    const newForm = {
+      ...form,
+      [id]: value,
+    };
+
+    // Recalcular portionCost sempre que qualquer valor mudar
+    const portionCost = Number(newForm.portionUsed) * Number(newForm.price);
+
     if (id === 'sideDishes') {
       const itemSelected = productList.find((item) => item.product === value);
-      itemSelected
-        ? setForm({
-            ...form,
-            sideDishes: itemSelected.product,
-            unit: itemSelected.unitOfMeasurement,
-            totalVolume: itemSelected.totalVolume,
-            totalCost: itemSelected.totalCost,
-          })
-        : setForm({
-            ...form,
-            sideDishes: '',
-            unit: '',
-          });
+
+      if (itemSelected) {
+        setForm({
+          ...newForm,
+          sideDishes: itemSelected.product,
+          unit: itemSelected.unitOfMeasurement,
+          totalVolume: itemSelected.totalVolume,
+          totalCost: itemSelected.totalCost,
+          portionCost,
+          costPriceObj: {
+            ...form.costPriceObj,
+            cost: portionCost,
+          },
+        });
+      } else {
+        setForm({
+          ...newForm,
+          sideDishes: '',
+          unit: '',
+          portionCost,
+          costPriceObj: {
+            ...form.costPriceObj,
+            cost: portionCost,
+          },
+        });
+      }
     } else {
       setForm({
-        ...form,
-        [id]: value,
+        ...newForm,
+        portionCost,
+        costPriceObj: {
+          ...form.costPriceObj,
+          cost: portionCost,
+        },
       });
     }
   }
@@ -175,6 +200,7 @@ function AddSideDishesForm({
     const enrichedForm = isFormComplete(form)
       ? form
       : buildFormWithComputedData(form, productList);
+    //     if(en  enrichedForm.portionCost > enrichedForm.price)
     if (!dataObj) {
       if (form.price && form.sideDishes) {
         addDoc(collection(db, 'sideDishes'), enrichedForm)

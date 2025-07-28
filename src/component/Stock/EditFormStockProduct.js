@@ -157,24 +157,54 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
   const updateCost = (e) => {
     const { id, value } = e.target;
-    if (id === 'totalVolume') {
-      const newCost =
-        obj.totalCost * (stockProductObj.totalVolume / obj.totalVolume);
 
-      const newUnit =
-        Number(stockProductObj.totalVolume) / Number(obj.volumePerUnit);
+    if (id === 'totalVolume' || id === 'totalCost') {
+      let totalCost = obj.totalCost;
+      let totalVolume = obj.totalVolume;
+      let newCostPerUnit = 0;
+      if (id === 'totalCost') {
+        totalCost = Number(value);
+        setStockProductObj({
+          ...stockProductObj,
+          totalCost: totalCost,
+        });
+      }
+      if (id === 'totalVolume') {
+        totalVolume = Number(value);
+        setStockProductObj({
+          ...stockProductObj,
+          totalVolume: totalVolume,
+        });
+      }
 
-      setStockProductObj({
-        ...stockProductObj,
-        totalCost: newCost,
-        amount: newUnit,
-      });
-    } else {
-      setStockProductObj({
-        ...stockProductObj,
-        totalCost: value,
-      });
+      let newUnit = 0;
+      //  const newVolume = Number(value);
+      // const newCost = totalCost * (newVolume / obj.totalVolume);
+
+      if (stockProductObj.totalCost > 0 && stockProductObj.totalVolume > 0) {
+        newUnit =
+          Number(stockProductObj.totalVolume) / Number(obj.volumePerUnit);
+        newCostPerUnit =
+          Number(stockProductObj.totalCost) /
+          Number(stockProductObj.totalVolume);
+        setStockProductObj({
+          ...stockProductObj,
+          amount: Number(newUnit).toFixed(2),
+          CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+        });
+      }
     }
+    //  else {
+    //   const newCost = Number(value);
+    //   const currentVolume = Number(stockProductObj.totalVolume);
+    //   const newCostPerUnit = currentVolume !== 0 ? newCost / currentVolume : 0;
+
+    //   setStockProductObj({
+    //     ...stockProductObj,
+    //     totalCost: newCost,
+    //     costPerUnit: Number(newCostPerUnit.toFixed(4)),
+    //   });
+    // }
   };
 
   const handleChange = (e) => {
