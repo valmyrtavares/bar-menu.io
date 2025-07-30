@@ -13,6 +13,7 @@ import {
 import { app } from '../../config-firebase/firebase';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
+  const [Dishes, setDishes] = React.useState([]);
   const [stockProductObj, setStockProductObj] = React.useState({
     CostPerUnit: Number(obj.CostPerUnit),
     amount: Number(obj.amount),
@@ -29,6 +30,16 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     React.useState('');
 
   const db = getFirestore(app);
+
+  React.useEffect(() => {
+    getBtnData('item')
+      .then((data) => {
+        setDishes(data);
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar dados:', error);
+      });
+  });
 
   const updateNoteEdit = () => {
     setStockProductObj((prevForm) => ({
@@ -223,18 +234,63 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       );
       return;
     }
+
+    updateRecipesinDihesAndSideDishes(stockProductObj);
+    return;
     try {
-      await handleStock(stockProductObj);
-      const docRef = doc(db, 'stock', stockProductObj.id);
-      await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
+      // await handleStock(stockProductObj);
+      //const docRef = doc(db, 'stock', stockProductObj.id);
+      // await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
-      fetchStock();
-      setShowEditForm(false);
+      //   updateRecipesinDihesAndSideDishes(stockProductObj);
+      //   fetchStock();
+      //   setShowEditForm(false);
     } catch (error) {
       console.error('Erro ao atualizar o documento:', error);
     }
   };
+
+  const updateRecipesinDihesAndSideDishes = (stockProduct) => {
+    if (Dishes && Dishes.length > 0) {
+      try {
+        Dishes.forEach((dish) => {
+          if (dish.title === 'CASQUINHA DE AÇAI') debugger; // Veja se chega aqui
+          if (
+            dish.CustomizedPrice &&
+            typeof dish.CustomizedPrice === 'object' &&
+            dish.CustomizedPrice.firstLabel === ''
+          ) {
+            if (
+              Array.isArray(dish.recipe?.FinalingridientsList) &&
+              dish.recipe.FinalingridientsList.length > 0
+            ) {
+              const recipeCurrent = dish.recipe.FinalingridientsList;
+              const currentIngredient = recipeCurrent.find(
+                (item) => item.name === stockProduct.product
+              );
+              if (!currentIngredient) return;
+
+              currentIngredient.costPerUnit =
+                stockProduct.totalCost / stockProduct.totalVolume;
+              currentIngredient.portionCost =
+                currentIngredient.amount * currentIngredient.costPerUnit;
+
+              const totalPortionCost = recipeCurrent.reduce((sum, item) => {
+                return sum + (item.portionCost || 0);
+              }, 0);
+              console.log('Total portionCost:', totalPortionCost);
+
+              dish.costPriceObj.cost = totalPortionCost;
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Erro dentro do forEach:', error);
+      }
+    }
+  };
+
   return (
     <div className={edit.popupOverlay}>
       <div className={edit.containerEditStock}>
