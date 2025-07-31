@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
+import AutoPayment from '../Payment/AutoPayment.js';
 import '../../assets/styles/requestModal.css';
 import {
   deleteRequestItem,
@@ -42,6 +43,7 @@ const RequestModal = () => {
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [autoPayment, setAutoPayment] = React.useState(true); //Habilita o pagamento automático
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
@@ -232,10 +234,10 @@ const RequestModal = () => {
   const sendRequestToKitchen = async (e) => {
     if (isProcessing.current) return; // Impede cliques repetidos
     isProcessing.current = true; // Bloqueia a função
-
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       if (isToten && isToten === true) {
+        onChoose();
         addRequestUserToten(currentUserNew.id);
         setTotenMessage(true);
         setTimeout(() => {
@@ -246,7 +248,6 @@ const RequestModal = () => {
         //mostrar mensagem
         return;
       } else if (warningMsg) {
-        setTotenMessage(true);
         const data = await getOneItemColleciton('user', currentUserNew.id);
         console.log('Atual cliente   ', data);
         if (data) {
@@ -377,6 +378,15 @@ const RequestModal = () => {
       console.error('Erro ao atualizar o array no Firestore:', error);
     }
   };
+  const onChoose = (selectedPayment) => {
+    if (!autoPayment) {
+      setAutoPayment(true);
+      return;
+    } else {
+      setAutoPayment(false);
+    }
+    console.log('Forma de pagamento escolhida no pai:', selectedPayment);
+  };
 
   const countingRequest = async () => {
     const requestData = await getBtnData('requests');
@@ -407,7 +417,11 @@ const RequestModal = () => {
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
-
+      {autoPayment && (
+        <div className="container-autoPayment">
+          <AutoPayment setAutoPayment={setAutoPayment} onChoose={onChoose} />
+        </div>
+      )}
       {warningMsg && (
         <WarningMessages
           message="Agora você pode ir ao caixa "
