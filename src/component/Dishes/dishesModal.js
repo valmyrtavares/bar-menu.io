@@ -33,7 +33,9 @@ const DishesModal = ({ item, setModal }) => {
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
-    size: '',
+    size: item.CustomizedPrice.firstLabel
+      ? item.CustomizedPrice.firstLabel
+      : '',
   });
   const [itemOnScreen, setItemOnScreen] = React.useState('');
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
