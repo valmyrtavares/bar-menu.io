@@ -43,11 +43,12 @@ const RequestModal = () => {
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [autoPayment, setAutoPayment] = React.useState(true); //Habilita o pagamento automático
+  const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const location = useLocation();
+  let methodPayment = '';
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -237,7 +238,6 @@ const RequestModal = () => {
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       if (isToten && isToten === true) {
-        onChoose();
         addRequestUserToten(currentUserNew.id);
         setTotenMessage(true);
         setTimeout(() => {
@@ -334,6 +334,8 @@ const RequestModal = () => {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
+        paymentDone: methodPayment ? true : false, // Verifica se o método de pagamento foi selecionado
+        paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
         request: previousRequests, // Atribuir os pedidos recuperados
@@ -383,9 +385,14 @@ const RequestModal = () => {
       setAutoPayment(true);
       return;
     } else {
-      setAutoPayment(false);
+      if (selectedPayment === 'dinheiro') {
+        sendRequestToKitchen();
+        setAutoPayment(false);
+      } else {
+        methodPayment = selectedPayment;
+        sendRequestToKitchen();
+      }
     }
-    console.log('Forma de pagamento escolhida no pai:', selectedPayment);
   };
 
   const countingRequest = async () => {
@@ -408,6 +415,7 @@ const RequestModal = () => {
           setOpenCloseTotenPopup={setOpenCloseTotenPopup}
           setCurrentUser={setCurrentUser}
           sendRequestToKitchen={sendRequestToKitchen}
+          onChoose={onChoose}
           isSubmitting={isSubmitting}
         />
       )}
@@ -419,7 +427,7 @@ const RequestModal = () => {
       </div>
       {autoPayment && (
         <div className="container-autoPayment">
-          <AutoPayment setAutoPayment={setAutoPayment} onChoose={onChoose} />
+          <AutoPayment onChoose={onChoose} />
         </div>
       )}
       {warningMsg && (
