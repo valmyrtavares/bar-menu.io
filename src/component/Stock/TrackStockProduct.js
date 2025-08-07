@@ -25,6 +25,8 @@ const TrackStockProduct = () => {
   const [showDeleted, setShowDeleted] = React.useState(false);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
+  const [subTitle, setSubTitle] = React.useState('Matéria Prima');
+  const [changeSubTitle, setChangeSubTitle] = React.useState(true);
 
   React.useEffect(() => {
     fetchStock();
@@ -82,7 +84,9 @@ const TrackStockProduct = () => {
 
   const toggleDeletedProducts = () => {
     const nextShowDeleted = !showDeleted;
-
+    nextShowDeleted
+      ? setSubTitle('Itens Excluídos')
+      : setSubTitle('Itens Habilitados');
     const filtered = allStockItems.filter(
       (item) =>
         item.operationSupplies === false && //true = insumo false = matéria prima
@@ -96,6 +100,10 @@ const TrackStockProduct = () => {
   };
 
   const changeProductView = () => {
+    setChangeSubTitle((prev) => !prev);
+    changeSubTitle
+      ? setSubTitle('Todos os Insumos')
+      : setSubTitle('Todas as Matérias Primas');
     setToogleTypeOfProducts((prev) => !prev);
     const filtered = allStockItems.filter(
       (item) => item.operationSupplies === tootleTooggleOfProducts
@@ -126,11 +134,12 @@ const TrackStockProduct = () => {
         <Title mainTitle="Estoque" />
       </Link>
       <div className={style.containerBtnView}>
+        <h2>{subTitle}</h2>
         <button
           onClick={changeProductView}
           title={tooltips.trackStockProduct.rawMaterialBtn}
         >
-          {tootleTooggleOfProducts ? 'Insumos' : 'Matéria Prima'}
+          Insumos / Matéria Prima
         </button>
       </div>
       <div className={style.tableStockContainer}>

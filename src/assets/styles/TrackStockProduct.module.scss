@@ -7,15 +7,23 @@
         @include tableContainer
     }
 
-    .containerBtnView{
-        width: 100%;
-        display: flex;
-        justify-content: end;
-        padding:3%;
-    button {
-        @include btnAdmin;
-    }
-    }
+        .containerBtnView {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3%;
+            width: 100%;
+    
+            h2 {
+                flex: 1;
+                text-align: center;
+                    margin: 0px 0px 0px 140px; // remove espaçamento padrão
+            }
+    
+            button {
+                @include btnAdmin;
+            }
+        }
    
     .containerAdjustmentScreen {
         position: fixed;
