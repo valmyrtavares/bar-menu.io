@@ -102,8 +102,8 @@ const TrackStockProduct = () => {
   const changeProductView = () => {
     setChangeSubTitle((prev) => !prev);
     changeSubTitle
-      ? setSubTitle('Todos os Insumos')
-      : setSubTitle('Todas as Matérias Primas');
+      ? setSubTitle('Todas MPs Indiretas')
+      : setSubTitle('Todas as MPs Diretas');
     setToogleTypeOfProducts((prev) => !prev);
     const filtered = allStockItems.filter(
       (item) => item.operationSupplies === tootleTooggleOfProducts
@@ -139,7 +139,7 @@ const TrackStockProduct = () => {
           onClick={changeProductView}
           title={tooltips.trackStockProduct.rawMaterialBtn}
         >
-          Insumos / Matéria Prima
+          MP indireta / MP direta
         </button>
       </div>
       <div className={style.tableStockContainer}>

@@ -1,11 +1,10 @@
 export const tooltips = {
   trackStockProduct: {
     rawMaterialBtn: `Esse botão serve para que o administrador possa ver
-           todos os insumos ( produtos que não participam dos produtos vendidos) 
-           ou todas as matérias primas (produtos que participam dos produtos vendidos) incluindo
+           todas as matérias primas, que são MP indiretas( que são as que não participam dos diretamente nos  produtos vendidos) 
+           e matérias primas diretas MP diretas (produtos que participam diretamente da confecção dos produtos vendidos) incluindo
         os disponívies e indisponíveis, por isso nessa categoria temos linhas vermelhas,
-         mostrando os itens e insumos, indisponíveis (pintado de vermelho) e disponíveis (sem coloração)
-         Observe que o titulo do botão muda conforme o uso`,
+         mostrando as matérias primas, indisponíveis (pintado de vermelho) e disponíveis (sem coloração)`,
     btnEdit: `Aqui você pode editar os valores de um produto que não estejam corretos
                 deixando uma justificativa sobre as mudanças`,
     toggleBtn: `Esse botão alterna entre Excluir e Restaurar, dependendo da tela.
