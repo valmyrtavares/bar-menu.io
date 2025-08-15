@@ -142,6 +142,14 @@ const AdminMainMenu = ({ children }) => {
             >
               Vendas
             </NavLink>
+            <NavLink
+              to="/admin/auto-payment"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
+              Auto Pagamento
+            </NavLink>
 
             <NavLink
               to="/admin/sell-flow"
