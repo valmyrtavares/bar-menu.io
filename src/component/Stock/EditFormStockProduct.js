@@ -235,15 +235,16 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       return;
     }
 
-    updateRecipesinDihesAndSideDishes(stockProductObj);
+    const retorno = updateRecipesinDishesAndSideDishes(stockProductObj);
     return;
+    debugger;
     try {
       // await handleStock(stockProductObj);
       //const docRef = doc(db, 'stock', stockProductObj.id);
       // await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
-      //   updateRecipesinDihesAndSideDishes(stockProductObj);
+      //   updateRecipesinDishesAndSideDishes(stockProductObj);
       //   fetchStock();
       //   setShowEditForm(false);
     } catch (error) {
@@ -251,7 +252,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     }
   };
 
-  const updateRecipesinDihesAndSideDishes = (stockProduct) => {
+  const updateRecipesinDishesAndSideDishes = (stockProduct) => {
     if (Dishes && Dishes.length > 0) {
       try {
         Dishes.forEach((dish) => {
