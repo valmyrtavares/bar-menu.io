@@ -236,8 +236,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     }
 
     const retorno = updateRecipesinDishesAndSideDishes(stockProductObj);
-    return;
-    debugger;
+
     try {
       // await handleStock(stockProductObj);
       //const docRef = doc(db, 'stock', stockProductObj.id);
@@ -256,7 +255,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     if (Dishes && Dishes.length > 0) {
       try {
         Dishes.forEach((dish) => {
-          if (dish.title === 'CASQUINHA DE AÇAI') debugger; // Veja se chega aqui
+          // CENÁRIO 1 - Produto com apenas 1 preço
           if (
             dish.CustomizedPrice &&
             typeof dish.CustomizedPrice === 'object' &&
@@ -272,18 +271,64 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               );
               if (!currentIngredient) return;
 
+              // Atualiza ingrediente
               currentIngredient.costPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
               currentIngredient.portionCost =
                 currentIngredient.amount * currentIngredient.costPerUnit;
 
+              // Recalcula custo total da receita
               const totalPortionCost = recipeCurrent.reduce((sum, item) => {
                 return sum + (item.portionCost || 0);
               }, 0);
-              console.log('Total portionCost:', totalPortionCost);
 
+              // Atualiza custo do prato
               dish.costPriceObj.cost = totalPortionCost;
             }
+          }
+
+          // CENÁRIO 2 - Produto com 3 preços (primeiro label não é vazio)
+          else if (
+            dish.CustomizedPrice &&
+            typeof dish.CustomizedPrice === 'object' &&
+            dish.CustomizedPrice.firstLabel !== ''
+          ) {
+            debugger;
+            const labels = ['firstLabel', 'secondLabel', 'thirdLabel'];
+            const costs = ['firstCost', 'secondCost', 'thirdCost'];
+
+            labels.forEach((label, index) => {
+              const recipeList =
+                dish.recipe?.FinalingridientsList?.[
+                  dish.CustomizedPrice[label]
+                ];
+
+              if (Array.isArray(recipeList) && recipeList.length > 0) {
+                const currentIngredient = recipeList.find(
+                  (item) => item.name === stockProduct.product
+                );
+                if (!currentIngredient) return;
+
+                // Atualiza ingrediente
+                currentIngredient.costPerUnit =
+                  stockProduct.totalCost / stockProduct.totalVolume;
+                currentIngredient.portionCost =
+                  currentIngredient.amount * currentIngredient.costPerUnit;
+
+                // Recalcula custo total da receita
+                const totalPortionCost = recipeList.reduce((sum, item) => {
+                  return sum + (item.portionCost || 0);
+                }, 0);
+
+                // Atualiza custos no CustomizedPrice
+                dish.CustomizedPrice[costs[index]] = totalPortionCost;
+
+                // Garante que dish.costPriceObj.cost recebe o mesmo do firstCost
+                if (index === 0) {
+                  dish.costPriceObj.cost = totalPortionCost;
+                }
+              }
+            });
           }
         });
       } catch (error) {
