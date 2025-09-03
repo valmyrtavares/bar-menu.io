@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import style from '../../assets/styles/AutoPayment.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
+import { v4 as uuidv4 } from 'uuid';
 
 const paymentOptions = [
   { label: 'Débito', value: 'debit' },
@@ -16,21 +17,14 @@ const AutoPayment = ({ onChoose, price }) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  function generateCorrelationId() {
+    return uuidv4();
+  }
+
   const paymentOption = {
     debit: 21,
     credite: 22,
     pix: 23,
-  };
-  let payGo = {
-    formaPagamentoId: '',
-    pedidoId: null,
-    terminalId: '4517',
-    observacao: 'Venda teste',
-    aguardarTefIniciarTransacao: true,
-    adquirente: 'DEMO',
-    parcelamentoAdmin: true,
-    quantidadeParcelas: 1,
-    valorTotalVendido: '',
   };
 
   const handleChange = (e) => {
@@ -49,78 +43,93 @@ const AutoPayment = ({ onChoose, price }) => {
       return;
     }
 
-    // Valores chumbados para teste
-    const payGoData = {
-      ...payGo,
-      formaPagamentoId: 21, // Crédito fixo
-      valorTotalVendido: 1, // Valor fixo
-    };
-
     try {
       setLoading(true);
       setErrorMessage('');
 
-      // 1️⃣ Inicia a venda
-      const initRes = await fetch('http://localhost:3001/api/paygo', {
+      // 🔑 1) Gerar correlationId único
+      const correlationId = generateCorrelationId();
+
+      // 🔑 2) Montar objeto com esse correlationId
+      const payGo = {
+        type: 'INPUT',
+        origin: 'PAGAMENTO',
+        data: {
+          callbackUrl:
+            'https://webhook.site/05d9a59c-fc9b-43e2-84d8-7e7c543038ba',
+          correlationId,
+          flow: 'SYNC',
+          automationName: 'GERACAOZ',
+          receiver: {
+            companyId: '003738',
+            storeId: '0001',
+            terminalId: '01',
+          },
+          message: {
+            command: 'PAYMENT',
+            value: 12.0,
+            paymentMethod: 'CARD',
+            paymentType: 'DEBIT',
+            paymentMethodSubType: 'FULL_PAYMENT',
+          },
+        },
+      };
+
+      // 3️⃣ Enviar para sua API que chama o Payer
+      const initRes = await fetch('http://localhost:3001/api/payer/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payGoData),
+        body: JSON.stringify(payGo),
       });
 
       if (!initRes.ok) throw new Error(`Erro na requisição: ${initRes.status}`);
       const initData = await initRes.json();
-      console.log('Resposta da inicialização da venda:', initData);
-      const vendaId = initData.intencaoVenda?.id;
-      console.log('Venda iniciada, id:', vendaId);
+      console.log('Objeto inteiro    ', initData);
+      const correlationIdFromApi =
+        initData.SendMessageResponse.ResponseMetadata.RequestId; // 👈 pega do retorno
+      console.log(
+        '🚀 Inicia pagamento, correlationIdFromApi:',
+        correlationIdFromApi
+      );
+      console.log('CORRELATION ID ENVIADO  ', correlationId);
 
-      // 2️⃣ Polling para aguardar status final
+      // 4️⃣ Polling para aguardar status (até webhook estar implementado)
       let finalStatus = null;
-      const maxAttempts = 60; // 60 segundos
+      const maxAttempts = 60;
       let attempts = 0;
 
       while (!finalStatus && attempts < maxAttempts) {
         const statusRes = await fetch(
-          `http://localhost:3001/api/paygo/${vendaId}`
+          `http://localhost:3001/api/payer/status/${correlationId}/GERACAOZ`
         );
+
         if (!statusRes.ok)
           throw new Error(`Erro ao consultar status: ${statusRes.status}`);
+
         const statusData = await statusRes.json();
+        console.log('🔍 Retorno do Payer:', statusData);
 
-        const status = statusData.intencaoVenda?.intencaoVendaStatus?.nome;
-        console.log('Status atual da venda:', status);
-        console.log(
-          '🔍 Status retornado do polling:',
-          statusData.intencaoVenda.intencaoVendaStatus
-        );
+        // 👇 pega statusTransaction do local correto
+        const statusTransaction =
+          statusData?.receivedOutput?.data?.message?.statusTransaction;
 
-        // if (status === 'Aprovado' || status === 'SUCESSO') {
-        //   finalStatus = 'SUCESSO';
-        //   break;
-        // }
-        // if (status === 'Negado' || status === 'Cancelado') {
-        //   finalStatus = 'FALHA';
-        //   break;
-        // }
-        if (['Creditado', 'Aprovado', 'SUCESSO'].includes(status)) {
+        if (['APPROVED', 'SUCESSO'].includes(statusTransaction)) {
           finalStatus = 'SUCESSO';
           break;
         }
 
-        // fallback por pagamentosExternos
-        const ext =
-          statusData.intencaoVenda?.pagamentosExternos?.[0]
-            ?.pagamentoExternoStatus?.nome;
-        if (['Finalizado', 'Aprovado'].includes(ext)) {
-          finalStatus = 'SUCESSO';
+        if (['REJECTED', 'CANCELED'].includes(statusData.statusTransaction)) {
+          finalStatus = 'ERRO';
           break;
         }
 
         attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1s delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
+      // 5️⃣ Só fecha a tela se o pagamento foi aprovado
       if (finalStatus === 'SUCESSO') {
-        console.log('Pagamento aprovado');
+        console.log('✅ Pagamento aprovado');
         onChoose(selected);
       } else {
         throw new Error('Pagamento não aprovado');
