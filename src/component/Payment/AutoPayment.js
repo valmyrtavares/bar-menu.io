@@ -10,7 +10,7 @@ const paymentOptions = [
   { label: 'Dinheiro', value: 'dinheiro' },
 ];
 
-const AutoPayment = ({ onChoose, price }) => {
+const AutoPayment = ({ onChoose, price, setIdPayer }) => {
   const [selected, setSelected] = useState('');
   const [warningCashPaymentMessage, setWarningCashPaymentMessage] =
     useState(false);
@@ -112,9 +112,13 @@ const AutoPayment = ({ onChoose, price }) => {
         // 👇 pega statusTransaction do local correto
         const statusTransaction =
           statusData?.receivedOutput?.data?.message?.statusTransaction;
+        let idPayer = statusData?.receivedOutput?.data?.message?.idPayer;
 
         if (['APPROVED', 'SUCESSO'].includes(statusTransaction)) {
           finalStatus = 'SUCESSO';
+
+          setIdPayer(idPayer);
+          // Seta o idPayer no estado do componente pai
           break;
         }
 

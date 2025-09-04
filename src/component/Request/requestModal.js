@@ -44,6 +44,7 @@ const RequestModal = () => {
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
+  const idPayerRef = React.useRef('');
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
@@ -301,6 +302,7 @@ const RequestModal = () => {
         orderDelivered: false,
         request: data.request, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
+        idPayer: idPayerRef.current,
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
@@ -340,6 +342,7 @@ const RequestModal = () => {
         orderDelivered: false,
         request: previousRequests, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
+        idPayer: idPayerRef.current,
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
@@ -427,7 +430,10 @@ const RequestModal = () => {
       </div>
       {autoPayment && (
         <div className="container-autoPayment">
-          <AutoPayment onChoose={onChoose} />
+          <AutoPayment
+            onChoose={onChoose}
+            setIdPayer={(value) => (idPayerRef.current = value)}
+          />
         </div>
       )}
       {warningMsg && (
