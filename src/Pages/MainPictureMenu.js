@@ -186,7 +186,10 @@ const MainPictureMenu = () => {
                         Faça o seu pedido
                       </button>
                     </div>
-                    <div className={style.image}>
+                    <div
+                      className={style.image}
+                      onClick={() => preparedRequest(item)}
+                    >
                       <img src={item.image} alt="" />
                     </div>
                   </div>
