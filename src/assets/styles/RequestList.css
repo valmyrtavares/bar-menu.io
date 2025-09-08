@@ -20,6 +20,9 @@ font-family: var(--title-font)
     font-size:12px
    
 }
+.container-request-list .request .customer button{
+    text-align: center;
+}
 
 .container-request-list .request{
     border:solid .5px black;
@@ -34,11 +37,11 @@ font-family: var(--title-font)
     grid-template-columns: 1fr 1fr;
 
 }
-.container-request-list .request p{
+.container-request-list .request p {
     margin:1px 5px
 }
 
-.container-request-list p, span, h1 {
+.container-request-list p, span, h1{
     text-align: center;
 }
 

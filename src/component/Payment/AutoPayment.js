@@ -56,7 +56,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
         origin: 'PAGAMENTO',
         data: {
           callbackUrl:
-            'https://webhook.site/05d9a59c-fc9b-43e2-84d8-7e7c543038ba',
+            'https://webhook.site/82b67759-33fc-466b-9f43-1a47eb261d6f',
           correlationId,
           flow: 'SYNC',
           automationName: 'GERACAOZ',
@@ -67,7 +67,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
           },
           message: {
             command: 'PAYMENT',
-            value: 12.0,
+            value: 6.0,
             paymentMethod: 'CARD',
             paymentType: 'DEBIT',
             paymentMethodSubType: 'FULL_PAYMENT',
@@ -122,9 +122,15 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
           break;
         }
 
-        if (['REJECTED', 'CANCELED'].includes(statusData.statusTransaction)) {
+        if (['REJECTED', 'CANCELED'].includes(statusTransaction)) {
           finalStatus = 'ERRO';
+          console.log('Pagamento Rejeitado ou Cancelado');
           break;
+        }
+
+        if (attempts > 10) {
+          console.log('Tentativas excedidas, cancelando pagamento');
+          finalStatus = 'PENDING';
         }
 
         attempts++;
@@ -135,6 +141,12 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
       if (finalStatus === 'SUCESSO') {
         console.log('✅ Pagamento aprovado');
         onChoose(selected);
+      } else if (finalStatus === 'ERRO') {
+        console.log('Estou enviando um desabled no Choose');
+        onChoose('desabled');
+      } else if (finalStatus === 'PENDING') {
+        console.log('Estou enviando um desabled no Choose');
+        onChoose('exceded');
       } else {
         throw new Error('Pagamento não aprovado');
       }

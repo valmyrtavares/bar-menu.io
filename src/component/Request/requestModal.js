@@ -44,6 +44,9 @@ const RequestModal = () => {
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
+  const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
+  const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] =
+    React.useState(false);
   const idPayerRef = React.useRef('');
 
   const navigate = useNavigate();
@@ -384,13 +387,32 @@ const RequestModal = () => {
     }
   };
   const onChoose = (selectedPayment) => {
+    console.log('selectedPayment   ', selectedPayment);
     if (!autoPayment) {
       setAutoPayment(true);
       return;
     } else {
-      if (selectedPayment === 'dinheiro') {
+      if (selectedPayment === 'dinheiroS') {
         sendRequestToKitchen();
         setAutoPayment(false);
+      } else if (selectedPayment === 'desabled') {
+        setAutoPayment(false);
+        setErrorPaymentMessage(
+          'Seu auto-pagamento foi recusado, vá até o caixa caixa e efetue o pagamento com o/a atendente'
+        );
+        setTotenRejectPaymentMessage(true);
+        setTimeout(() => {
+          setTotenRejectPaymentMessage(false);
+        }, 7000);
+      } else if (selectedPayment === 'exceded') {
+        setAutoPayment(false);
+        setErrorPaymentMessage(
+          'O tempo limite do seu pagamento foi excedido, vá até o caixa caixa e efetue o pagamento com o/a atendente'
+        );
+        setTotenRejectPaymentMessage(true);
+        setTimeout(() => {
+          setTotenRejectPaymentMessage(false);
+        }, 7000);
       } else {
         methodPayment = selectedPayment;
         sendRequestToKitchen();
@@ -424,6 +446,9 @@ const RequestModal = () => {
       )}
       {totenMessage && (
         <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
+      )}
+      {totenRejectPaymentMessage && (
+        <DefaultComumMessage msg={errorPaymentMessage} />
       )}
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
