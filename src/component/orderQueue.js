@@ -24,11 +24,15 @@ const OrderQueue = () => {
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
       // Separando os dados em duas listas com base no campo `done`
+
       let waitingLineData = data.filter((item) => item.done);
       waitingLineData = requestSorter(waitingLineData);
       let doneLineData = data.filter(
-        (item) => !item.done && !item.orderDelivered
+        (item) => item.done === false && item.orderDelivered === false
       );
+      console.log('data   ', data);
+      console.log('doneLineData   ', doneLineData);
+      console.log('waitingLineData   ', waitingLineData);
       doneLineData = requestSorter(doneLineData);
 
       setWaitingLine(waitingLineData);
@@ -49,6 +53,7 @@ const OrderQueue = () => {
       const movedItem = prevWaitingLine.current.find(
         (item) => !waitingLine.some((waitingItem) => waitingItem.id === item.id)
       );
+      console.log('prevWaitingLine    ', prevWaitingLine.current);
 
       if (movedItem) {
         setMovingItem(movedItem);
@@ -89,8 +94,8 @@ const OrderQueue = () => {
           {waitingLine &&
             waitingLine.length > 0 &&
             waitingLine.map((item, index) => (
-              <div className="border-red">
-                <div key={index} className="horizont-line-queue ">
+              <div className="border-red" key={index}>
+                <div className="horizont-line-queue ">
                   <p>Nome: {firstNameClient(item.name)}</p>
                   <p>
                     <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;{' '}
@@ -105,10 +110,9 @@ const OrderQueue = () => {
         <div>
           <h3>Pronto</h3>
           {doneLine &&
-            console.log('PEDIDOS FEITOS   ', doneLine) &&
             doneLine.length > 0 &&
             doneLine.map((item, index) => (
-              <div className="border-green">
+              <div className="border-green" key={index}>
                 <div key={item.id} className="horizont-line-queue">
                   <p>{firstNameClient(item.name)}</p>
                   <p>
