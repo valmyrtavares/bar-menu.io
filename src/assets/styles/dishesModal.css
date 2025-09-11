@@ -14,8 +14,14 @@
   @media (min-width: 600px) {
     .content-modal-dishes {    
       max-width: 400px;    
+        left: 13%;
     }
   }
+    @media (max-width: 600px) {
+      .content-modal-dishes {    
+        left: 13%;
+      }
+    }
   .content-modal-dishes .label-side-dishes{
     color: var(--title-font-color)!important;
     font-family: var(--title-font)!important
