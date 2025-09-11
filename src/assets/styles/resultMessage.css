@@ -26,6 +26,11 @@
   z-index: 5;
   
 }
+@media(max-width: 600px){
+  .default-comum-message-container {
+    width: 80%; /* Ajusta a largura para telas menores */
+  }
+}
 
 .default-comum-message-container h1 {
   color: #d72b2b;
