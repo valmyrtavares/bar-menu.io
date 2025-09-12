@@ -11,10 +11,19 @@
   }
   
   .customized-price-container form div label {
+       display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    row-gap: 3px;
     font-size: 14px;
     color: var(--font-color)!important;
-    font-family: var(--text-font)!important
+    font-family: var(--text-font)!important;
+    cursor: pointer;
   }
+   .customized-price-container form div label input{
+    margin-top: 0px;
+   }
   
   .customized-price-container form div p {
     font-size: 12px;

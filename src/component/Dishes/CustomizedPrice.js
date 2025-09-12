@@ -28,55 +28,61 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
       {showCustomizedPrice && (
         <form>
           <div>
-            <input
-              disabled={radioDisabled}
-              className="form-check-input"
-              id={`radio-${item.firstLabel}`}
-              value={`${item.firstPrice}-${item.firstLabel}-${item.firstCost}}`}
-              name="options"
-              type="radio"
-              checked={
-                formPriceOnScreen ===
-                `${item.firstPrice}-${item.firstLabel}-${item.firstCost}`
-              }
-              onChange={handleChange}
-            />
-            <label className="form-check-label">{item.firstLabel}</label>
-            <p>R${item.firstPrice}</p>
+            <label className="form-check-label">
+              {item.firstLabel}
+              <input
+                disabled={radioDisabled}
+                className="form-check-input"
+                id={`radio-${item.firstLabel}`}
+                value={`${item.firstPrice}-${item.firstLabel}-${item.firstCost}}`}
+                name="options"
+                type="radio"
+                checked={
+                  formPriceOnScreen ===
+                  `${item.firstPrice}-${item.firstLabel}-${item.firstCost}`
+                }
+                onChange={handleChange}
+              />
+              R${item.firstPrice}
+            </label>
           </div>
           <div>
-            <input
-              disabled={radioDisabled}
-              className="form-check-input"
-              id={`radio-${item.secondLabel}`}
-              name="options"
-              value={`${item.secondPrice}-${item.secondLabel}-${item.secondCost}`}
-              checked={
-                formPriceOnScreen ===
-                `${item.secondPrice}-${item.secondLabel}-${item.secondCost}`
-              }
-              type="radio"
-              onChange={handleChange}
-            />
-            <label className="form-check-label">{item.secondLabel}</label>
-            <p>R$ {item.secondPrice}</p>
+            <label className="form-check-label">
+              {item.secondLabel}
+              <input
+                disabled={radioDisabled}
+                className="form-check-input"
+                id={`radio-${item.secondLabel}`}
+                name="options"
+                value={`${item.secondPrice}-${item.secondLabel}-${item.secondCost}`}
+                checked={
+                  formPriceOnScreen ===
+                  `${item.secondPrice}-${item.secondLabel}-${item.secondCost}`
+                }
+                type="radio"
+                onChange={handleChange}
+              />
+              R$ {item.secondPrice}
+            </label>
           </div>
           <div>
-            <input
-              disabled={radioDisabled}
-              className="form-check-input"
-              id={`radio-${item.thirdLabel}`}
-              value={`${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`}
-              name="options"
-              type="radio"
-              checked={
-                formPriceOnScreen ===
-                `${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`
-              }
-              onChange={handleChange}
-            />
-            <label className="form-check-label">{item.thirdLabel}</label>
-            <p>R${item.thirdPrice}</p>
+            <label className="form-check-label">
+              {item.thirdLabel}
+              <input
+                disabled={radioDisabled}
+                className="form-check-input"
+                id={`radio-${item.thirdLabel}`}
+                value={`${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`}
+                name="options"
+                type="radio"
+                checked={
+                  formPriceOnScreen ===
+                  `${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`
+                }
+                onChange={handleChange}
+              />
+              R${item.thirdPrice}
+            </label>
           </div>
         </form>
       )}
