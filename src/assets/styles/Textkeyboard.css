@@ -1,15 +1,25 @@
 @import 'variables';
+
+.total-keyboard-container{
+background-color: var(--bg-color);
+padding: 4px;
+width: 135%;
+height: 150%;
+position: relative;
+left: -25%;
+}
 .text-keyboard-line-container{
-    margin:auto;
-     max-width: 800px;
+    margin-bottom:5px;
+
      border:solid 2px var( --secundary-bg-color);
      justify-items:center ;
-     padding: 5px;
+     padding: 5;
      gap: 5px;
      display: grid;
      grid-auto-flow: column;
      grid-auto-columns: min-content;;
      justify-content: center;
+
      
      
   }
