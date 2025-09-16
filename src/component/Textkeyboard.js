@@ -70,10 +70,10 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
           p
         </div>
         <div
-          className="text-character"
+          className="text-character space"
           onClick={() => handleCharacterClick('Bcksp')}
         >
-          Bcksp
+          Backsp
         </div>
         <div
           className="text-character one-char"
@@ -194,7 +194,7 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
       </div>
       <div className="text-keyboard-line-container">
         <div
-          className="text-character"
+          className="text-character space"
           onClick={() => handleCharacterClick('clearField')}
         >
           limpar
@@ -205,14 +205,8 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
         >
           Esp
         </div>
-        <div className="text-character" onClick={closeKeyboard}>
+        <div className="text-character space" onClick={closeKeyboard}>
           Enter
-        </div>
-        <div
-          className="text-character"
-          onClick={() => handleCharacterClick('.com')}
-        >
-          .com
         </div>
       </div>
     </div>
