@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/CustomizedPrice.css';
+import style from '../../assets/styles/CustomizedPrice.module.scss';
 
 function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   const [formPriceOnScreen, setFormPriceOnScreen] = React.useState({});
@@ -24,17 +24,17 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
   }, [radioDisabled]);
 
   return (
-    <div className="customized-price-container">
+    <div className={style.customizedPriceContainerForm}>
       {showCustomizedPrice && (
         <form>
           <div>
-            <label className="form-check-label">
+            <label className={style.formCheckLabel}>
               {item.firstLabel}
               <input
                 disabled={radioDisabled}
-                className="form-check-input"
+                className={style.formCheckInput}
                 id={`radio-${item.firstLabel}`}
-                value={`${item.firstPrice}-${item.firstLabel}-${item.firstCost}}`}
+                value={`${item.firstPrice}-${item.firstLabel}-${item.firstCost}`}
                 name="options"
                 type="radio"
                 checked={
@@ -47,11 +47,11 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
             </label>
           </div>
           <div>
-            <label className="form-check-label">
+            <label className={style.formCheckLabel}>
               {item.secondLabel}
               <input
                 disabled={radioDisabled}
-                className="form-check-input"
+                className={style.formCheckInput}
                 id={`radio-${item.secondLabel}`}
                 name="options"
                 value={`${item.secondPrice}-${item.secondLabel}-${item.secondCost}`}
@@ -66,11 +66,11 @@ function CustomizedPrice({ item, onPriceChange, radioDisabled }) {
             </label>
           </div>
           <div>
-            <label className="form-check-label">
+            <label className={style.formCheckLabel}>
               {item.thirdLabel}
               <input
                 disabled={radioDisabled}
-                className="form-check-input"
+                className={style.formCheckInput}
                 id={`radio-${item.thirdLabel}`}
                 value={`${item.thirdPrice}-${item.thirdLabel}-${item.thirdCost}`}
                 name="options"

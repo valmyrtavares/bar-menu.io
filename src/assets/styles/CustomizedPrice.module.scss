@@ -1,0 +1,62 @@
+.customizedPriceContainerForm {
+  margin-top: 30px;
+  form{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+   
+      div{
+        .formCheckLabel{
+          display: grid;
+          grid-template-rows: 1fr 1fr 1fr;
+          align-items: center;
+          justify-items: center;
+          row-gap: 3px;
+          font-size: 18px;
+          color: var(--font-color) !important;
+          font-family: var(--text-font) !important;
+          cursor: pointer;
+          .formCheckInput{
+              width: 18px;
+              height: 18px;
+            accent-color: blue !important; 
+          }
+          .formCheckInput:focus {
+            accent-color: blue !important;
+            outline: 2px solid blue;
+            outline-offset: 2px;
+          }                 
+        }
+      }
+    }
+  }
+  
+
+  
+//   .customized-price-container form div label 
+//    .customized-price-container form div label input{
+//     margin-top: 0px;
+//    }
+   
+// /* esconde o radio nativo */
+// .form-check-input[type="radio"] {
+//   appearance: none;
+//   -webkit-appearance: none;
+//   width: 18px;
+//   height: 18px;
+//   border: 2px solid #ccc;
+//   border-radius: 50%;
+//   cursor: pointer;
+// }
+
+  
+//   .customized-price-container form div p {
+//     font-size: 12px;
+//     font-weight: 700;
+//   }
+
+//   @media (min-width: 600px) {
+//     .customized-price-container form div label,
+//     .customized-price-container form div p {
+//       font-size: 18px;   
+//     }
+//   }
