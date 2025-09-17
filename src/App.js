@@ -58,6 +58,8 @@ function App() {
     const isToten = localStorage.getItem('isToten') === 'true';
     if (isToten) {
       global.setIsToten(true);
+      // aplica estilo no body
+      document.body.style.overflowY = 'hidden';
     }
     const setSystemMode = async () => {
       if (location.pathname === '/') {
