@@ -194,7 +194,6 @@ const RequestListToBePrepared = () => {
         console.log('Document successfully updated !');
         fetchUserRequests();
         global.setUserNewRequest(item);
-        navigate('/print');
       })
       .catch((error) => {
         console.log(error);
@@ -783,6 +782,12 @@ const RequestListToBePrepared = () => {
         console.log(error);
       });
   };
+
+  const openPrintScreen = (item) => {
+    console.log('item para nota fiscal');
+    global.setUserNewRequest(item);
+    navigate('/print');
+  };
   return (
     <div>
       <Link to="/admin/admin">
@@ -880,6 +885,13 @@ const RequestListToBePrepared = () => {
                   onClick={() => orderDelivery(item)}
                 >
                   Entregue
+                </button>
+                <button
+                  disabled={!item.paymentMethod}
+                  className={style.btnFiscalAttributes}
+                  onClick={() => openPrintScreen(item)}
+                >
+                  Nota Fiscal
                 </button>
               </div>
             </div>
