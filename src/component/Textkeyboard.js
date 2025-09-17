@@ -205,9 +205,6 @@ const TextKeyboard = ({ addCharacter, closeKeyboard, id }) => {
         >
           Esp
         </div>
-        <div className="text-character space" onClick={closeKeyboard}>
-          Enter
-        </div>
       </div>
     </div>
   );
