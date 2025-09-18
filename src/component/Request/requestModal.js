@@ -27,6 +27,7 @@ import { GlobalContext } from '../../GlobalContext';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 //import { cardClasses } from "@mui/material";
 import { getAnonymousUser } from '../../Hooks/useEnsureAnonymousUser.js';
+import { TRUE } from 'sass';
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState('');
@@ -84,6 +85,7 @@ const RequestModal = () => {
         }
         console.log('order Storaged   ', orderStoraged);
       }
+      setIsSubmitting(hasRequest());
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -93,6 +95,14 @@ const RequestModal = () => {
     }
     console.log('userData mudou:', userData);
   }, [userData]);
+
+  const hasRequest = () => {
+    if (userData.request.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   React.useEffect(() => {
     if (currentUser) {
