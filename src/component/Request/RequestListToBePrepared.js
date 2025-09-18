@@ -821,7 +821,7 @@ const RequestListToBePrepared = () => {
               onClick={() => toggleRequest(item.id)}
               className={style.btnToggle}
             >
-              {openRequests[item.id] ? 'A' : 'X'}
+              {openRequests[item.id] ? 'Expandir' : 'Recolher'}
             </button>
             {!openRequests[item.id] ? (
               <div
