@@ -27,7 +27,7 @@ import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 import MessagePromotions from '../Promotions/MessagePromotions';
-import { debugErrorMap } from 'firebase/auth';
+//import { debugErrorMap } from 'firebase/auth';
 
 const RequestListToBePrepared = () => {
   const db = getFirestore(app);
@@ -55,6 +55,7 @@ const RequestListToBePrepared = () => {
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
   const [currentRequest, setCurrentRequest] = React.useState(null);
   const [sideDishesList, setSideDishesList] = React.useState([]);
+  const [openRequests, setOpenRequests] = React.useState({});
   //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
   //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
@@ -70,6 +71,19 @@ const RequestListToBePrepared = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
+  React.useEffect(() => {
+    if (!requestsDoneList) return;
+    setOpenRequests((prev) => {
+      const next = {};
+      requestsDoneList.forEach((item) => {
+        // mantém valor antigo se já existia, senão começa fechado
+        next[item.id] = prev[item.id] ?? false;
+      });
+      return next;
+    });
+  }, [requestsDoneList]);
 
   // React.useEffect(() => {
   //   if (shouldRunEffect) {
@@ -788,6 +802,13 @@ const RequestListToBePrepared = () => {
     global.setUserNewRequest(item);
     navigate('/print');
   };
+  const toggleRequest = (id) => {
+    setOpenRequests((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
     <div>
       <Link to="/admin/admin">
@@ -796,13 +817,22 @@ const RequestListToBePrepared = () => {
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => (
           <div className={style.containerRequestListToBePrepared} key={item.id}>
-            <div className={style.userContainer}>
-              <div>
+            <button
+              onClick={() => toggleRequest(item.id)}
+              className={style.btnToggle}
+            >
+              {openRequests[item.id] ? 'A' : 'X'}
+            </button>
+            {!openRequests[item.id] ? (
+              <div
+                className={
+                  openRequests[item.id]
+                    ? style.requestId
+                    : style.requestIdClosed
+                }
+              >
                 <p>
                   <span>Nome</span> {firstNameClient(item.name)}
-                </p>
-                <p>
-                  <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
                 </p>
                 <p>
                   <span>Ordenação</span>: {item.countRequest}
@@ -810,93 +840,113 @@ const RequestListToBePrepared = () => {
                 <p>
                   <span>Data</span> {item.dateTime}
                 </p>
-                <h2>Valor final R$ {item.finalPriceRequest},00</h2>
-                <div className={style.customerProfileButton}>
-                  <ButtonCustomerProfile
+                <p>
+                  <span>Valor</span>R$ {item.finalPriceRequest},00
+                </p>
+              </div>
+            ) : (
+              <div className={style.userContainer}>
+                <div>
+                  <p>
+                    <span>Nome</span> {firstNameClient(item.name)}
+                  </p>
+                  <p>
+                    <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
+                  </p>
+                  <p>
+                    <span>Ordenação</span>: {item.countRequest}
+                  </p>
+                  <p>
+                    <span>Data</span> {item.dateTime}
+                  </p>
+                  <h2>Valor final R$ {item.finalPriceRequest},00</h2>
+                  <div className={style.customerProfileButton}>
+                    <ButtonCustomerProfile
+                      item={item}
+                      request={item.request}
+                      descontFinalPrice={descontFinalPrice}
+                    />
+                  </div>
+                  <PaymentMethod
                     item={item}
-                    request={item.request}
-                    descontFinalPrice={descontFinalPrice}
+                    onPaymentMethodChange={handlePaymentMethodChange}
                   />
+                  <div className={style.promotionSelect}>
+                    <select
+                      name="selectedPromotion"
+                      value={selectedPromotion}
+                      onChange={(e) => handleSelectChange(e, item)}
+                    >
+                      <option value="">Selecione uma promoção </option>
+                      {promotions &&
+                        promotions.length > 0 &&
+                        promotions.map((promotion, index) => (
+                          <option key={index} value={index}>
+                            {promotion.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 </div>
-                <PaymentMethod
-                  item={item}
-                  onPaymentMethodChange={handlePaymentMethodChange}
-                />
-                <div className={style.promotionSelect}>
-                  <select
-                    name="selectedPromotion"
-                    value={selectedPromotion}
-                    onChange={(e) => handleSelectChange(e, item)}
+                <div className={style.btnStatus}>
+                  <button
+                    onClick={() => openShowModal(item.id)}
+                    className={style.pendent}
                   >
-                    <option value="">Selecione uma promoção </option>
-                    {promotions &&
-                      promotions.length > 0 &&
-                      promotions.map((promotion, index) => (
-                        <option key={index} value={index}>
-                          {promotion.title}
-                        </option>
-                      ))}
-                  </select>
+                    Cancelar pedido
+                  </button>
+                  <div>
+                    {ShowDefaultMessage && (
+                      <DefaultComumMessage
+                        msg="Você está prestes a excluir esse pedido"
+                        onClose={closeModal}
+                        onConfirm={() => handleDeleteRequest(selectedRequestId)}
+                      />
+                    )}
+                  </div>
+                  <div>
+                    {messagePromotionPopup && (
+                      <MessagePromotions
+                        message={textPromotion}
+                        AddPromotion={AddPromotion}
+                        setClose={setMessagePromotionPopup}
+                        onContinue={addEditBenefitedClient}
+                      />
+                    )}
+                  </div>
+                  <button
+                    disabled={!item.paymentMethod}
+                    className={item.paymentDone ? style.done : style.pendent}
+                    onClick={() => changeStatusPaid(item)}
+                  >
+                    Pago
+                  </button>
+                  <button
+                    disabled={!item.paymentDone}
+                    className={item.done ? style.pendent : style.done}
+                    onClick={() => RequestDone(item)}
+                  >
+                    Pronto
+                  </button>
+                  <button
+                    disabled={item.done}
+                    className={item.orderDelivered ? style.done : style.pendent}
+                    onClick={() => orderDelivery(item)}
+                  >
+                    Entregue
+                  </button>
+                  <button
+                    disabled={!item.paymentMethod}
+                    className={style.btnFiscalAttributes}
+                    onClick={() => openPrintScreen(item)}
+                  >
+                    Nota Fiscal
+                  </button>
                 </div>
               </div>
-              <div className={style.btnStatus}>
-                <button
-                  onClick={() => openShowModal(item.id)}
-                  className={style.pendent}
-                >
-                  Cancelar pedido
-                </button>
-                <div>
-                  {ShowDefaultMessage && (
-                    <DefaultComumMessage
-                      msg="Você está prestes a excluir esse pedido"
-                      onClose={closeModal}
-                      onConfirm={() => handleDeleteRequest(selectedRequestId)}
-                    />
-                  )}
-                </div>
-                <div>
-                  {messagePromotionPopup && (
-                    <MessagePromotions
-                      message={textPromotion}
-                      AddPromotion={AddPromotion}
-                      setClose={setMessagePromotionPopup}
-                      onContinue={addEditBenefitedClient}
-                    />
-                  )}
-                </div>
-                <button
-                  disabled={!item.paymentMethod}
-                  className={item.paymentDone ? style.done : style.pendent}
-                  onClick={() => changeStatusPaid(item)}
-                >
-                  Pago
-                </button>
-                <button
-                  disabled={!item.paymentDone}
-                  className={item.done ? style.pendent : style.done}
-                  onClick={() => RequestDone(item)}
-                >
-                  Pronto
-                </button>
-                <button
-                  disabled={item.done}
-                  className={item.orderDelivered ? style.done : style.pendent}
-                  onClick={() => orderDelivery(item)}
-                >
-                  Entregue
-                </button>
-                <button
-                  disabled={!item.paymentMethod}
-                  className={style.btnFiscalAttributes}
-                  onClick={() => openPrintScreen(item)}
-                >
-                  Nota Fiscal
-                </button>
-              </div>
-            </div>
-
+            )}
             {item.request &&
+              openRequests[item.id] &&
               item.request.map((item, recipeIndex) => (
                 <div className={style.requestItem} key={recipeIndex}>
                   {recipeModal.openModal && (
@@ -944,7 +994,6 @@ const RequestListToBePrepared = () => {
               ))}
           </div>
         ))}
-      ;
     </div>
   );
 };

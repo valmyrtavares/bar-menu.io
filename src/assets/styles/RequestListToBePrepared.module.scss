@@ -19,6 +19,24 @@
     width: 90%;
     margin: 10px 5%;
     padding: 10px;
+    .btnToggle{
+        position: relative;
+        top:0px;
+        border-radius: 5px;
+        padding: 5px 10px;
+        background: transparent;
+        border:none;
+    }
+    .requestIdClosed{
+        display: flex;
+        justify-content: space-around;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        p{
+            margin-bottom: 2px;
+        }
+    }
 
     .userContainer {
         display: grid;
