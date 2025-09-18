@@ -60,9 +60,13 @@
           font-size: 20px;   
         }
       }
-      .content-modal-dishes .close-btn {
+      /* .content-modal-dishes .close-btn {
         display: flex;
         justify-content: end;
+      } */
+         .content-modal-dishes .close-btn button {
+      position: fixed;
+      top: 7%;
       }
 
       .content-modal-dishes div button {
