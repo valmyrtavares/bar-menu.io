@@ -252,14 +252,18 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
 
   const updateRecipesinDishesAndSideDishes = (stockProduct) => {
+    const updatedDishes = [];
     if (Dishes && Dishes.length > 0) {
+      console.log('DISHES   ', Dishes);
       try {
         Dishes.forEach((dish) => {
           // CENÁRIO 1 - Produto com apenas 1 preço
+
           if (
-            dish.CustomizedPrice &&
-            typeof dish.CustomizedPrice === 'object' &&
-            dish.CustomizedPrice.firstLabel === ''
+            !dish.CustomizedPrice || // não existe
+            (typeof dish.CustomizedPrice === 'object' &&
+              (!dish.CustomizedPrice.firstLabel || // não tem firstLabel
+                dish.CustomizedPrice.firstLabel.trim() === ''))
           ) {
             if (
               Array.isArray(dish.recipe?.FinalingridientsList) &&
@@ -267,7 +271,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             ) {
               const recipeCurrent = dish.recipe.FinalingridientsList;
               const currentIngredient = recipeCurrent.find(
-                (item) => item.name === stockProduct.product
+                (item) =>
+                  item.name.trim().toLowerCase() ===
+                  stockProduct.product.trim().toLowerCase()
               );
               if (!currentIngredient) return;
 
@@ -287,13 +293,13 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             }
           }
 
-          // CENÁRIO 2 - Produto com 3 preços (primeiro label não é vazio)
+          // CENÁRIO 2 - Produto com 3 preços (primeiro label não é vazio)\
           else if (
-            dish.CustomizedPrice &&
+            dish.CustomizedPrice && // existe
             typeof dish.CustomizedPrice === 'object' &&
-            dish.CustomizedPrice.firstLabel !== ''
+            dish.CustomizedPrice.firstLabel && // não é vazio
+            dish.CustomizedPrice.firstLabel.trim() !== ''
           ) {
-            debugger;
             const labels = ['firstLabel', 'secondLabel', 'thirdLabel'];
             const costs = ['firstCost', 'secondCost', 'thirdCost'];
 
@@ -305,9 +311,21 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
               if (Array.isArray(recipeList) && recipeList.length > 0) {
                 const currentIngredient = recipeList.find(
-                  (item) => item.name === stockProduct.product
+                  (item) =>
+                    item.name.trim().toLowerCase() ===
+                    stockProduct.product.trim().toLowerCase()
                 );
                 if (!currentIngredient) return;
+
+                // 🔎 Antes
+                console.log(
+                  `[ANTES] Dish: ${dish.title} (${label}) | Ingrediente: ${currentIngredient.name}`,
+                  {
+                    costPerUnit: currentIngredient.costPerUnit,
+                    portionCost: currentIngredient.portionCost,
+                    dishCost: dish.CustomizedPrice[costs[index]],
+                  }
+                );
 
                 // Atualiza ingrediente
                 currentIngredient.costPerUnit =
@@ -327,6 +345,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
                 if (index === 0) {
                   dish.costPriceObj.cost = totalPortionCost;
                 }
+                console.log(
+                  `[DEPOIS] Dish: ${dish.title} (${label}) | Ingrediente: ${currentIngredient.name}`,
+                  {
+                    costPerUnit: currentIngredient.costPerUnit,
+                    portionCost: currentIngredient.portionCost,
+                    dishCost: dish.CustomizedPrice[costs[index]],
+                  }
+                );
               }
             });
           }
