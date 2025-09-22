@@ -235,17 +235,27 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       return;
     }
 
-    const retorno = updateRecipesinDishesAndSideDishes(stockProductObj);
+    const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
+    console.log('Pratos que foram alterados:', updatedDishes);
 
     try {
-      // await handleStock(stockProductObj);
-      //const docRef = doc(db, 'stock', stockProductObj.id);
-      // await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
+      // Atualiza cada prato no Firebase em paralelo
+      await Promise.all(updatedDishes.map(updateDishInFirebase));
+
+      console.log('Receitas atualizadas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar receitas:', error);
+    }
+
+    try {
+      await handleStock(stockProductObj);
+      const docRef = doc(db, 'stock', stockProductObj.id);
+      await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
-      //   updateRecipesinDishesAndSideDishes(stockProductObj);
-      //   fetchStock();
-      //   setShowEditForm(false);
+      updateRecipesinDishesAndSideDishes(stockProductObj);
+      fetchStock();
+      setShowEditForm(false);
     } catch (error) {
       console.error('Erro ao atualizar o documento:', error);
     }
@@ -278,18 +288,24 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               if (!currentIngredient) return;
 
               // Atualiza ingrediente
-              currentIngredient.costPerUnit =
+              const newCostPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
-              currentIngredient.portionCost =
-                currentIngredient.amount * currentIngredient.costPerUnit;
+              const newPortionCost = currentIngredient.amount * newCostPerUnit;
+              if (
+                currentIngredient.costPerUnit !== newCostPerUnit ||
+                currentIngredient.portionCost !== newPortionCost
+              ) {
+                currentIngredient.costPerUnit = newCostPerUnit;
+                currentIngredient.portionCost = newPortionCost;
 
-              // Recalcula custo total da receita
-              const totalPortionCost = recipeCurrent.reduce((sum, item) => {
-                return sum + (item.portionCost || 0);
-              }, 0);
+                const totalPortionCost = recipeCurrent.reduce(
+                  (sum, item) => sum + (item.portionCost || 0),
+                  0
+                );
+                dish.costPriceObj.cost = totalPortionCost;
 
-              // Atualiza custo do prato
-              dish.costPriceObj.cost = totalPortionCost;
+                updatedDishes.push(dish); //
+              }
             }
           }
 
@@ -302,6 +318,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
           ) {
             const labels = ['firstLabel', 'secondLabel', 'thirdLabel'];
             const costs = ['firstCost', 'secondCost', 'thirdCost'];
+
+            let wasUpdated = false; // 👈 flag
 
             labels.forEach((label, index) => {
               const recipeList =
@@ -317,50 +335,57 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
                 );
                 if (!currentIngredient) return;
 
-                // 🔎 Antes
-                console.log(
-                  `[ANTES] Dish: ${dish.title} (${label}) | Ingrediente: ${currentIngredient.name}`,
-                  {
-                    costPerUnit: currentIngredient.costPerUnit,
-                    portionCost: currentIngredient.portionCost,
-                    dishCost: dish.CustomizedPrice[costs[index]],
-                  }
-                );
+                const newCostPerUnit =
+                  stockProduct.totalCost / stockProduct.totalVolume;
+                const newPortionCost =
+                  currentIngredient.amount * newCostPerUnit;
 
                 // Atualiza ingrediente
-                currentIngredient.costPerUnit =
-                  stockProduct.totalCost / stockProduct.totalVolume;
-                currentIngredient.portionCost =
-                  currentIngredient.amount * currentIngredient.costPerUnit;
+                // currentIngredient.costPerUnit =
+                //   stockProduct.totalCost / stockProduct.totalVolume;
+                // currentIngredient.portionCost =
+                //   currentIngredient.amount * currentIngredient.costPerUnit;
+                if (
+                  currentIngredient.costPerUnit !== newCostPerUnit ||
+                  currentIngredient.portionCost !== newPortionCost
+                ) {
+                  currentIngredient.costPerUnit = newCostPerUnit;
+                  currentIngredient.portionCost = newPortionCost;
+                  // Recalcula custo total da receita
+                  const totalPortionCost = recipeList.reduce((sum, item) => {
+                    return sum + (item.portionCost || 0);
+                  }, 0);
+                  // Atualiza custos no CustomizedPrice
+                  dish.CustomizedPrice[costs[index]] = totalPortionCost;
 
-                // Recalcula custo total da receita
-                const totalPortionCost = recipeList.reduce((sum, item) => {
-                  return sum + (item.portionCost || 0);
-                }, 0);
-
-                // Atualiza custos no CustomizedPrice
-                dish.CustomizedPrice[costs[index]] = totalPortionCost;
-
-                // Garante que dish.costPriceObj.cost recebe o mesmo do firstCost
-                if (index === 0) {
-                  dish.costPriceObj.cost = totalPortionCost;
-                }
-                console.log(
-                  `[DEPOIS] Dish: ${dish.title} (${label}) | Ingrediente: ${currentIngredient.name}`,
-                  {
-                    costPerUnit: currentIngredient.costPerUnit,
-                    portionCost: currentIngredient.portionCost,
-                    dishCost: dish.CustomizedPrice[costs[index]],
+                  // Garante que dish.costPriceObj.cost recebe o mesmo do firstCost
+                  if (index === 0) {
+                    dish.costPriceObj.cost = totalPortionCost;
                   }
-                );
+                  wasUpdated = true;
+                }
               }
             });
+            if (wasUpdated) {
+              updatedDishes.push(dish);
+            }
           }
         });
+        return updatedDishes;
       } catch (error) {
         console.error('Erro dentro do forEach:', error);
       }
     }
+  };
+
+  //Update costs which were changed in the stock edit form
+  const updateDishInFirebase = async (dish) => {
+    const docRef = doc(db, 'item', dish.id); // 👈 coleção dos pratos
+    await updateDoc(docRef, {
+      recipe: dish.recipe,
+      costPriceObj: dish.costPriceObj,
+      CustomizedPrice: dish.CustomizedPrice,
+    });
   };
 
   return (
