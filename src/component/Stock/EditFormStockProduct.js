@@ -13,6 +13,7 @@ import {
 import { app } from '../../config-firebase/firebase';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
+  const [Dishes, setDishes] = React.useState([]);
   const [stockProductObj, setStockProductObj] = React.useState({
     CostPerUnit: Number(obj.CostPerUnit),
     amount: Number(obj.amount),
@@ -29,6 +30,16 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     React.useState('');
 
   const db = getFirestore(app);
+
+  React.useEffect(() => {
+    getBtnData('item')
+      .then((data) => {
+        setDishes(data);
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar dados:', error);
+      });
+  });
 
   const updateNoteEdit = () => {
     setStockProductObj((prevForm) => ({
@@ -223,18 +234,160 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       );
       return;
     }
+
+    const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
+    console.log('Pratos que foram alterados:', updatedDishes);
+
+    try {
+      // Atualiza cada prato no Firebase em paralelo
+      await Promise.all(updatedDishes.map(updateDishInFirebase));
+
+      console.log('Receitas atualizadas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar receitas:', error);
+    }
+
     try {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
       console.log('Documento atualizado com sucesso!');
+      updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
       setShowEditForm(false);
     } catch (error) {
       console.error('Erro ao atualizar o documento:', error);
     }
   };
+
+  const updateRecipesinDishesAndSideDishes = (stockProduct) => {
+    const updatedDishes = [];
+    if (Dishes && Dishes.length > 0) {
+      console.log('DISHES   ', Dishes);
+      try {
+        Dishes.forEach((dish) => {
+          // CENÁRIO 1 - Produto com apenas 1 preço
+
+          if (
+            !dish.CustomizedPrice || // não existe
+            (typeof dish.CustomizedPrice === 'object' &&
+              (!dish.CustomizedPrice.firstLabel || // não tem firstLabel
+                dish.CustomizedPrice.firstLabel.trim() === ''))
+          ) {
+            if (
+              Array.isArray(dish.recipe?.FinalingridientsList) &&
+              dish.recipe.FinalingridientsList.length > 0
+            ) {
+              const recipeCurrent = dish.recipe.FinalingridientsList;
+              const currentIngredient = recipeCurrent.find(
+                (item) =>
+                  item.name.trim().toLowerCase() ===
+                  stockProduct.product.trim().toLowerCase()
+              );
+              if (!currentIngredient) return;
+
+              // Atualiza ingrediente
+              const newCostPerUnit =
+                stockProduct.totalCost / stockProduct.totalVolume;
+              const newPortionCost = currentIngredient.amount * newCostPerUnit;
+              if (
+                currentIngredient.costPerUnit !== newCostPerUnit ||
+                currentIngredient.portionCost !== newPortionCost
+              ) {
+                currentIngredient.costPerUnit = newCostPerUnit;
+                currentIngredient.portionCost = newPortionCost;
+
+                const totalPortionCost = recipeCurrent.reduce(
+                  (sum, item) => sum + (item.portionCost || 0),
+                  0
+                );
+                dish.costPriceObj.cost = totalPortionCost;
+
+                updatedDishes.push(dish); //
+              }
+            }
+          }
+
+          // CENÁRIO 2 - Produto com 3 preços (primeiro label não é vazio)\
+          else if (
+            dish.CustomizedPrice && // existe
+            typeof dish.CustomizedPrice === 'object' &&
+            dish.CustomizedPrice.firstLabel && // não é vazio
+            dish.CustomizedPrice.firstLabel.trim() !== ''
+          ) {
+            const labels = ['firstLabel', 'secondLabel', 'thirdLabel'];
+            const costs = ['firstCost', 'secondCost', 'thirdCost'];
+
+            let wasUpdated = false; // 👈 flag
+
+            labels.forEach((label, index) => {
+              const recipeList =
+                dish.recipe?.FinalingridientsList?.[
+                  dish.CustomizedPrice[label]
+                ];
+
+              if (Array.isArray(recipeList) && recipeList.length > 0) {
+                const currentIngredient = recipeList.find(
+                  (item) =>
+                    item.name.trim().toLowerCase() ===
+                    stockProduct.product.trim().toLowerCase()
+                );
+                if (!currentIngredient) return;
+
+                const newCostPerUnit =
+                  stockProduct.totalCost / stockProduct.totalVolume;
+                const newPortionCost =
+                  currentIngredient.amount * newCostPerUnit;
+
+                // Atualiza ingrediente
+                // currentIngredient.costPerUnit =
+                //   stockProduct.totalCost / stockProduct.totalVolume;
+                // currentIngredient.portionCost =
+                //   currentIngredient.amount * currentIngredient.costPerUnit;
+                if (
+                  currentIngredient.costPerUnit !== newCostPerUnit ||
+                  currentIngredient.portionCost !== newPortionCost
+                ) {
+                  currentIngredient.costPerUnit = newCostPerUnit;
+                  currentIngredient.portionCost = newPortionCost;
+                  // Recalcula custo total da receita
+                  const totalPortionCost = recipeList.reduce((sum, item) => {
+                    return sum + (item.portionCost || 0);
+                  }, 0);
+                  // Atualiza custos no CustomizedPrice
+                  dish.CustomizedPrice[costs[index]] = totalPortionCost;
+
+                  // Garante que dish.costPriceObj.cost recebe o mesmo do firstCost
+                  if (index === 0) {
+                    dish.costPriceObj.cost = totalPortionCost;
+                  }
+                  wasUpdated = true;
+                }
+              }
+            });
+            if (wasUpdated) {
+              updatedDishes.push(dish);
+            }
+          }
+        });
+        return updatedDishes;
+      } catch (error) {
+        console.error('Erro dentro do forEach:', error);
+      }
+    }
+  };
+
+  //Update costs which were changed in the stock edit form
+  const updateDishInFirebase = async (dish) => {
+    const docRef = doc(db, 'item', dish.id); // 👈 coleção dos pratos
+    await updateDoc(docRef, {
+      recipe: dish.recipe,
+      costPriceObj: dish.costPriceObj,
+      CustomizedPrice: dish.CustomizedPrice,
+    });
+  };
+
   return (
     <div className={edit.popupOverlay}>
       <div className={edit.containerEditStock}>
