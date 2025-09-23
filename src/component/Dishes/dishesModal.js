@@ -42,6 +42,7 @@ const DishesModal = ({ item, setModal }) => {
     []
   );
   const [radioDisabled, setRadioDisabled] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const navigate = useNavigate();
   const db = getFirestore(app);
@@ -164,7 +165,9 @@ const DishesModal = ({ item, setModal }) => {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    console.log('Cliente atual   ', currentUser);
+    if (isSubmitting) return; // evita disparo duplo
+    setIsSubmitting(true);
+
     if (!global.authorizated) {
       CheckLogin();
     }
@@ -206,6 +209,8 @@ const DishesModal = ({ item, setModal }) => {
       return;
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsSubmitting(false); // libera o botão depois que terminar
     }
   }
 
@@ -347,7 +352,7 @@ const DishesModal = ({ item, setModal }) => {
             ))}
         </div>
         <button type="submit" className="request-client-modal">
-          Faça o seu pedido'
+          {isSubmitting ? 'Enviando...' : 'Faça seu pedido'}
         </button>
       </form>
     </div>
