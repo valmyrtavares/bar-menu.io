@@ -1,13 +1,26 @@
-.containerAdminMainMenu{
-    background:red;
+.containerAdminMainMenu {
+    background: red;
     height: 100vh;
-    display:grid;
-    grid-template-columns: 1fr 5fr;
-    nav{
-        background-color: white;
-        padding: 3%;
-        height: 99vh;
-        overflow-y: auto;
+    display: grid;
+    grid-template-columns: 250px 1fr; // padrão: sidebar visível
+    transition: grid-template-columns 0.3s ease;
+
+    &.changeProportion {
+        grid-template-columns: 0 1fr; // sidebar recolhida
+    }
+  .sidebar {
+      background-color: white;
+      padding: 3%;
+      height: 99vh;
+      overflow-y: auto;
+      transform: translateX(0);
+      opacity: 1;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+
+      &.hideSideMenu {
+          transform: translateX(-100%); // desliza para fora
+          opacity: 0;
+      }
         link {
                 color: black;
                 text-decoration: none;
@@ -23,12 +36,13 @@
                 font-weight: bold;
                 background: #14213dce !important;
             }
-    }
-    section {
-        background-color: rgb(196, 194, 194);
-        padding: 5%;
-        color: #FCA311;
-        background: #14213D;
+        }
+        section {
+            background-color: rgb(196, 194, 194);
+            padding: 5%;
+            color: #FCA311;
+            background: #14213D;
+            grid-column: 2; // força o Outlet sempre na segunda coluna
     
     }
     .sideMenu{
@@ -57,7 +71,9 @@
        color:#14213D;
        padding: 2%;
        height: 80vh;
-           overflow-y: auto;
+        overflow-y: auto;
+       
+            
     }
 }
 
@@ -68,6 +84,7 @@
     left: 20%;
     z-index: 30;
 }
+
 
 
 

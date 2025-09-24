@@ -26,7 +26,8 @@ import CreateCustomer from './Forms/Login/createCustomer';
 import RequestModal from './component/Request/requestModal';
 import ScreenStylesForm from './Forms/ScreenStylesForm';
 import WelcomeSaluteForm from './Forms/WelcomeSaluteForm';
-import RequestListToBePrepared from './component/Request/RequestListToBePrepared';
+//import RequestListToBePrepared from './component/Request/RequestListToBePrepared';
+import PDV from './component/Request/PDV';
 import OrderQueue from './component/orderQueue';
 import RequestList from './component/Request/RequestList';
 import Promotions from './component/Promotions/CreatePromotions';
@@ -121,7 +122,7 @@ function App() {
           <Route path="request" element={<RequestManagementModule />} />
           <Route path="documentation" element={<Documentation />} />
           <Route path="stock" element={<TrackStockProduct />} />
-          <Route path="requestlist" element={<RequestListToBePrepared />} />
+          <Route path="requestlist" element={<PDV />} />
           <Route path="item" element={<FormItem />} />
           <Route path="EditButton/:id" element={<ListToEditAndDelete />} />
           <Route path="category" element={<AddButtonForm />} />

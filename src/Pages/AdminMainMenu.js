@@ -1,11 +1,13 @@
 import React from 'react';
 import admin from '../assets/styles/AdminMainMenu.module.scss';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
+  const [hideSideMenu, setHideSideMenu] = React.useState(true);
 
   React.useEffect(() => {
     if (!localStorage.hasOwnProperty('token')) {
@@ -14,6 +16,15 @@ const AdminMainMenu = ({ children }) => {
       const token = JSON.parse(localStorage.getItem('token'));
     }
   }, []);
+
+  React.useEffect(() => {
+    if (location.pathname !== '/admin/admin') {
+      setHideSideMenu(false);
+    } else {
+      setHideSideMenu(true);
+    }
+    console.log('Eu já tenho o URL de cada mudança   ', location.pathname);
+  }, [location.pathname, navigate]);
 
   const logoutAdmin = () => {
     if (logoutAdminPopup) {
@@ -33,8 +44,16 @@ const AdminMainMenu = ({ children }) => {
           />
         )}
       </div>
-      <div className={admin.containerAdminMainMenu}>
-        <nav>
+      <div
+        className={`${admin.containerAdminMainMenu} ${
+          !hideSideMenu ? admin.changeProportion : ''
+        }`}
+      >
+        <nav
+          className={`${admin.sidebar} ${
+            !hideSideMenu ? admin.hideSideMenu : ''
+          }`}
+        >
           <div className={admin.sideMenu}>
             <NavLink
               to="/"
