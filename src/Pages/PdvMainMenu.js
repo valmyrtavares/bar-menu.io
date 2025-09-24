@@ -12,6 +12,7 @@ import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import WarningMessage from '../component/WarningMessages.js';
 import { app } from '../config-firebase/firebase.js';
+import { async } from '@firebase/util';
 import {
   useEnsureAnonymousUser,
   getAnonymousUser,
@@ -148,6 +149,7 @@ function MainMenu() {
 
   return (
     <>
+      {global.pdvRequest && <RequestModal />}
       <div className="WarningMessage-container">
         {logoutAdminPopup && (
           <WarningMessage
@@ -157,7 +159,6 @@ function MainMenu() {
           />
         )}
       </div>
-
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         <div className={style.containerBtn}>
           {menuButton &&

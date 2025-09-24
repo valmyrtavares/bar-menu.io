@@ -15,6 +15,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import CustomizedPrice from './CustomizedPrice.js';
 import { GlobalContext } from '../../GlobalContext';
 import { CheckUser } from '../../Helpers/Helpers.js';
+import useLocalStorage from '../../Hooks/useLocalStorage.js';
 
 //React variables
 const DishesModal = ({ item, setModal }) => {
@@ -43,12 +44,14 @@ const DishesModal = ({ item, setModal }) => {
   );
   const [radioDisabled, setRadioDisabled] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [pdv, setPdv] = useLocalStorage('pdv', false);
 
   const navigate = useNavigate();
   const db = getFirestore(app);
 
   React.useEffect(() => {
     calculateFinalCost();
+    console.log('SOMOS UM PDV ?  ', pdv);
   }, []);
 
   React.useEffect(() => {
@@ -205,8 +208,14 @@ const DishesModal = ({ item, setModal }) => {
       });
 
       // Redireciona o usuário para a página de requisições
-      navigate('/request');
-      return;
+      debugger;
+      if (!pdv) {
+        navigate('/request');
+        return;
+      } else {
+        global.setPdvRequest(true);
+        navigate('/admin/requestlist');
+      }
     } catch (error) {
       console.log(error);
     } finally {

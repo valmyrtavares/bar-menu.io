@@ -8,6 +8,7 @@ export const GlobalStorage = ({ children }) => {
   const [isToten, setIsToten] = React.useState(null);
   const [authorizated, setAuthorizated] = React.useState(false);
   const [userNewRequest, setUserNewRequest] = React.useState({});
+  const [pdvRequest, setPdvRequest] = React.useState(false);
   const [styles, setStyles] = React.useState({
     btnColor: '#b02121',
     secundaryBgColor: '#b02121',
@@ -33,6 +34,8 @@ export const GlobalStorage = ({ children }) => {
         isToten,
         userNewRequest,
         setUserNewRequest,
+        setPdvRequest,
+        pdvRequest,
       }}
     >
       {children}

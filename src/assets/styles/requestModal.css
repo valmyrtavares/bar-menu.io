@@ -118,3 +118,6 @@ h3 {
         border: solid 5px var(--secundary-bg-color);   
     }
 }
+.pdv-change{
+    background-color: white;
+}
