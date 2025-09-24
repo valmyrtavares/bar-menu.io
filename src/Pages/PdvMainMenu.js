@@ -160,10 +160,6 @@ function MainMenu() {
 
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         <div className={style.containerBtn}>
-          <SubHeaderCustomer
-            logoutCustomer={logoutCustomer}
-            nameClient={nameClient}
-          />
           {menuButton &&
             dishes &&
             menuButton.map((item, index) => (

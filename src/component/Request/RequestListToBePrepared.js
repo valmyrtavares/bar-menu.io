@@ -30,7 +30,7 @@ import MessagePromotions from '../Promotions/MessagePromotions';
 
 //import { debugErrorMap } from 'firebase/auth';
 
-const RequestListToBePrepared = () => {
+const RequestListToBePrepared = ({ title }) => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
@@ -840,7 +840,7 @@ const RequestListToBePrepared = () => {
   return (
     <div>
       <Link to="/admin/admin">
-        <Title mainTitle="Cozinha" />
+        <Title mainTitle={title} />
       </Link>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {

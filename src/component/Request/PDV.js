@@ -2,15 +2,22 @@ import React from 'react';
 import SellsPoint from '../Request/RequestListToBePrepared';
 import PdvMainMenu from '../../Pages/PdvMainMenu.js';
 import style from '../../assets/styles/pdv.module.scss';
+import Title from '../title.js';
+import { Link } from 'react-router-dom';
 
 const PDV = () => {
   return (
-    <div className={style.pdvContainer}>
-      <div>
-        <SellsPoint />
-      </div>
-      <div>
-        <PdvMainMenu />
+    <div>
+      <Link to="/admin/admin">
+        <Title mainTitle="Ponto de Venda" />
+      </Link>
+      <div className={style.pdvContainer}>
+        <div>
+          <PdvMainMenu />
+        </div>
+        <div>
+          <SellsPoint />
+        </div>
       </div>
     </div>
   );
