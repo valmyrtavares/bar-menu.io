@@ -23,6 +23,7 @@ const FormFrontImage = () => {
     'modePictureMobile',
     false
   );
+  const [pdv, setPdv] = useLocalStorage('pdv', false);
 
   //Navigate
   const navigate = useNavigate();
@@ -44,10 +45,27 @@ const FormFrontImage = () => {
         );
       }
     }
-  }, [publicStatement, modePictureMobilePhone]);
+    if (pdv && publicStatement) {
+      if (publicStatement) {
+        setPublicStatement(false);
+        alert(
+          'O aplicativo está em modo Totem, ele não pode ser usado em PDV.'
+        );
+      } else if (pdv) {
+        setPdv(false);
+        alert(
+          'O aplicativo está em modo PDV, ele não pode ser usado como Totem.'
+        );
+      }
+    }
+  }, [publicStatement, modePictureMobilePhone, pdv]);
 
   const changePublicStatement = () => {
     setPublicStatement((prev) => !prev);
+  };
+
+  const changeModePdv = () => {
+    setPdv((prev) => !prev);
   };
 
   const changeModePicture = () => {
@@ -128,9 +146,9 @@ const FormFrontImage = () => {
           onChange={changePublicStatement}
         />
         <label className="form-check-label">
-          Manter selecionado para entrar no modo Toten que faráque o cliente
-          seja deslogado logo após o envio do pedido e o sistema retornará para
-          a tela inicial.
+          <b>Toten</b>: Manter selecionado para entrar no modo Toten que faráque
+          o cliente seja deslogado logo após o envio do pedido e o sistema
+          retornará para a tela inicial.
         </label>
       </div>
 
@@ -145,6 +163,20 @@ const FormFrontImage = () => {
         <label className="form-check-label">
           Para acionar o modo de imagem de celular, mantenha selecionado. node
           os botões serão substituidos por imagens.
+        </label>
+      </div>
+
+      <div className="form-check my-1">
+        <input
+          className="form-check-input"
+          id="pdv"
+          type="checkbox"
+          checked={pdv}
+          onChange={changeModePdv}
+        />
+        <label className="form-check-label">
+          <b>PDV</b>: Manter clicado para entrar no modo PDV (Ponto de Venda)
+          que habilita a tela para uso em caixas de restaurantes.
         </label>
       </div>
     </>
