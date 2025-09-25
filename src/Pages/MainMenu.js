@@ -82,7 +82,6 @@ function MainMenu() {
 
   async function CheckLogin() {
     const userId = await CheckUser('userMenu', global.isToten);
-    console.log('UserId é ', userId);
     navigate(userId);
   }
 

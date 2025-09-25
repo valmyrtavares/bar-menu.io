@@ -113,7 +113,6 @@ const RequestListToBePrepared = ({ title }) => {
         getBtnData('Promotions'),
         getBtnData('BenefitedCustomer'),
       ]);
-      console.log('promotionsData      ', promotionsData);
       const today = new Date();
       const promotionsFilter = promotionsData.filter((promotion) => {
         const startDate = new Date(promotion.startDate);
