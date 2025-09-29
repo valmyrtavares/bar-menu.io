@@ -1,5 +1,9 @@
 
 @import 'variables.css';
+@import './adminStyleReuse.module.scss';
+.toggleMenuBtn{
+    @include btnAdmin;
+}
 
 .containerBtn {
     .headerToten {

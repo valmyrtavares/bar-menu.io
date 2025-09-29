@@ -155,7 +155,9 @@ function MainMenu() {
   return (
     <>
       {' '}
-      <p onClick={showPopup}>pedidos</p>
+      <button onClick={showPopup} className={style.toggleMenuBtn}>
+        {global.pdvRequest ? 'Fechar tela' : 'Ver pedidos'}
+      </button>
       {global.pdvRequest && <RequestModal />}
       <div className="WarningMessage-container">
         {logoutAdminPopup && (

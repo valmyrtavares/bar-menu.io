@@ -341,7 +341,12 @@ const RequestModal = () => {
         });
       }
       setTotenMessage(false);
-      navigate('/orderqueue');
+      if (pdv && global.pdvRequest) {
+        navigate('/admin/requestlist');
+        global.setPdvRequest(false);
+      } else {
+        navigate('/orderqueue');
+      }
     } catch (error) {
       console.error('Erro ao adicionar pedido:', error);
     }
