@@ -39,6 +39,8 @@
         }
         section {
             background-color: rgb(196, 194, 194);
+            position: relative;
+            z-index: 10;
             padding: 5%;
             color: #FCA311;
             background: #14213D;
