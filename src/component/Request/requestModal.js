@@ -21,6 +21,7 @@ import {
   getBtnData,
 } from '../../api/Api.js';
 import WarningMessages from '../WarningMessages';
+import useLocalStorage from '../../Hooks/useLocalStorage.js';
 import TotenRegisterPopup from './TotenRegisterPopup.js';
 import PrintRequestCustomer from './PrintRequestCustomer';
 import { GlobalContext } from '../../GlobalContext';
@@ -44,9 +45,13 @@ const RequestModal = () => {
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  const [pdv, setPdv] = useLocalStorage('pdv', false);
+
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
   const location = useLocation();
+  const isAdminOrigin = !!location.state?.isAdminOrigin;
+  const [stylePdv, setStylePdv] = React.useState(false);
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -69,6 +74,17 @@ const RequestModal = () => {
       setBackorder(data);
     }
   }, []);
+
+  React.useEffect(() => {
+    console.log('pdv é ', pdv);
+    console.log('É DO ADMINISTRADOR isAdminOrigin é ', global.pdvRequest);
+
+    if (pdv && global.pdvRequest) {
+      setStylePdv(true);
+    } else {
+      setStylePdv(false);
+    }
+  }, [pdv, global]);
 
   React.useEffect(() => {
     if (userData && Array.isArray(userData.request)) {
@@ -234,6 +250,7 @@ const RequestModal = () => {
       setOpenCloseTotenPopup(true);
       return;
     }
+
     sendRequestToKitchen();
   };
 
@@ -401,8 +418,20 @@ const RequestModal = () => {
   };
   //const userNewRequest = addRequestUser(currentUser);
 
+  const handleRoute = () => {
+    if (!stylePdv) {
+      navigate('/');
+    } else {
+      global.setPdvRequest(false);
+      navigate('/admin/requestlist');
+      return;
+    }
+  };
+
   return (
-    <section className="container-modal-request">
+    <section
+      className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
+    >
       {openCloseTotenPupup && (
         <TotenRegisterPopup
           setOpenCloseTotenPopup={setOpenCloseTotenPopup}
@@ -455,9 +484,9 @@ const RequestModal = () => {
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
       <div className="btnFinalRequest">
-        <Link className="keep-shopping" to="/">
+        <button className="keep-shopping" onClick={handleRoute}>
           Continue Comprando
-        </Link>
+        </button>
       </div>
       <div className="btnFinalRequest">
         <button

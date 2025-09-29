@@ -83,7 +83,7 @@ function MainMenu() {
 
   async function CheckLogin() {
     const userId = await CheckUser('userMenu', global.isToten);
-    console.log('UserId é ', userId);
+
     if (userId === '/') {
       navigate('/admin/requestlist');
     }
@@ -147,8 +147,15 @@ function MainMenu() {
     }, 1200000);
   };
 
+  const showPopup = () => {
+    console.log('clicou');
+    global.setPdvRequest((prev) => !prev);
+  };
+
   return (
     <>
+      {' '}
+      <p onClick={showPopup}>pedidos</p>
       {global.pdvRequest && <RequestModal />}
       <div className="WarningMessage-container">
         {logoutAdminPopup && (

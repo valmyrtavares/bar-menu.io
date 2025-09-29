@@ -119,5 +119,6 @@ h3 {
     }
 }
 .pdv-change{
-    background-color: white;
+    background-color: white !important;
+    min-width: 147%;
 }

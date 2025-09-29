@@ -4,6 +4,7 @@ import PdvMainMenu from '../../Pages/PdvMainMenu.js';
 import style from '../../assets/styles/pdv.module.scss';
 import Title from '../title.js';
 import { Link } from 'react-router-dom';
+import RequestModal from './requestModal.js';
 
 const PDV = () => {
   return (
@@ -11,6 +12,7 @@ const PDV = () => {
       <Link to="/admin/admin">
         <Title mainTitle="Ponto de Venda" />
       </Link>
+
       <div className={style.pdvContainer}>
         <div>
           <PdvMainMenu />

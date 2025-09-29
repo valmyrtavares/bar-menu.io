@@ -208,13 +208,17 @@ const DishesModal = ({ item, setModal }) => {
       });
 
       // Redireciona o usuário para a página de requisições
-      debugger;
+
       if (!pdv) {
-        navigate('/request');
+        console.log('NÃO SOMOS UM PDV no handleSubmit ', pdv);
+        navigate('/request', { state: { isAdminOrigin: false } });
+        global.setPdvRequest(false);
         return;
       } else {
+        console.log(' SOMOS UM PDV no handleSubmit', pdv);
         global.setPdvRequest(true);
-        navigate('/admin/requestlist');
+        setModal(false);
+        navigate('/admin/requestlist', { state: { isAdminOrigin: true } });
       }
     } catch (error) {
       console.log(error);

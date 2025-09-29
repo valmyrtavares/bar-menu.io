@@ -9,7 +9,6 @@ const PedidoButton = React.memo(({ navigate }) => {
   return (
     <button
       onClick={() => {
-        console.log('✅ Botão clicado');
         navigate(); // Chamamos a navegação aqui para ver se dispara corretamente
       }}
     >
@@ -23,13 +22,11 @@ const SubHeaderCustomer = ({ logoutCustomer, nameClient }) => {
 
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    console.log('🌍 Estado global atualizado:', global);
-  }, [global]);
-
   const handleNavigate = React.useCallback(() => {
     console.log('🚀 Navegação acionada!');
-    navigate('/request');
+    if (!global.pdvRequest) {
+      navigate('/request');
+    }
   }, [navigate]);
 
   return (

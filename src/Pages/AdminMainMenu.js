@@ -23,7 +23,6 @@ const AdminMainMenu = ({ children }) => {
     } else {
       setHideSideMenu(true);
     }
-    console.log('Eu já tenho o URL de cada mudança   ', location.pathname);
   }, [location.pathname, navigate]);
 
   const logoutAdmin = () => {
