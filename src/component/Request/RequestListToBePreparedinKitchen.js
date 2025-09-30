@@ -12,7 +12,7 @@ import {
   getDoc,
   updateDoc,
 } from 'firebase/firestore';
-import style from '../../assets/styles/RequestListToBePrepared.module.scss';
+import style from '../../assets/styles/RequestListToBePreparedKitchen.module.scss';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
 import {
@@ -30,7 +30,7 @@ import MessagePromotions from '../Promotions/MessagePromotions.js';
 
 //import { debugErrorMap } from 'firebase/auth';
 
-const RequestListToBePrepared = ({ title }) => {
+const RequestListToBePrepared = () => {
   const db = getFirestore(app);
 
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
@@ -839,7 +839,7 @@ const RequestListToBePrepared = ({ title }) => {
   return (
     <div>
       <Link to="/admin/admin">
-        <Title mainTitle={title} />
+        <Title mainTitle="COZINHA" />
       </Link>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
@@ -860,8 +860,8 @@ const RequestListToBePrepared = ({ title }) => {
                 <div
                   className={
                     openRequests[item.id]
-                      ? style.requestId
-                      : style.requestIdClosed
+                      ? style.requestIdClosed
+                      : style.requestId
                   }
                 >
                   <p>
