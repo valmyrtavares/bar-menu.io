@@ -30,6 +30,7 @@ import WelcomeSaluteForm from './Forms/WelcomeSaluteForm';
 import PDV from './component/Request/PDV';
 import OrderQueue from './component/orderQueue';
 import RequestList from './component/Request/RequestList';
+import RequestListToBePreparedinKitchen from './component/Request/RequestListToBePreparedinKitchen';
 import Promotions from './component/Promotions/CreatePromotions';
 import RecipeDish from './Forms/recipeDishForm';
 import CustomerList from './component/Customers/customerList';
@@ -123,6 +124,10 @@ function App() {
           <Route path="documentation" element={<Documentation />} />
           <Route path="stock" element={<TrackStockProduct />} />
           <Route path="requestlist" element={<PDV />} />
+          <Route
+            path="kitchen"
+            element={<RequestListToBePreparedinKitchen />}
+          />
           <Route path="item" element={<FormItem />} />
           <Route path="EditButton/:id" element={<ListToEditAndDelete />} />
           <Route path="category" element={<AddButtonForm />} />

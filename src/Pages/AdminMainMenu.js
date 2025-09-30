@@ -229,6 +229,14 @@ const AdminMainMenu = ({ children }) => {
                 isActive ? `${admin.link} ${admin.active}` : admin.link
               }
             >
+              PDV
+            </NavLink>
+            <NavLink
+              to="/admin/kitchen"
+              className={({ isActive }) =>
+                isActive ? `${admin.link} ${admin.active}` : admin.link
+              }
+            >
               Cozinha
             </NavLink>
 
