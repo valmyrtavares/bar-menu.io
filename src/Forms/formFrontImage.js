@@ -1,8 +1,10 @@
 import React from 'react';
 import Input from '../component/Input';
-import { app, storage } from '../config-firebase/firebase.js';
+
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { setDoc, doc, getFirestore, updateDoc } from 'firebase/firestore';
+import { storage, db, getFirestore } from '../config-firebase/firebase';
+import { setDoc, doc, updateDoc } from 'firebase/firestore';
+
 import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';
 import Title from '../component/title.js';
@@ -29,7 +31,7 @@ const FormFrontImage = () => {
   const navigate = useNavigate();
 
   //FIRESTORE
-  const db = getFirestore(app);
+  // const db = getFirestore(app);
 
   React.useEffect(() => {
     if (publicStatement && modePictureMobilePhone) {
@@ -96,13 +98,14 @@ const FormFrontImage = () => {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
-        'state_change',
+        'state_changed',
         (snapshot) => {
-          const progress = (snapshot.bytesTrans / snapshot.totalBytes) * 100;
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setProgress(progress);
         },
         (error) => {
-          console.error(error);
+          console.error('Erro no upload:', error.code, error.message);
         },
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);

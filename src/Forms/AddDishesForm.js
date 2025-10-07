@@ -141,7 +141,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
           setProgress(progress);
         },
         (error) => {
-          console.error(error);
+          console.error('Erro no upload:', error.code, error.message);
         },
         async () => {
           // Handle successful uploads

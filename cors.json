@@ -1,6 +1,9 @@
 [
   {
-    "origin": ["http://localhost:3000", "https://seu-dominio.vercel.app"],
+    "origin": [
+      "http://localhost:3000",
+      "https://seashell-kingfisher-121989.hostingersite.com"
+    ],
     "method": ["GET", "POST", "PUT", "DELETE"],
     "maxAgeSeconds": 3600,
     "responseHeader": ["Content-Type", "x-goog-meta-*"]
