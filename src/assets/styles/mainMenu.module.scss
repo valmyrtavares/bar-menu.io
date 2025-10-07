@@ -32,7 +32,7 @@
             max-width: 139px;
             margin: 0 auto;
             p{
-                color: var(--btn-color);
+                color: var(--font-color);
                 font-weight: 700;
                 font-size: 19px;                  
                 font-family: var(--text-font);
@@ -41,7 +41,7 @@
             }
         }
         p, button{                
-                color: var(--btn-color);
+                color: var(--font-color);
                 border: none;
                 font-weight: 700;
                 font-size: 16px;
@@ -87,6 +87,8 @@
     width: 100%;
     min-height:70px;
   }
-
+colorText{
+    color: var(--font-color);
+}
 
 
