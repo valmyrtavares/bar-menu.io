@@ -9,6 +9,7 @@ import {
   getBtnData,
   replaceDocument,
 } from '../../../api/Api';
+import { list } from 'firebase/storage';
 
 function RegisterExpenses({ setShowPopup }) {
   const [form, setForm] = React.useState({
@@ -68,6 +69,10 @@ function RegisterExpenses({ setShowPopup }) {
 
   const setIdKey = (item) => {
     if (!item.humanId) {
+      if (listExpenses === null) {
+        item.humanId = 1;
+        return item;
+      }
       const existingIds = listExpenses
         .map((exp) => exp.humanId)
         .filter(Boolean);
