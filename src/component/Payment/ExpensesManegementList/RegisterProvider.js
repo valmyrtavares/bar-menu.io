@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
-import provider from '../../../assets/styles/RegisterProvider.module.css';
+import provider from '../../../assets/styles/RegisterProvider.module.scss';
 import CloseBtn from '../../closeBtn';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
@@ -136,7 +136,9 @@ const RegisterProvider = ({ setShowPopup }) => {
           <button className={provider.btn}>Enviar</button>
         </div>
       </form>
-      {listProvider && renderTableItem()}
+      <div className={provider.tableContainer}>
+        {listProvider && renderTableItem()}
+      </div>
     </div>
   );
 };
