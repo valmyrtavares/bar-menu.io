@@ -355,7 +355,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       adjustmentExpenseNote: adjustmentExpenseNote,
       previousVolume: previousVolume,
       previousCost: previousCost,
-      ContentsInStock: totalVolume,
+      ContentsInStock: totalVolume ? totalVolume : 0,
       totalResourceInvested: totalCost,
     };
     return stockEventRegistration;
@@ -501,7 +501,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       setItem((prevForm) => ({
         ...prevForm,
-        idProduct: selectedProduct.idProduct, // Define o ID do produto
+        idProduct: selectedProduct.idProduct
+          ? selectedProduct.idProduct
+          : selectedProduct.id, // Define o ID do produto
         product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
         operationSupplies: selectedProduct.operationSupplies ? true : false,
         unitOfMeasurement: selectedProduct

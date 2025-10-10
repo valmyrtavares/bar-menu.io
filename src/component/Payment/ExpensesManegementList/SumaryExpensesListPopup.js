@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../../assets/styles/SumaryExpensesListPopup.css';
+import style from '../../../assets/styles/SumaryExpensesListPopup.module.scss';
 import CloseBtn from '../../closeBtn';
 
 const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
@@ -9,7 +9,7 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
     }
   }, [oneExpense]);
   return (
-    <div className="container-sumary-expenses">
+    <div className={style.containerSumaryExpenses}>
       <CloseBtn setClose={setOpenSumaryPopup} />
       <h1>Despesa Completa</h1>
       <main>
@@ -44,7 +44,7 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
           {oneExpense.items &&
             oneExpense.items.length > 0 &&
             oneExpense.items.map((item) => (
-              <div className="container-item">
+              <div className={style.containerItem}>
                 <h4>Produto {item.product}</h4>
                 <p>
                   Custo por unidade
