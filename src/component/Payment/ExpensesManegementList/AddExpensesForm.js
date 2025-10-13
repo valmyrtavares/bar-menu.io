@@ -32,6 +32,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     product: '',
     amount: 0,
     CostPerUnit: 0,
+    minimumAmount: 0,
     totalCost: 0,
     volumePerUnit: 0,
     adjustmentExpenseNote: '',
@@ -509,6 +510,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '', // Define a unidade de medida
+        minimumAmount: selectedProduct.minimumAmount
+          ? selectedProduct.minimumAmount
+          : 0,
       }));
       return;
     } else {
