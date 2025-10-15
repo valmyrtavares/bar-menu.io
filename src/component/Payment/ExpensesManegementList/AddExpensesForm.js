@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Input from '../../Input';
 import style from '../../../assets/styles/AddExpensesForm.module.scss';
 import CloseBtn from '../../closeBtn';
-import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
+// import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
 import {
   getDocs,
   getFirestore,
@@ -633,6 +633,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             id="account"
             autoComplete="off"
             className="account"
+            required
             label="Nota fiscal"
             value={form.account}
             type="text"
@@ -708,7 +709,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="number"
               onChange={handleItemChange}
             />
-            <Input
+            {/* <Input
               title="Caso o valor em estoque desse produto não seja verdadeiro atualize o valor correto
               e na tela de 'digite sua Jusitificativa' escreva uma nota dizendo porque o valor restante
               desse produto em estoque não correponde a realidade. Ex: data de validade vencida"
@@ -720,7 +721,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="text"
               onChange={handleItemChange}
               onBlur={checkCurrentValue}
-            />
+            /> */}
 
             <Input
               title="Registre aqui a quantidade de itens por pacote Ex: 100 colheres ou 2kg de leite por volume"
@@ -740,13 +741,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         <button>Enviar</button>
       </form>
 
-      {showPopupNote && (
+      {/* {showPopupNote && (
         <ProductVolumeAdjustmentNote
           setNote={setNote}
           setShowPopupNote={setShowPopupNote}
           showPopupNote={showPopupNote}
         />
-      )}
+      )} */}
       {showItemsDetailsForm && item && renderTableItem()}
     </div>
   );
