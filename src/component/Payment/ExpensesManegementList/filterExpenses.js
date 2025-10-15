@@ -39,7 +39,6 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
 
   const handleFilter = () => {
     const res = filterExpenseList(form);
-
     if (!res) {
       setForm((prevForm) => ({
         ...prevForm,
@@ -164,7 +163,7 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
           >
             <option value="">Selecione</option>
             {productList.map((product, index) => (
-              <option key={product.id} value={product.idProduct}>
+              <option key={product.id} value={product.id}>
                 {product.name}
               </option>
             ))}

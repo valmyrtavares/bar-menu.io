@@ -4,6 +4,8 @@ import { getBtnData } from '../../api/Api';
 import WarningMessage from '../WarningMessages';
 import { doc, updateDoc, getFirestore } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
+import { Link } from 'react-router-dom';
+import Title from '../title';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
@@ -271,7 +273,10 @@ const ManagementRecipes = () => {
             />
           )}
       </div>
-      <h1>Gerenciamento de Receitas</h1>
+
+      <Link to="/admin/admin">
+        <Title mainTitle="Gerenciamento de Receitas" />
+      </Link>
       <h3>Use esse modulo para excluir ingredientes dos pratos selecionados</h3>
       <div className={style.deleteContainer}>
         <div className={style.leftSide}>
