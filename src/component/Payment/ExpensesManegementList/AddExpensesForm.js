@@ -268,12 +268,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         const pack = Number(itemFinded.amount) + Number(currentItem.amount);
         const volume = currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
-        currentItem.totalCost += currentItem.currentAmountProduct
-          ? previousCost
-          : itemFinded.totalCost || 0;
-        currentItem.totalVolume += currentItem.currentAmountProduct
-          ? previousVolume
-          : itemFinded.totalVolume || 0;
+        currentItem.totalCost += Number(
+          currentItem.currentAmountProduct
+            ? previousCost
+            : itemFinded.totalCost || 0
+        );
+        currentItem.totalVolume += Number(
+          currentItem.currentAmountProduct
+            ? previousVolume
+            : itemFinded.totalVolume || 0
+        );
 
         // Inicializa ou adiciona ao UsageHistory
         currentItem.UsageHistory = itemFinded.UsageHistory || [];
@@ -305,6 +309,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       } else {
         const previousCost = 0;
         const constpreviousVolume = 0;
+        const adjustmentExpenseNote = '';
         const cost = currentItem.totalCost;
         const pack = Number(currentItem.amount);
         const volume = currentItem.totalVolume;
@@ -315,6 +320,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           stockHistoryList(
             currentItem,
             account,
+            adjustmentExpenseNote,
             paymentDate,
             pack,
             cost,
