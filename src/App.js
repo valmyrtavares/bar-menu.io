@@ -151,3 +151,10 @@ function App() {
 
 export default App;
 //"homepage": "https://valmyrtavares.github.io/bar-menu.io",
+
+// REACT_APP_FIREBASE_API_KEY=AIzaSyB7bvkvqDzmRVZWLADteuNQM4AMHkYre_o
+// REACT_APP_FIREBASE_AUTH_DOMAIN=projetopilotomenu.firebaseapp.com
+// REACT_APP_FIREBASE_PROJECT_ID=projetopilotomenu
+// REACT_APP_FIREBASE_STORAGE_BUCKET=projetopilotomenu.firebasestorage.app
+// REACT_APP_FIREBASE_MESSAGING_SENDER_ID=307443442433
+// REACT_APP_FIREBASE_APP_ID=1:307443442433:web:888d3d72ad91a8b9e03100
