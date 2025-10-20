@@ -304,7 +304,7 @@ const RequestListToBePrepared = ({ title }) => {
       ) {
         for (let j = 0; j < currentItem.sideDishes.length; j++) {
           const sideDish = currentItem.sideDishes[j];
-          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionCost); // amount removed from stock
+          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionUsed); // amount removed from stock
           ObjPadrao.product = sideDish.name;
           ObjPadrao.unitOfMeasurement = sideDish.unit || '';
           ObjPadrao.CostPerUnit = sideDish.portionCost;
