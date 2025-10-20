@@ -74,9 +74,21 @@ const RequestListToBePrepared = ({ title }) => {
     return () => unsubscribe();
   }, []);
 
-  // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
+  //Open and close requests
   React.useEffect(() => {
     if (!requestsDoneList) return;
+
+    const mergedList = mergeRequestsByUser(requestsDoneList);
+    // Evita loop: só atualiza se mudou de fato
+    const sameLength = mergedList.length === requestsDoneList.length;
+    const sameIds =
+      sameLength &&
+      mergedList.every((item, i) => item.idUser === requestsDoneList[i].idUser);
+
+    if (!sameLength || !sameIds) {
+      setRequestDoneList(mergedList);
+    }
+
     setOpenRequests((prev) => {
       const next = {};
       requestsDoneList.forEach((item) => {
@@ -86,6 +98,36 @@ const RequestListToBePrepared = ({ title }) => {
       return next;
     });
   }, [requestsDoneList]);
+
+  function mergeRequestsByUser(list) {
+    const mergedByUser = {};
+
+    list.forEach((item) => {
+      const { idUser, request } = item;
+
+      if (!mergedByUser[idUser]) {
+        // Primeiro item desse usuário — copia tudo
+        mergedByUser[idUser] = { ...item };
+      } else {
+        // Já existe: mescla os requests
+        mergedByUser[idUser].request = [
+          ...mergedByUser[idUser].request,
+          ...(request || []),
+        ];
+      }
+
+      // --- Recalcula o finalPriceRequest após mesclar
+      const allRequests = mergedByUser[idUser].request || [];
+      const total = allRequests.reduce((sum, req) => {
+        const price = Number(req.finalPrice) || 0;
+        return sum + price;
+      }, 0);
+
+      mergedByUser[idUser].finalPriceRequest = total;
+    });
+
+    return Object.values(mergedByUser);
+  }
 
   // React.useEffect(() => {
   //   if (shouldRunEffect) {
@@ -256,6 +298,8 @@ const RequestListToBePrepared = ({ title }) => {
     const { request } = item;
 
     if (request && request.length > 0) {
+      debugger;
+
       await updateSideDihesInStock(request, dateTime, ObjPadrao);
     }
 
