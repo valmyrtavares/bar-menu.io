@@ -27,6 +27,7 @@ import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 import MessagePromotions from '../Promotions/MessagePromotions';
+import { alertMinimunAmount } from '../../Helpers/Helpers';
 
 //import { debugErrorMap } from 'firebase/auth';
 
@@ -384,12 +385,39 @@ const RequestListToBePrepared = ({ title }) => {
           const volumeBefore = parseToNumber(currentItem.totalVolume);
           const volumeAdd = parseToNumber(itemFinded.totalVolume);
           currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
-
-          if (currentItem.totalVolume < 0) {
+          if (currentItem.totalVolume < itemFinded.minimumAmount) {
             alert(
-              `Volume do item ${currentItem.name} está negativo. Verifique o estoque.`
+              `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
             );
-            currentItem.totalVolume = 0;
+
+            const check = alertMinimunAmount(
+              currentItem.product,
+              currentItem.totalVolume,
+              currentItem.minimumAmount,
+              currentItem.totalCost
+            );
+            if (check && check.message) {
+              try {
+                const key = 'warningAmountMessage';
+                let stored = localStorage.getItem(key);
+                let warnings = stored ? JSON.parse(stored) : [];
+                if (!Array.isArray(warnings)) warnings = [];
+                warnings.push(check.message);
+                localStorage.setItem(key, JSON.stringify(warnings));
+                global.setWarningLowRawMaterial((prev) => [
+                  ...prev,
+                  check.message,
+                ]);
+              } catch (err) {
+                console.error(
+                  'Erro ao atualizar warningAmountMessage no localStorage',
+                  err
+                );
+              }
+            }
+            if (currentItem.totalVolume < 0) {
+              currentItem.totalVolume = 0;
+            }
           }
         }
 

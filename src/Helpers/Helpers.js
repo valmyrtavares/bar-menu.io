@@ -6,44 +6,53 @@ import { app } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
 const db = getFirestore(app);
 
+// helpers/alertMinimumAmount.js
 export const alertMinimunAmount = (product, volume, minimum, cost) => {
   if (volume < minimum) {
-    console.log(
-      `O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`
-    );
-    return false;
+    return {
+      status: false,
+      message: `⚠️ O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`,
+    };
   }
+
   if (volume === 0) {
-    console.log(
-      `O produto ${product} foi recusado porque o volume está igual a 0`
-    );
-    return false;
+    return {
+      status: false,
+      message: ` O produto ${product} foi recusado porque o volume está igual a 0`,
+    };
   }
+
   if (minimum === undefined) {
-    console.log(
-      `O produto ${product} foi recusado porque o mínimo está indefinido`
-    );
-    return false;
+    console.log(`⚠️`);
+    return {
+      status: false,
+      message: ` O produto ${product} foi recusado porque o mínimo está indefinido`,
+    };
   }
+
   if (isNaN(cost)) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo não é um número`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo não é um número`,
+    };
   }
+
   if (cost === undefined) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo está indefinido`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo está indefinido`,
+    };
   }
+
   if (cost <= 0) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`,
+    };
   }
-  return true;
+
+  // ✅ Se passou em todas as verificações:
+  return { status: true, message: '' };
 };
 
 export const exportToExcel = (ObjList, fileName = 'data.xlsx') => {

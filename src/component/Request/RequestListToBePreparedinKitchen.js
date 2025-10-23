@@ -13,6 +13,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import style from '../../assets/styles/RequestListToBePreparedKitchen.module.scss';
+import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
 import {
@@ -841,6 +842,7 @@ const RequestListToBePrepared = () => {
       <Link to="/admin/admin">
         <Title mainTitle="COZINHA" />
       </Link>
+      <WarningAmoutMessage />
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
           const { status, color } = getStatusAndColor(item); // 👈 aqui

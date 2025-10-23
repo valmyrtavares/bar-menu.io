@@ -6,8 +6,10 @@ import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../../Helpers/Helpers';
+//import { useAlertMinimumAmount } from '../../Hooks/useAlertMinimumAmount'
 import Title from '../title';
 import { tooltips } from '../../constants/tooltips';
+import { GlobalContext } from '../../GlobalContext';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
@@ -27,6 +29,8 @@ const TrackStockProduct = () => {
     React.useState(false);
   const [subTitle, setSubTitle] = React.useState('Matéria Prima');
   const [changeSubTitle, setChangeSubTitle] = React.useState(true);
+  const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
+  const { setWarningLowRawMaterial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
     fetchStock();
@@ -34,6 +38,30 @@ const TrackStockProduct = () => {
   // React.useEffect(() => {
   //   fetchStock();
   // }, [refreshData]);
+
+  React.useEffect(() => {
+    if (!stock || stock.length === 0) return;
+    const messageWaningList = [];
+
+    stock.forEach((item) => {
+      const check = alertMinimunAmount(
+        item.product,
+        item.totalVolume,
+        item.minimumAmount,
+        item.totalCost
+      );
+      if (check.status !== '') {
+        messageWaningList.push(check.message);
+        // adiar para depois do forEach e gravar a lista no localStorage
+
+        setWarningLowRawMaterial((prev) => [...prev, check.message]);
+      }
+    });
+    localStorage.setItem(
+      'warningAmountMessage',
+      JSON.stringify(messageWaningList)
+    );
+  }, [stock, setWarningLowRawMaterial]);
 
   const fetchStock = async () => {
     const data = await getBtnData('stock');
@@ -166,7 +194,7 @@ const TrackStockProduct = () => {
                       item.totalVolume,
                       item.minimumAmount,
                       item.totalCost
-                    )
+                    ).status
                       ? ''
                       : style.warning
                   }
