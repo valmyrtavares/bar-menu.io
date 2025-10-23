@@ -13,8 +13,11 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
 import { getBtnData, addItemToCollection } from '../../../api/Api';
+//import { alertMinimunAmount } from '../../../Helpers/Helpers';
+import { GlobalContext } from '../../../GlobalContext';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
+  const global = React.useContext(GlobalContext);
   const [form, setForm] = React.useState({
     name: '',
     value: 0,
@@ -337,6 +340,35 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }
   };
 
+  // const updateWanrningAmoutMessage = (
+  //   product,
+  //   totalVolume,
+  //   minimumAmount,
+  //   totalCost
+  // ) => {
+  //   const check = alertMinimunAmount(
+  //     product,
+  //     totalVolume,
+  //     minimumAmount,
+  //     totalCost
+  //   );
+
+  //   try {
+  //     const key = 'warningAmountMessage';
+  //     let stored = localStorage.getItem(key);
+  //     let warnings = stored ? JSON.parse(stored) : [];
+  //     if (!Array.isArray(warnings)) warnings = [];
+  //     warnings.push(check.message);
+  //     localStorage.setItem(key, JSON.stringify(warnings));
+  //     global.setWarningLowRawMaterial((prev) => [...prev, check.message]);
+  //   } catch (err) {
+  //     console.error(
+  //       'Erro ao atualizar warningAmountMessage no localStorage',
+  //       err
+  //     );
+  //   }
+  // };
+
   const stockHistoryList = (
     item,
     account,
@@ -417,14 +449,17 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       paymentDate: form.paymentDate,
       expenseId: form.expenseId,
     }));
-
+    console.log('Itens enriquecidos  ', enrichedItems);
     /** 2. Cria um novo objeto form sem mutar o state original */
     const dataToSave = { ...form, items: enrichedItems };
 
     /** 3. (Opcional) Se ainda usa handleStock ou distributeItemsToExpenseList */
     if (enrichedItems.length > 0) {
-      handleStock(enrichedItems, form.account, form.paymentDate);
-      // distributeItemsToExpenseList(enrichedItems, ...);
+      if (enrichedItems.length > 0) {
+        await handleStock(enrichedItems, form.account, form.paymentDate);
+        const data = await getBtnData('stock');
+        handleWarningCleanup(data, enrichedItems);
+      }
     }
 
     try {
@@ -457,6 +492,29 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     } catch (error) {
       console.error('Erro ao salvar documento:', error);
     }
+  };
+
+  const handleWarningCleanup = (data, enrichedItems) => {
+    const stored =
+      JSON.parse(localStorage.getItem('warningAmountMessage')) || [];
+
+    data.forEach((item) => {
+      const match = enrichedItems.find((i) => i.idProduct === item.idProduct);
+      if (match && item.totalVolume > item.minimumAmount) {
+        // encontra o índice da mensagem correspondente ao produto
+        const msgIndex = stored.findIndex(
+          (msg) =>
+            typeof msg === 'string' && msg.includes(`produto ${item.product}`)
+        );
+
+        if (msgIndex !== -1) {
+          stored[msgIndex] = ''; // limpa apenas o aviso desse produto
+        }
+      }
+    });
+
+    localStorage.setItem('warningAmountMessage', JSON.stringify(stored));
+    global.setWarningLowRawMaterial(stored);
   };
 
   const handleChange = (e) => {
