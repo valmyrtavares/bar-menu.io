@@ -27,7 +27,10 @@ import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 import MessagePromotions from '../Promotions/MessagePromotions';
-import { alertMinimunAmount } from '../../Helpers/Helpers';
+import {
+  alertMinimunAmount,
+  checkLowAmountRawMaterial,
+} from '../../Helpers/Helpers';
 
 //import { debugErrorMap } from 'firebase/auth';
 
@@ -389,7 +392,6 @@ const RequestListToBePrepared = ({ title }) => {
             alert(
               `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
             );
-
             const check = alertMinimunAmount(
               currentItem.product,
               currentItem.totalVolume,
@@ -404,10 +406,12 @@ const RequestListToBePrepared = ({ title }) => {
                 if (!Array.isArray(warnings)) warnings = [];
                 warnings.push(check.message);
                 localStorage.setItem(key, JSON.stringify(warnings));
+                console.log('O que é esse global aqui  ', global);
                 global.setWarningLowRawMaterial((prev) => [
                   ...prev,
                   check.message,
                 ]);
+                await checkLowAmountRawMaterial(currentItem.product);
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',

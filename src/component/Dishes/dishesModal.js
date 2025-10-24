@@ -364,8 +364,16 @@ const DishesModal = ({ item, setModal }) => {
               </div>
             ))}
         </div>
-        <button type="submit" className="request-client-modal">
-          {isSubmitting ? 'Enviando...' : 'Faça seu pedido'}
+        <button
+          type="submit"
+          className="request-client-modal"
+          disabled={item.lowAmountRawMaterial}
+        >
+          {item.lowAmountRawMaterial
+            ? 'Indisponível'
+            : isSubmitting
+            ? 'Enviando...'
+            : 'Faça seu pedido'}
         </button>
       </form>
     </div>

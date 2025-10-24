@@ -1,10 +1,81 @@
 import React from 'react';
+
 import { getBtnData, getStockByProductName } from '../api/Api';
 import { cardClasses } from '@mui/material';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc,
+} from 'firebase/firestore';
 import { app } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
 const db = getFirestore(app);
+
+/**
+ * Atualiza o campo lowAmountRawMaterial em todos os itens da coleção "item"
+ * conforme a existência da matéria-prima nas receitas.
+ *
+ * @param {string} rawMaterialName - Nome da matéria-prima a ser verificada.
+ * @param {boolean} status - Valor que deve ser atribuído (true = indisponível, false = disponível).
+ */
+export async function checkLowAmountRawMaterial(rawMaterialName) {
+  if (!rawMaterialName || typeof rawMaterialName !== 'string') return;
+
+  const normalizedName = rawMaterialName.trim().toLowerCase();
+  const itemsRef = collection(db, 'item');
+  const snapshot = await getDocs(itemsRef);
+
+  const updatePromises = snapshot.docs.map(async (docSnap) => {
+    const data = docSnap.data();
+    const recipe = data?.recipeFinalingridientsList;
+
+    if (!recipe) return; // sem receita, pula
+
+    let found = false;
+
+    // Função auxiliar para buscar o ingrediente dentro de um array
+    const checkInArray = (arr) => {
+      if (!Array.isArray(arr)) return false;
+      return arr.some(
+        (ing) => ing?.name && ing.name.trim().toLowerCase() === normalizedName
+      );
+    };
+
+    // Caso 1: recipe é um array direto
+    if (Array.isArray(recipe)) {
+      found = checkInArray(recipe);
+    }
+
+    // Caso 2: recipe é um objeto com 3 arrays (firstPrice, secondPrice, thirdPrice)
+    else if (typeof recipe === 'object' && recipe !== null) {
+      const { firstPrice, secondPrice, thirdPrice } = recipe;
+      found =
+        checkInArray(firstPrice) ||
+        checkInArray(secondPrice) ||
+        checkInArray(thirdPrice);
+    }
+
+    const expectedValue = found ? true : false;
+    const currentValue = data.lowAmountRawMaterial;
+
+    // Atualiza somente se o valor estiver diferente ou inexistente
+    if (currentValue !== expectedValue) {
+      const itemRef = doc(db, 'item', docSnap.id);
+      await updateDoc(itemRef, { lowAmountRawMaterial: expectedValue });
+      console.log(
+        `Item ${
+          data.name || docSnap.id
+        } atualizado: lowAmountRawMaterial = ${expectedValue}`
+      );
+    }
+  });
+
+  await Promise.all(updatePromises);
+  console.log('Verificação de matérias-primas concluída com sucesso.');
+}
 
 // helpers/alertMinimumAmount.js
 export const alertMinimunAmount = (product, volume, minimum, cost) => {

@@ -11,6 +11,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
+import { checkLowAmountRawMaterial } from '../../Helpers/Helpers';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const [Dishes, setDishes] = React.useState([]);
@@ -252,6 +253,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
 
+      if (stockProductObj.totalVolume > stockProductObj.minimumAmount) {
+        await checkLowAmountRawMaterial(stockProductObj.product, false);
+      } else {
+        await checkLowAmountRawMaterial(stockProductObj.product, true);
+      }
       console.log('Documento atualizado com sucesso!');
       updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
