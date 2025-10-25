@@ -411,7 +411,7 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                await checkLowAmountRawMaterial(currentItem.product);
+                checkLowAmountRawMaterial(currentItem.product, true);
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',

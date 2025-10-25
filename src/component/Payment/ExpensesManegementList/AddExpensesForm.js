@@ -15,6 +15,7 @@ import { app } from '../../../config-firebase/firebase';
 import { getBtnData, addItemToCollection } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
+import { checkLowAmountRawMaterial } from '../../../Helpers/Helpers.js';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const global = React.useContext(GlobalContext);
@@ -438,6 +439,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
   };
 
+  const updatingAvaiableDishes = (enrichedItems) => {
+    if (enrichedItems && enrichedItems.length > 0) {
+      enrichedItems.forEach((item) => {
+        if (item.totalVolume > item.minimumAmount) {
+          checkLowAmountRawMaterial(item.product, false);
+        }
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -459,6 +470,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         await handleStock(enrichedItems, form.account, form.paymentDate);
         const data = await getBtnData('stock');
         handleWarningCleanup(data, enrichedItems);
+        updatingAvaiableDishes(enrichedItems);
       }
     }
 

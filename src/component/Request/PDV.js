@@ -7,13 +7,18 @@ import { Link } from 'react-router-dom';
 import RequestModal from './requestModal.js';
 import { GlobalContext } from '../../GlobalContext.js';
 import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
+import { checkLowAmountRawMaterial } from '../../Helpers/Helpers.js';
 
 const PDV = () => {
+  const funcaoDeDisparo = async () => {
+    await checkLowAmountRawMaterial('arroz', false);
+  };
   return (
     <div>
       <Link to="/admin/admin">
         <Title mainTitle="Ponto de Venda" />
       </Link>
+      <button onClick={funcaoDeDisparo}>Teste de produto</button>
       <WarningAmoutMessage />
       <div className={style.pdvContainer}>
         <div>

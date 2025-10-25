@@ -15,41 +15,44 @@ import * as XLSX from 'xlsx';
 const db = getFirestore(app);
 
 /**
- * Atualiza o campo lowAmountRawMaterial em todos os itens da coleção "item"
- * conforme a existência da matéria-prima nas receitas.
+ * Procura por uma matéria-prima em todas as receitas dos itens e atualiza lowAmountRawMaterial.
  *
- * @param {string} rawMaterialName - Nome da matéria-prima a ser verificada.
- * @param {boolean} status - Valor que deve ser atribuído (true = indisponível, false = disponível).
+ * @param {string} rawMaterialName - Nome da matéria-prima a ser procurada.
+ * @param {boolean} status - Valor que será definido (true = indisponível, false = disponível).
  */
-export async function checkLowAmountRawMaterial(rawMaterialName) {
-  if (!rawMaterialName || typeof rawMaterialName !== 'string') return;
+export async function checkLowAmountRawMaterial(rawMaterialName, status) {
+  if (!rawMaterialName || typeof rawMaterialName !== 'string') {
+    console.warn('⚠️ Parâmetro rawMaterialName inválido:', rawMaterialName);
+    return;
+  }
 
   const normalizedName = rawMaterialName.trim().toLowerCase();
-  const itemsRef = collection(db, 'item');
-  const snapshot = await getDocs(itemsRef);
+  const itemsSnapshot = await getDocs(collection(db, 'item'));
 
-  const updatePromises = snapshot.docs.map(async (docSnap) => {
+  for (const docSnap of itemsSnapshot.docs) {
     const data = docSnap.data();
-    const recipe = data?.recipeFinalingridientsList;
+    const recipe = data?.recipe?.FinalingridientsList;
 
-    if (!recipe) return; // sem receita, pula
+    if (!recipe) continue; // sem receita, pula
 
     let found = false;
 
-    // Função auxiliar para buscar o ingrediente dentro de um array
+    // Função auxiliar para verificar se o nome está dentro de um array de ingredientes
     const checkInArray = (arr) => {
       if (!Array.isArray(arr)) return false;
       return arr.some(
-        (ing) => ing?.name && ing.name.trim().toLowerCase() === normalizedName
+        (ing) =>
+          typeof ing?.name === 'string' &&
+          ing.name.trim().toLowerCase() === normalizedName
       );
     };
 
-    // Caso 1: recipe é um array direto
+    // Se for array direto
     if (Array.isArray(recipe)) {
       found = checkInArray(recipe);
     }
 
-    // Caso 2: recipe é um objeto com 3 arrays (firstPrice, secondPrice, thirdPrice)
+    // Se for objeto com 3 arrays (firstPrice, secondPrice, thirdPrice)
     else if (typeof recipe === 'object' && recipe !== null) {
       const { firstPrice, secondPrice, thirdPrice } = recipe;
       found =
@@ -58,23 +61,27 @@ export async function checkLowAmountRawMaterial(rawMaterialName) {
         checkInArray(thirdPrice);
     }
 
-    const expectedValue = found ? true : false;
-    const currentValue = data.lowAmountRawMaterial;
-
-    // Atualiza somente se o valor estiver diferente ou inexistente
-    if (currentValue !== expectedValue) {
-      const itemRef = doc(db, 'item', docSnap.id);
-      await updateDoc(itemRef, { lowAmountRawMaterial: expectedValue });
-      console.log(
-        `Item ${
-          data.name || docSnap.id
-        } atualizado: lowAmountRawMaterial = ${expectedValue}`
-      );
+    // Atualiza somente se a matéria-prima foi encontrada
+    if (found) {
+      try {
+        await updateDoc(doc(db, 'item', docSnap.id), {
+          lowAmountRawMaterial: status,
+        });
+        console.log(
+          `✅ Prato "${
+            data.title || docSnap.id
+          }" atualizado: lowAmountRawMaterial = ${status}`
+        );
+      } catch (err) {
+        console.error(
+          `❌ Erro ao atualizar "${data.title || docSnap.id}":`,
+          err.message
+        );
+      }
     }
-  });
+  }
 
-  await Promise.all(updatePromises);
-  console.log('Verificação de matérias-primas concluída com sucesso.');
+  console.log('🟢 Verificação de matérias-primas concluída.');
 }
 
 // helpers/alertMinimumAmount.js

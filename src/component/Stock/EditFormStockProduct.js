@@ -235,6 +235,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       );
       return;
     }
+    if (stockProductObj.totalVolume > stockProductObj.minimumAmount) {
+      checkLowAmountRawMaterial(stockProductObj.product, false);
+    } else {
+      checkLowAmountRawMaterial(stockProductObj.product, true);
+    }
 
     const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
     console.log('Pratos que foram alterados:', updatedDishes);

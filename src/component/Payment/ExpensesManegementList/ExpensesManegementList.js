@@ -83,11 +83,6 @@ const ExpensesManegementList = () => {
     }
   };
 
-  React.useEffect(() => {
-    console.log('item List:', itemList);
-    console.log('LISTA DE DESPESAS:', expensesList);
-  }, [itemList, expensesList]);
-
   const sortedData = (data) => {
     return data.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
   };
