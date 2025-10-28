@@ -61,6 +61,7 @@ const RecipeDish = ({
       setProductList(sortedData);
     };
     fetchProduct();
+    reloadCurrentRecipesValue();
     setIngridientsGroup([]);
   }, []);
 
@@ -86,7 +87,17 @@ const RecipeDish = ({
       const item = productList.find((item) => item.product === name);
       if (item) {
         const { product, totalVolume, minimumAmount, totalCost } = item;
-        return { product, totalVolume, minimumAmount, totalCost };
+        const warningAmountRawMaterial =
+          totalVolume > minimumAmount ? true : false;
+        const unavailableRawMaterial = totalVolume === 0 ? true : false;
+        return {
+          product,
+          totalVolume,
+          minimumAmount,
+          totalCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
+        };
       }
     }
     return null;
@@ -151,6 +162,13 @@ const RecipeDish = ({
           ? selectedProduct.totalCost / selectedProduct.totalVolume
           : 0;
 
+      const warningAmountRawMaterial =
+        selectedProduct.totalVolume > selectedProduct.minimumAmount
+          ? true
+          : false;
+      const unavailableRawMaterial =
+        selectedProduct.totalVolume === 0 ? true : false;
+
       setIngridients((prevForm) => ({
         ...prevForm,
         name: selectedProduct ? selectedProduct.product : '',
@@ -158,6 +176,8 @@ const RecipeDish = ({
           ? selectedProduct.unitOfMeasurement
           : '',
         costPerUnit: costPerUnit,
+        warningAmountRawMaterial: warningAmountRawMaterial,
+        unavailableRawMaterial: unavailableRawMaterial,
         portionCost: prevForm.amount
           ? parseFloat(prevForm.amount) * costPerUnit
           : 0,
@@ -206,22 +226,38 @@ const RecipeDish = ({
 
       const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
       const portionCost = parseFloat(ingredient.amount) * costPerUnit;
+      //QUERO VOLTAR AQUIasdfasdfasdf
+      const warningAmountRawMaterial =
+        matchedProduct.totalVolume > matchedProduct.minimumAmount
+          ? true
+          : false;
+      const unavailableRawMaterial =
+        matchedProduct.totalVolume === 0 ? true : false;
 
       return {
         costPerUnit,
         portionCost,
+        warningAmountRawMaterial,
+        unavailableRawMaterial,
       };
     };
 
     // CASO 1: Receita simples (sem variação de tamanho)
     if (isEmptyObject(customizedPriceObj)) {
       const updatedIngredients = ingredientsSimple.map((ingredient) => {
-        const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+        const {
+          costPerUnit,
+          portionCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
+        } = getUpdatedCostData(ingredient);
 
         return {
           ...ingredient,
           costPerUnit,
           portionCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
         };
       });
 
@@ -236,12 +272,19 @@ const RecipeDish = ({
       Object.entries(ingredientsBySize).forEach(
         ([sizeLabel, ingredientList]) => {
           updatedBySize[sizeLabel] = ingredientList.map((ingredient) => {
-            const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+            const {
+              costPerUnit,
+              portionCost,
+              warningAmountRawMaterial,
+              unavailableRawMaterial,
+            } = getUpdatedCostData(ingredient);
 
             return {
               ...ingredient,
               costPerUnit,
               portionCost,
+              warningAmountRawMaterial,
+              unavailableRawMaterial,
             };
           });
         }
