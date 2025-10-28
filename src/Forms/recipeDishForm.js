@@ -284,7 +284,7 @@ const RecipeDish = ({
   };
 
   return (
-    <div className={style.recipeDisContainer}>
+    <div className={style.recipeDishContainer}>
       <CloseBtn setClose={setRecipeModal} />
 
       <Link to="/admin/admin">
@@ -350,9 +350,9 @@ const RecipeDish = ({
                                 itemData.totalVolume,
                                 itemData.minimumAmount,
                                 itemData.totalCost
-                              )
-                              ? ''
-                              : 'warning'
+                              ).message
+                              ? 'warning'
+                              : ''
                             : ''
                         }
                       >
@@ -453,9 +453,9 @@ const RecipeDish = ({
                                   itemData.totalVolume,
                                   itemData.minimumAmount,
                                   itemData.totalCost
-                                )
-                                ? ''
-                                : 'warning'
+                                ).message
+                                ? 'warning'
+                                : ''
                               : ''
                           }
                         >
