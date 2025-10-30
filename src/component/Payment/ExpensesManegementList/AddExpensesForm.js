@@ -15,7 +15,7 @@ import { app } from '../../../config-firebase/firebase';
 import { getBtnData, addItemToCollection } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
-import { checkLowAmountRawMaterial } from '../../../Helpers/Helpers.js';
+import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const global = React.useContext(GlobalContext);
@@ -443,7 +443,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     if (enrichedItems && enrichedItems.length > 0) {
       enrichedItems.forEach((item) => {
         if (item.totalVolume > item.minimumAmount) {
-          checkLowAmountRawMaterial(item.product, false);
+          checkUnavaiableRawMaterial(item.product, false);
         }
       });
     }

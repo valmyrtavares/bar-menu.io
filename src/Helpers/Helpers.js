@@ -20,7 +20,7 @@ const db = getFirestore(app);
  * @param {string} rawMaterialName - Nome da matéria-prima a ser procurada.
  * @param {boolean} status - Valor que será definido (true = indisponível, false = disponível).
  */
-export async function checkLowAmountRawMaterial(rawMaterialName, status) {
+export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
   if (!rawMaterialName || typeof rawMaterialName !== 'string') {
     console.warn('⚠️ Parâmetro rawMaterialName inválido:', rawMaterialName);
     return;
@@ -28,49 +28,89 @@ export async function checkLowAmountRawMaterial(rawMaterialName, status) {
 
   const normalizedName = rawMaterialName.trim().toLowerCase();
   const itemsSnapshot = await getDocs(collection(db, 'item'));
+  const warningLog = [];
 
   for (const docSnap of itemsSnapshot.docs) {
     const data = docSnap.data();
     const recipe = data?.recipe?.FinalingridientsList;
+    if (!recipe) continue;
 
-    if (!recipe) continue; // sem receita, pula
+    let updatedRecipe = structuredClone(recipe);
+    let shouldUpdateRecipe = false;
 
-    let found = false;
+    // 🔹 Novo controle separado
+    let foundIngredient = false; // encontrou o ingrediente procurado
+    let hasUnavailable = false; // há algum ingrediente indisponível
 
-    // Função auxiliar para verificar se o nome está dentro de um array de ingredientes
+    // Função auxiliar revisada
     const checkInArray = (arr) => {
       if (!Array.isArray(arr)) return false;
-      return arr.some(
-        (ing) =>
-          typeof ing?.name === 'string' &&
-          ing.name.trim().toLowerCase() === normalizedName
-      );
+
+      arr.forEach((ing) => {
+        if (!ing || typeof ing.name !== 'string') return;
+        const normalizedIngName = ing.name.trim().toLowerCase();
+
+        // Cenário 1: ingrediente procurado está indisponível
+        if (normalizedIngName === normalizedName && status === true) {
+          ing.unavailableRawMaterial = true;
+          shouldUpdateRecipe = true;
+          foundIngredient = true;
+          hasUnavailable = true;
+          warningLog.push(normalizedIngName);
+        }
+
+        // Cenário 2: ingrediente procurado voltou a estar disponível
+        else if (normalizedIngName === normalizedName && status === false) {
+          ing.unavailableRawMaterial = false;
+          shouldUpdateRecipe = true;
+          foundIngredient = true;
+        }
+
+        // Verifica se há qualquer outro ingrediente ainda indisponível
+        if (ing.unavailableRawMaterial === true) {
+          hasUnavailable = true;
+          warningLog.push(normalizedIngName);
+        }
+      });
     };
 
-    // Se for array direto
+    // Verifica os diferentes formatos da receita
     if (Array.isArray(recipe)) {
-      found = checkInArray(recipe);
+      checkInArray(updatedRecipe);
+    } else if (typeof recipe === 'object' && recipe !== null) {
+      const { firstLabel, secondLabel, thirdLabel } = data.CustomizedPrice;
+      checkInArray(updatedRecipe[firstLabel]);
+      checkInArray(updatedRecipe[secondLabel]);
+      checkInArray(updatedRecipe[thirdLabel]);
     }
 
-    // Se for objeto com 3 arrays (firstPrice, secondPrice, thirdPrice)
-    else if (typeof recipe === 'object' && recipe !== null) {
-      const { firstPrice, secondPrice, thirdPrice } = recipe;
-      found =
-        checkInArray(firstPrice) ||
-        checkInArray(secondPrice) ||
-        checkInArray(thirdPrice);
-    }
-
-    // Atualiza somente se a matéria-prima foi encontrada
-    if (found) {
+    // Atualiza a receita se houve mudança em unavailableRawMaterial
+    if (shouldUpdateRecipe) {
       try {
         await updateDoc(doc(db, 'item', docSnap.id), {
-          lowAmountRawMaterial: status,
+          'recipe.FinalingridientsList': updatedRecipe, // ✅ corrigido nome
+        });
+        console.log(
+          `🧩 Receita de "${data.title}" atualizada com novas disponibilidades`
+        );
+      } catch (err) {
+        console.error(
+          `❌ Erro ao atualizar receita de "${data.title}":`,
+          err.message
+        );
+      }
+    }
+
+    // Atualiza o status do prato (somente se encontrou o ingrediente procurado)
+    if (foundIngredient) {
+      try {
+        await updateDoc(doc(db, 'item', docSnap.id), {
+          lowAmountRawMaterial: hasUnavailable, // ✅ agora depende apenas dos indisponíveis
         });
         console.log(
           `✅ Prato "${
             data.title || docSnap.id
-          }" atualizado: lowAmountRawMaterial = ${status}`
+          }" atualizado: lowAmountRawMaterial = ${hasUnavailable}`
         );
       } catch (err) {
         console.error(
@@ -79,6 +119,12 @@ export async function checkLowAmountRawMaterial(rawMaterialName, status) {
         );
       }
     }
+  }
+
+  // Log final
+  if (warningLog.length > 0) {
+    console.log('⚠️ Matérias-primas com problema detectadas:');
+    warningLog.forEach((mat) => console.log(` - ${mat}`));
   }
 
   console.log('🟢 Verificação de matérias-primas concluída.');

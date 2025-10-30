@@ -29,7 +29,7 @@ import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 import MessagePromotions from '../Promotions/MessagePromotions';
 import {
   alertMinimunAmount,
-  checkLowAmountRawMaterial,
+  checkUnavaiableRawMaterial,
 } from '../../Helpers/Helpers';
 
 //import { debugErrorMap } from 'firebase/auth';
@@ -411,7 +411,7 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                checkLowAmountRawMaterial(currentItem.product, true);
+                checkUnavaiableRawMaterial(currentItem.product, true);
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',

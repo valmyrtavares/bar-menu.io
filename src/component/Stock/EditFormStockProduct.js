@@ -11,7 +11,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
-import { checkLowAmountRawMaterial } from '../../Helpers/Helpers';
+import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const [Dishes, setDishes] = React.useState([]);
@@ -235,11 +235,6 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       );
       return;
     }
-    if (stockProductObj.totalVolume > stockProductObj.minimumAmount) {
-      checkLowAmountRawMaterial(stockProductObj.product, false);
-    } else {
-      checkLowAmountRawMaterial(stockProductObj.product, true);
-    }
 
     const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
     console.log('Pratos que foram alterados:', updatedDishes);
@@ -257,11 +252,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
-
-      if (stockProductObj.totalVolume > stockProductObj.minimumAmount) {
-        await checkLowAmountRawMaterial(stockProductObj.product, false);
+      if (stockProductObj.totalVolume <= 0) {
+        await checkUnavaiableRawMaterial(stockProductObj.product, true);
       } else {
-        await checkLowAmountRawMaterial(stockProductObj.product, true);
+        await checkUnavaiableRawMaterial(stockProductObj.product, false);
       }
       console.log('Documento atualizado com sucesso!');
       updateRecipesinDishesAndSideDishes(stockProductObj);

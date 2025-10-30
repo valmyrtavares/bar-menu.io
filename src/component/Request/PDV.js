@@ -7,11 +7,11 @@ import { Link } from 'react-router-dom';
 import RequestModal from './requestModal.js';
 import { GlobalContext } from '../../GlobalContext.js';
 import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
-import { checkLowAmountRawMaterial } from '../../Helpers/Helpers.js';
+import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 
 const PDV = () => {
   const funcaoDeDisparo = async () => {
-    await checkLowAmountRawMaterial('arroz', false);
+    await checkUnavaiableRawMaterial('arroz', false);
   };
   return (
     <div>

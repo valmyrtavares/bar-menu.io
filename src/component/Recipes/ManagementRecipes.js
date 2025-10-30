@@ -6,6 +6,7 @@ import { doc, updateDoc, getFirestore } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
 import { Link } from 'react-router-dom';
 import Title from '../title';
+import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
@@ -139,7 +140,6 @@ const ManagementRecipes = () => {
   };
   const DeleteIngredient = (permition) => {
     setShowWarningMessage(true);
-
     if (permition) {
       for (const recipeId of selectedRecipesToDelete) {
         const selectedDish = dishes.filter((item) => item.id === recipeId.id);
@@ -162,6 +162,7 @@ const ManagementRecipes = () => {
             'recipe.FinalingridientsList': FinalingridientsList,
           }).then(() => {
             console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+            updatingAvaiableDishesInMenu();
             setShowWarningMessage(false);
             setDisplayedRecipesToDelete([]);
             setSelectedRecipesToDelete([]);
@@ -172,6 +173,20 @@ const ManagementRecipes = () => {
       console.log('Não vai excluir');
     }
     // Aqui você pode fazer algo com as receitas selecionadas
+  };
+
+  //This function check if the raw material that was deleted from recipes is still above minimum amount in the stock, to able or disable dishes in the menu
+  const updatingAvaiableDishesInMenu = () => {
+    const currentRawMaterial = stock.find(
+      (item) => item.product === productSelectedToDelete
+    );
+
+    if (
+      currentRawMaterial &&
+      currentRawMaterial.totalVolume > currentRawMaterial.minimumAmount
+    )
+      return;
+    checkUnavaiableRawMaterial(currentRawMaterial.product, true);
   };
 
   const EditIngredient = (permition) => {
@@ -222,6 +237,7 @@ const ManagementRecipes = () => {
           })
             .then(() => {
               console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+              updatingAvaiableDishesInMenu();
               setConfirmAction(false);
               setSelectedRecipesToEdit([]);
               setDisplayedRecipesToEdit([]);
