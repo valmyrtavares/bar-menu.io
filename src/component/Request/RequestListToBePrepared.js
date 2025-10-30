@@ -411,7 +411,11 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                checkUnavaiableRawMaterial(currentItem.product, true);
+                if (currentItem.totalVolume <= 0)
+                  checkUnavaiableRawMaterial(currentItem.product, true);
+                else {
+                  checkUnavaiableRawMaterial(currentItem.product, false);
+                }
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',
