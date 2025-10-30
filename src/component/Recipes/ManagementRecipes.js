@@ -181,12 +181,11 @@ const ManagementRecipes = () => {
       (item) => item.product === productSelectedToDelete
     );
 
-    if (
-      currentRawMaterial &&
-      currentRawMaterial.totalVolume > currentRawMaterial.minimumAmount
-    )
-      return;
-    checkUnavaiableRawMaterial(currentRawMaterial.product, true);
+    if (currentRawMaterial && currentRawMaterial.totalVolume <= 0) {
+      checkUnavaiableRawMaterial(currentRawMaterial.product, true);
+    } else {
+      checkUnavaiableRawMaterial(currentRawMaterial.product, false);
+    }
   };
 
   const EditIngredient = (permition) => {

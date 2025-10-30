@@ -118,6 +118,22 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
           err.message
         );
       }
+    } else {
+      try {
+        await updateDoc(doc(db, 'item', docSnap.id), {
+          lowAmountRawMaterial: false, // ✅ s
+        });
+        console.log(
+          `✅ Prato "${
+            data.title || docSnap.id
+          }" atualizado: lowAmountRawMaterial = ${hasUnavailable}`
+        );
+      } catch (err) {
+        console.error(
+          `❌ Erro ao atualizar "${data.title || docSnap.id}":`,
+          err.message
+        );
+      }
     }
   }
 
