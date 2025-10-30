@@ -442,7 +442,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const updatingAvaiableDishes = (enrichedItems) => {
     if (enrichedItems && enrichedItems.length > 0) {
       enrichedItems.forEach((item) => {
-        if (item.totalVolume > item.minimumAmount) {
+        if (item.totalVolume <= 0) {
+          checkUnavaiableRawMaterial(item.product, true);
+        } else {
           checkUnavaiableRawMaterial(item.product, false);
         }
       });
