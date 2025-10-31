@@ -6,7 +6,8 @@ import Title from '../title.js';
 import { Link } from 'react-router-dom';
 import RequestModal from './requestModal.js';
 import { GlobalContext } from '../../GlobalContext.js';
-import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
+//import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
+import WarningAmoutMessage from '../Messages/WarningAmoutMessage';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 
 const PDV = () => {

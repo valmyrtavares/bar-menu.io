@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import style from '../../assets/styles/RequestListToBePreparedKitchen.module.scss';
-import WarningAmoutMessage from '../Messages/WarningAmoutMessage.js';
+import WarningAmoutMessage from '../Messages/WarningAmoutMessage';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
 import {
