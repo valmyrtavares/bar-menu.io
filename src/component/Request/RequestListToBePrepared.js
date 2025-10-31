@@ -246,6 +246,7 @@ const RequestListToBePrepared = ({ title }) => {
   }, [requestsDoneList]);
 
   const updateIngredientsStock = async (item) => {
+    //second step
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -331,6 +332,7 @@ const RequestListToBePrepared = ({ title }) => {
   }
 
   const handleStock = async (
+    //third step
     itemsStock,
     account = 'Editado',
     paymentDate = null
@@ -381,6 +383,9 @@ const RequestListToBePrepared = ({ title }) => {
           const previousCost = parseToNumber(itemFinded.totalCost);
           const costPerUnit = parseToNumber(currentItem.CostPerUnit);
           currentItem.totalCost = round(previousCost - costPerUnit, 2);
+          if (currentItem.totalCost < 0) {
+            currentItem.totalCost = 0;
+          }
 
           // Mantém a atualização de totalVolume
           // currentItem.totalVolume =
@@ -846,7 +851,7 @@ const RequestListToBePrepared = ({ title }) => {
     if (item.name === 'anonimo') {
       deleteData('user', item.idUser);
     }
-
+    // first step
     updateIngredientsStock(item);
 
     item.orderDelivered = true;
