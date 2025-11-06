@@ -4,10 +4,10 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { v4 as uuidv4 } from 'uuid';
 
 const paymentOptions = [
-  { label: 'Débito', value: 'debit' },
-  { label: 'Crédito', value: 'credite' },
-  { label: 'Pix', value: 'pix' },
-  { label: 'Dinheiro', value: 'dinheiro' },
+  { label: 'Débito', value: 'DEBIT' },
+  { label: 'Crédito', value: 'CREDIT' },
+  { label: 'Pix', value: 'DEBIT' },
+  { label: 'Dinheiro', value: 'CASH' },
 ];
 
 const AutoPayment = ({ onChoose, price, setIdPayer }) => {
@@ -34,7 +34,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (selected === 'dinheiro') {
+    if (selected === 'CASH') {
       setWarningCashPaymentMessage(true);
       setTimeout(() => {
         setWarningCashPaymentMessage(false);
@@ -42,11 +42,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
       }, 5000);
       return;
     }
-
+    console.log('Iniciando pagamento com:', selected, 'no valor de:', price);
     try {
       setLoading(true);
       setErrorMessage('');
-
       // 🔑 1) Gerar correlationId único
       const correlationId = generateCorrelationId();
 
@@ -56,7 +55,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
         origin: 'PAGAMENTO',
         data: {
           callbackUrl:
-            'https://webhook.site/82b67759-33fc-466b-9f43-1a47eb261d6f',
+            'callbackUrl: https://payer-4ptm.onrender.com/api/payer/webhook',
           correlationId,
           flow: 'SYNC',
           automationName: 'GERACAOZ',
@@ -67,9 +66,9 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
           },
           message: {
             command: 'PAYMENT',
-            value: 6.0,
-            paymentMethod: 'CARD',
-            paymentType: 'DEBIT',
+            value: price,
+            paymentMethod: selected === 'PIX' ? 'PIX' : 'CARD',
+            paymentType: selected === 'PIX' ? 'DEBIT' : selected,
             paymentMethodSubType: 'FULL_PAYMENT',
           },
         },
@@ -146,7 +145,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
         onChoose('desabled');
       } else if (finalStatus === 'PENDING') {
         console.log('Estou enviando um desabled no Choose');
-        onChoose('exceded');
+        onChoose(selected);
       } else {
         throw new Error('Pagamento não aprovado');
       }

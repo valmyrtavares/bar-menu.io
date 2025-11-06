@@ -392,7 +392,7 @@ const RequestModal = () => {
       setAutoPayment(true);
       return;
     } else {
-      if (selectedPayment === 'dinheiroS') {
+      if (selectedPayment === 'dinheiro') {
         sendRequestToKitchen();
         setAutoPayment(false);
       } else if (selectedPayment === 'desabled') {
@@ -403,7 +403,7 @@ const RequestModal = () => {
         setTotenRejectPaymentMessage(true);
         setTimeout(() => {
           setTotenRejectPaymentMessage(false);
-        }, 7000);
+        }, 100000);
       } else if (selectedPayment === 'exceded') {
         setAutoPayment(false);
         setErrorPaymentMessage(
@@ -458,6 +458,7 @@ const RequestModal = () => {
           <AutoPayment
             onChoose={onChoose}
             setIdPayer={(value) => (idPayerRef.current = value)}
+            price={finalPriceRequest}
           />
         </div>
       )}
