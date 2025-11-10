@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import style from '../../assets/styles/AutoPayment.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { v4 as uuidv4 } from 'uuid';
+import { io } from 'socket.io-client';
 
 const paymentOptions = [
   { label: 'Débito', value: 'DEBIT' },
@@ -16,6 +17,42 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
     useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [waitingForPayment, setWaitingForPayment] = useState(false);
+  const [correlationId, setCorrelationId] = useState(null);
+
+  React.useEffect(() => {
+    if (!correlationId) return; // evita montar antes do submit
+
+    const socket = io('https://payer-4ptm.onrender.com'); // url do seu backend
+
+    socket.on('connect', () => {
+      console.log('Socket conectado', socket.id);
+    });
+
+    // evento enviado pelo backend quando webhook chegar
+    // payload: { correlationId, status: 'SUCESSO'|'ERRO'|'PENDING', idPayer }
+    socket.on('paymentStatus', (payload) => {
+      console.log('Resultado do pagamento via socket:', payload);
+
+      const { statusTransaction } = payload;
+      console.log('statusTransaction recebido no socket:', statusTransaction);
+      if (statusTransaction === 'APPROVED') {
+        setWaitingForPayment(false);
+        setIdPayer(payload.idPayer || null);
+        onChoose(selected); // chama o onChoose como no fluxo aprovado
+      } else if (statusTransaction === 'ERRO') {
+        setWaitingForPayment(false);
+        onChoose('desabled'); // manter seu comportamento anterior
+      } else if (statusTransaction === 'PENDING') {
+        setWaitingForPayment(false);
+        onChoose(selected); // seu caso antigo tratava como pending -> selecionado
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [correlationId]); // cuidado com dependências: inclua 'selected' se necessário
 
   function generateCorrelationId() {
     return uuidv4();
@@ -42,27 +79,30 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
       }, 5000);
       return;
     }
+
     console.log('Iniciando pagamento com:', selected, 'no valor de:', price);
+
     try {
       setLoading(true);
       setErrorMessage('');
-      // 🔑 1) Gerar correlationId único
-      const correlationId = generateCorrelationId();
 
-      // 🔑 2) Montar objeto com esse correlationId
+      // 1️⃣ Gera correlationId único
+      const correlationId = generateCorrelationId();
+      setCorrelationId(correlationId);
+
+      // 2️⃣ Monta o objeto de requisição
       const payGo = {
         type: 'INPUT',
         origin: 'PAGAMENTO',
         data: {
-          callbackUrl:
-            'callbackUrl: https://payer-4ptm.onrender.com/api/payer/webhook',
+          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook', // 👈 agora aponta para o seu backend
           correlationId,
           flow: 'SYNC',
           automationName: 'GERACAOZ',
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '01',
+            terminalId: '02',
           },
           message: {
             command: 'PAYMENT',
@@ -74,86 +114,29 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
         },
       };
 
-      // 3️⃣ Enviar para sua API que chama o Payer
-      const initRes = await fetch('http://localhost:3001/api/payer/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payGo),
-      });
+      // 3️⃣ Envia ao backend hospedado no Render
+      const initRes = await fetch(
+        'https://payer-4ptm.onrender.com/api/payer/payment',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payGo),
+        }
+      );
 
       if (!initRes.ok) throw new Error(`Erro na requisição: ${initRes.status}`);
       const initData = await initRes.json();
-      console.log('Objeto inteiro    ', initData);
-      const correlationIdFromApi =
-        initData.SendMessageResponse.ResponseMetadata.RequestId; // 👈 pega do retorno
-      console.log(
-        '🚀 Inicia pagamento, correlationIdFromApi:',
-        correlationIdFromApi
-      );
-      console.log('CORRELATION ID ENVIADO  ', correlationId);
+      console.log('📤 Enviado com sucesso para backend:', initData);
 
-      // 4️⃣ Polling para aguardar status (até webhook estar implementado)
-      let finalStatus = null;
-      const maxAttempts = 60;
-      let attempts = 0;
-
-      while (!finalStatus && attempts < maxAttempts) {
-        const statusRes = await fetch(
-          `http://localhost:3001/api/payer/status/${correlationId}/GERACAOZ`
-        );
-
-        if (!statusRes.ok)
-          throw new Error(`Erro ao consultar status: ${statusRes.status}`);
-
-        const statusData = await statusRes.json();
-        console.log('🔍 Retorno do Payer:', statusData);
-
-        // 👇 pega statusTransaction do local correto
-        const statusTransaction =
-          statusData?.receivedOutput?.data?.message?.statusTransaction;
-        let idPayer = statusData?.receivedOutput?.data?.message?.idPayer;
-
-        if (['APPROVED', 'SUCESSO'].includes(statusTransaction)) {
-          finalStatus = 'SUCESSO';
-
-          setIdPayer(idPayer);
-          // Seta o idPayer no estado do componente pai
-          break;
-        }
-
-        if (['REJECTED', 'CANCELED'].includes(statusTransaction)) {
-          finalStatus = 'ERRO';
-          console.log('Pagamento Rejeitado ou Cancelado');
-          break;
-        }
-
-        if (attempts > 10) {
-          console.log('Tentativas excedidas, cancelando pagamento');
-          finalStatus = 'PENDING';
-        }
-
-        attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
-      // 5️⃣ Só fecha a tela se o pagamento foi aprovado
-      if (finalStatus === 'SUCESSO') {
-        console.log('✅ Pagamento aprovado');
-        onChoose(selected);
-      } else if (finalStatus === 'ERRO') {
-        console.log('Estou enviando um desabled no Choose');
-        onChoose('desabled');
-      } else if (finalStatus === 'PENDING') {
-        console.log('Estou enviando um desabled no Choose');
-        onChoose(selected);
-      } else {
-        throw new Error('Pagamento não aprovado');
-      }
+      // 4️⃣ Mostra que está aguardando resposta via webhook
+      console.log('⌛ Aguardando resposta do Payer via webhook...');
+      // Aqui você pode abrir um modal "Aguardando pagamento..."
+      // O webhook do backend tratará o retorno e poderá atualizar o frontend via socket ou polling leve, se quiser.
     } catch (err) {
       console.error('Erro no pagamento:', err);
       setErrorMessage('Falha no pagamento. Tente novamente.');
     } finally {
-      setLoading(false);
+      setLoading(true);
     }
   };
 
