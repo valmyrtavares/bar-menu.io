@@ -25,6 +25,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     volumePerUnit: Number(obj.volumePerUnit),
     minimumAmount: Number(obj.minimumAmount),
     noteReasonsEditingProduct: '',
+    disabledDish: obj.disabledDish || null,
     id: obj.id,
   });
   const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
@@ -444,6 +445,18 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               className="num"
               label="Volume Mínimo"
               value={stockProductObj.minimumAmount}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
+            />
+          </div>
+          <div className={edit.field}>
+            <Input
+              id="disabledDish"
+              autoComplete="off"
+              className="num"
+              label="Prato Indisponível a partir de "
+              value={stockProductObj.disabledDish}
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
