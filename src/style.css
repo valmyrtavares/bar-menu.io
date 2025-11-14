@@ -22,3 +22,8 @@
     color: #ff0000;
     font-weight: bold;
 }
+html,
+body {
+    touch-action: none;
+    /* impede gestures completamente */
+}
