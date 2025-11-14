@@ -442,7 +442,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const updatingAvaiableDishes = (enrichedItems) => {
     if (enrichedItems && enrichedItems.length > 0) {
       enrichedItems.forEach((item) => {
-        if (item.totalVolume <= 0) {
+        if (
+          item.disabledDish &&
+          item.disabledDish !== undefined &&
+          item.totalVolume <= item.disabledDish
+        ) {
           checkUnavaiableRawMaterial(item.product, true);
         } else {
           checkUnavaiableRawMaterial(item.product, false);

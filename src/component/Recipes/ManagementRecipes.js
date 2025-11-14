@@ -181,10 +181,14 @@ const ManagementRecipes = () => {
       (item) => item.product === productSelectedToDelete
     );
 
-    if (currentRawMaterial && currentRawMaterial.totalVolume <= 0) {
-      checkUnavaiableRawMaterial(currentRawMaterial.product, true);
-    } else {
+    if (
+      currentRawMaterial &&
+      currentRawMaterial.disabledDish !== undefined &&
+      currentRawMaterial.totalVolume <= currentRawMaterial.disabledDish
+    ) {
       checkUnavaiableRawMaterial(currentRawMaterial.product, false);
+    } else {
+      checkUnavaiableRawMaterial(currentRawMaterial.product, true);
     }
   };
 

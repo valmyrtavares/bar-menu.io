@@ -165,6 +165,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
           console.log(error);
         });
     } else {
+      console.log('Data obj id', dataObj.id);
+
       setDoc(doc(db, 'item', dataObj.id), form)
         .then(() => {
           navigate('/');

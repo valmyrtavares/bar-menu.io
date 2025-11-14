@@ -30,7 +30,7 @@ function Dishes({ newItem }) {
       {modal && <DishesModal item={item} setModal={setModal} />}
       {item && (
         <div
-          onClick={!item.lowAmountRawMaterial ? openmodal : null}
+          onClick={item?.lowAmountRawMaterial ? null : openmodal}
           className="item-container container my-2 card"
         >
           <div className="row">
@@ -47,7 +47,9 @@ function Dishes({ newItem }) {
           <div className="container-request-button">
             <button className="request-client">
               {' '}
-              {item.lowAmountRawMaterial ? 'Indisponível' : 'Faça o seu pedido'}
+              {item?.lowAmountRawMaterial
+                ? 'Indisponível'
+                : 'Faça o seu pedido'}
             </button>
             {item && (
               <p className="price float-end fw-bold">R${item.price},00</p>

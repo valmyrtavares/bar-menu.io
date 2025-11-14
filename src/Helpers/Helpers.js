@@ -26,7 +26,11 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
     return;
   }
 
-  const normalizedName = rawMaterialName.trim().toLowerCase();
+  const normalizedName = rawMaterialName
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   const itemsSnapshot = await getDocs(collection(db, 'item'));
   const warningLog = [];
 
@@ -48,7 +52,11 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
 
       arr.forEach((ing) => {
         if (!ing || typeof ing.name !== 'string') return;
-        const normalizedIngName = ing.name.trim().toLowerCase();
+        const normalizedIngName = ing.name
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
 
         // Cenário 1: ingrediente procurado está indisponível
         if (normalizedIngName === normalizedName && status === true) {
@@ -118,7 +126,7 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
           err.message
         );
       }
-    } else {
+    } else if (!foundIngredient && hasUnavailable) {
       try {
         await updateDoc(doc(db, 'item', docSnap.id), {
           lowAmountRawMaterial: false, // ✅ s

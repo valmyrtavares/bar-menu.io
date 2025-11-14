@@ -416,7 +416,11 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                if (currentItem.totalVolume <= 0)
+                if (
+                  currentItem.disabledDish &&
+                  currentItem.disabledDish !== undefined &&
+                  currentItem.totalVolume <= currentItem.disabledDish
+                )
                   checkUnavaiableRawMaterial(currentItem.product, true);
                 else {
                   checkUnavaiableRawMaterial(currentItem.product, false);

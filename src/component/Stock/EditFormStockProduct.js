@@ -253,7 +253,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
-      if (stockProductObj.totalVolume <= 0) {
+      if (
+        stockProductObj.disabledDish &&
+        stockProductObj.disabledDish !== undefined &&
+        stockProductObj.totalVolume <= stockProductObj.disabledDish
+      ) {
         await checkUnavaiableRawMaterial(stockProductObj.product, true);
       } else {
         await checkUnavaiableRawMaterial(stockProductObj.product, false);
@@ -297,6 +301,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               const newCostPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
+              //update costs if changed
               if (
                 currentIngredient.costPerUnit !== newCostPerUnit ||
                 currentIngredient.portionCost !== newPortionCost
