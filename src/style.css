@@ -1,5 +1,10 @@
 @import './assets//styles/variables.css';
 
+html,
+body {
+    touch-action: manipulation;
+}
+
 .main_title{
     text-align: center;
     color:red;
