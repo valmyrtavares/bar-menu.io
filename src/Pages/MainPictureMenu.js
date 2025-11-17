@@ -1,5 +1,6 @@
 import React from 'react';
 import style from '../assets/styles/MainPictureMenu.module.scss';
+import EachTotenDish from './EachTotenDish.js';
 import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
 import DishesModal from '../component/Dishes/dishesModal';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
@@ -174,25 +175,11 @@ const MainPictureMenu = () => {
               {dishesFiltered &&
                 dishesFiltered.length > 0 &&
                 dishesFiltered.map((item, index) => (
-                  <div
-                    className={style.itemContainer}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                    key={item.id || index} // Evita recriação desnecessária
-                  >
-                    <div className={style.text}>
-                      <h3>{item.title}</h3>
-                      <p>{item.comment}</p>
-                      <button onClick={() => preparedRequest(item)}>
-                        Faça o seu pedido
-                      </button>
-                    </div>
-                    <div
-                      className={style.image}
-                      onClick={() => preparedRequest(item)}
-                    >
-                      <img src={item.image} alt="" />
-                    </div>
-                  </div>
+                  <EachTotenDish
+                    item={item}
+                    index={index}
+                    preparedRequest={preparedRequest}
+                  />
                 ))}
             </div>
           </section>
