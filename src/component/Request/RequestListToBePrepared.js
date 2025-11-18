@@ -397,6 +397,7 @@ const RequestListToBePrepared = ({ title }) => {
             alert(
               `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
             );
+
             const check = alertMinimunAmount(
               currentItem.product,
               currentItem.totalVolume,
@@ -416,14 +417,13 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                if (
-                  currentItem.disabledDish &&
-                  currentItem.disabledDish !== undefined &&
-                  currentItem.totalVolume <= currentItem.disabledDish
-                )
-                  checkUnavaiableRawMaterial(currentItem.product, true);
-                else {
-                  checkUnavaiableRawMaterial(currentItem.product, false);
+                const disabledDish = Number(itemFinded.disabledDish);
+                if (disabledDish && disabledDish !== undefined) {
+                  if (currentItem.totalVolume <= disabledDish) {
+                    checkUnavaiableRawMaterial(currentItem.product, true);
+                  } else {
+                    checkUnavaiableRawMaterial(currentItem.product, false);
+                  }
                 }
               } catch (err) {
                 console.error(

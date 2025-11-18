@@ -36,9 +36,10 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
 
   for (const docSnap of itemsSnapshot.docs) {
     const data = docSnap.data();
+    if (data.title === 'KIBE DE QUEIJO' || data.title === 'KIBE DE QUEIJO')
+      debugger;
     const recipe = data?.recipe?.FinalingridientsList;
     if (!recipe) continue;
-
     let updatedRecipe = structuredClone(recipe);
     let shouldUpdateRecipe = false;
 
@@ -114,22 +115,6 @@ export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
       try {
         await updateDoc(doc(db, 'item', docSnap.id), {
           lowAmountRawMaterial: hasUnavailable, // ✅ agora depende apenas dos indisponíveis
-        });
-        console.log(
-          `✅ Prato "${
-            data.title || docSnap.id
-          }" atualizado: lowAmountRawMaterial = ${hasUnavailable}`
-        );
-      } catch (err) {
-        console.error(
-          `❌ Erro ao atualizar "${data.title || docSnap.id}":`,
-          err.message
-        );
-      }
-    } else if (!foundIngredient && hasUnavailable) {
-      try {
-        await updateDoc(doc(db, 'item', docSnap.id), {
-          lowAmountRawMaterial: false, // ✅ s
         });
         console.log(
           `✅ Prato "${

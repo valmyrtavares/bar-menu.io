@@ -250,6 +250,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         (itemSearch) => itemSearch.product === currentItem.product
       );
       if (itemFinded) {
+        updatingAvaiableDishes(itemFinded);
         // Atualiza os valores de custo e volume totais
         let previousCost = itemFinded.totalCost;
         const adjustmentExpenseNote = currentItem.adjustmentExpenseNote;
@@ -439,19 +440,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
   };
 
-  const updatingAvaiableDishes = (enrichedItems) => {
-    if (enrichedItems && enrichedItems.length > 0) {
-      enrichedItems.forEach((item) => {
-        if (
-          item.disabledDish &&
-          item.disabledDish !== undefined &&
-          item.totalVolume <= item.disabledDish
-        ) {
-          checkUnavaiableRawMaterial(item.product, true);
+  const updatingAvaiableDishes = (itemFinded) => {
+    if (itemFinded) {
+      const disabledDish = Number(itemFinded.disabledDish);
+      if (disabledDish && disabledDish !== undefined) {
+        if (itemFinded.totalVolume <= disabledDish) {
+          checkUnavaiableRawMaterial(itemFinded.product, true);
         } else {
-          checkUnavaiableRawMaterial(item.product, false);
+          checkUnavaiableRawMaterial(itemFinded.product, false);
         }
-      });
+      }
     }
   };
 
@@ -476,7 +474,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         await handleStock(enrichedItems, form.account, form.paymentDate);
         const data = await getBtnData('stock');
         handleWarningCleanup(data, enrichedItems);
-        updatingAvaiableDishes(enrichedItems);
+        //updatingAvaiableDishes(enrichedItems);
       }
     }
 
