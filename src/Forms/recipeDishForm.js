@@ -157,6 +157,7 @@ const RecipeDish = ({
       const selectedProduct = productList[value];
       console.log('selectedProduct', selectedProduct);
       const disabledDish = Number(selectedProduct.disabledDish);
+      const idProduct = selectedProduct.idProduct;
       const costPerUnit =
         selectedProduct && selectedProduct.totalVolume > 0
           ? selectedProduct.totalCost / selectedProduct.totalVolume
@@ -172,6 +173,7 @@ const RecipeDish = ({
       setIngridients((prevForm) => ({
         ...prevForm,
         name: selectedProduct ? selectedProduct.product : '',
+        idProduct: idProduct,
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '',

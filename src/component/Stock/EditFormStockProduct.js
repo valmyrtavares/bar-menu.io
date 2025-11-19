@@ -253,16 +253,17 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
-      const disabledDish = Number(stockProductObj.disabledDish);
-      const totalVolume = Number(stockProductObj.totalVolume);
-
-      if (disabledDish && disabledDish !== undefined) {
-        if (totalVolume <= disabledDish) {
-          await checkUnavaiableRawMaterial(stockProductObj.product, true);
-        } else {
-          await checkUnavaiableRawMaterial(stockProductObj.product, false);
-        }
-      }
+      // const disabledDish = Number(stockProductObj.disabledDish);
+      // const totalVolume = Number(stockProductObj.totalVolume);
+      debugger;
+      await checkUnavaiableRawMaterial(stockProductObj.id);
+      // if (disabledDish && disabledDish !== undefined) {
+      //   if (totalVolume <= disabledDish) {
+      //     await checkUnavaiableRawMaterial(stockProductObj.product, true);
+      //   } else {
+      //     await checkUnavaiableRawMaterial(stockProductObj.product, false);
+      //   }
+      // }
       console.log('Documento atualizado com sucesso!');
       updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
