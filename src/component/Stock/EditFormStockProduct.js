@@ -255,7 +255,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
       // const disabledDish = Number(stockProductObj.disabledDish);
       // const totalVolume = Number(stockProductObj.totalVolume);
-      debugger;
+
       await checkUnavaiableRawMaterial(stockProductObj.id);
       // if (disabledDish && disabledDish !== undefined) {
       //   if (totalVolume <= disabledDish) {

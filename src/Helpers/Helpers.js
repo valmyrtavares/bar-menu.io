@@ -65,6 +65,7 @@ export async function checkUnavaiableRawMaterial(id) {
       // Se é a matéria-prima alvo da função
       if (normalizedIngName === normalizedProduct) {
         ing.unavailableRawMaterial = isUnavailable; // true ou false
+        foundIngredient = true; // <-- ADICIONAR ESTA LINHA
       }
     });
   };
@@ -72,6 +73,9 @@ export async function checkUnavaiableRawMaterial(id) {
   //
   // 5) Para cada prato (item)
   //
+
+  let foundIngredient = false;
+
   for (const dishSnap of itemsSnapshot.docs) {
     const data = dishSnap.data();
 
@@ -104,11 +108,11 @@ export async function checkUnavaiableRawMaterial(id) {
       processIngredientsArray(updatedRecipe[labels.secondLabel], isUnavailable);
       processIngredientsArray(updatedRecipe[labels.thirdLabel], isUnavailable);
     }
-
+    //Aqui temos o problema a ser pensado depois de que o isUnavailable pode estar em uma das receitas desse grupo de 3 arrays
     //
     // 8) Ajuste da flag LOW AMOUNT no prato
     //
-    if (isUnavailable) {
+    if (isUnavailable && foundIngredient) {
       // Se a matéria-prima está indisponível → prato fica indisponível
       data.lowAmountRawMaterial = true;
     } else {
@@ -116,25 +120,40 @@ export async function checkUnavaiableRawMaterial(id) {
       // Cenário inverso:
       // totalVolume > disabledDish → verificar se ainda existe ALGUM ingrediente indisponível
       //
-      const checkStillUnavailable = (arr) =>
-        Array.isArray(arr) &&
-        arr.some((ing) => ing?.unavailableRawMaterial === true);
+
+      // Função corrigida para ignorar grupos que não usam o ingrediente
+      const checkStillUnavailable = (arr) => {
+        if (!Array.isArray(arr)) return null; // grupo não relevante
+
+        const found = arr.some((ing) => ing?.unavailableRawMaterial === true);
+
+        return found ? true : null; // true = indisponível; null = irrelevante
+      };
 
       let stillUnavailable = false;
 
       if (Array.isArray(updatedRecipe)) {
-        stillUnavailable = checkStillUnavailable(updatedRecipe);
+        // Receita de array único
+        stillUnavailable = checkStillUnavailable(updatedRecipe) === true;
       } else {
+        // Receita com 3 arrays
         const labels = data.CustomizedPrice;
-        stillUnavailable =
-          checkStillUnavailable(updatedRecipe[labels.firstLabel]) ||
-          checkStillUnavailable(updatedRecipe[labels.secondLabel]) ||
-          checkStillUnavailable(updatedRecipe[labels.thirdLabel]);
+
+        const r1 = checkStillUnavailable(updatedRecipe[labels.firstLabel]);
+        const r2 = checkStillUnavailable(updatedRecipe[labels.secondLabel]);
+        const r3 = checkStillUnavailable(updatedRecipe[labels.thirdLabel]);
+
+        // Se QUALQUER grupo retornar true → prato fora do cardápio
+        stillUnavailable = [r1, r2, r3].includes(true);
       }
 
-      // Se não há NENHUM ingrediente indisponível → prato pode voltar a ficar ok
+      // Define o status final do prato
       data.lowAmountRawMaterial = stillUnavailable;
+      console.log(
+        `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`
+      );
     }
+
     // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
 
     // referência do prato
