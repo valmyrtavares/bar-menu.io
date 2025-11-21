@@ -25,6 +25,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     volumePerUnit: Number(obj.volumePerUnit),
     minimumAmount: Number(obj.minimumAmount),
     noteReasonsEditingProduct: '',
+    disabledDish: obj.disabledDish || null,
     id: obj.id,
   });
   const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
@@ -252,11 +253,17 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
-      if (stockProductObj.totalVolume <= 0) {
-        await checkUnavaiableRawMaterial(stockProductObj.product, true);
-      } else {
-        await checkUnavaiableRawMaterial(stockProductObj.product, false);
-      }
+      // const disabledDish = Number(stockProductObj.disabledDish);
+      // const totalVolume = Number(stockProductObj.totalVolume);
+      debugger;
+      await checkUnavaiableRawMaterial(stockProductObj.id);
+      // if (disabledDish && disabledDish !== undefined) {
+      //   if (totalVolume <= disabledDish) {
+      //     await checkUnavaiableRawMaterial(stockProductObj.product, true);
+      //   } else {
+      //     await checkUnavaiableRawMaterial(stockProductObj.product, false);
+      //   }
+      // }
       console.log('Documento atualizado com sucesso!');
       updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
@@ -296,6 +303,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               const newCostPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
+              //update costs if changed
               if (
                 currentIngredient.costPerUnit !== newCostPerUnit ||
                 currentIngredient.portionCost !== newPortionCost
@@ -444,6 +452,18 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               className="num"
               label="Volume Mínimo"
               value={stockProductObj.minimumAmount}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
+            />
+          </div>
+          <div className={edit.field}>
+            <Input
+              id="disabledDish"
+              autoComplete="off"
+              className="num"
+              label="Prato Indisponível a partir de "
+              value={stockProductObj.disabledDish}
               type="text"
               onChange={handleChange}
               onBlur={updateCost}

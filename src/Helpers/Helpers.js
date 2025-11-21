@@ -6,6 +6,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  getDoc,
   getDocs,
   updateDoc,
   doc,
@@ -14,136 +15,157 @@ import { app } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
 const db = getFirestore(app);
 
-/**
- * Procura por uma matéria-prima em todas as receitas dos itens e atualiza lowAmountRawMaterial.
- *
- * @param {string} rawMaterialName - Nome da matéria-prima a ser procurada.
- * @param {boolean} status - Valor que será definido (true = indisponível, false = disponível).
- */
-export async function checkUnavaiableRawMaterial(rawMaterialName, status) {
-  if (!rawMaterialName || typeof rawMaterialName !== 'string') {
-    console.warn('⚠️ Parâmetro rawMaterialName inválido:', rawMaterialName);
-    return;
-  }
+export async function checkUnavaiableRawMaterial(id) {
+  //
+  // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID
+  //
+  const docRef = doc(db, 'stock', id);
+  const docSnap = await getDoc(docRef);
 
-  const normalizedName = rawMaterialName.trim().toLowerCase();
+  if (!docSnap.exists()) return;
+
+  const stock = { id: docSnap.id, ...docSnap.data() };
+  const { totalVolume, disabledDish, idProduct, product } = stock;
+
+  //
+  // Normaliza o nome da matéria prima do estoque
+  //
+  const normalizedProduct = product
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  //
+  // 2) BUSCA TODOS OS PRATOS (collection 'item')
+  //
   const itemsSnapshot = await getDocs(collection(db, 'item'));
-  const warningLog = [];
 
-  for (const docSnap of itemsSnapshot.docs) {
-    const data = docSnap.data();
+  //
+  // 3) Função auxiliar que normaliza nome de ingrediente
+  //
+  const normalize = (str) =>
+    str
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  //
+  // 4) Função que processa um array de ingredientes
+  //
+  const processIngredientsArray = (arr, isUnavailable) => {
+    if (!Array.isArray(arr)) return;
+
+    arr.forEach((ing) => {
+      if (!ing || typeof ing.name !== 'string') return;
+
+      const normalizedIngName = normalize(ing.name);
+
+      // Se é a matéria-prima alvo da função
+      if (normalizedIngName === normalizedProduct) {
+        ing.unavailableRawMaterial = isUnavailable; // true ou false
+      }
+    });
+  };
+
+  //
+  // 5) Para cada prato (item)
+  //
+  for (const dishSnap of itemsSnapshot.docs) {
+    const data = dishSnap.data();
+
     const recipe = data?.recipe?.FinalingridientsList;
     if (!recipe) continue;
 
+    // Clone seguro
     let updatedRecipe = structuredClone(recipe);
-    let shouldUpdateRecipe = false;
 
-    // 🔹 Novo controle separado
-    let foundIngredient = false; // encontrou o ingrediente procurado
-    let hasUnavailable = false; // há algum ingrediente indisponível
+    //
+    // VERIFICAÇÃO DE INDISPONIBILIDADE
+    //
+    const isUnavailable = Number(disabledDish) >= Number(totalVolume);
 
-    // Função auxiliar revisada
-    const checkInArray = (arr) => {
-      if (!Array.isArray(arr)) return false;
-
-      arr.forEach((ing) => {
-        if (!ing || typeof ing.name !== 'string') return;
-        const normalizedIngName = ing.name.trim().toLowerCase();
-
-        // Cenário 1: ingrediente procurado está indisponível
-        if (normalizedIngName === normalizedName && status === true) {
-          ing.unavailableRawMaterial = true;
-          shouldUpdateRecipe = true;
-          foundIngredient = true;
-          hasUnavailable = true;
-          warningLog.push(normalizedIngName);
-        }
-
-        // Cenário 2: ingrediente procurado voltou a estar disponível
-        else if (normalizedIngName === normalizedName && status === false) {
-          ing.unavailableRawMaterial = false;
-          shouldUpdateRecipe = true;
-          foundIngredient = true;
-        }
-
-        // Verifica se há qualquer outro ingrediente ainda indisponível
-        if (ing.unavailableRawMaterial === true) {
-          hasUnavailable = true;
-          warningLog.push(normalizedIngName);
-        }
-      });
-    };
-
-    // Verifica os diferentes formatos da receita
-    if (Array.isArray(recipe)) {
-      checkInArray(updatedRecipe);
-    } else if (typeof recipe === 'object' && recipe !== null) {
-      const { firstLabel, secondLabel, thirdLabel } = data.CustomizedPrice;
-      checkInArray(updatedRecipe[firstLabel]);
-      checkInArray(updatedRecipe[secondLabel]);
-      checkInArray(updatedRecipe[thirdLabel]);
+    //
+    // 6) Cenário 1 → Recipe é UM ARRAY
+    //
+    if (Array.isArray(updatedRecipe)) {
+      processIngredientsArray(updatedRecipe, isUnavailable);
     }
 
-    // Atualiza a receita se houve mudança em unavailableRawMaterial
-    if (shouldUpdateRecipe) {
-      try {
-        await updateDoc(doc(db, 'item', docSnap.id), {
-          'recipe.FinalingridientsList': updatedRecipe, // ✅ corrigido nome
-        });
-        console.log(
-          `🧩 Receita de "${data.title}" atualizada com novas disponibilidades`
-        );
-      } catch (err) {
-        console.error(
-          `❌ Erro ao atualizar receita de "${data.title}":`,
-          err.message
-        );
-      }
+    //
+    // 7) Cenário 2 → Recipe é OBJETO com 3 arrays
+    //
+    else if (typeof updatedRecipe === 'object' && updatedRecipe !== null) {
+      const labels = data.CustomizedPrice;
+      if (!labels) continue;
+
+      processIngredientsArray(updatedRecipe[labels.firstLabel], isUnavailable);
+      processIngredientsArray(updatedRecipe[labels.secondLabel], isUnavailable);
+      processIngredientsArray(updatedRecipe[labels.thirdLabel], isUnavailable);
     }
 
-    // Atualiza o status do prato (somente se encontrou o ingrediente procurado)
-    if (foundIngredient) {
-      try {
-        await updateDoc(doc(db, 'item', docSnap.id), {
-          lowAmountRawMaterial: hasUnavailable, // ✅ agora depende apenas dos indisponíveis
-        });
-        console.log(
-          `✅ Prato "${
-            data.title || docSnap.id
-          }" atualizado: lowAmountRawMaterial = ${hasUnavailable}`
-        );
-      } catch (err) {
-        console.error(
-          `❌ Erro ao atualizar "${data.title || docSnap.id}":`,
-          err.message
-        );
-      }
+    //
+    // 8) Ajuste da flag LOW AMOUNT no prato
+    //
+    if (isUnavailable) {
+      // Se a matéria-prima está indisponível → prato fica indisponível
+      data.lowAmountRawMaterial = true;
     } else {
-      try {
-        await updateDoc(doc(db, 'item', docSnap.id), {
-          lowAmountRawMaterial: false, // ✅ s
-        });
-        console.log(
-          `✅ Prato "${
-            data.title || docSnap.id
-          }" atualizado: lowAmountRawMaterial = ${hasUnavailable}`
-        );
-      } catch (err) {
-        console.error(
-          `❌ Erro ao atualizar "${data.title || docSnap.id}":`,
-          err.message
-        );
+      //
+      // Cenário inverso:
+      // totalVolume > disabledDish → verificar se ainda existe ALGUM ingrediente indisponível
+      //
+      const checkStillUnavailable = (arr) =>
+        Array.isArray(arr) &&
+        arr.some((ing) => ing?.unavailableRawMaterial === true);
+
+      let stillUnavailable = false;
+
+      if (Array.isArray(updatedRecipe)) {
+        stillUnavailable = checkStillUnavailable(updatedRecipe);
+      } else {
+        const labels = data.CustomizedPrice;
+        stillUnavailable =
+          checkStillUnavailable(updatedRecipe[labels.firstLabel]) ||
+          checkStillUnavailable(updatedRecipe[labels.secondLabel]) ||
+          checkStillUnavailable(updatedRecipe[labels.thirdLabel]);
       }
+
+      // Se não há NENHUM ingrediente indisponível → prato pode voltar a ficar ok
+      data.lowAmountRawMaterial = stillUnavailable;
     }
-  }
+    // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
 
-  // Log final
-  if (warningLog.length > 0) {
-    console.log('⚠️ Matérias-primas com problema detectadas:');
-    warningLog.forEach((mat) => console.log(` - ${mat}`));
-  }
+    // referência do prato
+    const dishRef = doc(db, 'item', dishSnap.id);
 
-  console.log('🟢 Verificação de matérias-primas concluída.');
+    // monta o payload atualizado
+    // --- MONTAR PAYLOAD CONFORME O TIPO DE RECIPE ---
+    let updatedPayload;
+
+    if (Array.isArray(recipe)) {
+      // 1) Recipe simples (um único array)
+      updatedPayload = {
+        ...data,
+        recipe: {
+          FinalingridientsList: updatedRecipe,
+        },
+      };
+    } else {
+      // 2) Recipe com 3 arrays dentro de um objeto
+      updatedPayload = {
+        ...data,
+        recipe: {
+          FinalingridientsList: updatedRecipe, // updatedRecipe já é o objeto com 3 arrays
+        },
+        CustomizedPrice: data.CustomizedPrice, // mantém o mapeamento dos 3 labels
+      };
+    }
+
+    // salva no firestore
+    await updateDoc(dishRef, updatedPayload);
+  }
 }
 
 // helpers/alertMinimumAmount.js
