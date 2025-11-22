@@ -11,7 +11,21 @@ const EachTotenDish = ({ item, index, preparedRequest }) => {
       <div className={style.image}>
         <img src={item.image} alt="" />
       </div>
-      <h3>{item.lowAmountRawMaterial ? 'indisponivel' : item.title}</h3>
+      <h3>
+        {item.title}
+        {item.lowAmountRawMaterial && (
+          <span
+            style={{
+              display: 'block',
+              fontSize: '0.8em',
+              color: '#c00',
+              marginTop: '4px',
+            }}
+          >
+            INDISPONIVEL
+          </span>
+        )}
+      </h3>
       <div className={style.text}>
         <p>{item.comment}</p>
       </div>

@@ -16,7 +16,6 @@ import * as XLSX from 'xlsx';
 const db = getFirestore(app);
 
 export async function checkUnavaiableRawMaterial(id) {
-  //
   // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID
   //
   const docRef = doc(db, 'stock', id);
@@ -149,10 +148,10 @@ export async function checkUnavaiableRawMaterial(id) {
 
       // Define o status final do prato
       data.lowAmountRawMaterial = stillUnavailable;
-      console.log(
-        `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`
-      );
     }
+    console.log(
+      `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`
+    );
 
     // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
 
