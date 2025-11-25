@@ -21,7 +21,7 @@ const RecipeDish = ({
     unitOfMeasurement: '',
   });
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
-  const [recipeExplanation, setRecipeExplanation] = React.useState('');
+  const [recipeExplanation, setRecipeExplanation] = React.useState(null);
   const [productList, setProductList] = React.useState(null);
   const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
   const [ingredientsBySize, setIngredientsBySize] = React.useState({});
@@ -31,7 +31,7 @@ const RecipeDish = ({
     //#1
     if (recipe) {
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
-        recipe.Explanation = '';
+        recipe.Explanation = 'Receita Vazia';
         recipe.FinalingridientsList = [];
         formatterRecipes(recipe);
       } else {
@@ -545,12 +545,11 @@ const RecipeDish = ({
         <label>Escreva sua receita</label>
         <textarea
           id="gift"
+          required
           className={style.textArea}
           value={recipeExplanation}
-          onChange={({ target }) => setRecipeExplanation(target.value)}
-        >
-          Saudação
-        </textarea>
+          onChange={(e) => setRecipeExplanation(e.target.value)}
+        />
       </div>
       <div className={style.formButtonSubmit}>
         <button onClick={sendRecipe}>Enviar Receita</button>

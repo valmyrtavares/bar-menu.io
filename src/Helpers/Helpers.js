@@ -17,7 +17,7 @@ const db = getFirestore(app);
 
 export async function checkUnavaiableRawMaterial(id) {
   // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID
-  //
+
   const docRef = doc(db, 'stock', id);
   const docSnap = await getDoc(docRef);
 
@@ -58,7 +58,7 @@ export async function checkUnavaiableRawMaterial(id) {
 
     arr.forEach((ing) => {
       if (!ing || typeof ing.name !== 'string') return;
-
+      foundIngredient = false;
       const normalizedIngName = normalize(ing.name);
 
       // Se é a matéria-prima alvo da função

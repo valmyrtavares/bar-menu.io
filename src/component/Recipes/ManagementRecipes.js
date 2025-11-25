@@ -180,16 +180,7 @@ const ManagementRecipes = () => {
     const currentRawMaterial = stock.find(
       (item) => item.product === productSelectedToDelete
     );
-
-    if (
-      currentRawMaterial &&
-      currentRawMaterial.disabledDish !== undefined &&
-      currentRawMaterial.totalVolume <= currentRawMaterial.disabledDish
-    ) {
-      checkUnavaiableRawMaterial(currentRawMaterial.product, false);
-    } else {
-      checkUnavaiableRawMaterial(currentRawMaterial.product, true);
-    }
+    checkUnavaiableRawMaterial(currentRawMaterial.id);
   };
 
   const EditIngredient = (permition) => {

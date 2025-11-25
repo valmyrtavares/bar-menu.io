@@ -417,14 +417,8 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-                const disabledDish = Number(itemFinded.disabledDish);
-                if (disabledDish && disabledDish !== undefined) {
-                  if (currentItem.totalVolume <= disabledDish) {
-                    checkUnavaiableRawMaterial(currentItem.product, true);
-                  } else {
-                    checkUnavaiableRawMaterial(currentItem.product, false);
-                  }
-                }
+
+                await checkUnavaiableRawMaterial(itemFinded.id);
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',

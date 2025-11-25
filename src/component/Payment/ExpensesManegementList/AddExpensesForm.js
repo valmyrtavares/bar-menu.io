@@ -250,7 +250,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         (itemSearch) => itemSearch.product === currentItem.product
       );
       if (itemFinded) {
-        updatingAvaiableDishes(itemFinded);
         // Atualiza os valores de custo e volume totais
         let previousCost = itemFinded.totalCost;
         const adjustmentExpenseNote = currentItem.adjustmentExpenseNote;
@@ -311,6 +310,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        await checkUnavaiableRawMaterial(itemFinded.id);
       } else {
         const previousCost = 0;
         const constpreviousVolume = 0;
@@ -338,6 +338,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           ),
         ];
         await addDoc(collection(db, 'stock'), currentItem);
+        await checkUnavaiableRawMaterial(itemFinded.id);
       }
     }
   };
@@ -440,19 +441,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
   };
 
-  const updatingAvaiableDishes = (itemFinded) => {
-    if (itemFinded) {
-      const disabledDish = Number(itemFinded.disabledDish);
-      if (disabledDish && disabledDish !== undefined) {
-        if (itemFinded.totalVolume <= disabledDish) {
-          checkUnavaiableRawMaterial(itemFinded.product, true);
-        } else {
-          checkUnavaiableRawMaterial(itemFinded.product, false);
-        }
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -474,7 +462,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         await handleStock(enrichedItems, form.account, form.paymentDate);
         const data = await getBtnData('stock');
         handleWarningCleanup(data, enrichedItems);
-        //updatingAvaiableDishes(enrichedItems);
       }
     }
 
