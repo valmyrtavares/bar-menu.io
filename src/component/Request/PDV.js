@@ -19,7 +19,6 @@ const PDV = () => {
       <Link to="/admin/admin">
         <Title mainTitle="Ponto de Venda" />
       </Link>
-      <button onClick={funcaoDeDisparo}>Teste de produto</button>
       <WarningAmoutMessage />
       <div className={style.pdvContainer}>
         <div>
