@@ -19,6 +19,7 @@ import NameForm from './NameForm';
 const CreateCustomer = () => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
+  const [pdv, setPdv] = React.useState(false);
   const anonymousClient = React.useRef(null);
   const [cpfModal, setCpfModal] = React.useState(true);
   const [popupName, setPopupName] = React.useState(true);
@@ -63,6 +64,10 @@ const CreateCustomer = () => {
   const db = getFirestore(app);
 
   React.useEffect(() => {
+    if (localStorage.hasOwnProperty('pdv')) {
+      const pdv = JSON.parse(localStorage.getItem('pdv'));
+      setPdv(pdv);
+    }
     async function CheckLogin() {
       const userId = await CheckUser('userMenu');
       if (userId === '/') {
@@ -123,7 +128,11 @@ const CreateCustomer = () => {
           });
         })
         .then(() => {
-          navigate('/');
+          if (!pdv) {
+            navigate('/');
+          } else {
+            navigate('/admin/requestlist');
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -174,7 +183,11 @@ const CreateCustomer = () => {
         });
       })
       .then(() => {
-        navigate('/');
+        if (!pdv) {
+          navigate('/');
+        } else {
+          navigate('/admin/requestlist');
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -390,6 +403,7 @@ const CreateCustomer = () => {
             clientFinded={clientFinded}
             cpf={form.cpf}
             setCpfModal={setCpfModal}
+            pdv={pdv}
           />
         )}
         <Input

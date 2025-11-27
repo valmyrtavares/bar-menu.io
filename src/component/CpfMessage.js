@@ -3,7 +3,7 @@ import '../assets/styles/cpfMessage.css';
 import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../GlobalContext';
 
-const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
+const CpfMessage = ({ clientFinded, cpf, setCpfModal, pdv }) => {
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
 
@@ -15,7 +15,11 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal }) => {
       name: clientFinded[0].name,
     };
     localStorage.setItem('userMenu', JSON.stringify(currentUser));
-    navigate('/');
+    if (!pdv) {
+      navigate('/');
+    } else {
+      navigate('/admin/requestlist');
+    }
     setCpfModal(false);
   };
   const backToCreateProfile = () => {
