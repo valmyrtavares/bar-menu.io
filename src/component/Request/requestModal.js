@@ -93,7 +93,7 @@ const RequestModal = () => {
       if (localStorage.hasOwnProperty('backorder')) {
         const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
         if (orderStoraged && orderStoraged.length > 0) {
-          if (userData.request && userData.request) {
+          if (userData.request && userData.request.length > 0) {
             orderStoraged.forEach((element) => {
               userData.request.push(element);
             });
