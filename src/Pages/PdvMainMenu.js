@@ -19,10 +19,10 @@ import {
 } from '../Hooks/useEnsureAnonymousUser.js';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 
-function MainMenu() {
+function PdvMainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
-  const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
+  const [menuButton, setMenuButton] = React.useState([]);
   const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
@@ -191,4 +191,4 @@ function MainMenu() {
     </>
   );
 }
-export default MainMenu;
+export default PdvMainMenu;
