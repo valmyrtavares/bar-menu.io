@@ -37,8 +37,8 @@ import {
 const RequestListToBePrepared = ({ title }) => {
   const db = getFirestore(app);
 
-  const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
+  const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);
   const [colorStatusRequest, setColorStatusRequest] = React.useState('red');
   const global = React.useContext(GlobalContext);
@@ -81,6 +81,12 @@ const RequestListToBePrepared = ({ title }) => {
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
   React.useEffect(() => {
     if (!requestsDoneList) return;
+
+    // se tiver pelo menos 1 item, apaga o localStorage
+    if (requestsDoneList.length > 0) {
+      localStorage.removeItem('backorder');
+    }
+
     setOpenRequests((prev) => {
       const next = {};
       requestsDoneList.forEach((item) => {
@@ -266,15 +272,45 @@ const RequestListToBePrepared = ({ title }) => {
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
+      if (!currentItem) {
+        console.log('Item inválido na request:', request);
+        continue;
+      }
+
+      if (!currentItem.recipe) {
+        console.log('Item sem recipe:', currentItem);
+        continue;
+      }
+
+      if (!currentItem.recipe.FinalingridientsList) {
+        console.log('FinalingridientsList está undefined:', currentItem.recipe);
+        continue;
+      }
       const account = currentItem.name;
-      const { FinalingridientsList } = currentItem.recipe;
-      if (Array.isArray(FinalingridientsList[currentItem.size])) {
-        for (
-          let i = 0;
-          i < FinalingridientsList[currentItem.size].length;
-          i++
-        ) {
-          const ingredient = FinalingridientsList[currentItem.size][i];
+      const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
+      if (!Array.isArray(FinalingridientsList)) {
+        console.log(
+          'ERRO: FinalingridientsList está indefinido para:',
+          currentItem
+        );
+        continue; // pula para o próximo item da request
+      }
+
+      if (
+        !currentItem?.recipe?.FinalingridientsList ||
+        currentItem.recipe.FinalingridientsList.length === 0
+      ) {
+        alert(
+          'Este produto precisa ter uma receita cadastrada para ser vendido.'
+        );
+        return; // ou continue, dependendo do seu fluxo
+      }
+
+      const size = currentItem?.size;
+      const listBySize = FinalingridientsList?.[size];
+      if (Array.isArray(listBySize)) {
+        for (let i = 0; i < listBySize.length; i++) {
+          const ingredient = listBySize[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;

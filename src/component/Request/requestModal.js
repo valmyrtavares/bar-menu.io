@@ -64,14 +64,19 @@ const RequestModal = () => {
     }
 
     if (localStorage.hasOwnProperty('backorder')) {
-      let data = [];
-      const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
-      if (orderStoraged && orderStoraged.length > 0) {
-        orderStoraged.forEach((element) => {
-          data.push(element);
-        });
+      const raw = localStorage.getItem('backorder');
+      let orderStoraged = [];
+
+      if (raw) {
+        try {
+          orderStoraged = JSON.parse(raw);
+        } catch (err) {
+          console.warn("Valor inválido para 'backorder':", raw);
+          orderStoraged = [];
+        }
       }
-      setBackorder(data);
+
+      setBackorder(orderStoraged);
     }
   }, []);
 
@@ -432,7 +437,11 @@ const RequestModal = () => {
       return;
     }
   };
-
+  const logout = () => {
+    localStorage.removeItem('userMenu');
+    global.setAuthorizated(false);
+    navigate('/create-customer');
+  };
   return (
     <section
       className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
@@ -464,7 +473,7 @@ const RequestModal = () => {
         />
       )}
 
-      <p className="current-client">
+      <p className="current-client" onClick={logout}>
         <span>Cliente: </span>
         {userData?.name === 'anonimo' ? userData?.fantasyName : userData?.name}
       </p>

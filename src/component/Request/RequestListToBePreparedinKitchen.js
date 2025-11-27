@@ -262,15 +262,35 @@ const RequestListToBePrepared = () => {
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
+
+      if (!currentItem) {
+        console.log('Item inválido na request:', request);
+        continue;
+      }
+
+      if (!currentItem.recipe) {
+        console.log('Item sem recipe:', currentItem);
+        continue;
+      }
+
+      if (!currentItem.recipe.FinalingridientsList) {
+        console.log('FinalingridientsList está undefined:', currentItem.recipe);
+        continue;
+      }
       const account = currentItem.name;
-      const { FinalingridientsList } = currentItem.recipe;
-      if (Array.isArray(FinalingridientsList[currentItem.size])) {
-        for (
-          let i = 0;
-          i < FinalingridientsList[currentItem.size].length;
-          i++
-        ) {
-          const ingredient = FinalingridientsList[currentItem.size][i];
+      const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
+      if (!Array.isArray(FinalingridientsList)) {
+        console.log(
+          'ERRO: FinalingridientsList está indefinido para:',
+          currentItem
+        );
+        continue; // pula para o próximo item da request
+      }
+      const size = currentItem?.size;
+      const listBySize = FinalingridientsList?.[size];
+      if (Array.isArray(listBySize)) {
+        for (let i = 0; i < listBySize.length; i++) {
+          const ingredient = listBySize[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
