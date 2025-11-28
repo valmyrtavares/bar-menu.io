@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
 import style from '../../../assets/styles/AddExpensesForm.module.scss';
+import { UpdateMenuMessage } from '../../Messages/UpdateMenuMessage.js';
 import CloseBtn from '../../closeBtn';
 // import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
 import {
@@ -19,6 +20,8 @@ import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const global = React.useContext(GlobalContext);
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
     value: 0,
@@ -310,7 +313,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
-        await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(res);
       } else {
         const previousCost = 0;
         const constpreviousVolume = 0;
@@ -338,7 +343,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           ),
         ];
         await addDoc(collection(db, 'stock'), currentItem);
-        await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(res);
       }
     }
   };
@@ -611,6 +618,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   return (
     <div className={style.containerAddExpensesForm}>
       <CloseBtn setClose={setShowPopup} />
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
 
       <h1>Adicione uma nova despesa</h1>
 
