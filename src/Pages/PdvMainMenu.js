@@ -18,6 +18,7 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
+import { onSnapshot } from 'firebase/firestore';
 
 function PdvMainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
@@ -34,7 +35,15 @@ function PdvMainMenu() {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    console.log('Acabei de entrar aqui'); // Verifica se o toten existe no localStorage e define o estado global isToten
+    const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
+      const dishes = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setDishes(dishes); // atualiza automaticamente
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // const checkToten = () => {

@@ -1,6 +1,9 @@
 @import './adminStyleReuse.module.scss';
 
 .containerManagementRecipes{
+    .updateMenuMessageWrapper{
+        position :relative;
+    }
     h1{
         margin-bottom: 100px;
     }

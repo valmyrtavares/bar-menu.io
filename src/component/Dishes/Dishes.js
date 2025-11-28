@@ -9,7 +9,8 @@ function Dishes({ newItem }) {
 
   React.useEffect(() => {
     setItem(newItem);
-  }, []);
+    console.log('Objeto recebido em Dishes:', newItem);
+  }, [newItem]);
 
   const openmodal = () => {
     setModal(true);
