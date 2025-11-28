@@ -460,18 +460,19 @@ const RequestModal = () => {
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
-
-      {warningMsg && (
-        <WarningMessages
-          message="Agora você pode ir ao caixa "
-          customer={userData?.name}
-          finalPriceRequest={finalPriceRequest}
-          sendRequestToKitchen={sendRequestToKitchen}
-          setWarningMsg={setWarningMsg}
-          requests={userData.request}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <div className="warning-messages-container">
+        {warningMsg && (
+          <WarningMessages
+            message="Agora você pode ir ao caixa "
+            customer={userData?.name}
+            finalPriceRequest={finalPriceRequest}
+            sendRequestToKitchen={sendRequestToKitchen}
+            setWarningMsg={setWarningMsg}
+            requests={userData.request}
+            isSubmitting={isSubmitting}
+          />
+        )}
+      </div>
 
       <p className="current-client" onClick={logout}>
         <span>Cliente: </span>

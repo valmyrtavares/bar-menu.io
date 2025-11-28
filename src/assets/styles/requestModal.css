@@ -3,6 +3,10 @@
 .container-modal-request {
     min-height: 75vh;
 }
+.container-modal-request .warning-messages-container{
+    position: relative;
+    left:20%
+}
 
 .current-client {
     text-align: center;
