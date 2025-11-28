@@ -3,6 +3,7 @@ import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
 import { getBtnData } from '../../api/Api';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
   collection,
@@ -30,6 +31,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   });
   const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
     React.useState('');
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
 
   const db = getFirestore(app);
 
@@ -256,15 +259,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       // const disabledDish = Number(stockProductObj.disabledDish);
       // const totalVolume = Number(stockProductObj.totalVolume);
 
-      await checkUnavaiableRawMaterial(stockProductObj.id);
-      // if (disabledDish && disabledDish !== undefined) {
-      //   if (totalVolume <= disabledDish) {
-      //     await checkUnavaiableRawMaterial(stockProductObj.product, true);
-      //   } else {
-      //     await checkUnavaiableRawMaterial(stockProductObj.product, false);
-      //   }
-      // }
-      console.log('Documento atualizado com sucesso!');
+      setLoadingAvailableMenuDishes(true);
+      const res = await checkUnavaiableRawMaterial(stockProductObj.id);
+      setLoadingAvailableMenuDishes(res);
+
       updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
       setShowEditForm(false);
@@ -413,6 +411,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             X
           </button>
         </div>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
 
         <div className={edit.titleRow}>
           <h2>{`${stockProductObj.product} - ${stockProductObj.unitOfMeasurement}`}</h2>

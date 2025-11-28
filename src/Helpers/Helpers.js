@@ -184,6 +184,7 @@ export async function checkUnavaiableRawMaterial(id) {
     // salva no firestore
     await updateDoc(dishRef, updatedPayload);
   }
+  return false;
 }
 
 // helpers/alertMinimumAmount.js
