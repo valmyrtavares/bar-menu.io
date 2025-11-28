@@ -7,6 +7,7 @@ import { app } from '../../config-firebase/firebase';
 import { Link } from 'react-router-dom';
 import Title from '../title';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
@@ -27,6 +28,8 @@ const ManagementRecipes = () => {
   const [selectedRecipesToEdit, setSelectedRecipesToEdit] = React.useState([]); // list of recipes selected to edit
   const [showWarningMessage, setShowWarningMessage] = React.useState(false); // Open modal regarind delete action
   const [ConfirmAction, setConfirmAction] = React.useState(false); // Open modal regardind confirm edit action
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
 
   const db = getFirestore(app);
 
@@ -176,11 +179,13 @@ const ManagementRecipes = () => {
   };
 
   //This function check if the raw material that was deleted from recipes is still above minimum amount in the stock, to able or disable dishes in the menu
-  const updatingAvaiableDishesInMenu = () => {
+  const updatingAvaiableDishesInMenu = async () => {
     const currentRawMaterial = stock.find(
       (item) => item.product === productSelectedToDelete
     );
-    checkUnavaiableRawMaterial(currentRawMaterial.id);
+    setLoadingAvailableMenuDishes(true);
+    const res = await checkUnavaiableRawMaterial(currentRawMaterial.id);
+    setLoadingAvailableMenuDishes(res);
   };
 
   const EditIngredient = (permition) => {
@@ -251,6 +256,9 @@ const ManagementRecipes = () => {
 
   return (
     <div className={style.containerManagementRecipes}>
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
       <div className={style.containerWarningMessage}>
         {showWarningMessage && (
           <WarningMessage
