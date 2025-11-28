@@ -15,6 +15,7 @@ import {
 import style from '../../assets/styles/RequestListToBePrepared.module.scss';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirstFourLetters,
   requestSorter,
@@ -36,7 +37,8 @@ import {
 
 const RequestListToBePrepared = ({ title }) => {
   const db = getFirestore(app);
-
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);
@@ -453,8 +455,9 @@ const RequestListToBePrepared = ({ title }) => {
                   ...prev,
                   check.message,
                 ]);
-
-                await checkUnavaiableRawMaterial(itemFinded.id);
+                setLoadingAvailableMenuDishes(true);
+                const res = await checkUnavaiableRawMaterial(itemFinded.id);
+                setLoadingAvailableMenuDishes(res);
               } catch (err) {
                 console.error(
                   'Erro ao atualizar warningAmountMessage no localStorage',
@@ -916,6 +919,9 @@ const RequestListToBePrepared = ({ title }) => {
       <Link to="/admin/admin">
         <Title mainTitle={title} />
       </Link>
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
           const { status, color } = getStatusAndColor(item); // 👈 aqui
