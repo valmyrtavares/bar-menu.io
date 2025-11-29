@@ -11,9 +11,6 @@ import WarningAmoutMessage from '../Messages/WarningAmoutMessage';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 
 const PDV = () => {
-  const funcaoDeDisparo = async () => {
-    await checkUnavaiableRawMaterial('arroz', false);
-  };
   return (
     <div>
       <Link to="/admin/admin">

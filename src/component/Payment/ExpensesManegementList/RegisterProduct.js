@@ -136,7 +136,7 @@ const RegisterProduct = ({ setShowPopup }) => {
 
     if (editForm) {
       console.log('form to submit:', form);
-      debugger;
+
       const documentRef = doc(db, 'product', id);
 
       // Limpar o objeto `form` para remover valores `undefined`

@@ -432,37 +432,42 @@ const RequestListToBePrepared = ({ title }) => {
           const volumeAdd = parseToNumber(itemFinded.totalVolume);
           currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
           if (currentItem.totalVolume < itemFinded.minimumAmount) {
-            alert(
-              `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
-            );
+            debugger;
+            if (!hasWarningForProduct(currentItem.product)) {
+              console.log(`Aviso já registrado para ${currentItem.product}`);
+              alert(
+                `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
+              );
 
-            const check = alertMinimunAmount(
-              currentItem.product,
-              currentItem.totalVolume,
-              currentItem.minimumAmount,
-              currentItem.totalCost
-            );
-            if (check && check.message) {
-              try {
-                const key = 'warningAmountMessage';
-                let stored = localStorage.getItem(key);
-                let warnings = stored ? JSON.parse(stored) : [];
-                if (!Array.isArray(warnings)) warnings = [];
-                warnings.push(check.message);
-                localStorage.setItem(key, JSON.stringify(warnings));
-                console.log('O que é esse global aqui  ', global);
-                global.setWarningLowRawMaterial((prev) => [
-                  ...prev,
-                  check.message,
-                ]);
-                setLoadingAvailableMenuDishes(true);
-                const res = await checkUnavaiableRawMaterial(itemFinded.id);
-                setLoadingAvailableMenuDishes(res);
-              } catch (err) {
-                console.error(
-                  'Erro ao atualizar warningAmountMessage no localStorage',
-                  err
-                );
+              const check = alertMinimunAmount(
+                currentItem.product,
+                currentItem.totalVolume,
+                itemFinded.minimumAmount,
+                currentItem.totalCost
+              );
+
+              if (check && check.message) {
+                try {
+                  const key = 'warningAmountMessage';
+                  let stored = localStorage.getItem(key);
+                  let warnings = stored ? JSON.parse(stored) : [];
+                  if (!Array.isArray(warnings)) warnings = [];
+                  warnings.push(check.message);
+                  localStorage.setItem(key, JSON.stringify(warnings));
+                  console.log('O que é esse global aqui  ', global);
+                  global.setWarningLowRawMaterial((prev) => [
+                    ...prev,
+                    check.message,
+                  ]);
+                  setLoadingAvailableMenuDishes(true);
+                  const res = await checkUnavaiableRawMaterial(itemFinded.id);
+                  setLoadingAvailableMenuDishes(res);
+                } catch (err) {
+                  console.error(
+                    'Erro ao atualizar warningAmountMessage no localStorage',
+                    err
+                  );
+                }
               }
             }
             if (currentItem.totalVolume < 0) {
@@ -511,6 +516,18 @@ const RequestListToBePrepared = ({ title }) => {
         await addDoc(collection(db, 'stock'), currentItem);
       }
     }
+  };
+
+  const hasWarningForProduct = (productName) => {
+    const raw = localStorage.getItem('warningAmountMessage');
+    let parsed = JSON.parse(raw);
+    const res =
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      parsed.some(
+        (entry) => typeof entry === 'string' && entry.includes(productName)
+      );
+    return res;
   };
 
   const cleanObject = (obj) => {
