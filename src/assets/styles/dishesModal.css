@@ -60,14 +60,12 @@
           font-size: 20px;   
         }
       }
-      /* .content-modal-dishes .close-btn {
+      .content-modal-dishes .close-btn {
         display: flex;
         justify-content: end;
-      } */
-         .content-modal-dishes .close-btn button {
-      position: fixed;
-      top: 7%;
+        margin-block:20px 0px;
       }
+      
 
       .content-modal-dishes div button {
         margin: 0;
