@@ -155,7 +155,7 @@ const FormFrontImage = () => {
         </label>
       </div>
 
-      <div className="form-check my-1">
+      {/*} <div className="form-check my-1">
         <input
           className="form-check-input"
           id="modePicture"
@@ -167,7 +167,7 @@ const FormFrontImage = () => {
           Para acionar o modo de imagem de celular, mantenha selecionado. node
           os botões serão substituidos por imagens.
         </label>
-      </div>
+      </div>*/}
 
       <div className="form-check my-1">
         <input
