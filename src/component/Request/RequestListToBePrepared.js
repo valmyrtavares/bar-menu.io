@@ -431,49 +431,6 @@ const RequestListToBePrepared = ({ title }) => {
           const volumeBefore = parseToNumber(currentItem.totalVolume);
           const volumeAdd = parseToNumber(itemFinded.totalVolume);
           currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
-          if (currentItem.totalVolume < itemFinded.minimumAmount) {
-            debugger;
-            if (!hasWarningForProduct(currentItem.product)) {
-              console.log(`Aviso já registrado para ${currentItem.product}`);
-              alert(
-                `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
-              );
-
-              const check = alertMinimunAmount(
-                currentItem.product,
-                currentItem.totalVolume,
-                itemFinded.minimumAmount,
-                currentItem.totalCost
-              );
-
-              if (check && check.message) {
-                try {
-                  const key = 'warningAmountMessage';
-                  let stored = localStorage.getItem(key);
-                  let warnings = stored ? JSON.parse(stored) : [];
-                  if (!Array.isArray(warnings)) warnings = [];
-                  warnings.push(check.message);
-                  localStorage.setItem(key, JSON.stringify(warnings));
-                  console.log('O que é esse global aqui  ', global);
-                  global.setWarningLowRawMaterial((prev) => [
-                    ...prev,
-                    check.message,
-                  ]);
-                  setLoadingAvailableMenuDishes(true);
-                  const res = await checkUnavaiableRawMaterial(itemFinded.id);
-                  setLoadingAvailableMenuDishes(res);
-                } catch (err) {
-                  console.error(
-                    'Erro ao atualizar warningAmountMessage no localStorage',
-                    err
-                  );
-                }
-              }
-            }
-            if (currentItem.totalVolume < 0) {
-              currentItem.totalVolume = 0;
-            }
-          }
         }
 
         // Inicializa ou adiciona ao UsageHistory
@@ -500,6 +457,7 @@ const RequestListToBePrepared = ({ title }) => {
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        await updatingStockAndMenu(itemFinded, currentItem);
       } else {
         // Cria um novo registro para o item no banco de dados
         currentItem.UsageHistory = [
@@ -514,6 +472,49 @@ const RequestListToBePrepared = ({ title }) => {
         ];
         currentItem = cleanObject(currentItem);
         await addDoc(collection(db, 'stock'), currentItem);
+        await updatingStockAndMenu(itemFinded, currentItem); //update warnings and menu after update stock
+      }
+    }
+  };
+
+  const updatingStockAndMenu = async (itemFinded, currentItem) => {
+    if (currentItem.totalVolume < itemFinded.minimumAmount) {
+      if (!hasWarningForProduct(currentItem.product)) {
+        console.log(`Aviso já registrado para ${currentItem.product}`);
+        alert(
+          `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
+        );
+
+        const check = alertMinimunAmount(
+          currentItem.product,
+          currentItem.totalVolume,
+          itemFinded.minimumAmount,
+          currentItem.totalCost
+        );
+
+        if (check && check.message) {
+          try {
+            const key = 'warningAmountMessage';
+            let stored = localStorage.getItem(key);
+            let warnings = stored ? JSON.parse(stored) : [];
+            if (!Array.isArray(warnings)) warnings = [];
+            warnings.push(check.message);
+            localStorage.setItem(key, JSON.stringify(warnings));
+            console.log('O que é esse global aqui  ', global);
+            global.setWarningLowRawMaterial((prev) => [...prev, check.message]);
+          } catch (err) {
+            console.error(
+              'Erro ao atualizar warningAmountMessage no localStorage',
+              err
+            );
+          }
+        }
+      }
+      setLoadingAvailableMenuDishes(true);
+      const res = await checkUnavaiableRawMaterial(itemFinded.id);
+      setLoadingAvailableMenuDishes(res);
+      if (currentItem.totalVolume < 0) {
+        currentItem.totalVolume = 0;
       }
     }
   };
