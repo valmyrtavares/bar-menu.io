@@ -211,8 +211,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               <th>Custo Total</th>
               <th>Volume</th>
               <th>Unidade de medida</th>
-              <th>Volume atual</th>
-              <th>Nota</th>
               <th>Excluir</th>
             </tr>
           </thead>
@@ -227,8 +225,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                   <td>{requestItem.totalCost}</td>
                   <td>{requestItem.volumePerUnit}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
-                  <td>{requestItem.currentAmountProduct}</td>
-                  <td title={requestItem.adjustmentExpenseNote}>
+                  <td>
+                    {' '}
                     {requestItem.adjustmentExpenseNote ? 'nota' : 'sem nota'}
                   </td>
                   <td onClick={() => deleteItem(index)}>X</td>
