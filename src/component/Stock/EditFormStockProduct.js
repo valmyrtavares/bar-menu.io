@@ -233,10 +233,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
 
   const addItem = async () => {
-    if (!noteReasonsEditingProduct) {
-      alert(
-        'A edição só pode ser cocluída, depois da anotação sobre a edição do produto'
-      );
+    if (
+      noteReasonsEditingProduct === '' ||
+      stockProductObj.totalVolume <= 0 ||
+      stockProductObj.totalCost <= 0 ||
+      stockProductObj.minimumAmount <= 0 ||
+      stockProductObj.disabledDish <= 0
+    ) {
+      alert('Todos os campos de edição são obrigatórios.');
       return;
     }
 
@@ -418,7 +422,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         </div>
 
         <div className={edit.inputGrid}>
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="totalVolume"
               autoComplete="off"
@@ -431,7 +435,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             />
           </div>
 
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="totalCost"
               autoComplete="off"
@@ -444,7 +448,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             />
           </div>
 
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="minimumAmount"
               autoComplete="off"
@@ -456,32 +460,31 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               onBlur={updateCost}
             />
           </div>
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="disabledDish"
               autoComplete="off"
               className="num"
-              label="Prato Indisponível a partir de "
+              label="Indisponível a partir"
               value={stockProductObj.disabledDish}
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
             />
           </div>
-
-          <div className={edit.field}>
-            <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
-            <textarea
-              id="editAdminNote"
-              className="num"
-              value={noteReasonsEditingProduct || ''}
-              onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
-              autoComplete="off"
-              rows={3}
-              placeholder="Adicione uma observação sobre os motivos da sua edição"
-              onBlur={updateNoteEdit}
-            />
-          </div>
+        </div>
+        <div className={edit.textareaField}>
+          <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
+          <textarea
+            id="editAdminNote"
+            className="num"
+            value={noteReasonsEditingProduct || ''}
+            onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
+            autoComplete="off"
+            rows={3}
+            placeholder="Adicione uma observação sobre os motivos da sua edição"
+            onBlur={updateNoteEdit}
+          />
         </div>
 
         <div className={edit.volumeRow}>
