@@ -121,6 +121,7 @@ const TotenRegisterPopup = ({
   };
 
   const addNickname = async () => {
+    debugger;
     if (form.cpf === '' && form.name === '') {
       setWarningMessageToEmptyFields(true);
 
@@ -131,7 +132,10 @@ const TotenRegisterPopup = ({
       window.warningTimeout = setTimeout(() => {
         setWarningMessageToEmptyFields(false);
       }, 5000);
-
+      setShowNameKeyboard(false);
+      setShowCpfKeyboard(false);
+      setCpfOption(true);
+      setNameOption(true);
       return; // Sai da função para evitar continuar a execução
     }
     if (noDobleClick) return; // evita disparo duplo
@@ -171,6 +175,10 @@ const TotenRegisterPopup = ({
           setWarningMessageCustomerNotFinded(false);
         }, 5000);
         setForm({ ...form, cpf: '' });
+        setNoDobleClick(false);
+        setNameOption(true);
+        setCpfOption(true);
+        setShowCpfKeyboard(false);
         return;
       }
     }
