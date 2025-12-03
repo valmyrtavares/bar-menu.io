@@ -38,12 +38,13 @@
                 color: var(--font-color);
             }
         }
+      
 
         .titleRow {
             width: 100%;
 
             h2 {
-                font-size: 3.6rem;
+                font-size: 2.6rem;
                 font-weight: bold;
                 color: $admin-title-color;
                 margin: 0;
@@ -52,48 +53,36 @@
 
         .inputGrid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-
-            .field {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-
-                h3,
-                p,
-                label {
-                    color: $admin-title-color;
-                    margin: 5px 0;
-                    font-size:1.9rem
-                }
-
-                input,
-                textarea {
-                    width: 100%;
-                    max-width: 180px;
-                    font-size: 1rem;
-                    padding: 5px;
-                }
-
-                textarea {
-                    resize: vertical;
-                    min-height: 100px;
-                }
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+           
+            
+           div{
+            display:grid;
+            grid-template-columns: auto;
+            align-content: center;
+            input{
+                max-width: 100px;
+                margin:0 auto
             }
+           }           
         }
+.textareaField{
+    display:grid;
+    grid-template-columns: auto;
+    width: 90%;
+    margin: 5px auto;
+}
 
-        .volumeRow {
-            width: 100%;
-
-            h3,
-            p {
-                color: $admin-title-color;
-                margin: 5px 0;
-                font-size: 1.1rem;
-            }
-        }
+.volumeRow {
+    width: 100%;
+    
+    h3,
+    p {
+        color: $admin-title-color;
+        margin: 5px 0;
+        font-size: 1.1rem;
+    }
+}
 
         .btnRow {
             width: 100%;

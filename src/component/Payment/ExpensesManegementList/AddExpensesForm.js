@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import Input from '../../Input';
 import style from '../../../assets/styles/AddExpensesForm.module.scss';
+import { UpdateMenuMessage } from '../../Messages/UpdateMenuMessage.js';
 import CloseBtn from '../../closeBtn';
-import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
+// import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
 import {
   getDocs,
   getFirestore,
@@ -13,8 +14,14 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../../config-firebase/firebase';
 import { getBtnData, addItemToCollection } from '../../../api/Api';
+//import { alertMinimunAmount } from '../../../Helpers/Helpers';
+import { GlobalContext } from '../../../GlobalContext';
+import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
+  const global = React.useContext(GlobalContext);
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
     value: 0,
@@ -32,6 +39,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     product: '',
     amount: 0,
     CostPerUnit: 0,
+    minimumAmount: 0,
     totalCost: 0,
     volumePerUnit: 0,
     adjustmentExpenseNote: '',
@@ -203,8 +211,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               <th>Custo Total</th>
               <th>Volume</th>
               <th>Unidade de medida</th>
-              <th>Volume atual</th>
-              <th>Nota</th>
               <th>Excluir</th>
             </tr>
           </thead>
@@ -219,8 +225,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
                   <td>{requestItem.totalCost}</td>
                   <td>{requestItem.volumePerUnit}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
-                  <td>{requestItem.currentAmountProduct}</td>
-                  <td title={requestItem.adjustmentExpenseNote}>
+                  <td>
+                    {' '}
                     {requestItem.adjustmentExpenseNote ? 'nota' : 'sem nota'}
                   </td>
                   <td onClick={() => deleteItem(index)}>X</td>
@@ -267,12 +273,16 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         const pack = Number(itemFinded.amount) + Number(currentItem.amount);
         const volume = currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
-        currentItem.totalCost += currentItem.currentAmountProduct
-          ? previousCost
-          : itemFinded.totalCost || 0;
-        currentItem.totalVolume += currentItem.currentAmountProduct
-          ? previousVolume
-          : itemFinded.totalVolume || 0;
+        currentItem.totalCost += Number(
+          currentItem.currentAmountProduct
+            ? previousCost
+            : itemFinded.totalCost || 0
+        );
+        currentItem.totalVolume += Number(
+          currentItem.currentAmountProduct
+            ? previousVolume
+            : itemFinded.totalVolume || 0
+        );
 
         // Inicializa ou adiciona ao UsageHistory
         currentItem.UsageHistory = itemFinded.UsageHistory || [];
@@ -301,9 +311,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(res);
       } else {
         const previousCost = 0;
         const constpreviousVolume = 0;
+        const adjustmentExpenseNote = '';
         const cost = currentItem.totalCost;
         const pack = Number(currentItem.amount);
         const volume = currentItem.totalVolume;
@@ -314,6 +328,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           stockHistoryList(
             currentItem,
             account,
+            adjustmentExpenseNote,
             paymentDate,
             pack,
             cost,
@@ -326,9 +341,41 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           ),
         ];
         await addDoc(collection(db, 'stock'), currentItem);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(res);
       }
     }
   };
+
+  // const updateWanrningAmoutMessage = (
+  //   product,
+  //   totalVolume,
+  //   minimumAmount,
+  //   totalCost
+  // ) => {
+  //   const check = alertMinimunAmount(
+  //     product,
+  //     totalVolume,
+  //     minimumAmount,
+  //     totalCost
+  //   );
+
+  //   try {
+  //     const key = 'warningAmountMessage';
+  //     let stored = localStorage.getItem(key);
+  //     let warnings = stored ? JSON.parse(stored) : [];
+  //     if (!Array.isArray(warnings)) warnings = [];
+  //     warnings.push(check.message);
+  //     localStorage.setItem(key, JSON.stringify(warnings));
+  //     global.setWarningLowRawMaterial((prev) => [...prev, check.message]);
+  //   } catch (err) {
+  //     console.error(
+  //       'Erro ao atualizar warningAmountMessage no localStorage',
+  //       err
+  //     );
+  //   }
+  // };
 
   const stockHistoryList = (
     item,
@@ -355,7 +402,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       adjustmentExpenseNote: adjustmentExpenseNote,
       previousVolume: previousVolume,
       previousCost: previousCost,
-      ContentsInStock: totalVolume,
+      ContentsInStock: totalVolume ? totalVolume : 0,
       totalResourceInvested: totalCost,
     };
     return stockEventRegistration;
@@ -410,14 +457,17 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       paymentDate: form.paymentDate,
       expenseId: form.expenseId,
     }));
-
+    console.log('Itens enriquecidos  ', enrichedItems);
     /** 2. Cria um novo objeto form sem mutar o state original */
     const dataToSave = { ...form, items: enrichedItems };
 
     /** 3. (Opcional) Se ainda usa handleStock ou distributeItemsToExpenseList */
     if (enrichedItems.length > 0) {
-      handleStock(enrichedItems, form.account, form.paymentDate);
-      // distributeItemsToExpenseList(enrichedItems, ...);
+      if (enrichedItems.length > 0) {
+        await handleStock(enrichedItems, form.account, form.paymentDate);
+        const data = await getBtnData('stock');
+        handleWarningCleanup(data, enrichedItems);
+      }
     }
 
     try {
@@ -450,6 +500,29 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     } catch (error) {
       console.error('Erro ao salvar documento:', error);
     }
+  };
+
+  const handleWarningCleanup = (data, enrichedItems) => {
+    const stored =
+      JSON.parse(localStorage.getItem('warningAmountMessage')) || [];
+
+    data.forEach((item) => {
+      const match = enrichedItems.find((i) => i.idProduct === item.idProduct);
+      if (match && item.totalVolume > item.minimumAmount) {
+        // encontra o índice da mensagem correspondente ao produto
+        const msgIndex = stored.findIndex(
+          (msg) =>
+            typeof msg === 'string' && msg.includes(`produto ${item.product}`)
+        );
+
+        if (msgIndex !== -1) {
+          stored[msgIndex] = ''; // limpa apenas o aviso desse produto
+        }
+      }
+    });
+
+    localStorage.setItem('warningAmountMessage', JSON.stringify(stored));
+    global.setWarningLowRawMaterial(stored);
   };
 
   const handleChange = (e) => {
@@ -501,12 +574,17 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       setItem((prevForm) => ({
         ...prevForm,
-        idProduct: selectedProduct.idProduct, // Define o ID do produto
+        idProduct: selectedProduct.idProduct
+          ? selectedProduct.idProduct
+          : selectedProduct.id, // Define o ID do produto
         product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
         operationSupplies: selectedProduct.operationSupplies ? true : false,
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '', // Define a unidade de medida
+        minimumAmount: selectedProduct.minimumAmount
+          ? selectedProduct.minimumAmount
+          : 0,
       }));
       return;
     } else {
@@ -538,6 +616,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   return (
     <div className={style.containerAddExpensesForm}>
       <CloseBtn setClose={setShowPopup} />
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
 
       <h1>Adicione uma nova despesa</h1>
 
@@ -621,6 +702,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             id="account"
             autoComplete="off"
             className="account"
+            required
             label="Nota fiscal"
             value={form.account}
             type="text"
@@ -696,7 +778,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="number"
               onChange={handleItemChange}
             />
-            <Input
+            {/* <Input
               title="Caso o valor em estoque desse produto não seja verdadeiro atualize o valor correto
               e na tela de 'digite sua Jusitificativa' escreva uma nota dizendo porque o valor restante
               desse produto em estoque não correponde a realidade. Ex: data de validade vencida"
@@ -708,7 +790,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="text"
               onChange={handleItemChange}
               onBlur={checkCurrentValue}
-            />
+            /> */}
 
             <Input
               title="Registre aqui a quantidade de itens por pacote Ex: 100 colheres ou 2kg de leite por volume"
@@ -728,13 +810,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         <button>Enviar</button>
       </form>
 
-      {showPopupNote && (
+      {/* {showPopupNote && (
         <ProductVolumeAdjustmentNote
           setNote={setNote}
           setShowPopupNote={setShowPopupNote}
           showPopupNote={showPopupNote}
         />
-      )}
+      )} */}
       {showItemsDetailsForm && item && renderTableItem()}
     </div>
   );

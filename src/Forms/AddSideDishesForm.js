@@ -247,9 +247,6 @@ function AddSideDishesForm({
           objPriceCost={form.costPriceObj}
         />
       )}
-      <div className={style.editCloseButton}>
-        <button onClick={() => setModalEditSideDishes(false)}>X</button>
-      </div>
       <Link to="/admin/admin">
         <Title
           mainTitle={

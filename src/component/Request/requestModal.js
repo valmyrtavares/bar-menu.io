@@ -64,14 +64,19 @@ const RequestModal = () => {
     }
 
     if (localStorage.hasOwnProperty('backorder')) {
-      let data = [];
-      const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
-      if (orderStoraged && orderStoraged.length > 0) {
-        orderStoraged.forEach((element) => {
-          data.push(element);
-        });
+      const raw = localStorage.getItem('backorder');
+      let orderStoraged = [];
+
+      if (raw) {
+        try {
+          orderStoraged = JSON.parse(raw);
+        } catch (err) {
+          console.warn("Valor inválido para 'backorder':", raw);
+          orderStoraged = [];
+        }
       }
-      setBackorder(data);
+
+      setBackorder(orderStoraged);
     }
   }, []);
 
@@ -93,7 +98,7 @@ const RequestModal = () => {
       if (localStorage.hasOwnProperty('backorder')) {
         const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
         if (orderStoraged && orderStoraged.length > 0) {
-          if (userData.request && userData.request) {
+          if (userData.request && userData.request.length > 0) {
             orderStoraged.forEach((element) => {
               userData.request.push(element);
             });
@@ -262,7 +267,12 @@ const RequestModal = () => {
 
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
-      if (isToten && isToten === true) {
+
+      if (pdv === true && global.pdvRequest) {
+        addRequestUserToten(currentUserNew.id);
+        global.setPdvRequest(false);
+        return;
+      } else if (isToten && isToten === true) {
         addRequestUserToten(currentUserNew.id);
         setTotenMessage(true);
         setTimeout(() => {
@@ -432,7 +442,11 @@ const RequestModal = () => {
       return;
     }
   };
-
+  const logout = () => {
+    localStorage.removeItem('userMenu');
+    global.setAuthorizated(false);
+    navigate('/create-customer');
+  };
   return (
     <section
       className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
@@ -451,20 +465,21 @@ const RequestModal = () => {
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
+      <div className="warning-messages-container">
+        {warningMsg && (
+          <WarningMessages
+            message="Agora você pode ir ao caixa "
+            customer={userData?.name}
+            finalPriceRequest={finalPriceRequest}
+            sendRequestToKitchen={sendRequestToKitchen}
+            setWarningMsg={setWarningMsg}
+            requests={userData.request}
+            isSubmitting={isSubmitting}
+          />
+        )}
+      </div>
 
-      {warningMsg && (
-        <WarningMessages
-          message="Agora você pode ir ao caixa "
-          customer={userData?.name}
-          finalPriceRequest={finalPriceRequest}
-          sendRequestToKitchen={sendRequestToKitchen}
-          setWarningMsg={setWarningMsg}
-          requests={userData.request}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
-      <p className="current-client">
+      <p className="current-client" onClick={logout}>
         <span>Cliente: </span>
         {userData?.name === 'anonimo' ? userData?.fantasyName : userData?.name}
       </p>

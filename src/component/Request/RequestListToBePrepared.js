@@ -15,6 +15,7 @@ import {
 import style from '../../assets/styles/RequestListToBePrepared.module.scss';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirstFourLetters,
   requestSorter,
@@ -27,14 +28,19 @@ import { GlobalContext } from '../../GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import ButtonCustomerProfile from '../Promotions/ButtonCustomerProfile';
 import MessagePromotions from '../Promotions/MessagePromotions';
+import {
+  alertMinimunAmount,
+  checkUnavaiableRawMaterial,
+} from '../../Helpers/Helpers';
 
 //import { debugErrorMap } from 'firebase/auth';
 
 const RequestListToBePrepared = ({ title }) => {
   const db = getFirestore(app);
-
-  const [requestsDoneList, setRequestDoneList] = React.useState([]);
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
+  const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);
   const [colorStatusRequest, setColorStatusRequest] = React.useState('red');
   const global = React.useContext(GlobalContext);
@@ -77,6 +83,12 @@ const RequestListToBePrepared = ({ title }) => {
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
   React.useEffect(() => {
     if (!requestsDoneList) return;
+
+    // se tiver pelo menos 1 item, apaga o localStorage
+    if (requestsDoneList.length > 0) {
+      localStorage.removeItem('backorder');
+    }
+
     setOpenRequests((prev) => {
       const next = {};
       requestsDoneList.forEach((item) => {
@@ -242,6 +254,7 @@ const RequestListToBePrepared = ({ title }) => {
   }, [requestsDoneList]);
 
   const updateIngredientsStock = async (item) => {
+    //second step
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -261,15 +274,45 @@ const RequestListToBePrepared = ({ title }) => {
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
+      if (!currentItem) {
+        console.log('Item inválido na request:', request);
+        continue;
+      }
+
+      if (!currentItem.recipe) {
+        console.log('Item sem recipe:', currentItem);
+        continue;
+      }
+
+      if (!currentItem.recipe.FinalingridientsList) {
+        console.log('FinalingridientsList está undefined:', currentItem.recipe);
+        continue;
+      }
       const account = currentItem.name;
-      const { FinalingridientsList } = currentItem.recipe;
-      if (Array.isArray(FinalingridientsList[currentItem.size])) {
-        for (
-          let i = 0;
-          i < FinalingridientsList[currentItem.size].length;
-          i++
-        ) {
-          const ingredient = FinalingridientsList[currentItem.size][i];
+      const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
+      if (!Array.isArray(FinalingridientsList)) {
+        console.log(
+          'ERRO: FinalingridientsList está indefinido para:',
+          currentItem
+        );
+        continue; // pula para o próximo item da request
+      }
+
+      if (
+        !currentItem?.recipe?.FinalingridientsList ||
+        currentItem.recipe.FinalingridientsList.length === 0
+      ) {
+        alert(
+          'Este produto precisa ter uma receita cadastrada para ser vendido.'
+        );
+        return; // ou continue, dependendo do seu fluxo
+      }
+
+      const size = currentItem?.size;
+      const listBySize = FinalingridientsList?.[size];
+      if (Array.isArray(listBySize)) {
+        for (let i = 0; i < listBySize.length; i++) {
+          const ingredient = listBySize[i];
           ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
           ObjPadrao.product = ingredient.name;
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
@@ -304,7 +347,7 @@ const RequestListToBePrepared = ({ title }) => {
       ) {
         for (let j = 0; j < currentItem.sideDishes.length; j++) {
           const sideDish = currentItem.sideDishes[j];
-          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionCost); // amount removed from stock
+          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionUsed); // amount removed from stock
           ObjPadrao.product = sideDish.name;
           ObjPadrao.unitOfMeasurement = sideDish.unit || '';
           ObjPadrao.CostPerUnit = sideDish.portionCost;
@@ -327,6 +370,7 @@ const RequestListToBePrepared = ({ title }) => {
   }
 
   const handleStock = async (
+    //third step
     itemsStock,
     account = 'Editado',
     paymentDate = null
@@ -377,6 +421,9 @@ const RequestListToBePrepared = ({ title }) => {
           const previousCost = parseToNumber(itemFinded.totalCost);
           const costPerUnit = parseToNumber(currentItem.CostPerUnit);
           currentItem.totalCost = round(previousCost - costPerUnit, 2);
+          if (currentItem.totalCost < 0) {
+            currentItem.totalCost = 0;
+          }
 
           // Mantém a atualização de totalVolume
           // currentItem.totalVolume =
@@ -384,13 +431,6 @@ const RequestListToBePrepared = ({ title }) => {
           const volumeBefore = parseToNumber(currentItem.totalVolume);
           const volumeAdd = parseToNumber(itemFinded.totalVolume);
           currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
-
-          if (currentItem.totalVolume < 0) {
-            alert(
-              `Volume do item ${currentItem.name} está negativo. Verifique o estoque.`
-            );
-            currentItem.totalVolume = 0;
-          }
         }
 
         // Inicializa ou adiciona ao UsageHistory
@@ -417,6 +457,7 @@ const RequestListToBePrepared = ({ title }) => {
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        await updatingStockAndMenu(itemFinded, currentItem);
       } else {
         // Cria um novo registro para o item no banco de dados
         currentItem.UsageHistory = [
@@ -431,8 +472,63 @@ const RequestListToBePrepared = ({ title }) => {
         ];
         currentItem = cleanObject(currentItem);
         await addDoc(collection(db, 'stock'), currentItem);
+        await updatingStockAndMenu(itemFinded, currentItem); //update warnings and menu after update stock
       }
     }
+  };
+
+  const updatingStockAndMenu = async (itemFinded, currentItem) => {
+    if (currentItem.totalVolume < itemFinded.minimumAmount) {
+      if (!hasWarningForProduct(currentItem.product)) {
+        console.log(`Aviso já registrado para ${currentItem.product}`);
+        alert(
+          `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
+        );
+
+        const check = alertMinimunAmount(
+          currentItem.product,
+          currentItem.totalVolume,
+          itemFinded.minimumAmount,
+          currentItem.totalCost
+        );
+
+        if (check && check.message) {
+          try {
+            const key = 'warningAmountMessage';
+            let stored = localStorage.getItem(key);
+            let warnings = stored ? JSON.parse(stored) : [];
+            if (!Array.isArray(warnings)) warnings = [];
+            warnings.push(check.message);
+            localStorage.setItem(key, JSON.stringify(warnings));
+            console.log('O que é esse global aqui  ', global);
+            global.setWarningLowRawMaterial((prev) => [...prev, check.message]);
+          } catch (err) {
+            console.error(
+              'Erro ao atualizar warningAmountMessage no localStorage',
+              err
+            );
+          }
+        }
+      }
+      setLoadingAvailableMenuDishes(true);
+      const res = await checkUnavaiableRawMaterial(itemFinded.id);
+      setLoadingAvailableMenuDishes(res);
+      if (currentItem.totalVolume < 0) {
+        currentItem.totalVolume = 0;
+      }
+    }
+  };
+
+  const hasWarningForProduct = (productName) => {
+    const raw = localStorage.getItem('warningAmountMessage');
+    let parsed = JSON.parse(raw);
+    const res =
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      parsed.some(
+        (entry) => typeof entry === 'string' && entry.includes(productName)
+      );
+    return res;
   };
 
   const cleanObject = (obj) => {
@@ -810,7 +906,7 @@ const RequestListToBePrepared = ({ title }) => {
     if (item.name === 'anonimo') {
       deleteData('user', item.idUser);
     }
-
+    // first step
     updateIngredientsStock(item);
 
     item.orderDelivered = true;
@@ -841,6 +937,9 @@ const RequestListToBePrepared = ({ title }) => {
       <Link to="/admin/admin">
         <Title mainTitle={title} />
       </Link>
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
           const { status, color } = getStatusAndColor(item); // 👈 aqui

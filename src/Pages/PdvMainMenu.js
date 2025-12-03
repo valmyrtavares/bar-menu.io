@@ -18,11 +18,12 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
+import { onSnapshot } from 'firebase/firestore';
 
-function MainMenu() {
+function PdvMainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
-  const [menuButton, setMenuButton] = React.useState([]);
   const [dishes, setDishes] = React.useState([]);
+  const [menuButton, setMenuButton] = React.useState([]);
   const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
@@ -34,7 +35,15 @@ function MainMenu() {
   const db = getFirestore(app);
 
   React.useEffect(() => {
-    console.log('Acabei de entrar aqui'); // Verifica se o toten existe no localStorage e define o estado global isToten
+    const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
+      const dishes = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setDishes(dishes); // atualiza automaticamente
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // const checkToten = () => {
@@ -191,4 +200,4 @@ function MainMenu() {
     </>
   );
 }
-export default MainMenu;
+export default PdvMainMenu;

@@ -1,4 +1,5 @@
 import React from 'react';
+import provider from '../assets/styles/RegisterProvider.module.scss';
 
 const CloseBtn = ({ setClose }) => {
   const buttonStyle = {
@@ -19,6 +20,7 @@ const CloseBtn = ({ setClose }) => {
     <div style={container}>
       {' '}
       <button
+        className={provider.btn}
         style={buttonStyle}
         onClick={() => {
           setClose(false);

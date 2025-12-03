@@ -1,49 +1,240 @@
 import React from 'react';
+
 import { getBtnData, getStockByProductName } from '../api/Api';
 import { cardClasses } from '@mui/material';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  doc,
+} from 'firebase/firestore';
 import { app } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
 const db = getFirestore(app);
 
+export async function checkUnavaiableRawMaterial(id) {
+  // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID
+
+  const docRef = doc(db, 'stock', id);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) return;
+
+  const stock = { id: docSnap.id, ...docSnap.data() };
+  const { totalVolume, disabledDish, idProduct, product } = stock;
+
+  //
+  // Normaliza o nome da matéria prima do estoque
+  //
+  const normalizedProduct = product
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  //
+  // 2) BUSCA TODOS OS PRATOS (collection 'item')
+  //
+  const itemsSnapshot = await getDocs(collection(db, 'item'));
+
+  //
+  // 3) Função auxiliar que normaliza nome de ingrediente
+  //
+  const normalize = (str) =>
+    str
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  //
+  // 4) Função que processa um array de ingredientes
+  //
+  const processIngredientsArray = (arr, isUnavailable) => {
+    if (!Array.isArray(arr)) return;
+
+    arr.forEach((ing) => {
+      if (!ing || typeof ing.name !== 'string') return;
+      foundIngredient = false;
+      const normalizedIngName = normalize(ing.name);
+
+      // Se é a matéria-prima alvo da função
+      if (normalizedIngName === normalizedProduct) {
+        ing.unavailableRawMaterial = isUnavailable; // true ou false
+        foundIngredient = true; // <-- ADICIONAR ESTA LINHA
+      }
+    });
+  };
+
+  //
+  // 5) Para cada prato (item)
+  //
+
+  let foundIngredient = false;
+
+  for (const dishSnap of itemsSnapshot.docs) {
+    const data = dishSnap.data();
+
+    const recipe = data?.recipe?.FinalingridientsList;
+    if (!recipe) continue;
+
+    // Clone seguro
+    let updatedRecipe = structuredClone(recipe);
+
+    //
+    // VERIFICAÇÃO DE INDISPONIBILIDADE
+    //
+    const isUnavailable = Number(disabledDish) >= Number(totalVolume);
+
+    //
+    // 6) Cenário 1 → Recipe é UM ARRAY
+    //
+    if (Array.isArray(updatedRecipe)) {
+      processIngredientsArray(updatedRecipe, isUnavailable);
+    }
+
+    //
+    // 7) Cenário 2 → Recipe é OBJETO com 3 arrays
+    //
+    else if (typeof updatedRecipe === 'object' && updatedRecipe !== null) {
+      const labels = data.CustomizedPrice;
+      if (!labels) continue;
+
+      processIngredientsArray(updatedRecipe[labels.firstLabel], isUnavailable);
+      processIngredientsArray(updatedRecipe[labels.secondLabel], isUnavailable);
+      processIngredientsArray(updatedRecipe[labels.thirdLabel], isUnavailable);
+    }
+    //Aqui temos o problema a ser pensado depois de que o isUnavailable pode estar em uma das receitas desse grupo de 3 arrays
+    //
+    // 8) Ajuste da flag LOW AMOUNT no prato
+    //
+    if (isUnavailable && foundIngredient) {
+      // Se a matéria-prima está indisponível → prato fica indisponível
+      data.lowAmountRawMaterial = true;
+    } else {
+      //
+      // Cenário inverso:
+      // totalVolume > disabledDish → verificar se ainda existe ALGUM ingrediente indisponível
+      //
+
+      // Função corrigida para ignorar grupos que não usam o ingrediente
+      const checkStillUnavailable = (arr) => {
+        if (!Array.isArray(arr)) return null; // grupo não relevante
+
+        const found = arr.some((ing) => ing?.unavailableRawMaterial === true);
+
+        return found ? true : null; // true = indisponível; null = irrelevante
+      };
+
+      let stillUnavailable = false;
+
+      if (Array.isArray(updatedRecipe)) {
+        // Receita de array único
+        stillUnavailable = checkStillUnavailable(updatedRecipe) === true;
+      } else {
+        // Receita com 3 arrays
+        const labels = data.CustomizedPrice;
+
+        const r1 = checkStillUnavailable(updatedRecipe[labels.firstLabel]);
+        const r2 = checkStillUnavailable(updatedRecipe[labels.secondLabel]);
+        const r3 = checkStillUnavailable(updatedRecipe[labels.thirdLabel]);
+
+        // Se QUALQUER grupo retornar true → prato fora do cardápio
+        stillUnavailable = [r1, r2, r3].includes(true);
+      }
+
+      // Define o status final do prato
+      data.lowAmountRawMaterial = stillUnavailable;
+    }
+    console.log(
+      `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`
+    );
+
+    // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
+
+    // referência do prato
+    const dishRef = doc(db, 'item', dishSnap.id);
+
+    // monta o payload atualizado
+    // --- MONTAR PAYLOAD CONFORME O TIPO DE RECIPE ---
+    let updatedPayload;
+
+    if (Array.isArray(recipe)) {
+      // 1) Recipe simples (um único array)
+      updatedPayload = {
+        ...data,
+        recipe: {
+          FinalingridientsList: updatedRecipe,
+        },
+      };
+    } else {
+      // 2) Recipe com 3 arrays dentro de um objeto
+      updatedPayload = {
+        ...data,
+        recipe: {
+          FinalingridientsList: updatedRecipe, // updatedRecipe já é o objeto com 3 arrays
+        },
+        CustomizedPrice: data.CustomizedPrice, // mantém o mapeamento dos 3 labels
+      };
+    }
+
+    // salva no firestore
+    await updateDoc(dishRef, updatedPayload);
+  }
+  return false;
+}
+
+// helpers/alertMinimumAmount.js
+
 export const alertMinimunAmount = (product, volume, minimum, cost) => {
   if (volume < minimum) {
-    console.log(
-      `O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`
-    );
-    return false;
+    return {
+      status: false,
+      message: `⚠️ O produto ${product} foi recusado porque o volume (${volume}) está menor que o mínimo (${minimum})`,
+    };
   }
+
   if (volume === 0) {
-    console.log(
-      `O produto ${product} foi recusado porque o volume está igual a 0`
-    );
-    return false;
+    return {
+      status: false,
+      message: ` O produto ${product} foi recusado porque o volume está igual a 0`,
+    };
   }
+
   if (minimum === undefined) {
-    console.log(
-      `O produto ${product} foi recusado porque o mínimo está indefinido`
-    );
-    return false;
+    console.log(`⚠️`);
+    return {
+      status: false,
+      message: ` O produto ${product} foi recusado porque o mínimo está indefinido`,
+    };
   }
+
   if (isNaN(cost)) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo não é um número`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo não é um número`,
+    };
   }
+
   if (cost === undefined) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo está indefinido`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo está indefinido`,
+    };
   }
+
   if (cost <= 0) {
-    console.log(
-      `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`
-    );
-    return false;
+    return {
+      status: false,
+      message: `O produto ${product} foi recusado porque o custo (${cost}) é menor ou igual a 0`,
+    };
   }
-  return true;
+
+  // ✅ Se passou em todas as verificações:
+  return { status: true, message: '' };
 };
 
 export const exportToExcel = (ObjList, fileName = 'data.xlsx') => {

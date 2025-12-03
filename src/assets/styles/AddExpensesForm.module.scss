@@ -12,6 +12,9 @@
     height: 90vh;
     overflow-y: auto;
     z-index:55;
+    .updateMenuMessageWrapper{
+        position :relative;
+    }
     h1 {
         margin: 5px 0 !important;
     }

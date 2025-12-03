@@ -4,6 +4,10 @@ import { getBtnData } from '../../api/Api';
 import WarningMessage from '../WarningMessages';
 import { doc, updateDoc, getFirestore } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
+import { Link } from 'react-router-dom';
+import Title from '../title';
+import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
@@ -24,6 +28,8 @@ const ManagementRecipes = () => {
   const [selectedRecipesToEdit, setSelectedRecipesToEdit] = React.useState([]); // list of recipes selected to edit
   const [showWarningMessage, setShowWarningMessage] = React.useState(false); // Open modal regarind delete action
   const [ConfirmAction, setConfirmAction] = React.useState(false); // Open modal regardind confirm edit action
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
 
   const db = getFirestore(app);
 
@@ -137,7 +143,6 @@ const ManagementRecipes = () => {
   };
   const DeleteIngredient = (permition) => {
     setShowWarningMessage(true);
-
     if (permition) {
       for (const recipeId of selectedRecipesToDelete) {
         const selectedDish = dishes.filter((item) => item.id === recipeId.id);
@@ -160,6 +165,7 @@ const ManagementRecipes = () => {
             'recipe.FinalingridientsList': FinalingridientsList,
           }).then(() => {
             console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+            updatingAvaiableDishesInMenu();
             setShowWarningMessage(false);
             setDisplayedRecipesToDelete([]);
             setSelectedRecipesToDelete([]);
@@ -170,6 +176,16 @@ const ManagementRecipes = () => {
       console.log('Não vai excluir');
     }
     // Aqui você pode fazer algo com as receitas selecionadas
+  };
+
+  //This function check if the raw material that was deleted from recipes is still above minimum amount in the stock, to able or disable dishes in the menu
+  const updatingAvaiableDishesInMenu = async () => {
+    const currentRawMaterial = stock.find(
+      (item) => item.product === productSelectedToDelete
+    );
+    setLoadingAvailableMenuDishes(true);
+    const res = await checkUnavaiableRawMaterial(currentRawMaterial.id);
+    setLoadingAvailableMenuDishes(res);
   };
 
   const EditIngredient = (permition) => {
@@ -220,6 +236,7 @@ const ManagementRecipes = () => {
           })
             .then(() => {
               console.log(`Ingrediente removido com sucesso de ${recipeId}`);
+              updatingAvaiableDishesInMenu();
               setConfirmAction(false);
               setSelectedRecipesToEdit([]);
               setDisplayedRecipesToEdit([]);
@@ -239,6 +256,9 @@ const ManagementRecipes = () => {
 
   return (
     <div className={style.containerManagementRecipes}>
+      <div className={style.updateMenuMessageWrapper}>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
+      </div>
       <div className={style.containerWarningMessage}>
         {showWarningMessage && (
           <WarningMessage
@@ -271,7 +291,10 @@ const ManagementRecipes = () => {
             />
           )}
       </div>
-      <h1>Gerenciamento de Receitas</h1>
+
+      <Link to="/admin/admin">
+        <Title mainTitle="Gerenciamento de Receitas" />
+      </Link>
       <h3>Use esse modulo para excluir ingredientes dos pratos selecionados</h3>
       <div className={style.deleteContainer}>
         <div className={style.leftSide}>

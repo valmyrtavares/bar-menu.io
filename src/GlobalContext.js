@@ -9,6 +9,7 @@ export const GlobalStorage = ({ children }) => {
   const [authorizated, setAuthorizated] = React.useState(false);
   const [userNewRequest, setUserNewRequest] = React.useState({});
   const [pdvRequest, setPdvRequest] = React.useState(false);
+  const [warningLowRawMaterial, setWarningLowRawMaterial] = React.useState([]);
   const [styles, setStyles] = React.useState({
     btnColor: '#b02121',
     secundaryBgColor: '#b02121',
@@ -24,6 +25,8 @@ export const GlobalStorage = ({ children }) => {
       value={{
         image,
         setImage,
+        warningLowRawMaterial,
+        setWarningLowRawMaterial,
         id,
         setId,
         styles,

@@ -18,7 +18,7 @@
         grid-template-columns: 1fr 4fr;
 
         .categories {
-            max-height: 70vh; // Limita a altura máxima
+            max-height: 90vh; // Limita a altura máxima
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
             margin-top: 56px;
             background-color: var(--bg-color);
@@ -69,65 +69,9 @@
                 overflow-y: auto;
                 display: flex;
                 flex-wrap: wrap;
-                justify-content: space-around;
-
-                .itemContainer {
-                    margin: 5px 0;
-                    width: 47%;
-                    background-color: var(--secundary-bg-color);
-                    display: grid;
-                    grid-template-columns: 3fr 2fr;
-
-                    /* Adicionamos a animação ao itemContainer */
-                    opacity: 0;
-                    transform: translateY(20px); // Começa um pouco abaixo
-                    animation: fadeInUp 0.5s ease-out forwards;
-
-                    .text {
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-around;
-                        max-height: 300px;
-
-                        h3 {
-                            max-height: 30px;
-                            font-size: 19px;
-                            margin-bottom: 4px;
-                            
-                        }
-
-                        p {
-                            font-size: 19px;
-                            padding: 4%;
-                            margin-bottom: 4px;
-                        }
-
-                        button {
-                            width: 80%;
-                            border-radius: 10px;
-                            padding: 10px 20px;
-                            border: none;
-                            margin: 0px 10%;
-                            font-family: var(--title-font) !important;
-                            font-size: 1.2rem;
-                            font-weight: bold;
-                            color: var(--title-font-color);
-                            background: var(--btn-color);
-                            max-height: 40px;
-                        }
-                    }
-
-                    .image {
-                        background-color: var(--secundary-bg-color);
-                        overflow: hidden;
-                        position: relative;
-
-                        img {
-                            width: 100%;
-                            overflow: hidden;
-                        }
-                    }
-                }
+                justify-content: space-between;
+gap: 10px;
+               
             }
         }
 

@@ -55,6 +55,14 @@ const NestedBtn = ({ item, parent, menuButton, dishes, containerRef }) => {
       setChildItem(filterItem);
     }
   }, []);
+  React.useEffect(() => {
+    if (dishes) {
+      const filterItem = dishes.filter(
+        (dishe) => item.parent == dishe.category
+      );
+      setChildItem(filterItem);
+    }
+  }, [dishes]);
 
   return (
     <div className="nested-btn">

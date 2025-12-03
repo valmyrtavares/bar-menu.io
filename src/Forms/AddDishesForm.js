@@ -165,6 +165,11 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
           console.log(error);
         });
     } else {
+      console.log('Dados completos', form);
+
+      form.recipe.Explanation = form.recipe.Explanation
+        ? form.recipe.Explanation
+        : 'Receita Vazia';
       setDoc(doc(db, 'item', dataObj.id), form)
         .then(() => {
           navigate('/');

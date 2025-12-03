@@ -25,6 +25,9 @@ const TotenRegisterPopup = ({
   });
 
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
+  const [nameOption, setNameOption] = React.useState(true);
+  const [cpfOption, setCpfOption] = React.useState(true);
+  const [noDobleClick, setNoDobleClick] = React.useState(false);
   const [showCpfKeyboard, setShowCpfKeyboard] = React.useState(false);
   const [warningMessageToEmptyFields, setWarningMessageToEmptyFields] =
     React.useState(false);
@@ -108,22 +111,17 @@ const TotenRegisterPopup = ({
     if (id === 'name') {
       setShowNameKeyboard(true);
       setShowCpfKeyboard(false);
+      setCpfOption(false);
     }
     if (id === 'cpf') {
       setShowCpfKeyboard(true);
       setShowNameKeyboard(false);
+      setNameOption(false);
     }
   };
 
   const addNickname = async () => {
-    const noCustomer = {
-      name: 'anonimo',
-      phone: '777',
-      birthday: '77',
-      fantasyName: form.name,
-      email: 'anonimo@anonimo.com',
-    };
-
+    debugger;
     if (form.cpf === '' && form.name === '') {
       setWarningMessageToEmptyFields(true);
 
@@ -134,9 +132,22 @@ const TotenRegisterPopup = ({
       window.warningTimeout = setTimeout(() => {
         setWarningMessageToEmptyFields(false);
       }, 5000);
-
+      setShowNameKeyboard(false);
+      setShowCpfKeyboard(false);
+      setCpfOption(true);
+      setNameOption(true);
       return; // Sai da função para evitar continuar a execução
     }
+    if (noDobleClick) return; // evita disparo duplo
+    setNoDobleClick(true);
+    const noCustomer = {
+      name: 'anonimo',
+      phone: '777',
+      birthday: '77',
+      fantasyName: form.name,
+      email: 'anonimo@anonimo.com',
+    };
+
     if (form.cpf !== '') {
       const data = await getBtnData('user');
       const recoveredClient = data.find((item) => item.cpf === form.cpf);
@@ -164,6 +175,10 @@ const TotenRegisterPopup = ({
           setWarningMessageCustomerNotFinded(false);
         }, 5000);
         setForm({ ...form, cpf: '' });
+        setNoDobleClick(false);
+        setNameOption(true);
+        setCpfOption(true);
+        setShowCpfKeyboard(false);
         return;
       }
     }
@@ -195,6 +210,8 @@ const TotenRegisterPopup = ({
         setOpenCloseTotenPopup(false);
       } catch (error) {
         console.error('Erro ao adicionar usuário:', error);
+      } finally {
+        setNoDobleClick(false); // libera o botão depois que terminar
       }
     }
   };
@@ -210,52 +227,60 @@ const TotenRegisterPopup = ({
       )}
       <div className={style.totenRegisterPopupSecondContainer}>
         <CloseBtn setClose={setOpenCloseTotenPopup} />
-        <h1>Como devemos chamar você ?</h1>
-        <Input
-          id="name"
-          required
-          autoComplete="off"
-          value={form.name}
-          placeholder="Nome"
-          type="text"
-          onChange={handleChange}
-          onFocus={handleFocus}
-        />
-        {showNameKeyboard && global.isToten && (
-          <TextKeyboard
-            addCharacter={addCharacter}
-            id="name"
-            closeKeyboard={() => closeKeyboard(form.fantasyName, 'name')}
-          />
-        )}
-        <h1>Se você já tem cadastro preencha com o seu CPF</h1>
-        <div className="cpf-input">
-          <Input
-            id="cpf"
-            autoComplete="off"
-            required
-            placeholder="CPF"
-            value={form.cpf}
-            type="text"
-            onChange={handleChange}
-            onFocus={handleFocus}
-            // onBlur={handleBlur}
-          />
-          {showCpfKeyboard && global.isToten && (
-            <Keyboard
-              // handleBlur={handleBlur}
-              addCharacter={addCharacter}
-              closeKeyboard={() => closeKeyboard(form.cpf, 'cpf')}
-              id="cpf"
+        {nameOption && (
+          <div>
+            <h1>Como devemos chamar você ?</h1>
+            <Input
+              id="name"
+              required
+              autoComplete="off"
+              value={form.name}
+              placeholder="Nome"
+              type="text"
+              onChange={handleChange}
+              onFocus={handleFocus}
             />
-          )}
-        </div>
+            {showNameKeyboard && global.isToten && (
+              <TextKeyboard
+                addCharacter={addCharacter}
+                id="name"
+                closeKeyboard={() => closeKeyboard(form.fantasyName, 'name')}
+              />
+            )}
+          </div>
+        )}
+        {cpfOption && (
+          <div>
+            <h1>Se você já tem cadastro preencha com o seu CPF</h1>
+            <div className="cpf-input">
+              <Input
+                id="cpf"
+                autoComplete="off"
+                required
+                placeholder="CPF"
+                value={form.cpf}
+                type="text"
+                onChange={handleChange}
+                onFocus={handleFocus}
+                // onBlur={handleBlur}
+              />
+              {showCpfKeyboard && global.isToten && (
+                <Keyboard
+                  // handleBlur={handleBlur}
+                  addCharacter={addCharacter}
+                  closeKeyboard={() => closeKeyboard(form.cpf, 'cpf')}
+                  id="cpf"
+                />
+              )}
+            </div>
+          </div>
+        )}
         <button
-          disabled={isSubmitting}
+          disabled={noDobleClick}
           className={style.goonBtn}
           onClick={addNickname}
         >
-          Continue
+          {!noDobleClick ? 'Continue' : 'Enviando...'}
         </button>
       </div>
     </div>

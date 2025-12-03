@@ -1,0 +1,66 @@
+ .itemContainer {
+     margin: 5px 0;
+     width: 32%;
+     background-color: var(--secundary-bg-color);
+    
+
+     /* Adicionamos a animação ao itemContainer */
+     opacity: 0;
+     transform: translateY(20px); // Começa um pouco abaixo
+     animation: fadeInUp 0.5s ease-out forwards;
+
+.image {
+        background-color: var(--secundary-bg-color);
+        overflow: hidden;
+        position: relative;
+        aspect-ratio: 1 / 1; // garante que o card seja quadrado
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; // preenche o quadrado cortando só as bordas
+            object-position: center; // mostra sempre o centro da imagem
+            display: block; // remove espaços extras indesejados
+        }
+    }
+     .text {
+  
+
+         h3 {
+             max-height: 30px;
+             font-size: 19px;
+             margin:0;
+             span{
+                display: 'block';
+                font-size: '0.8em';
+                color: '#c00';
+                margin-top: '4px';
+             }
+
+         }
+
+         p {
+             font-size: 15px;
+           text-align: center;
+         }
+
+        
+     }
+
+ }
+        /* Animação fadeInUp */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+    
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
+        .dishes {
+            background-color: var(--bg-color);
+        }

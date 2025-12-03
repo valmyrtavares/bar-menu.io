@@ -21,7 +21,7 @@ const RecipeDish = ({
     unitOfMeasurement: '',
   });
   const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
-  const [recipeExplanation, setRecipeExplanation] = React.useState('');
+  const [recipeExplanation, setRecipeExplanation] = React.useState(null);
   const [productList, setProductList] = React.useState(null);
   const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
   const [ingredientsBySize, setIngredientsBySize] = React.useState({});
@@ -31,7 +31,7 @@ const RecipeDish = ({
     //#1
     if (recipe) {
       if (!recipe.Explanation && !recipe.FinalingridientsList) {
-        recipe.Explanation = '';
+        recipe.Explanation = 'Receita Vazia';
         recipe.FinalingridientsList = [];
         formatterRecipes(recipe);
       } else {
@@ -61,6 +61,7 @@ const RecipeDish = ({
       setProductList(sortedData);
     };
     fetchProduct();
+    reloadCurrentRecipesValue();
     setIngridientsGroup([]);
   }, []);
 
@@ -86,7 +87,17 @@ const RecipeDish = ({
       const item = productList.find((item) => item.product === name);
       if (item) {
         const { product, totalVolume, minimumAmount, totalCost } = item;
-        return { product, totalVolume, minimumAmount, totalCost };
+        const warningAmountRawMaterial =
+          totalVolume > minimumAmount ? true : false;
+        const unavailableRawMaterial = totalVolume === 0 ? true : false;
+        return {
+          product,
+          totalVolume,
+          minimumAmount,
+          totalCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
+        };
       }
     }
     return null;
@@ -145,19 +156,30 @@ const RecipeDish = ({
     if (id === 'name') {
       const selectedProduct = productList[value];
       console.log('selectedProduct', selectedProduct);
-
+      const disabledDish = Number(selectedProduct.disabledDish);
+      const idProduct = selectedProduct.idProduct;
       const costPerUnit =
         selectedProduct && selectedProduct.totalVolume > 0
           ? selectedProduct.totalCost / selectedProduct.totalVolume
           : 0;
 
+      const warningAmountRawMaterial =
+        selectedProduct.totalVolume > selectedProduct.minimumAmount
+          ? true
+          : false;
+      const unavailableRawMaterial =
+        selectedProduct.totalVolume <= disabledDish ? true : false;
+
       setIngridients((prevForm) => ({
         ...prevForm,
         name: selectedProduct ? selectedProduct.product : '',
+        idProduct: idProduct,
         unitOfMeasurement: selectedProduct
           ? selectedProduct.unitOfMeasurement
           : '',
         costPerUnit: costPerUnit,
+        warningAmountRawMaterial: warningAmountRawMaterial,
+        unavailableRawMaterial: unavailableRawMaterial,
         portionCost: prevForm.amount
           ? parseFloat(prevForm.amount) * costPerUnit
           : 0,
@@ -206,22 +228,38 @@ const RecipeDish = ({
 
       const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
       const portionCost = parseFloat(ingredient.amount) * costPerUnit;
+      //QUERO VOLTAR AQUIasdfasdfasdf
+      const warningAmountRawMaterial =
+        matchedProduct.totalVolume > matchedProduct.minimumAmount
+          ? true
+          : false;
+      const unavailableRawMaterial =
+        matchedProduct.totalVolume === 0 ? true : false;
 
       return {
         costPerUnit,
         portionCost,
+        warningAmountRawMaterial,
+        unavailableRawMaterial,
       };
     };
 
     // CASO 1: Receita simples (sem variação de tamanho)
     if (isEmptyObject(customizedPriceObj)) {
       const updatedIngredients = ingredientsSimple.map((ingredient) => {
-        const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+        const {
+          costPerUnit,
+          portionCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
+        } = getUpdatedCostData(ingredient);
 
         return {
           ...ingredient,
           costPerUnit,
           portionCost,
+          warningAmountRawMaterial,
+          unavailableRawMaterial,
         };
       });
 
@@ -236,12 +274,19 @@ const RecipeDish = ({
       Object.entries(ingredientsBySize).forEach(
         ([sizeLabel, ingredientList]) => {
           updatedBySize[sizeLabel] = ingredientList.map((ingredient) => {
-            const { costPerUnit, portionCost } = getUpdatedCostData(ingredient);
+            const {
+              costPerUnit,
+              portionCost,
+              warningAmountRawMaterial,
+              unavailableRawMaterial,
+            } = getUpdatedCostData(ingredient);
 
             return {
               ...ingredient,
               costPerUnit,
               portionCost,
+              warningAmountRawMaterial,
+              unavailableRawMaterial,
             };
           });
         }
@@ -284,7 +329,7 @@ const RecipeDish = ({
   };
 
   return (
-    <div className={style.recipeDisContainer}>
+    <div className={style.recipeDishContainer}>
       <CloseBtn setClose={setRecipeModal} />
 
       <Link to="/admin/admin">
@@ -350,9 +395,9 @@ const RecipeDish = ({
                                 itemData.totalVolume,
                                 itemData.minimumAmount,
                                 itemData.totalCost
-                              )
-                              ? ''
-                              : 'warning'
+                              ).message
+                              ? 'warning'
+                              : ''
                             : ''
                         }
                       >
@@ -453,9 +498,9 @@ const RecipeDish = ({
                                   itemData.totalVolume,
                                   itemData.minimumAmount,
                                   itemData.totalCost
-                                )
-                                ? ''
-                                : 'warning'
+                                ).message
+                                ? 'warning'
+                                : ''
                               : ''
                           }
                         >
@@ -500,12 +545,11 @@ const RecipeDish = ({
         <label>Escreva sua receita</label>
         <textarea
           id="gift"
+          required
           className={style.textArea}
           value={recipeExplanation}
-          onChange={({ target }) => setRecipeExplanation(target.value)}
-        >
-          Saudação
-        </textarea>
+          onChange={(e) => setRecipeExplanation(e.target.value)}
+        />
       </div>
       <div className={style.formButtonSubmit}>
         <button onClick={sendRecipe}>Enviar Receita</button>

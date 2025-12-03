@@ -3,6 +3,7 @@ import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
 import { getBtnData } from '../../api/Api';
+import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
   collection,
@@ -11,6 +12,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { app } from '../../config-firebase/firebase';
+import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const [Dishes, setDishes] = React.useState([]);
@@ -24,10 +26,13 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     volumePerUnit: Number(obj.volumePerUnit),
     minimumAmount: Number(obj.minimumAmount),
     noteReasonsEditingProduct: '',
+    disabledDish: obj.disabledDish || null,
     id: obj.id,
   });
   const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
     React.useState('');
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
+    React.useState(false);
 
   const db = getFirestore(app);
 
@@ -228,10 +233,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
 
   const addItem = async () => {
-    if (!noteReasonsEditingProduct) {
-      alert(
-        'A edição só pode ser cocluída, depois da anotação sobre a edição do produto'
-      );
+    if (
+      noteReasonsEditingProduct === '' ||
+      stockProductObj.totalVolume <= 0 ||
+      stockProductObj.totalCost <= 0 ||
+      stockProductObj.minimumAmount <= 0 ||
+      stockProductObj.disabledDish <= 0
+    ) {
+      alert('Todos os campos de edição são obrigatórios.');
       return;
     }
 
@@ -251,8 +260,13 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       await handleStock(stockProductObj);
       const docRef = doc(db, 'stock', stockProductObj.id);
       await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
+      // const disabledDish = Number(stockProductObj.disabledDish);
+      // const totalVolume = Number(stockProductObj.totalVolume);
 
-      console.log('Documento atualizado com sucesso!');
+      setLoadingAvailableMenuDishes(true);
+      const res = await checkUnavaiableRawMaterial(stockProductObj.id);
+      setLoadingAvailableMenuDishes(res);
+
       updateRecipesinDishesAndSideDishes(stockProductObj);
       fetchStock();
       setShowEditForm(false);
@@ -291,6 +305,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               const newCostPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
+              //update costs if changed
               if (
                 currentIngredient.costPerUnit !== newCostPerUnit ||
                 currentIngredient.portionCost !== newPortionCost
@@ -400,13 +415,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             X
           </button>
         </div>
+        {loadingAvailableMenuDishes && <UpdateMenuMessage />}
 
         <div className={edit.titleRow}>
           <h2>{`${stockProductObj.product} - ${stockProductObj.unitOfMeasurement}`}</h2>
         </div>
 
         <div className={edit.inputGrid}>
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="totalVolume"
               autoComplete="off"
@@ -419,7 +435,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             />
           </div>
 
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="totalCost"
               autoComplete="off"
@@ -432,7 +448,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             />
           </div>
 
-          <div className={edit.field}>
+          <div className={edit.fieldWrapper}>
             <Input
               id="minimumAmount"
               autoComplete="off"
@@ -444,20 +460,31 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               onBlur={updateCost}
             />
           </div>
-
-          <div className={edit.field}>
-            <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
-            <textarea
-              id="editAdminNote"
-              className="num"
-              value={noteReasonsEditingProduct || ''}
-              onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
+          <div className={edit.fieldWrapper}>
+            <Input
+              id="disabledDish"
               autoComplete="off"
-              rows={3}
-              placeholder="Adicione uma observação sobre os motivos da sua edição"
-              onBlur={updateNoteEdit}
+              className="num"
+              label="Indisponível a partir"
+              value={stockProductObj.disabledDish}
+              type="text"
+              onChange={handleChange}
+              onBlur={updateCost}
             />
           </div>
+        </div>
+        <div className={edit.textareaField}>
+          <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
+          <textarea
+            id="editAdminNote"
+            className="num"
+            value={noteReasonsEditingProduct || ''}
+            onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
+            autoComplete="off"
+            rows={3}
+            placeholder="Adicione uma observação sobre os motivos da sua edição"
+            onBlur={updateNoteEdit}
+          />
         </div>
 
         <div className={edit.volumeRow}>

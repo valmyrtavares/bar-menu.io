@@ -80,6 +80,12 @@ const RegisterProduct = ({ setShowPopup }) => {
 
   const renderTableItem = () => {
     if (listProvider && listProvider.length > 0) {
+      listProvider.map((item) => {
+        if (!item.idProduct) {
+          item.idProduct = item.id;
+        }
+        return item;
+      });
     }
     return (
       <div className={product.containerProductRegisterTable}>
@@ -129,6 +135,8 @@ const RegisterProduct = ({ setShowPopup }) => {
     event.preventDefault();
 
     if (editForm) {
+      console.log('form to submit:', form);
+
       const documentRef = doc(db, 'product', id);
 
       // Limpar o objeto `form` para remover valores `undefined`
