@@ -121,16 +121,6 @@ const TotenRegisterPopup = ({
   };
 
   const addNickname = async () => {
-    if (noDobleClick) return; // evita disparo duplo
-    setNoDobleClick(true);
-    const noCustomer = {
-      name: 'anonimo',
-      phone: '777',
-      birthday: '77',
-      fantasyName: form.name,
-      email: 'anonimo@anonimo.com',
-    };
-
     if (form.cpf === '' && form.name === '') {
       setWarningMessageToEmptyFields(true);
 
@@ -144,6 +134,16 @@ const TotenRegisterPopup = ({
 
       return; // Sai da função para evitar continuar a execução
     }
+    if (noDobleClick) return; // evita disparo duplo
+    setNoDobleClick(true);
+    const noCustomer = {
+      name: 'anonimo',
+      phone: '777',
+      birthday: '77',
+      fantasyName: form.name,
+      email: 'anonimo@anonimo.com',
+    };
+
     if (form.cpf !== '') {
       const data = await getBtnData('user');
       const recoveredClient = data.find((item) => item.cpf === form.cpf);
