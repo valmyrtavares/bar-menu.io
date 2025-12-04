@@ -1,5 +1,5 @@
 import { debugErrorMap } from 'firebase/auth';
-import { app } from '../config-firebase/firebase.js';
+
 import {
   getFirestore,
   collection,
@@ -21,7 +21,7 @@ import {
 } from 'firebase/storage';
 
 //FIRESTORE
-const db = getFirestore(app);
+import { db } from '../config-firebase/firebase';
 
 /**
  * Atualiza ou cria uma chave em um documento de uma coleção específica.
@@ -131,7 +131,6 @@ export function fetchInDataChanges(collectionName, onData) {
 
 //Delete item in collection
 export async function deleteData(coolectionName, id) {
-  const db = getFirestore(app);
   try {
     const docRef = doc(db, coolectionName, id);
     await deleteDoc(docRef);
@@ -142,7 +141,6 @@ export async function deleteData(coolectionName, id) {
 
 //Remove item in the "request" array list
 export async function deleteRequestItem(userId, itemId) {
-  const db = getFirestore(app);
   const userRef = doc(db, 'user', userId);
 
   try {

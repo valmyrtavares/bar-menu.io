@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import Title from '../title';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
+import { db } from '../../config-firebase/firebase.js';
 
 const ManagementRecipes = () => {
   const [dishes, setDishes] = React.useState(null);
@@ -30,8 +31,6 @@ const ManagementRecipes = () => {
   const [ConfirmAction, setConfirmAction] = React.useState(false); // Open modal regardind confirm edit action
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
-
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     const fetchCollections = async () => {

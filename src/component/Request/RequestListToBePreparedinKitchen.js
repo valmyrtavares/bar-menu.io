@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod.js';
 import { fetchInDataChanges } from '../../api/Api.js';
 import {
@@ -32,8 +32,6 @@ import MessagePromotions from '../Promotions/MessagePromotions.js';
 //import { debugErrorMap } from 'firebase/auth';
 
 const RequestListToBePrepared = () => {
-  const db = getFirestore(app);
-
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);

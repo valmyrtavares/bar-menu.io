@@ -10,7 +10,7 @@ import {
   updateDoc,
   arrayUnion,
 } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomizedPrice from './CustomizedPrice.js';
 import { GlobalContext } from '../../GlobalContext';
@@ -47,7 +47,6 @@ const DishesModal = ({ item, setModal }) => {
   const [pdv, setPdv] = useLocalStorage('pdv', false);
 
   const navigate = useNavigate();
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     calculateFinalCost();

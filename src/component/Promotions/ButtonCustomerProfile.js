@@ -3,7 +3,7 @@ import '../../assets/styles/ButtonCustomerProfile.css';
 import { getOneItemColleciton, getBtnData } from '../../api/Api';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase';
 
 const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
   const [noRegistration, setNoRegistration] = React.useState(null);
@@ -21,7 +21,6 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
   });
 
   // FIRESTORE
-  const db = getFirestore(app);
 
   //Fetch user in firebase and check out if is it anonymous to fill the button's color and load the PromotionCient useState
   React.useEffect(() => {

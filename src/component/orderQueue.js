@@ -1,5 +1,5 @@
 import React from 'react';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { fetchInDataChanges } from '../api/Api.js';
 import '../assets/styles/orderQueue.css';
@@ -18,8 +18,6 @@ const OrderQueue = () => {
   // Guardar os estados anteriores das listas
   const prevDoneLine = React.useRef(doneLine);
   const prevWaitingLine = React.useRef(waitingLine);
-
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {

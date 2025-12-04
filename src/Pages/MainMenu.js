@@ -11,7 +11,7 @@ import { GlobalContext } from '../GlobalContext';
 import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import WarningMessage from '../component/WarningMessages';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import {
   useEnsureAnonymousUser,
   getAnonymousUser,
@@ -31,7 +31,6 @@ function MainMenu() {
   const navigate = useNavigate();
 
   useEnsureAnonymousUser();
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten

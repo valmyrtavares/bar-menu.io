@@ -7,7 +7,7 @@ import {
 } from '../api/Api.js';
 import MenuButton from '../component/menuHamburguerButton.js';
 import Title from '../component/title.js';
-import { app, storage } from '../config-firebase/firebase.js';
+import { db, storage } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
@@ -35,7 +35,6 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
   const [progress, setProgress] = React.useState(0);
 
   //FIRESTORE
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     const fetchCategory = async () => {

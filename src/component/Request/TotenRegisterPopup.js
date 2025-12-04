@@ -5,7 +5,7 @@ import TextKeyboard from '../../component/Textkeyboard';
 import useFormValidation from '../../Hooks/useFormValidation.js';
 import { GlobalContext } from '../../GlobalContext';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import { getOneItemColleciton, getBtnData } from '../../api/Api.js';
 import Keyboard from '../../component/Keyboard';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
@@ -34,7 +34,6 @@ const TotenRegisterPopup = ({
   const [warningMessageCustomerNotFinded, setWarningMessageCustomerNotFinded] =
     React.useState(false);
   const global = React.useContext(GlobalContext);
-  const db = getFirestore(app);
 
   const closeKeyboard = (Value, id) => {
     if (id === 'fantasyName') {

@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { getBtnData } from '../../api/Api';
+import { db } from '../../config-firebase/firebase';
 
 const CreatePromotions = () => {
   const [formData, setFormData] = useState({
@@ -22,9 +23,6 @@ const CreatePromotions = () => {
     reusable: '',
     rules: '',
   });
-
-  const app = getApp();
-  const db = getFirestore(app);
 
   const [selectedPromotion, setSelectedPromotion] = useState('');
   const [promotions, setPromotions] = useState([]);

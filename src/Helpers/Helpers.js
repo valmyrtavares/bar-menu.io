@@ -11,9 +11,8 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
-const db = getFirestore(app);
 
 export async function checkUnavaiableRawMaterial(id) {
   // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID

@@ -11,7 +11,7 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase';
+import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
@@ -33,8 +33,6 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     React.useState('');
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
-
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     getBtnData('item')

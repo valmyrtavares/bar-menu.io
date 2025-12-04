@@ -8,7 +8,7 @@ import {
   getDocs,
   getFirestore,
 } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import { getFirstFourLetters } from '../../Helpers/Helpers.js';
 
 const EachCustomer = ({ oneClient, setShowPopup }) => {
@@ -17,7 +17,6 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
     React.useState(null);
 
   // FIRESTORE
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     if (oneClient) {
