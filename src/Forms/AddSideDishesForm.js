@@ -1,6 +1,6 @@
 import React from 'react';
 import Title from '../component/title.js';
-import { app, storage } from '../config-firebase/firebase.js';
+import { db, storage } from '../config-firebase/firebase.js';
 
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
@@ -40,7 +40,6 @@ function AddSideDishesForm({
   const [productList, setProductList] = React.useState(null);
 
   //FIRESTORE
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     if (dataObj) {

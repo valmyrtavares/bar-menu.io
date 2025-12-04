@@ -12,7 +12,7 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore';
-import { app } from '../../../config-firebase/firebase';
+import { db } from '../../../config-firebase/firebase.js';
 import { getBtnData, addItemToCollection } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
@@ -58,7 +58,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [showPopupNote, setShowPopupNote] = React.useState(null);
   //const [currentAmountProduct, setCurrentAmountProduct] = React.useState('');
   const [total, setTotal] = React.useState(0);
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     const fetchRegisterLists = async () => {

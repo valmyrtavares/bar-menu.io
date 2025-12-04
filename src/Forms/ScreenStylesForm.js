@@ -1,7 +1,7 @@
 import React from 'react';
 import Title from '../component/title';
 import Input from '../component/Input';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import {
   getFirestore,
   collection,
@@ -23,7 +23,7 @@ function ScreenStylesForm() {
     textFont: '',
     secundaryBgColor: '',
   });
-  const db = getFirestore(app);
+
   const navigate = useNavigate();
 
   React.useEffect(() => {

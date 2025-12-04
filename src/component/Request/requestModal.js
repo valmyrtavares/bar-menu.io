@@ -1,5 +1,5 @@
 import React from 'react';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import {
   getFirestore,
   getDoc,
@@ -34,7 +34,7 @@ const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState('');
   const [userData, setUserData] = React.useState(null);
   const [backorder, setBackorder] = React.useState(null);
-  const db = getFirestore(app);
+
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
   const [disabledBtn, setDisabledBtn] = React.useState(true);

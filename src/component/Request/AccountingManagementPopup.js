@@ -9,7 +9,8 @@ import {
 } from 'firebase/firestore';
 import '../../assets/styles/AccountingManagementPopup.css';
 import CloseBtn from '../closeBtn';
-import { app } from '../../config-firebase/firebase.js';
+
+import { db } from '../../config-firebase/firebase.js';
 
 const AccountingManagementPopup = ({
   dishesRequested,
@@ -18,7 +19,6 @@ const AccountingManagementPopup = ({
 }) => {
   const [costPrice, setCostPrice] = React.useState(null);
   const [sideDishesData, setSideDishesData] = React.useState({});
-  const db = getFirestore(app);
 
   // USEEFFECTS SESSION  **********************************************************************************
 

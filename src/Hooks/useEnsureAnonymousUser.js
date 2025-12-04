@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { app } from '../config-firebase/firebase';
+import { db } from '../config-firebase/firebase';
 import {
   collection,
   addDoc,
@@ -15,8 +15,6 @@ const noCustomer = {
   birthday: '77',
   email: 'anonimo@anonimo.com',
 };
-
-const db = getFirestore(app);
 
 export const getAnonymousUser = async () => {
   const usersCollection = collection(db, 'user');

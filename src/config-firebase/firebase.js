@@ -1,7 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
-import { getFirestore } from 'firebase/firestore'; // 👈 adicione isso
+
+// 🔥 IMPORTS corretos para Firestore com cache persistente
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentSingleTabManager,
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -13,8 +19,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
 const storage = getStorage(app);
-const db = getFirestore(app); // 👈 adiciona aqui
+
+// 🔥 Firestore com cache persistente
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentSingleTabManager(),
+  }),
+});
 
 export { app, auth, storage, db };

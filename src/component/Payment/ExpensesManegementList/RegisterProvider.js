@@ -3,7 +3,7 @@ import Input from '../../Input';
 import provider from '../../../assets/styles/RegisterProvider.module.scss';
 import CloseBtn from '../../closeBtn';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../../config-firebase/firebase';
+import { db } from '../../../config-firebase/firebase';
 import { getBtnData, deleteData } from '../../../api/Api';
 
 const RegisterProvider = ({ setShowPopup }) => {
@@ -13,8 +13,6 @@ const RegisterProvider = ({ setShowPopup }) => {
   });
   const [listProvider, setListProvider] = React.useState(null);
   const [refreshScreen, setRefreshScreen] = React.useState(false);
-
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     fetchProvider();

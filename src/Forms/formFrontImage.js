@@ -31,7 +31,6 @@ const FormFrontImage = () => {
   const navigate = useNavigate();
 
   //FIRESTORE
-  // const db = getFirestore(app);
 
   React.useEffect(() => {
     if (publicStatement && modePictureMobilePhone) {

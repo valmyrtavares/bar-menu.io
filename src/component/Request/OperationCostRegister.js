@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getBtnData, deleteData } from '../../api/Api'; // Ajuste o caminho conforme necessário
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase'; // Ajuste o caminho do firebaseConfig conforme necessário
+import { db } from '../../config-firebase/firebase'; // Ajuste o caminho do firebaseConfig conforme necessário
 import style from '../../assets/styles/CostOperations.module.scss';
 import { Link } from 'react-router-dom';
 import Title from '../title';
 
 export default function CostOperations() {
-  const db = getFirestore(app);
   const [form, setForm] = useState({
     typeOfOperation: 'pix',
     valueOfOperation: '',

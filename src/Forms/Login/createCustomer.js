@@ -1,7 +1,7 @@
 import React from 'react';
 import Input from '../../component/Input.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../config-firebase/firebase.js';
+import { db } from '../../config-firebase/firebase.js';
 import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../../GlobalContext';
 import '../../assets/styles/createCustomer.css';
@@ -61,7 +61,6 @@ const CreateCustomer = () => {
   }, [form]);
 
   // FIRESTORE
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('pdv')) {

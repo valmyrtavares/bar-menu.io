@@ -11,6 +11,5 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
-const db = getFirestore(app);

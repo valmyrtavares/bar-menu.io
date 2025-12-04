@@ -1,13 +1,12 @@
 import React from 'react';
 import '../assets/styles/WelcomeSaluteForm.css';
 import Title from '../component/title.js';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import { getFirestore, setDoc, doc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 function WelcomeSaluteForm() {
-  const db = getFirestore(app);
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     gift: '',

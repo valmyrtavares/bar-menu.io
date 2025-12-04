@@ -2,7 +2,7 @@ import React from 'react';
 import { fetchCategoriesItem } from '../api/Api.js';
 import Input from '../component/Input.js';
 import Title from '../component/title.js';
-import { app, storage } from '../config-firebase/firebase.js';
+import { db, storage } from '../config-firebase/firebase.js';
 import MenuButton from '../component/menuHamburguerButton.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import {
@@ -59,7 +59,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
   const { handleBlur } = useFormValidation();
 
   //FIRESTORE
-  const db = getFirestore(app);
 
   //Update the new side dishes that come from noNameDishesInDishes
   React.useEffect(() => {

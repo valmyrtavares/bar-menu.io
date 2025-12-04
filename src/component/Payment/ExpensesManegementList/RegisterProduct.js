@@ -13,7 +13,7 @@ import {
   setDoc,
   doc,
 } from 'firebase/firestore';
-import { app } from '../../../config-firebase/firebase.js';
+import { db } from '../../../config-firebase/firebase.js';
 import { getBtnData, deleteData } from '../../../api/Api';
 import WarningMessage from '../../WarningMessages.js';
 
@@ -32,8 +32,6 @@ const RegisterProduct = ({ setShowPopup }) => {
   const [warningMsg, setWarningMsg] = React.useState(false);
   const [productSelectedToExclude, setProductSelectedToExclude] =
     React.useState(null);
-
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     fetchProvider();

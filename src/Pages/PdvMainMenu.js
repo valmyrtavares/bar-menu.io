@@ -11,7 +11,7 @@ import { GlobalContext } from '../GlobalContext.js';
 import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import WarningMessage from '../component/WarningMessages.js';
-import { app } from '../config-firebase/firebase.js';
+import { db } from '../config-firebase/firebase.js';
 import { async } from '@firebase/util';
 import {
   useEnsureAnonymousUser,
@@ -32,7 +32,6 @@ function PdvMainMenu() {
   const navigate = useNavigate();
 
   useEnsureAnonymousUser();
-  const db = getFirestore(app);
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
