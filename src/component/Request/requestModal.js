@@ -269,7 +269,8 @@ const RequestModal = () => {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
 
       if (pdv === true && global.pdvRequest) {
-        addRequestUserToten(currentUserNew.id);
+        const data = await getOneItemColleciton('user', currentUserNew.id);
+        addRequestUser(data);
         global.setPdvRequest(false);
         return;
       } else if (isToten && isToten === true) {
