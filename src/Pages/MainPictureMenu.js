@@ -12,6 +12,8 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
+import { cacheImage } from '../util/imageCache.js';
+import CategoryItem from './CategoryItem.js';
 
 const MainPictureMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -44,6 +46,8 @@ const MainPictureMenu = () => {
         const bestSeller = {
           category: 'main',
           parent: 'bestSellers',
+          display: true,
+          id: '1232',
           title: 'OS MAIS VENDIDOS ',
           image:
             'https://firebasestorage.googleapis.com/v0/b/react-bar-67f33.appspot.com/o/frontImage%2FWhatsApp%20Image%202024-07-26%20at%2011.19.36.png?alt=media&token=f129a337-ee65-4402-90b2-8ce8a5fb593f',
@@ -59,6 +63,12 @@ const MainPictureMenu = () => {
         }
         setDishes(dataItem);
         setIsLoading(false);
+        dataItem.forEach((item) => {
+          cacheImage(item.id, item.image);
+        });
+        menuButton.forEach((item) => {
+          cacheImage(item.id, item.image);
+        });
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -151,22 +161,12 @@ const MainPictureMenu = () => {
           <nav className={style.categories}>
             {menuButton &&
               menuButton.length > 0 &&
-              menuButton.map((item, index) => (
-                <div
-                  key={index}
-                  className={style.categoryItem}
-                  onClick={() => chooseCategory(item.parent, item.title)}
-                >
-                  <h3>{item.title}</h3>
-                  <img
-                    src={
-                      item.image
-                        ? item.image
-                        : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
-                    }
-                    alt=""
-                  />
-                </div>
+              menuButton.map((item) => (
+                <CategoryItem
+                  key={item.id}
+                  chooseCategory={chooseCategory}
+                  item={item}
+                />
               ))}
           </nav>
           <section className={style.dishes}>
