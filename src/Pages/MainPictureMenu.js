@@ -46,6 +46,8 @@ const MainPictureMenu = () => {
         const bestSeller = {
           category: 'main',
           parent: 'bestSellers',
+          display: true,
+          id: '1232',
           title: 'OS MAIS VENDIDOS ',
           image:
             'https://firebasestorage.googleapis.com/v0/b/react-bar-67f33.appspot.com/o/frontImage%2FWhatsApp%20Image%202024-07-26%20at%2011.19.36.png?alt=media&token=f129a337-ee65-4402-90b2-8ce8a5fb593f',

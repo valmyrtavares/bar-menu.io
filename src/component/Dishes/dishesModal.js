@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../assets/styles/dishesModal.css';
+import { useCachedImage } from '../../Hooks/useCachedImage';
 import {
   getFirestore,
   collection,
@@ -47,6 +48,7 @@ const DishesModal = ({ item, setModal }) => {
   const [pdv, setPdv] = useLocalStorage('pdv', false);
 
   const navigate = useNavigate();
+  const src = useCachedImage(item.id, item.image);
 
   React.useEffect(() => {
     calculateFinalCost();
@@ -277,7 +279,7 @@ const DishesModal = ({ item, setModal }) => {
         <button onClick={closeModal}>X</button>
       </div>
       <h1>{item.title}</h1>
-      <img src={item.image} alt="img" />
+      <img src={src} alt="img" />
       <p>{item.comment}</p>
       <h4>Valor: R${totalPrice.toFixed(2)}</h4>
       {item.CustomizedPrice &&
