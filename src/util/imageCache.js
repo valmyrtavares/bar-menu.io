@@ -14,7 +14,7 @@ export async function cacheImage(id, imageUrl) {
     const bitmap = await createImageBitmap(blob);
 
     // ⬇️ DEFINA AQUI a largura máxima desejada
-    const MAX_WIDTH = 800;
+    const MAX_WIDTH = 400;
 
     let newWidth = bitmap.width;
     let newHeight = bitmap.height;
