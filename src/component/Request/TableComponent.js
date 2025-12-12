@@ -82,6 +82,11 @@ const TableComponent = ({ filteredCompleteRequests }) => {
       } = item;
 
       // Cria uma linha para cada item dentro de `request`
+      if (!request) {
+        console.warn('Item sem request, pulando:', item);
+        return []; // ⬅️ isso é o "continue" do flatMap
+      }
+
       return request.map((requestItem, index) => (
         <tr key={`${requestItem.name}-${index}`}>
           <td>{requestItem.name}</td>
@@ -104,6 +109,11 @@ const TableComponent = ({ filteredCompleteRequests }) => {
     const totals = filteredCompleteRequests.reduce(
       (acc, item) => {
         const { paymentMethod, request, finalPriceRequest } = item;
+
+        if (!request) {
+          console.warn('Item sem request, pulando:', item);
+          return acc; // ⬅️ isso é o "continue" do flatMap
+        }
 
         // Calcula a soma dos preços dos itens no pedido
         const sumItemsPrice = request.reduce(
