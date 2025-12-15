@@ -45,7 +45,7 @@ const RequestModal = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
   const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
-  const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(false);
+  const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(true);
   const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] =
     React.useState(false);
   const idPayerRef = React.useRef('');

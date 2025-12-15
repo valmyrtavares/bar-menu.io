@@ -7,7 +7,7 @@ import { io } from 'socket.io-client';
 const paymentOptions = [
   { label: 'Débito', value: 'DEBIT' },
   { label: 'Crédito', value: 'CREDIT' },
-  { label: 'Pix', value: 'DEBIT' },
+  { label: 'Pix', value: 'PIX' },
   { label: 'Dinheiro', value: 'CASH' },
 ];
 
@@ -102,7 +102,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
           message: {
             command: 'PAYMENT',
