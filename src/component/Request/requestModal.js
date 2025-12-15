@@ -45,6 +45,7 @@ const RequestModal = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
   const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
+  const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(false);
   const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] =
     React.useState(false);
   const idPayerRef = React.useRef('');
@@ -386,7 +387,11 @@ const RequestModal = () => {
       console.error('Erro ao atualizar o array no Firestore:', error);
     }
   };
-  const onChoose = (selectedPayment) => {
+  const onChoose = async (selectedPayment) => {
+    if (!autoPaymentMachineOn) {
+      await sendRequestToKitchen();
+      return;
+    }
     console.log('selectedPayment   ', selectedPayment);
     if (!autoPayment) {
       setAutoPayment(true);
