@@ -1,0 +1,9 @@
+@use './mixin' as *;
+@import "./adminStyleReuse.module.scss";
+
+.AutoPaymentListContainer { 
+    @include tableContainer;
+        .clickEvent{
+        cursor: pointer;
+    }
+}
