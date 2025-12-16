@@ -1,0 +1,54 @@
+/* AutoPayment.module.scss */
+.autoPayment {
+
+   
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background: var(--secundary-bg-color);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.18), 8px 0 24px -8px rgba(0, 0, 0, 0.12);
+
+    .title {
+        margin-bottom: 1.5rem;
+        font-size: 2.8rem;
+        font-weight: bold;
+        color: var(--title-font-color);
+    }
+
+    .options {
+        display: flex;
+        gap: 2rem;
+        margin: 4rem 0;
+        
+        .radioLabel {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            
+            .radioInput {
+                margin-right: 0.5rem;
+                accent-color: #007bff;
+                width:4rem;
+                height: 1.5rem;
+            }
+        }
+    }
+
+    .chooseButton {
+        padding: 0.7rem 2rem;
+        font-size: 1.7rem; 
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--title-font-color);
+        background: var(--btn-color);
+
+        &:disabled {
+            background: var(--btn-color);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}

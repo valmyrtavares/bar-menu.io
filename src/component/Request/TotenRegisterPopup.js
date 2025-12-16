@@ -14,6 +14,7 @@ const TotenRegisterPopup = ({
   setOpenCloseTotenPopup,
   setCurrentUser,
   sendRequestToKitchen,
+  onChoose,
   isSubmitting,
 }) => {
   const { form, setForm, error, handleChange, handleBlur } = useFormValidation({
@@ -162,7 +163,8 @@ const TotenRegisterPopup = ({
         );
         setCurrentUser(recoveredClient);
         setOpenCloseTotenPopup(false);
-        sendRequestToKitchen();
+        global.isToten ? onChoose() : sendRequestToKitchen();
+
         return;
       } else {
         setWarningMessageCustomerNotFinded(true);
@@ -201,7 +203,7 @@ const TotenRegisterPopup = ({
         // Busca o usuário recém-criado no Firestore
         const currentUser = await getOneItemColleciton('user', docRef.id);
 
-        sendRequestToKitchen();
+        global.isToten ? onChoose() : sendRequestToKitchen();
         // Atualiza o estado do cliente atual
         setCurrentUser(currentUser);
 

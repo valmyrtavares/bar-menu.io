@@ -8,6 +8,12 @@
     left:20%
 }
 
+.container-modal-request .container-autoPayment {
+position: fixed;
+    top: 30vh;
+    left: 37%;
+}
+
 .current-client {
     text-align: center;
     font-size: 22px;

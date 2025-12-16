@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
+import AutoPayment from '../Payment/AutoPayment.js';
 import '../../assets/styles/requestModal.css';
 import {
   deleteRequestItem,
@@ -44,6 +45,12 @@ const RequestModal = () => {
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
+  const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
+  const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(true);
+  const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] =
+    React.useState(false);
+  const idPayerRef = React.useRef('');
 
   const [pdv, setPdv] = useLocalStorage('pdv', false);
 
@@ -52,6 +59,7 @@ const RequestModal = () => {
   const location = useLocation();
   const isAdminOrigin = !!location.state?.isAdminOrigin;
   const [stylePdv, setStylePdv] = React.useState(false);
+  let methodPayment = '';
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -264,7 +272,6 @@ const RequestModal = () => {
   const sendRequestToKitchen = async (e) => {
     if (isProcessing.current) return; // Impede cliques repetidos
     isProcessing.current = true; // Bloqueia a função
-
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
 
@@ -284,7 +291,6 @@ const RequestModal = () => {
         //mostrar mensagem
         return;
       } else if (warningMsg) {
-        setTotenMessage(true);
         const data = await getOneItemColleciton('user', currentUserNew.id);
         console.log('Atual cliente   ', data);
         if (data) {
@@ -338,6 +344,7 @@ const RequestModal = () => {
         orderDelivered: false,
         request: data.request, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
+        idPayer: idPayerRef.current,
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
@@ -376,10 +383,13 @@ const RequestModal = () => {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
+        paymentDone: methodPayment ? true : false, // Verifica se o método de pagamento foi selecionado
+        paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
         request: previousRequests, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
+        idPayer: idPayerRef.current,
         dateTime: takeDataTime(),
         countRequest: await countingRequest(),
       };
@@ -420,6 +430,43 @@ const RequestModal = () => {
       console.error('Erro ao atualizar o array no Firestore:', error);
     }
   };
+  const onChoose = async (selectedPayment) => {
+    if (!autoPaymentMachineOn) {
+      await sendRequestToKitchen();
+      return;
+    }
+    console.log('selectedPayment   ', selectedPayment);
+    if (!autoPayment) {
+      setAutoPayment(true);
+      return;
+    } else {
+      if (selectedPayment === 'dinheiro') {
+        sendRequestToKitchen();
+        setAutoPayment(false);
+      } else if (selectedPayment === 'desabled') {
+        setAutoPayment(false);
+        setErrorPaymentMessage(
+          'Seu auto-pagamento foi recusado, vá até o caixa caixa e efetue o pagamento com o/a atendente'
+        );
+        setTotenRejectPaymentMessage(true);
+        setTimeout(() => {
+          setTotenRejectPaymentMessage(false);
+        }, 100000);
+      } else if (selectedPayment === 'exceded') {
+        setAutoPayment(false);
+        setErrorPaymentMessage(
+          'O tempo limite do seu pagamento foi excedido, vá até o caixa caixa e efetue o pagamento com o/a atendente'
+        );
+        setTotenRejectPaymentMessage(true);
+        setTimeout(() => {
+          setTotenRejectPaymentMessage(false);
+        }, 7000);
+      } else {
+        methodPayment = selectedPayment;
+        sendRequestToKitchen();
+      }
+    }
+  };
 
   const countingRequest = async () => {
     const requestData = await getBtnData('requests');
@@ -457,30 +504,41 @@ const RequestModal = () => {
           setOpenCloseTotenPopup={setOpenCloseTotenPopup}
           setCurrentUser={setCurrentUser}
           sendRequestToKitchen={sendRequestToKitchen}
+          onChoose={onChoose}
           isSubmitting={isSubmitting}
         />
       )}
       {totenMessage && (
         <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
       )}
+      {totenRejectPaymentMessage && (
+        <DefaultComumMessage msg={errorPaymentMessage} />
+      )}
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
       </div>
-      <div className="warning-messages-container">
-        {warningMsg && (
-          <WarningMessages
-            message="Agora você pode ir ao caixa "
-            customer={userData?.name}
-            finalPriceRequest={finalPriceRequest}
-            sendRequestToKitchen={sendRequestToKitchen}
-            setWarningMsg={setWarningMsg}
-            requests={userData.request}
-            isSubmitting={isSubmitting}
+      {autoPayment && (
+        <div className="container-autoPayment">
+          <AutoPayment
+            onChoose={onChoose}
+            setIdPayer={(value) => (idPayerRef.current = value)}
+            price={finalPriceRequest}
           />
-        )}
-      </div>
+        </div>
+      )}
+      {warningMsg && (
+        <WarningMessages
+          message="Agora você pode ir ao caixa "
+          customer={userData?.name}
+          finalPriceRequest={finalPriceRequest}
+          sendRequestToKitchen={sendRequestToKitchen}
+          setWarningMsg={setWarningMsg}
+          requests={userData.request}
+          isSubmitting={isSubmitting}
+        />
+      )}
 
-      <p className="current-client" onClick={logout}>
+      <p className="current-client">
         <span>Cliente: </span>
         {userData?.name === 'anonimo' ? userData?.fantasyName : userData?.name}
       </p>
