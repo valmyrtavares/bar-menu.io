@@ -26,6 +26,10 @@ const FormFrontImage = () => {
     false
   );
   const [pdv, setPdv] = useLocalStorage('pdv', false);
+  const [autoPaymentMachineOn, setautoPaymentMachineOn] = useLocalStorage(
+    'autoPaymentMachineOn',
+    false
+  );
 
   //Navigate
   const navigate = useNavigate();
@@ -67,6 +71,10 @@ const FormFrontImage = () => {
 
   const changeModePdv = () => {
     setPdv((prev) => !prev);
+  };
+
+  const changeAutoPayment = () => {
+    setautoPaymentMachineOn((prev) => !prev);
   };
 
   const changeModePicture = () => {
@@ -167,6 +175,20 @@ const FormFrontImage = () => {
           os botões serão substituidos por imagens.
         </label>
       </div>*/}
+
+      <div className="form-check my-1">
+        <input
+          className="form-check-input"
+          id="autoPaymentMachineOn"
+          type="checkbox"
+          checked={autoPaymentMachineOn}
+          onChange={changeAutoPayment}
+        />
+        <label className="form-check-label">
+          <b>Auto Pagamento</b>: Manter clicado para usar a maquina de auto
+          pagamento
+        </label>
+      </div>
 
       <div className="form-check my-1">
         <input

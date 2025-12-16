@@ -71,6 +71,15 @@ const RequestModal = () => {
       if (toten) setIsToten(true);
     }
 
+    if (localStorage.hasOwnProperty('autoPaymentMachineOn')) {
+      const autoPaymentAllow = JSON.parse(
+        localStorage.getItem('autoPaymentMachineOn')
+      );
+      autoPaymentAllow
+        ? setAutoPaymentMachineOn(true)
+        : setAutoPaymentMachineOn(false);
+    }
+
     if (localStorage.hasOwnProperty('backorder')) {
       const raw = localStorage.getItem('backorder');
       let orderStoraged = [];

@@ -121,7 +121,6 @@ const TotenRegisterPopup = ({
   };
 
   const addNickname = async () => {
-    debugger;
     if (form.cpf === '' && form.name === '') {
       setWarningMessageToEmptyFields(true);
 
