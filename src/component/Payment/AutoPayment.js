@@ -102,7 +102,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '01',
+            terminalId: '02',
           },
           message: {
             command: 'PAYMENT',
