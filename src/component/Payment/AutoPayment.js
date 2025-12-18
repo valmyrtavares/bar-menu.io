@@ -3,6 +3,7 @@ import style from '../../assets/styles/AutoPayment.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { v4 as uuidv4 } from 'uuid';
 import { io } from 'socket.io-client';
+import CloseBtn from '../closeBtn';
 
 const paymentOptions = [
   { label: 'Débito', value: 'DEBIT' },
@@ -11,7 +12,7 @@ const paymentOptions = [
   { label: 'Dinheiro', value: 'CASH' },
 ];
 
-const AutoPayment = ({ onChoose, price, setIdPayer }) => {
+const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [selected, setSelected] = useState('');
   const [warningCashPaymentMessage, setWarningCashPaymentMessage] =
     useState(false);
@@ -19,6 +20,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [waitingForPayment, setWaitingForPayment] = useState(false);
   const [correlationId, setCorrelationId] = useState(null);
+  const [message, setMessage] = useState('');
 
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
@@ -40,12 +42,14 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
         setWaitingForPayment(false);
         setIdPayer(payload.idPayer || null);
         onChoose(selected); // chama o onChoose como no fluxo aprovado
-      } else if (statusTransaction === 'ERRO') {
+      } else if (statusTransaction === 'REJECTED') {
         setWaitingForPayment(false);
+        setMessage('Falha no pagamento. Tente novamente');
         onChoose('desabled'); // manter seu comportamento anterior
-      } else if (statusTransaction === 'PENDING') {
+      } else if (statusTransaction === 'ABORTED') {
+        console.log('Objeto completo  ', payload);
         setWaitingForPayment(false);
-        onChoose(selected); // seu caso antigo tratava como pending -> selecionado
+        onChoose('ABORTED'); // seu caso antigo tratava como pending -> selecionado
       }
     });
 
@@ -57,12 +61,6 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
   function generateCorrelationId() {
     return uuidv4();
   }
-
-  const paymentOption = {
-    debit: 21,
-    credite: 22,
-    pix: 23,
-  };
 
   const handleChange = (e) => {
     setSelected(e.target.value);
@@ -84,6 +82,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
 
     try {
       setLoading(true);
+      setMessage('Efetue o pagamento na máquina de cartão ao lado');
       setErrorMessage('');
 
       // 1️⃣ Gera correlationId único
@@ -139,9 +138,48 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
       setLoading(true);
     }
   };
+  const abortPayment = async () => {
+    console.log('Pagamento abortado pelo usuário.');
+    try {
+      const payGo = {
+        type: 'INPUT',
+        origin: 'LAB',
+        data: {
+          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook', // 👈 agora aponta para o seu backend
+          correlationId,
+
+          automationName: 'GERACAOZ',
+          receiver: {
+            companyId: '003738',
+            storeId: '0001',
+            terminalId: '01',
+          },
+        },
+      };
+
+      const initRes = await fetch(
+        'https://payer-4ptm.onrender.com/api/payer/payment',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payGo),
+        }
+      );
+
+      if (!initRes.ok) throw new Error(`Erro na requisição: ${initRes.status}`);
+      const initData = await initRes.json();
+      console.log('📤 Enviado com sucesso para backend:', initData);
+      console.log('⌛ Aguardando resposta do Payer via webhook...');
+    } catch (err) {
+      console.error('Erro ao abortar o pagamento:', err);
+    } finally {
+      setLoading(true);
+    }
+  };
 
   return (
     <div className={style.autoPaymentContainer}>
+      <CloseBtn setClose={setAutoPayment} />
       {warningCashPaymentMessage && (
         <DefaultComumMessage msg="Pagamento em dinheiro deve ser efetuado direto no caixa ao lado" />
       )}
@@ -162,7 +200,12 @@ const AutoPayment = ({ onChoose, price, setIdPayer }) => {
             </label>
           ))}
         </div>
-        {loading && <p>Aguardando confirmação do pagamento...</p>}
+        {loading && (
+          <DefaultComumMessage
+            msg="Efetue o pagamento na máquina de cartão ao lado"
+            onClose={abortPayment}
+          />
+        )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <button
           type="submit"

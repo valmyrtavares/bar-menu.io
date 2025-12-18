@@ -461,11 +461,10 @@ const RequestModal = () => {
         setTimeout(() => {
           setTotenRejectPaymentMessage(false);
         }, 100000);
-      } else if (selectedPayment === 'exceded') {
+      } else if (selectedPayment === 'ABORTED') {
+        console.log('Pagamento abortado pelo usuário.  ', selectedPayment);
         setAutoPayment(false);
-        setErrorPaymentMessage(
-          'O tempo limite do seu pagamento foi excedido, vá até o caixa caixa e efetue o pagamento com o/a atendente'
-        );
+        setErrorPaymentMessage('O seu pagamento foi cancelado');
         setTotenRejectPaymentMessage(true);
         setTimeout(() => {
           setTotenRejectPaymentMessage(false);
@@ -504,6 +503,17 @@ const RequestModal = () => {
     global.setAuthorizated(false);
     navigate('/create-customer');
   };
+
+  const onClose = () => {
+    setTotenRejectPaymentMessage(false);
+    sendRequestToKitchen();
+  };
+
+  const onConfirm = () => {
+    console.log('Confirmando mensagem de rejeição de pagamento do toten');
+    setTotenRejectPaymentMessage(false);
+    setAutoPayment(true);
+  };
   return (
     <section
       className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
@@ -521,7 +531,13 @@ const RequestModal = () => {
         <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
       )}
       {totenRejectPaymentMessage && (
-        <DefaultComumMessage msg={errorPaymentMessage} />
+        <DefaultComumMessage
+          msg={errorPaymentMessage}
+          onClose={onClose}
+          onConfirm={onConfirm}
+          negativeResponse="Fechar e pagar com o atendente"
+          affirmativeResponse="Tentar Novamente"
+        />
       )}
       <div className="container-modalDihses-InCarrolse">
         {modal && <CheckDishesModal item={item} setModal={setModal} />}
@@ -532,6 +548,7 @@ const RequestModal = () => {
             onChoose={onChoose}
             setIdPayer={(value) => (idPayerRef.current = value)}
             price={finalPriceRequest}
+            setAutoPayment={setAutoPayment}
           />
         </div>
       )}

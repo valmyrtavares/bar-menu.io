@@ -1,7 +1,14 @@
 import React, { useEffect } from 'react';
 import '../../assets/styles/resultMessage.css';
 
-const DefaultComumMessage = ({ msg, onClose, onConfirm, item }) => {
+const DefaultComumMessage = ({
+  msg,
+  onClose,
+  onConfirm,
+  item,
+  negativeResponse,
+  affirmativeResponse,
+}) => {
   return (
     <>
       <div className="overlay"></div> {/* Overlay para o fundo escuro */}
@@ -9,14 +16,19 @@ const DefaultComumMessage = ({ msg, onClose, onConfirm, item }) => {
         <h1>Mensagem importante</h1>
         <h3>{msg}</h3>
         <div className="container-button">
-          {onClose && <button onClick={onClose}>Cancelar</button>}
+          {onClose && (
+            <button onClick={onClose} type="button">
+              {negativeResponse ? negativeResponse : 'Cancelar'}
+            </button>
+          )}
+
           {onConfirm && (
             <button
               onClick={() => {
                 item ? onConfirm(item, true) : onConfirm();
               }}
             >
-              Continuar
+              {affirmativeResponse ? affirmativeResponse : 'Continuar'}
             </button>
           )}
         </div>
