@@ -455,7 +455,7 @@ const RequestModal = () => {
       } else if (selectedPayment === 'desabled') {
         setAutoPayment(false);
         setErrorPaymentMessage(
-          'Seu auto-pagamento foi recusado, vá até o caixa caixa e efetue o pagamento com o/a atendente'
+          'Seu pagamento foi recusado. Você pode tentar novamente ou ir ao caixa e efetuar o pagamento com o/a atendente'
         );
         setTotenRejectPaymentMessage(true);
         setTimeout(() => {
