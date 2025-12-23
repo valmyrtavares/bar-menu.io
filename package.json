@@ -32,11 +32,14 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "predeploy": "npm run build",
+    "predeploy": "npm run build:main",
     "deploy": "gh-pages -d docs",
-    "start": "react-scripts start",
+    "start:main": "dotenv -e .env.main react-scripts start",
+    "start:tropicalx": "dotenv -e .env.tropicalx react-scripts start",
     "clean": "rm -rf docs && mkdir docs",
     "build": "react-scripts build && npm run clean && mv build/* docs/",
+    "build:main": "dotenv -e .env.main react-scripts build && npm run clean && mv build/* docs/",
+    "build:tropicalx": "dotenv -e .env.tropicalx react-scripts build && npm run clean && mv build/* docs/",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "proxy-server": "node proxyServer.js"
@@ -60,6 +63,8 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
     "typescript": "^4.9.5"
   }
 }
