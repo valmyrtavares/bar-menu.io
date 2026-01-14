@@ -22,6 +22,40 @@
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
             margin-top: 56px;
             background-color: var(--bg-color);
+            .categoryItem {
+                    width: 100%;
+                    aspect-ratio: 1 / 1; // Torna a div quadrada
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                    overflow: hidden;
+                    position: relative;
+                    background-color: var(--secundary-bg-color);
+                    margin-bottom: 10px;
+            
+                    h3 {
+                        height: 20%; // Ocupa 1/5 da altura total
+                        display: flex;
+                        color: var(--title-font-color);
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
+            
+                        width: 100%;
+                        z-index: 2;
+                    }
+            
+                    img {
+                        width: 85%; // Faz a imagem ficar mais larga que alta
+                        height: 80%; // Ocupa o restante do espaço disponível
+                        object-fit: cover; // Garante que as bordas sejam cortadas
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                    }
+                }
             
         }
         .dishes {

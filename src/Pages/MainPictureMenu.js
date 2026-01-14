@@ -12,8 +12,8 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
-import { cacheImage } from '../util/imageCache.js';
-import CategoryItem from './CategoryItem.js';
+// import { cacheImage } from '../util/imageCache.js';
+// import CategoryItem from './CategoryItem.js';
 
 const MainPictureMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -63,12 +63,12 @@ const MainPictureMenu = () => {
         }
         setDishes(dataItem);
         setIsLoading(false);
-        dataItem.forEach((item) => {
-          cacheImage(item.id, item.image);
-        });
-        menuButton.forEach((item) => {
-          cacheImage(item.id, item.image);
-        });
+        // dataItem.forEach((item) => {
+        //   cacheImage(item.id, item.image);
+        // });
+        // menuButton.forEach((item) => {
+        //   cacheImage(item.id, item.image);
+        // });
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -161,12 +161,22 @@ const MainPictureMenu = () => {
           <nav className={style.categories}>
             {menuButton &&
               menuButton.length > 0 &&
-              menuButton.map((item) => (
-                <CategoryItem
-                  key={item.id}
-                  chooseCategory={chooseCategory}
-                  item={item}
-                />
+              menuButton.map((item, index) => (
+                <div
+                  key={index}
+                  className={style.categoryItem}
+                  onClick={() => chooseCategory(item.parent, item.title)}
+                >
+                  <h3>{item.title}</h3>
+                  <img
+                    src={
+                      item.image
+                        ? item.image
+                        : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
+                    }
+                    alt=""
+                  />
+                </div>
               ))}
           </nav>
           <section className={style.dishes}>
