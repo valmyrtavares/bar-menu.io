@@ -18,11 +18,12 @@ import {
 } from '../Hooks/useEnsureAnonymousUser.js';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { onSnapshot } from 'firebase/firestore';
+import { useMenuData } from '../Hooks/useMenuData.js';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
-  const [menuButton, setMenuButton] = React.useState([]);
-  const [dishes, setDishes] = React.useState([]);
+  // const [menuButton, setMenuButton] = React.useState([]);
+  // const [dishes, setDishes] = React.useState([]);
   const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
@@ -31,19 +32,20 @@ function MainMenu() {
   const navigate = useNavigate();
 
   useEnsureAnonymousUser();
+  const { menuButton, dishes, loading, error } = useMenuData();
 
-  React.useEffect(() => {
-    // checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
-    const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
-      const dishes = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setDishes(dishes); // atualiza automaticamente
-    });
+  // React.useEffect(() => {
+  // checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
+  //   const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
+  //     const dishes = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setDishes(dishes); // atualiza automaticamente
+  //   });
 
-    return () => unsubscribe();
-  }, []);
+  //   return () => unsubscribe();
+  // }, []);
 
   // const checkToten = () => {
   //   const totenExist = localStorage.getItem('toten');
@@ -58,36 +60,36 @@ function MainMenu() {
   //   }
   // };
 
-  React.useEffect(() => {
-    // if (!global.isToten) {
-    //   if (!global.authorizated) {
-    //     CheckLogin();
-    //   }
-    // }
-    fetchData();
-  }, [global.authorizated]);
+  // React.useEffect(() => {
+  // if (!global.isToten) {
+  //   if (!global.authorizated) {
+  //     CheckLogin();
+  //   }
+  // }
+  // fetchData();
+  // }, [global.authorizated]);
 
-  const fetchData = async () => {
-    try {
-      const [data, dataItem] = await Promise.all([
-        getBtnData('button'),
-        getBtnData('item'),
-      ]);
-      setMenuButton(data);
-      setDishes(dataItem);
-      grabClient();
-    } catch (error) {
-      console.error('Erro fetching data', error);
-    }
-  };
+  // const fetchData = async () => {
+  //   try {
+  //     const [data, dataItem] = await Promise.all([
+  //       getBtnData('button'),
+  //       getBtnData('item'),
+  //     ]);
+  //     setMenuButton(data);
+  //     setDishes(dataItem);
+  //     grabClient();
+  //   } catch (error) {
+  //     console.error('Erro fetching data', error);
+  //   }
+  // };
 
-  React.useEffect(() => {
-    if (global.isToten === null) return; // Espera até que tenha um valor válido
+  // React.useEffect(() => {
+  //   if (global.isToten === null) return; // Espera até que tenha um valor válido
 
-    if (!global.authorizated) {
-      CheckLogin();
-    }
-  }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
+  //   if (!global.authorizated) {
+  //     CheckLogin();
+  //   }
+  // }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
 
   async function CheckLogin() {
     const userId = await CheckUser('userMenu', global.isToten);
