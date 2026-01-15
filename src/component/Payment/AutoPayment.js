@@ -36,6 +36,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     socket.on('paymentStatus', (payload) => {
       console.log('Resultado do pagamento via socket:', payload);
 
+      if (payload.correlationId !== correlationId) return;
       const { statusTransaction } = payload;
       console.log('statusTransaction recebido no socket:', statusTransaction);
       if (statusTransaction === 'APPROVED') {
@@ -70,10 +71,14 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     e.preventDefault();
 
     if (selected === 'CASH') {
+      setMessage(
+        'Pagamento em dinheiro deve ser realizado por enquanto com atendente com um atendente.'
+      );
+
       setWarningCashPaymentMessage(true);
       setTimeout(() => {
         setWarningCashPaymentMessage(false);
-        onChoose(selected);
+        onChoose(selected); // fecha componente e segue fluxo
       }, 5000);
       return;
     }
@@ -101,7 +106,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '01',
+            terminalId: '02',
           },
           message: {
             command: 'PAYMENT',
@@ -114,66 +119,38 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       };
 
       // 3️⃣ Envia ao backend hospedado no Render
-      const initRes = await fetch(
-        'https://payer-4ptm.onrender.com/api/payer/payment',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payGo),
-        }
-      );
-
-      if (!initRes.ok) throw new Error(`Erro na requisição: ${initRes.status}`);
-      const initData = await initRes.json();
-      console.log('📤 Enviado com sucesso para backend:', initData);
-
-      // 4️⃣ Mostra que está aguardando resposta via webhook
-      console.log('⌛ Aguardando resposta do Payer via webhook...');
-      // Aqui você pode abrir um modal "Aguardando pagamento..."
-      // O webhook do backend tratará o retorno e poderá atualizar o frontend via socket ou polling leve, se quiser.
+      await fetch('https://payer-4ptm.onrender.com/api/payer/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payGo),
+      });
     } catch (err) {
       console.error('Erro no pagamento:', err);
       setErrorMessage('Falha no pagamento. Tente novamente.');
-    } finally {
-      setLoading(true);
+      setMessage('Erro ao iniciar pagamento. Tente novamente.');
     }
   };
   const abortPayment = async () => {
+    if (!correlationId) return;
     console.log('Pagamento abortado pelo usuário.');
     try {
-      const payGo = {
-        type: 'INPUT',
-        origin: 'LAB',
-        data: {
-          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook', // 👈 agora aponta para o seu backend
+      setMessage('Cancelando pagamento...');
+      await fetch('https://payer-4ptm.onrender.com/api/payer/abort', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           correlationId,
-
           automationName: 'GERACAOZ',
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '01',
+            terminalId: '02',
           },
-        },
-      };
-
-      const initRes = await fetch(
-        'https://payer-4ptm.onrender.com/api/payer/payment',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payGo),
-        }
-      );
-
-      if (!initRes.ok) throw new Error(`Erro na requisição: ${initRes.status}`);
-      const initData = await initRes.json();
-      console.log('📤 Enviado com sucesso para backend:', initData);
-      console.log('⌛ Aguardando resposta do Payer via webhook...');
+        }),
+      });
     } catch (err) {
       console.error('Erro ao abortar o pagamento:', err);
-    } finally {
-      setLoading(true);
+      setMessage('Erro ao cancelar o pagamento. Tente novamente.');
     }
   };
 
@@ -181,7 +158,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     <div className={style.autoPaymentContainer}>
       <CloseBtn setClose={setAutoPayment} />
       {warningCashPaymentMessage && (
-        <DefaultComumMessage msg="Pagamento em dinheiro deve ser efetuado direto no caixa ao lado" />
+        <DefaultComumMessage msg="Pagamento em dinheiro ou pix deve ser efetuado direto no caixa ao lado" />
       )}
       <form className={style.autoPayment} onSubmit={handleSubmit}>
         <h1 className={style.title}>Escolha sua forma de pagamento</h1>
@@ -201,7 +178,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           ))}
         </div>
         {loading && (
-          <DefaultComumMessage msg="Efetue o pagamento na máquina de cartão ao lado" />
+          <DefaultComumMessage
+            msg="Efetue o pagamento na máquina de cartão ao lado"
+            onClose={abortPayment}
+          />
         )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <button
