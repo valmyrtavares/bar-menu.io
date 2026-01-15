@@ -1,15 +1,12 @@
 import React from 'react';
 import CarrosselImages from '../component/carouselComponent';
 import NestedBtn from '../component/nestedBtn';
-import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
-import MenuButton from '../component/menuHamburguerButton';
-import RequestModal from '../component/Request/requestModal.js';
+// import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
+// import MenuButton from '../component/menuHamburguerButton';
+// import RequestModal from '../component/Request/requestModal.js';
 import { Link, useNavigate } from 'react-router-dom';
 import style from '../assets/styles/mainMenu.module.scss';
-import { common } from '@mui/material/colors';
-import { GlobalContext } from '../GlobalContext';
-import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+
 import WarningMessage from '../component/WarningMessages';
 import { db } from '../config-firebase/firebase.js';
 import {
@@ -17,8 +14,9 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
-import { onSnapshot } from 'firebase/firestore';
+
 import { useMenuData } from '../Hooks/useMenuData.js';
+import { useLogoutWarning } from '../Hooks/useLogoutWarning.js';
 import { useAnonymousSession } from '../Hooks/useAnonymousSession.js';
 
 function MainMenu() {
@@ -27,14 +25,17 @@ function MainMenu() {
   // const [dishes, setDishes] = React.useState([]);
   // const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
-  const global = React.useContext(GlobalContext);
-  const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
+  // const global = React.useContext(GlobalContext);
+  // const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   const navigate = useNavigate();
 
   useEnsureAnonymousUser();
   const { menuButton, dishes, loading, error } = useMenuData();
   const { nameClient, logout } = useAnonymousSession();
+
+  const { open, requestLogout, cancelLogout, confirmLogout } =
+    useLogoutWarning(logout);
 
   // React.useEffect(() => {
   // checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
@@ -93,36 +94,36 @@ function MainMenu() {
   //   }
   // }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
 
-  async function CheckLogin() {
-    const userId = await CheckUser('userMenu', global.isToten);
-    navigate(userId);
-  }
+  // async function CheckLogin() {
+  //   const userId = await CheckUser('userMenu', global.isToten);
+  //   navigate(userId);
+  // }
 
   // const logToAnounimousInToten = () => {
-  const noCustomer = {
-    name: 'anonimo',
-    phone: '777',
-    birthday: '77',
-    email: 'anonimo@anonimo.com',
-  };
+  // const noCustomer = {
+  //   name: 'anonimo',
+  //   phone: '777',
+  //   birthday: '77',
+  //   email: 'anonimo@anonimo.com',
+  // };
 
-  const logoutCustomer = async () => {
-    if (global.isToten) {
-      if (logoutAdminPopup) {
-        const anonymousUser = await getAnonymousUser();
-        localStorage.setItem(
-          'userMenu',
-          JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
-        );
-        return;
-      }
-      setLogoutAdminPopup(true);
-    } else {
-      localStorage.removeItem('userMenu');
-      global.setAuthorizated(false);
-      navigate('create-customer');
-    }
-  };
+  // const logoutCustomer = async () => {
+  //   if (global.isToten) {
+  //     if (logoutAdminPopup) {
+  //       const anonymousUser = await getAnonymousUser();
+  //       localStorage.setItem(
+  //         'userMenu',
+  //         JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+  //       );
+  //       return;
+  //     }
+  //     setLogoutAdminPopup(true);
+  //   } else {
+  //     localStorage.removeItem('userMenu');
+  //     global.setAuthorizated(false);
+  //     navigate('create-customer');
+  //   }
+  // };
 
   // function grabClient() {
   //   if (localStorage.hasOwnProperty('userMenu')) {
@@ -159,11 +160,11 @@ function MainMenu() {
   return (
     <>
       <div className="WarningMessage-container">
-        {logoutAdminPopup && (
+        {open && (
           <WarningMessage
             message="Você está prestes a sair do sistema"
-            setWarningMsg={setLogoutAdminPopup}
-            sendRequestToKitchen={logoutCustomer}
+            setWarningMsg={cancelLogout}
+            sendRequestToKitchen={confirmLogout}
           />
         )}
       </div>
@@ -171,7 +172,10 @@ function MainMenu() {
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         {true && <CarrosselImages />}
         <div className={style.containerBtn}>
-          <SubHeaderCustomer logoutCustomer={logout} nameClient={nameClient} />
+          <SubHeaderCustomer
+            logoutCustomer={requestLogout}
+            nameClient={nameClient}
+          />
           {menuButton &&
             dishes &&
             menuButton.map((item, index) => (
