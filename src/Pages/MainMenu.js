@@ -33,7 +33,7 @@ function MainMenu() {
   useEnsureAnonymousUser();
 
   React.useEffect(() => {
-    checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
+    // checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
     const unsubscribe = onSnapshot(collection(db, 'item'), (snapshot) => {
       const dishes = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -45,25 +45,25 @@ function MainMenu() {
     return () => unsubscribe();
   }, []);
 
-  const checkToten = () => {
-    const totenExist = localStorage.getItem('toten');
-    if (!totenExist || global.isToten !== true) {
-      global.setIsToten(false);
-      if (!global.authorizated) {
-        CheckLogin();
-      }
-    } else {
-      global.setIsToten(true);
-      CheckLogin();
-    }
-  };
+  // const checkToten = () => {
+  //   const totenExist = localStorage.getItem('toten');
+  //   if (!totenExist || global.isToten !== true) {
+  //     global.setIsToten(false);
+  //     if (!global.authorizated) {
+  //       CheckLogin();
+  //     }
+  //   } else {
+  //     global.setIsToten(true);
+  //     CheckLogin();
+  //   }
+  // };
 
   React.useEffect(() => {
-    if (!global.isToten) {
-      if (!global.authorizated) {
-        CheckLogin();
-      }
-    }
+    // if (!global.isToten) {
+    //   if (!global.authorizated) {
+    //     CheckLogin();
+    //   }
+    // }
     fetchData();
   }, [global.authorizated]);
 
