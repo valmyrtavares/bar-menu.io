@@ -19,12 +19,13 @@ import {
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { onSnapshot } from 'firebase/firestore';
 import { useMenuData } from '../Hooks/useMenuData.js';
+import { useAnonymousSession } from '../Hooks/useAnonymousSession.js';
 
 function MainMenu() {
   // const [displayForm, setDisplayForm] = React.useState(false);
   // const [menuButton, setMenuButton] = React.useState([]);
   // const [dishes, setDishes] = React.useState([]);
-  const [nameClient, setNameClient] = React.useState('');
+  // const [nameClient, setNameClient] = React.useState('');
   const containerRef = React.useRef(null);
   const global = React.useContext(GlobalContext);
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
@@ -33,6 +34,7 @@ function MainMenu() {
 
   useEnsureAnonymousUser();
   const { menuButton, dishes, loading, error } = useMenuData();
+  const { nameClient, logout } = useAnonymousSession();
 
   // React.useEffect(() => {
   // checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
@@ -122,37 +124,37 @@ function MainMenu() {
     }
   };
 
-  function grabClient() {
-    if (localStorage.hasOwnProperty('userMenu')) {
-      const nameCustomer = JSON.parse(localStorage.getItem('userMenu'));
+  // function grabClient() {
+  //   if (localStorage.hasOwnProperty('userMenu')) {
+  //     const nameCustomer = JSON.parse(localStorage.getItem('userMenu'));
 
-      if (nameCustomer.name === 'anonimo') {
-        deleteAnonymousWithnoItem(nameCustomer.id);
-      }
+  //     if (nameCustomer.name === 'anonimo') {
+  //       deleteAnonymousWithnoItem(nameCustomer.id);
+  //     }
 
-      let firstName = nameCustomer.name.split(' ')[0];
-      firstName =
-        firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
-      setNameClient(firstName);
-    }
-  }
+  //     let firstName = nameCustomer.name.split(' ')[0];
+  //     firstName =
+  //       firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  //     setNameClient(firstName);
+  //   }
+  // }
 
-  const deleteAnonymousWithnoItem = (id) => {
-    // Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
-    setTimeout(async () => {
-      try {
-        const data = await getOneItemColleciton('user', id);
-        if (!data?.request || data?.request.length === 0) {
-          await deleteData('user', id);
-          localStorage.removeItem('userMenu');
-          global.setAuthorizated(false);
-          CheckLogin();
-        }
-      } catch (error) {
-        console.error('Erro ao buscar e deletar dados', error);
-      }
-    }, 1200000);
-  };
+  // const deleteAnonymousWithnoItem = (id) => {
+  //   // Delete customer loged as anonimo and during 2 minutes does not have requestlog like anonimo and during 2 min does not have request
+  //   setTimeout(async () => {
+  //     try {
+  //       const data = await getOneItemColleciton('user', id);
+  //       if (!data?.request || data?.request.length === 0) {
+  //         await deleteData('user', id);
+  //         localStorage.removeItem('userMenu');
+  //         global.setAuthorizated(false);
+  //         CheckLogin();
+  //       }
+  //     } catch (error) {
+  //       console.error('Erro ao buscar e deletar dados', error);
+  //     }
+  //   }, 1200000);
+  // };
 
   return (
     <>
@@ -169,10 +171,7 @@ function MainMenu() {
       <div ref={containerRef} style={{ height: '80vh', overflowY: 'auto' }}>
         {true && <CarrosselImages />}
         <div className={style.containerBtn}>
-          <SubHeaderCustomer
-            logoutCustomer={logoutCustomer}
-            nameClient={nameClient}
-          />
+          <SubHeaderCustomer logoutCustomer={logout} nameClient={nameClient} />
           {menuButton &&
             dishes &&
             menuButton.map((item, index) => (
