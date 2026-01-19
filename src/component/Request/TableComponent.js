@@ -49,6 +49,10 @@ const TableComponent = ({ filteredCompleteRequests }) => {
               <td>{totalInScreen.pix}</td>
             </tr>
             <tr>
+              <td>VR</td>
+              <td>{totalInScreen.vr}</td>
+            </tr>
+            <tr>
               <td>Total Bruto</td>
               <td>{totalInScreen.grossdiscount}</td>
             </tr>
@@ -106,6 +110,7 @@ const TableComponent = ({ filteredCompleteRequests }) => {
     }
 
     // Objeto inicial para acumular os totais
+
     const totals = filteredCompleteRequests.reduce(
       (acc, item) => {
         const { paymentMethod, request, finalPriceRequest } = item;
@@ -118,7 +123,7 @@ const TableComponent = ({ filteredCompleteRequests }) => {
         // Calcula a soma dos preços dos itens no pedido
         const sumItemsPrice = request.reduce(
           (sum, reqItem) => sum + reqItem.finalPrice,
-          0
+          0,
         );
 
         // Adiciona ao total geral
@@ -136,13 +141,19 @@ const TableComponent = ({ filteredCompleteRequests }) => {
           const price = reqItem.finalPrice;
           acc.grossdiscount += price;
 
-          if (paymentMethod === 'debit') {
+          if (paymentMethod === 'debit' || paymentMethod === 'DEBIT') {
             acc.debit += price;
-          } else if (paymentMethod === 'credite') {
+          } else if (
+            paymentMethod === 'credite' ||
+            paymentMethod === 'CREDIT' ||
+            paymentMethod === 'credit'
+          ) {
             acc.credit += price;
-          } else if (paymentMethod === 'cash') {
+          } else if (paymentMethod === 'vr') {
+            acc.vr += price;
+          } else if (paymentMethod === 'cash' || paymentMethod === 'CASH') {
             acc.cash += price;
-          } else if (paymentMethod === 'pix') {
+          } else if (paymentMethod === 'pix' || paymentMethod === 'PIX') {
             acc.pix += price;
           }
         });
@@ -154,10 +165,11 @@ const TableComponent = ({ filteredCompleteRequests }) => {
         debit: 0,
         credit: 0,
         cash: 0,
+        vr: 0,
         pix: 0,
         discount: 0,
         grossdiscount: 0,
-      } // Objeto inicial
+      }, // Objeto inicial
     );
 
     return totals; // Retorna o objeto final com os totais
