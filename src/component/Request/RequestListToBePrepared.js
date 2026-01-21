@@ -199,7 +199,7 @@ const RequestListToBePrepared = ({ title }) => {
         });
         console.log(
           'finalPriceRequest atualizado com sucesso para:',
-          updatedFinalPrice
+          updatedFinalPrice,
         );
 
         // Aqui você pode atualizar o estado local para refletir a mudança imediatamente na interface
@@ -273,36 +273,16 @@ const RequestListToBePrepared = ({ title }) => {
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
-      if (!currentItem) {
-        console.log('Item inválido na request:', request);
-        continue;
-      }
 
-      if (!currentItem.recipe) {
-        console.log('Item sem recipe:', currentItem);
-        continue;
-      }
-
-      if (!currentItem.recipe.FinalingridientsList) {
-        console.log('FinalingridientsList está undefined:', currentItem.recipe);
-        continue;
-      }
       const account = currentItem.name;
       const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
-      if (!Array.isArray(FinalingridientsList)) {
-        console.log(
-          'ERRO: FinalingridientsList está indefinido para:',
-          currentItem
-        );
-        continue; // pula para o próximo item da request
-      }
 
       if (
         !currentItem?.recipe?.FinalingridientsList ||
         currentItem.recipe.FinalingridientsList.length === 0
       ) {
         alert(
-          'Este produto precisa ter uma receita cadastrada para ser vendido.'
+          'Este produto precisa ter uma receita cadastrada para ser vendido.',
         );
         return; // ou continue, dependendo do seu fluxo
       }
@@ -372,7 +352,7 @@ const RequestListToBePrepared = ({ title }) => {
     //third step
     itemsStock,
     account = 'Editado',
-    paymentDate = null
+    paymentDate = null,
   ) => {
     if (!Array.isArray(itemsStock)) {
       itemsStock = [itemsStock];
@@ -393,7 +373,7 @@ const RequestListToBePrepared = ({ title }) => {
 
       // Verifica se o item já existe no banco de dados
       const itemFinded = data?.find(
-        (itemSearch) => itemSearch.product === currentItem.product
+        (itemSearch) => itemSearch.product === currentItem.product,
       );
       console.log('itemFinded', itemFinded);
 
@@ -447,8 +427,8 @@ const RequestListToBePrepared = ({ title }) => {
             previousVolume,
             previousCost,
             currentItem.totalCost,
-            currentItem.totalVolume
-          )
+            currentItem.totalVolume,
+          ),
         );
         console.log('item atual atualizado   ', currentItem);
         currentItem = cleanObject(currentItem);
@@ -466,7 +446,7 @@ const RequestListToBePrepared = ({ title }) => {
             paymentDate,
             0,
             currentItem.totalCost,
-            currentItem.totalVolume
+            currentItem.totalVolume,
           ),
         ];
         currentItem = cleanObject(currentItem);
@@ -481,14 +461,14 @@ const RequestListToBePrepared = ({ title }) => {
       if (!hasWarningForProduct(currentItem.product)) {
         console.log(`Aviso já registrado para ${currentItem.product}`);
         alert(
-          `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`
+          `Volume do item ${currentItem.product} está abaixo do recomendado. Verifique o estoque.`,
         );
 
         const check = alertMinimunAmount(
           currentItem.product,
           currentItem.totalVolume,
           itemFinded.minimumAmount,
-          currentItem.totalCost
+          currentItem.totalCost,
         );
 
         if (check && check.message) {
@@ -504,7 +484,7 @@ const RequestListToBePrepared = ({ title }) => {
           } catch (err) {
             console.error(
               'Erro ao atualizar warningAmountMessage no localStorage',
-              err
+              err,
             );
           }
         }
@@ -525,7 +505,7 @@ const RequestListToBePrepared = ({ title }) => {
       Array.isArray(parsed) &&
       parsed.length > 0 &&
       parsed.some(
-        (entry) => typeof entry === 'string' && entry.includes(productName)
+        (entry) => typeof entry === 'string' && entry.includes(productName),
       );
     return res;
   };
@@ -535,7 +515,7 @@ const RequestListToBePrepared = ({ title }) => {
       return Object.fromEntries(
         Object.entries(obj)
           .filter(([_, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, cleanObject(value)]) // Limpa recursivamente
+          .map(([key, value]) => [key, cleanObject(value)]), // Limpa recursivamente
       );
     }
     return obj; // Retorna o valor se não for objeto
@@ -552,7 +532,7 @@ const RequestListToBePrepared = ({ title }) => {
     previousVolume,
     previousCost,
     totalCost,
-    totalVolume
+    totalVolume,
   ) => {
     const stockEventRegistration = {
       date: paymentDate,
@@ -596,7 +576,7 @@ const RequestListToBePrepared = ({ title }) => {
 
     // Verifica se o cliente já foi beneficiado
     const benefitedClientFinded = benefitedClient.find(
-      (client) => client.idUser === item.idUser
+      (client) => client.idUser === item.idUser,
     );
     // Se o cliente não foi beneficiado
     if (!benefitedClientFinded) {
@@ -607,7 +587,7 @@ const RequestListToBePrepared = ({ title }) => {
         acumulativePurchase(item, benefitedClientObj, currentPromotion);
       } else {
         setTextPromotion(
-          `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
+          `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `,
         );
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
@@ -625,7 +605,7 @@ const RequestListToBePrepared = ({ title }) => {
       if (reusable === 'false') {
         // Se a promoção não é reutilizável
         const promotionFinded = benefitedClientFinded.promotionTitle.find(
-          (item) => item === title
+          (item) => item === title,
         );
         if (promotionFinded) {
           setAddPromotion(false);
@@ -633,7 +613,7 @@ const RequestListToBePrepared = ({ title }) => {
 
           const purchasedProducts =
             benefitedClientFinded.benefitUsed.find(
-              (item) => item.nomeDaPromocao === title
+              (item) => item.nomeDaPromocao === title,
             )?.listaDeProdutos || [];
 
           setSelectedPromotion('');
@@ -644,7 +624,7 @@ const RequestListToBePrepared = ({ title }) => {
               item.dateTime
             } na compra dos itens ${purchasedProducts
               .map((item) => item)
-              .join(', ')}`
+              .join(', ')}`,
           );
           return;
         } else {
@@ -674,7 +654,7 @@ const RequestListToBePrepared = ({ title }) => {
     setMessagePromotionPopup(true);
     setAddPromotion(true); // Habilita o botão de continuar
     setTextPromotion(
-      `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+      `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
     );
     setCurrentDiscount(currentPromotion.discount);
     setSelectedPromotion('');
@@ -707,20 +687,20 @@ const RequestListToBePrepared = ({ title }) => {
         !benefitedClientEdited.promotionTitle.includes(
           benefitedClientEdited.benefitUsed[
             benefitedClientEdited.benefitUsed.length - 1
-          ]?.nomeDaPromocao
+          ]?.nomeDaPromocao,
         )
       ) {
         benefitedClientEdited.promotionTitle.push(
           benefitedClientEdited.benefitUsed[
             benefitedClientEdited.benefitUsed.length - 1
-          ]?.nomeDaPromocao
+          ]?.nomeDaPromocao,
         );
       }
       //add the promotion title to the list of promotions used by the client
       setDoc(doc(db, 'requests', currentRequest.id), currentRequest);
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
-        benefitedClientEdited
+        benefitedClientEdited,
       );
       console.log('Document written with ID: ', docRef.id);
       fetchData();
@@ -744,13 +724,13 @@ const RequestListToBePrepared = ({ title }) => {
         !benefitedClientEdited.promotionTitle.includes(
           benefitedClientEdited.benefitUsed[
             benefitedClientEdited.benefitUsed.length - 1
-          ]?.nomeDaPromocao
+          ]?.nomeDaPromocao,
         )
       ) {
         benefitedClientEdited.promotionTitle.push(
           benefitedClientEdited.benefitUsed[
             benefitedClientEdited.benefitUsed.length - 1
-          ]?.nomeDaPromocao
+          ]?.nomeDaPromocao,
         );
       }
 
@@ -777,7 +757,7 @@ const RequestListToBePrepared = ({ title }) => {
         setMessagePromotionPopup(true);
         setAddPromotion(true);
         setTextPromotion(
-          `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+          `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
         );
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
@@ -809,7 +789,7 @@ const RequestListToBePrepared = ({ title }) => {
           currentPromotion.minimumValue
         } reais. Ele ainda deve consumir o valor de ${
           currentPromotion.minimumValue - benefitedClientObj.score
-        }. As regras são:${currentPromotion.rules} `
+        }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
       setSelectedPromotion('');
@@ -832,7 +812,7 @@ const RequestListToBePrepared = ({ title }) => {
       setMessagePromotionPopup(true);
       setAddPromotion(true);
       setTextPromotion(
-        `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
+        `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
       );
       setSelectedPromotion('');
       setOperation('add');
@@ -858,7 +838,7 @@ const RequestListToBePrepared = ({ title }) => {
           currentPromotion.minimumValue
         } reais. Ele ainda deve consumir o valor de ${
           currentPromotion.minimumValue - finalPriceRequest
-        }. As regras são:${currentPromotion.rules} `
+        }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
       setSelectedPromotion('');
@@ -877,7 +857,7 @@ const RequestListToBePrepared = ({ title }) => {
 
   const addBenefitedClientWithNoDescount = async (
     benefitedClientObj,
-    action
+    action,
   ) => {
     //add the client to the benefited list without discount, cause he didn't reach the minimum value
     //
@@ -893,7 +873,7 @@ const RequestListToBePrepared = ({ title }) => {
     if (action === 'add') {
       const docRef = await addDoc(
         collection(db, 'BenefitedCustomer'),
-        benefitedClientObj
+        benefitedClientObj,
       );
       console.log('Document written with ID: ', docRef.id);
       fetchData();

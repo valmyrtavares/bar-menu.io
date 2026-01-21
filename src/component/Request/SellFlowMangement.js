@@ -62,7 +62,7 @@ const RequestManagementModule = () => {
             //traz somente os pedidos do filtro de data
             completeRequests,
             startDate,
-            endDate
+            endDate,
           );
 
           setFilteredCompleteRequests(copleteRequests);
@@ -97,7 +97,7 @@ const RequestManagementModule = () => {
     if (data && data.length > 0) {
       return data.filter((item) => {
         const itemDate = new Date(
-          item.dateTime?.split(' - ')[0].split('/').reverse().join('-')
+          item.dateTime?.split(' - ')[0].split('/').reverse().join('-'),
         );
 
         return itemDate >= startDate && itemDate <= endDate;
@@ -211,7 +211,7 @@ const RequestManagementModule = () => {
   return (
     <div className="management-requests">
       <Link to="/admin/admin">
-        <Title mainTitle="Fechamento de Caixa" />
+        <Title mainTitle="Fechamentos de Caixa" />
       </Link>
       <div className="container-date">
         <div>
