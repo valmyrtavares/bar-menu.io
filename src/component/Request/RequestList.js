@@ -40,7 +40,7 @@ const RequestList = () => {
     const dataSorted = requestSorter(data, 'direction');
     console.log(
       'Ordenados:',
-      dataSorted.map((item) => item.countRequest)
+      dataSorted.map((item) => item.countRequest),
     );
     setRequestDoneList(dataSorted);
   };
@@ -100,7 +100,7 @@ const RequestList = () => {
 
       while (!finalStatus && attempts < maxAttempts) {
         const statusRes = await fetch(
-          `http://localhost:3001/api/payer/status/${idPayer}/GERACAOZ`
+          `http://localhost:3001/api/payer/status/${idPayer}/GERACAOZ`,
         );
 
         if (!statusRes.ok)
@@ -181,14 +181,6 @@ const RequestList = () => {
               <p className="idUser">
                 <span></span> {item.idUser}
               </p>
-              {item.idPayer && (
-                <button
-                  disabled={disabledCancelButton}
-                  onClick={() => cancelPayment(item.idPayer)}
-                >
-                  Cancelar Pagamento
-                </button>
-              )}
             </div>
             <div>
               {item.request &&
