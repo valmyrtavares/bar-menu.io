@@ -66,10 +66,10 @@ function App() {
     }
     const setSystemMode = async () => {
       if (location.pathname === '/') {
-        const modePictureMobile = await checkPictureMenuMode();
-        console.log('Modo de figura   ', modePictureMobile);
-        setMainMenu(() =>
-          modePictureMobile ? MainPictureMobileMenu : MainMenuDefault
+        const modePictureMobile = false; //return always false for now await checkPictureMenuMode();
+
+        setMainMenu(
+          () => (modePictureMobile ? MainPictureMobileMenu : MainMenuDefault), //there is no totem here just default and picture mobile menu
         );
       }
       // Verifica se a URL atual é exatamente "/admin"
@@ -78,17 +78,17 @@ function App() {
     setSystemMode();
   }, [location.pathname]); // Reexecuta sempre que a URL muda
 
-  const checkPictureMenuMode = async () => {
-    try {
-      const mode = await getOneItemColleciton(
-        'PictureMode',
-        '7OQE7SP75uGlSokNrpNE'
-      );
-      return mode.menuPictureMode;
-    } catch (error) {
-      console.error('Erro fetching data', error);
-    }
-  };
+  // const checkPictureMenuMode = async () => {
+  //   try {
+  //     const mode = await getOneItemColleciton(
+  //       'PictureMode',
+  //       '7OQE7SP75uGlSokNrpNE',
+  //     );
+  //     return mode.menuPictureMode;
+  //   } catch (error) {
+  //     console.error('Erro fetching data', error);
+  //   }
+  // };
 
   return (
     <div className="ultra-wrapper">
