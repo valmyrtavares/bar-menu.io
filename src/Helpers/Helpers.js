@@ -149,7 +149,7 @@ export async function checkUnavaiableRawMaterial(id) {
       data.lowAmountRawMaterial = stillUnavailable;
     }
     console.log(
-      `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`
+      `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`,
     );
 
     // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
@@ -341,7 +341,7 @@ export const logToAnounimousInToten = (setNameClient) => {
         setNameClient('anonimo');
         localStorage.setItem(
           'userMenu',
-          JSON.stringify({ id: docRef.id, name: 'anonimo' })
+          JSON.stringify({ id: docRef.id, name: 'anonimo' }),
         );
       });
     }
@@ -366,13 +366,13 @@ export async function calculateItemCost(item) {
       } else {
         invalidIngredients.push(ingredient.name);
         console.warn(
-          `Stock not found or invalid for ingredient: ${ingredient.name}`
+          `Stock not found or invalid for ingredient: ${ingredient.name}`,
         );
         if (invalidIngredients.length > 0) {
           alert(
             `O valor do custo não está correto porque os seguintes ingredientes não têm valores válidos: ${invalidIngredients.join(
-              ', '
-            )}. O cálculo foi feito apenas com os ingredientes válidos.`
+              ', ',
+            )}. O cálculo foi feito apenas com os ingredientes válidos.`,
           );
         }
       }

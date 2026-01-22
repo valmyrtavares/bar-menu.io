@@ -47,7 +47,7 @@ export const useEnsureAnonymousUser = () => {
       const anonymousUser = await getAnonymousUser();
       localStorage.setItem(
         'userMenu',
-        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name }),
       );
     };
 

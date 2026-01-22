@@ -56,7 +56,7 @@ const MainPictureMenu = () => {
         if (Array.isArray(data) && data.length > 0) {
           data.unshift(bestSeller);
           const filteredButtonCategory = data.filter(
-            (item) => item.parent !== 'hide'
+            (item) => item.parent !== 'hide',
           );
 
           setMenuButton(filteredButtonCategory);
@@ -107,7 +107,7 @@ const MainPictureMenu = () => {
       const anonymousUser = await getAnonymousUser();
       localStorage.setItem(
         'userMenu',
-        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name })
+        JSON.stringify({ id: anonymousUser.id, name: anonymousUser.name }),
       );
       setLogoutAdminPopup(false);
       return;
