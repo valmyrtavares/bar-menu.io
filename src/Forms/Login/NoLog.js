@@ -126,7 +126,12 @@ const NoLog = () => {
 
   return (
     <div className="welcome-message">
-      <h3> Caso já seja cliente,digite o seu CPF</h3>
+      <div className="container-first-message">
+        <h3>
+          {' '}
+          Se você já tem cadastro, digite o seu CPF para o identificarmos
+        </h3>
+      </div>
       <div className="cpf-input">
         <Input
           id="cpf"
@@ -155,14 +160,14 @@ const NoLog = () => {
           className="btn btn-primary"
           onClick={createNewCustomer}
         >
-          Ainda não sou cliente
+          Não sou cliente e não quero me registrar
         </button>
         <button
           type="submit"
           className="btn btn-primary"
           onClick={checkCustomer}
         >
-          Continue
+          Buscar CPF
         </button>
       </div>
     </div>

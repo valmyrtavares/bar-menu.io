@@ -2,6 +2,19 @@
 .welcome-message{
     padding:5px;
 }
+
+.welcome-message .container-first-message{
+    background: var(--btn-color);
+    font-family: var(--title-font);
+    max-width: 70%;
+    margin: 50px 15%
+}
+
+.welcome-message .container-first-message h3{
+    color: var(--title-font-color);
+    font-size: 26px;
+
+}
 .welcome-message main{
     padding: 5px;
     border:solid 2px var(--title-font-color);
