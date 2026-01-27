@@ -73,7 +73,7 @@ const RequestModal = () => {
 
     if (localStorage.hasOwnProperty('autoPaymentMachineOn')) {
       const autoPaymentAllow = JSON.parse(
-        localStorage.getItem('autoPaymentMachineOn')
+        localStorage.getItem('autoPaymentMachineOn'),
       );
       autoPaymentAllow
         ? setAutoPaymentMachineOn(true)
@@ -245,7 +245,7 @@ const RequestModal = () => {
           // Buscar o documento do usuário "anonymous" pelo campo 'name'
           const userQuery = query(
             collection(db, 'user'),
-            where('name', '==', 'anonymous')
+            where('name', '==', 'anonymous'),
           );
           const querySnapshot = await getDocs(userQuery);
 
@@ -264,7 +264,7 @@ const RequestModal = () => {
         } catch (error) {
           console.error(
             'Erro ao buscar ou atualizar usuário anonymous:',
-            error
+            error,
           );
         }
       }
@@ -321,13 +321,13 @@ const RequestModal = () => {
     const now = new Date();
     const formattedDateTime = `${String(now.getDate()).padStart(
       2,
-      '0'
+      '0',
     )}/${String(now.getMonth() + 1).padStart(
       2,
-      '0'
+      '0',
     )}/${now.getFullYear()} - ${String(now.getHours()).padStart(
       2,
-      '0'
+      '0',
     )}:${String(now.getMinutes()).padStart(2, '0')}`;
     return formattedDateTime;
   };
@@ -337,7 +337,7 @@ const RequestModal = () => {
       return Object.fromEntries(
         Object.entries(obj)
           .filter(([_, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, cleanObject(value)]) // Limpa recursivamente
+          .map(([key, value]) => [key, cleanObject(value)]), // Limpa recursivamente
       );
     }
     return obj; // Retorna o valor se não for objeto
@@ -392,7 +392,7 @@ const RequestModal = () => {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
-        paymentDone: methodPayment ? true : false, // Verifica se o método de pagamento foi selecionado
+        paymentDone: methodPayment && methodPayment !== 'CASH' ? true : false, // Verifica se o método de pagamento foi selecionado
         paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
@@ -455,7 +455,7 @@ const RequestModal = () => {
       } else if (selectedPayment === 'desabled') {
         setAutoPayment(false);
         setErrorPaymentMessage(
-          'Seu pagamento foi recusado. Você pode tentar novamente ou ir ao caixa e efetuar o pagamento com o/a atendente'
+          'Seu pagamento foi recusado. Você pode tentar novamente ou ir ao caixa e efetuar o pagamento com o/a atendente',
         );
         setTotenRejectPaymentMessage(true);
         setTimeout(() => {
