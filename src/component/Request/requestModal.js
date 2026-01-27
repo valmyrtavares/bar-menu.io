@@ -392,7 +392,14 @@ const RequestModal = () => {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
-        paymentDone: methodPayment && methodPayment !== 'CASH' ? true : false, // Verifica se o método de pagamento foi selecionado
+        paymentDone:
+          methodPayment &&
+          methodPayment !== 'CASH' &&
+          methodPayment !== 'desabled' &&
+          methodPayment !== 'ABORTED' &&
+          methodPayment !== 'REJECTED'
+            ? true
+            : false, // Verifica se o método de pagamento foi selecionado
         paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
