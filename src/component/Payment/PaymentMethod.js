@@ -6,6 +6,19 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     React.useState('cash');
 
+  React.useEffect(() => {
+    const { paymentMethod } = item;
+    if (paymentMethod === 'CREDIT') {
+      setSelectedPaymentMethod('credite');
+    } else if (paymentMethod === 'DEBIT') {
+      setSelectedPaymentMethod('debit');
+    } else if (paymentMethod === 'PIX') {
+      setSelectedPaymentMethod('pix');
+    } else if (paymentMethod === 'VR') {
+      setSelectedPaymentMethod('vr');
+    }
+  }, [item]);
+
   const handleChange = (e) => {
     const { value } = e.target;
     setSelectedPaymentMethod(value);
