@@ -158,7 +158,7 @@ const TotenRegisterPopup = ({
           JSON.stringify({
             id: recoveredClient.id,
             name: recoveredClient.name,
-          })
+          }),
         );
         setCurrentUser(recoveredClient);
         setOpenCloseTotenPopup(false);
@@ -194,7 +194,7 @@ const TotenRegisterPopup = ({
         // Armazena no localStorage
         localStorage.setItem(
           'userMenu',
-          JSON.stringify({ id: docRef.id, name: noCustomer.fantasyName })
+          JSON.stringify({ id: docRef.id, name: noCustomer.fantasyName }),
         );
 
         console.log('Document written with ID:', docRef.id);
@@ -229,7 +229,7 @@ const TotenRegisterPopup = ({
         <CloseBtn setClose={setOpenCloseTotenPopup} />
         {nameOption && (
           <div>
-            <h1>Como devemos chamar você ?</h1>
+            <h1>Como devemos_chamar você ?</h1>
             <Input
               id="name"
               required
