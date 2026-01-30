@@ -247,18 +247,100 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
     console.log('form', form);
   }, [form]);
 
-  React.useEffect(() => {
-    console.log('costByRecipe', costByRecipe);
-    if (typeof costByRecipe === 'number' && !isNaN(costByRecipe)) {
-      setForm((prevForm) => ({
+  // React.useEffect(() => {
+  //   if (typeof costByRecipe === 'number' && !isNaN(costByRecipe)) {
+  //     setForm((prevForm) => {
+  //       // Calculate percentage if price exists
+  //       const price = parseFloat(prevForm.price) || 0;
+  //       let percentage = prevForm.costPriceObj?.percentage || 0;
+
+  //       if (price > 0 && costByRecipe > 0) {
+  //         percentage = ((price - costByRecipe) / costByRecipe) * 100;
+  //       }
+
+  //       return {
+  //         ...prevForm,
+  //         costPriceObj: {
+  //           ...prevForm.costPriceObj,
+  //           cost: costByRecipe,
+  //           percentage: percentage.toFixed(2),
+  //         },
+  //       };
+  //     });
+  //   }
+  // }, [costByRecipe]);
+
+  const handleSinglePriceUpdate = (totalCost) => {
+    setForm((prevForm) => {
+      const price = parseFloat(prevForm.price) || 0;
+      const cost = parseFloat(totalCost) || 0;
+      let percentage = 0;
+      if (price > 0 && cost > 0) {
+        percentage = ((price - cost) / cost) * 100;
+      }
+      return {
         ...prevForm,
         costPriceObj: {
           ...prevForm.costPriceObj,
-          cost: costByRecipe,
+          cost: cost,
+          percentage: percentage.toFixed(2),
         },
-      }));
-    }
-  }, [costByRecipe]);
+      };
+    });
+  };
+  const handleCustomPriceUpdate = (updatedCostsObj) => {
+    setForm((prevForm) => {
+      const calculatePct = (price, cost) => {
+        const p = parseFloat(price) || 0;
+        const c = parseFloat(cost) || 0;
+        if (p > 0 && c > 0) return (((p - c) / c) * 100).toFixed(2);
+        return 0;
+      };
+
+      const newCostProfit = { ...prevForm.costProfitMarginCustomized };
+      let newCostPriceObj = { ...prevForm.costPriceObj };
+      let newMainPrice = prevForm.price;
+
+      ['firstPrice', 'secondPrice', 'thirdPrice'].forEach(key => {
+        if (updatedCostsObj[key]) {
+          // Garante que existe a estrutura antes de alterar
+          // Usa o objeto existente em prevForm OU cria se não existir (cenário raro se fluxo seguido)
+          if (!newCostProfit[key] && prevForm.CustomizedPrice && prevForm.CustomizedPrice[key]) {
+            newCostProfit[key] = { ...prevForm.CustomizedPrice[key] };
+          } else if (!newCostProfit[key]) {
+            newCostProfit[key] = {};
+          }
+
+          const cost = updatedCostsObj[key].cost;
+          // O preço deve vir de newCostProfit (que deve ter sido populado via CustomizePriceForm)
+          // Se newCostProfit não tiver, tentamos pegar de CustomizedPrice que é o espelho original
+          const price = newCostProfit[key].price || (prevForm.CustomizedPrice && prevForm.CustomizedPrice[key] ? prevForm.CustomizedPrice[key].price : 0);
+
+          newCostProfit[key].price = price; // Garante que preço está lá
+          newCostProfit[key].cost = cost;
+          newCostProfit[key].percentage = calculatePct(price, cost);
+
+          // Lógica de sincronização com preço único se for o PRIMEIRO preço
+          if (key === 'firstPrice' && price > 0) {
+            newMainPrice = price;
+            newCostPriceObj = {
+              price: price,
+              cost: cost,
+              percentage: calculatePct(price, cost)
+              // Se precisar de label: label: newCostProfit[key].label
+            };
+          }
+        }
+      });
+
+      return {
+        ...prevForm,
+        price: newMainPrice,
+        costPriceObj: newCostPriceObj,
+        costProfitMarginCustomized: newCostProfit
+      };
+    });
+  };
 
   return (
     <div className={style.containerAddDishesForm}>
@@ -288,6 +370,8 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
             customizedPriceObj={customizedPriceObj}
             costByRecipe={form.costPriceObj}
             costProfitMarginCustomized={form.costProfitMarginCustomized}
+            onSingleCostUpdate={handleSinglePriceUpdate}
+            onCustomCostUpdate={handleCustomPriceUpdate}
           />
         )}
       </div>

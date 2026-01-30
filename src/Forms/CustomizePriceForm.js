@@ -77,23 +77,30 @@ function CustomizePriceForm({
 
   React.useEffect(() => {
     if (customizedPriceObj && Object.keys(customizedPriceObj).length > 0) {
+      const calculatePercentage = (price, cost) => {
+        const p = parseFloat(price) || 0;
+        const c = parseFloat(cost) || 0;
+        if (p > 0 && c > 0) return ((p - c) / c * 100).toFixed(2);
+        return 0;
+      }
+
       setFormPrice({
         firstPrice: {
           price: customizedPriceObj.firstPrice?.price || 0,
           cost: customizedPriceObj.firstPrice?.cost || 0,
-          percentage: customizedPriceObj.firstPrice?.percentage || 0,
+          percentage: customizedPriceObj.firstPrice?.percentage || calculatePercentage(customizedPriceObj.firstPrice?.price, customizedPriceObj.firstPrice?.cost),
           label: customizedPriceObj.firstPrice?.label || '',
         },
         secondPrice: {
           price: customizedPriceObj.secondPrice?.price || 0,
           cost: customizedPriceObj.secondPrice?.cost || 0,
-          percentage: customizedPriceObj.secondPrice?.percentage || 0,
+          percentage: customizedPriceObj.secondPrice?.percentage || calculatePercentage(customizedPriceObj.secondPrice?.price, customizedPriceObj.secondPrice?.cost),
           label: customizedPriceObj.secondPrice?.label || '',
         },
         thirdPrice: {
           price: customizedPriceObj.thirdPrice?.price || 0,
           cost: customizedPriceObj.thirdPrice?.cost || 0,
-          percentage: customizedPriceObj.thirdPrice?.percentage || 0,
+          percentage: customizedPriceObj.thirdPrice?.percentage || calculatePercentage(customizedPriceObj.thirdPrice?.price, customizedPriceObj.thirdPrice?.cost),
           label: customizedPriceObj.thirdPrice?.label || '',
         },
       });
