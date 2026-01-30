@@ -296,47 +296,21 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
         if (p > 0 && c > 0) return (((p - c) / c) * 100).toFixed(2);
         return 0;
       };
-
       const newCostProfit = { ...prevForm.costProfitMarginCustomized };
-      let newCostPriceObj = { ...prevForm.costPriceObj };
-      let newMainPrice = prevForm.price;
-
       ['firstPrice', 'secondPrice', 'thirdPrice'].forEach(key => {
         if (updatedCostsObj[key]) {
           // Garante que existe a estrutura antes de alterar
-          // Usa o objeto existente em prevForm OU cria se não existir (cenário raro se fluxo seguido)
-          if (!newCostProfit[key] && prevForm.CustomizedPrice && prevForm.CustomizedPrice[key]) {
-            newCostProfit[key] = { ...prevForm.CustomizedPrice[key] };
-          } else if (!newCostProfit[key]) {
-            newCostProfit[key] = {};
-          }
+          if (!newCostProfit[key]) newCostProfit[key] = {};
 
           const cost = updatedCostsObj[key].cost;
-          // O preço deve vir de newCostProfit (que deve ter sido populado via CustomizePriceForm)
-          // Se newCostProfit não tiver, tentamos pegar de CustomizedPrice que é o espelho original
-          const price = newCostProfit[key].price || (prevForm.CustomizedPrice && prevForm.CustomizedPrice[key] ? prevForm.CustomizedPrice[key].price : 0);
+          const price = newCostProfit[key].price;
 
-          newCostProfit[key].price = price; // Garante que preço está lá
           newCostProfit[key].cost = cost;
           newCostProfit[key].percentage = calculatePct(price, cost);
-
-          // Lógica de sincronização com preço único se for o PRIMEIRO preço
-          if (key === 'firstPrice' && price > 0) {
-            newMainPrice = price;
-            newCostPriceObj = {
-              price: price,
-              cost: cost,
-              percentage: calculatePct(price, cost)
-              // Se precisar de label: label: newCostProfit[key].label
-            };
-          }
         }
       });
-
       return {
         ...prevForm,
-        price: newMainPrice,
-        costPriceObj: newCostPriceObj,
         costProfitMarginCustomized: newCostProfit
       };
     });

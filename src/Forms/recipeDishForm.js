@@ -115,7 +115,13 @@ const RecipeDish = ({
         return sum + value;
       }, 0);
 
-      // Removed comments and side effects 
+      const LabelSize = ['firstPrice', 'secondPrice', 'thirdPrice'];
+      LabelSize.forEach((item) => {
+        if (costProfitMarginCustomized[item].label === label) {
+          costProfitMarginCustomized[item].cost = Number(total.toFixed(2));
+        }
+      });
+      costByRecipe.cost = costProfitMarginCustomized['firstPrice'].cost;
       return Number(total.toFixed(2));
     }
 
@@ -126,7 +132,7 @@ const RecipeDish = ({
       const value = parseFloat(item.portionCost) || 0;
       return sum + value;
     }, 0);
-    // Removed side effect: costByRecipe.cost = Number(total.toFixed(2));
+    costByRecipe.cost = Number(total.toFixed(2));
 
     return Number(total.toFixed(2));
   };
