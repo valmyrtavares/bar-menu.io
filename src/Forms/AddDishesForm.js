@@ -247,31 +247,12 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
     console.log('form', form);
   }, [form]);
 
-  // React.useEffect(() => {
-  //   if (typeof costByRecipe === 'number' && !isNaN(costByRecipe)) {
-  //     setForm((prevForm) => {
-  //       // Calculate percentage if price exists
-  //       const price = parseFloat(prevForm.price) || 0;
-  //       let percentage = prevForm.costPriceObj?.percentage || 0;
 
-  //       if (price > 0 && costByRecipe > 0) {
-  //         percentage = ((price - costByRecipe) / costByRecipe) * 100;
-  //       }
 
-  //       return {
-  //         ...prevForm,
-  //         costPriceObj: {
-  //           ...prevForm.costPriceObj,
-  //           cost: costByRecipe,
-  //           percentage: percentage.toFixed(2),
-  //         },
-  //       };
-  //     });
-  //   }
-  // }, [costByRecipe]);
 
   const handleSinglePriceUpdate = (totalCost) => {
     setForm((prevForm) => {
+      // Pega o preço atual do formulário
       const price = parseFloat(prevForm.price) || 0;
       const cost = parseFloat(totalCost) || 0;
       let percentage = 0;
@@ -282,6 +263,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
         ...prevForm,
         costPriceObj: {
           ...prevForm.costPriceObj,
+          price: price, // <--- ADICIONAR ESTA LINHA IMPORTANTE
           cost: cost,
           percentage: percentage.toFixed(2),
         },
@@ -297,6 +279,9 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
         return 0;
       };
       const newCostProfit = { ...prevForm.costProfitMarginCustomized };
+      let newCostPriceObj = { ...prevForm.costPriceObj }; // Prepara objeto de preço único
+      let newMainPrice = prevForm.price;
+
       ['firstPrice', 'secondPrice', 'thirdPrice'].forEach(key => {
         if (updatedCostsObj[key]) {
           // Garante que existe a estrutura antes de alterar
@@ -305,12 +290,20 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
           const cost = updatedCostsObj[key].cost;
           const price = newCostProfit[key].price;
 
-          newCostProfit[key].cost = cost;
-          newCostProfit[key].percentage = calculatePct(price, cost);
+          if (key === 'firstPrice' && price > 0) {
+            newMainPrice = price;
+            newCostPriceObj = {
+              price: price,
+              cost: cost,
+              percentage: calculatePct(price, cost)
+            };
+          }
         }
       });
       return {
         ...prevForm,
+        price: newMainPrice, // Atualiza preço principal
+        costPriceObj: newCostPriceObj, // Atualiza objeto de custo principal
         costProfitMarginCustomized: newCostProfit
       };
     });

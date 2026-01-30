@@ -14,6 +14,14 @@ import {
 import { db } from '../config-firebase/firebase.js';
 import * as XLSX from 'xlsx';
 
+export const isEmptyObject = (obj) => {
+  if (!obj || obj.firstLabel === '' || obj.firstLabel === undefined) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 export async function checkUnavaiableRawMaterial(id) {
   // 1) BUSCA DIRETA DO OBJETO NO FIRESTORE PELO ID
 

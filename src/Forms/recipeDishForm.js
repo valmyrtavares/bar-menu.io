@@ -6,6 +6,8 @@ import { getBtnData } from '../api/Api';
 import Title from '../component/title.js';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../Helpers/Helpers.js';
+import useRecipeIngredients from '../Hooks/useRecipeIngredients';
+
 
 const RecipeDish = ({
   setRecipeModal,
@@ -22,35 +24,24 @@ const RecipeDish = ({
     amount: '',
     unitOfMeasurement: '',
   });
-  const [IngridientsGroup, setIngridientsGroup] = React.useState([]);
+
   const [recipeExplanation, setRecipeExplanation] = React.useState(null);
   const [productList, setProductList] = React.useState(null);
-  const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
-  const [ingredientsBySize, setIngredientsBySize] = React.useState({});
+
   const fieldFocus = React.useRef();
 
-  React.useEffect(() => {
-    //#1
-    if (recipe) {
-      if (!recipe.Explanation && !recipe.FinalingridientsList) {
-        recipe.Explanation = 'Receita Vazia';
-        recipe.FinalingridientsList = [];
-        formatterRecipes(recipe);
-      } else {
-        formatterRecipes(recipe);
-      }
-      setIngridientsGroup(recipe.FinalingridientsList);
-      setRecipeExplanation(recipe.Explanation);
-    }
-  }, [recipe]);
+  const {
+    ingredientsSimple,
+    ingredientsBySize,
+    addIngredient,
+    removeItem,
+    calculateItemCost,
+    getRecipeData,
+    isEmptyObject
+  } = useRecipeIngredients(recipe, productList, customizedPriceObj);
 
   React.useEffect(() => {
-    reloadCurrentRecipesValue();
-  }, [productList]);
-
-  React.useEffect(() => {
-    //#2
-
+    // Restaurando a busca de produtos (Estoque)
     const fetchProduct = async () => {
       const data = await getBtnData('stock');
       const sortedData = data
@@ -63,9 +54,17 @@ const RecipeDish = ({
       setProductList(sortedData);
     };
     fetchProduct();
-    reloadCurrentRecipesValue();
-    setIngridientsGroup([]);
   }, []);
+  React.useEffect(() => {
+    // Restaurando a inicialização da explicação da receita
+    if (recipe && recipe.Explanation) {
+      setRecipeExplanation(recipe.Explanation);
+    }
+  }, [recipe]);
+
+
+
+
 
   React.useEffect(() => {
     //#3
@@ -76,13 +75,7 @@ const RecipeDish = ({
       console.log('ingredientsSimple    ', ingredientsSimple);
   }, [ingredientsBySize, ingredientsSimple]);
 
-  const isEmptyObject = (obj) => {
-    if (obj.firstLabel === '' || obj.firstLabel === undefined) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+
 
   const grabSpecificItemInStock = (name) => {
     if (productList && productList.length > 0 && name) {
@@ -104,46 +97,8 @@ const RecipeDish = ({
     }
     return null;
   };
-  const calculateItemCost = (ingredients, label) => {
-    if (label) {
-      const items = ingredients[label];
 
-      if (!Array.isArray(items)) return 0;
 
-      const total = items.reduce((sum, item) => {
-        const value = parseFloat(item.portionCost) || 0;
-        return sum + value;
-      }, 0);
-
-      const LabelSize = ['firstPrice', 'secondPrice', 'thirdPrice'];
-      LabelSize.forEach((item) => {
-        if (costProfitMarginCustomized[item].label === label) {
-          costProfitMarginCustomized[item].cost = Number(total.toFixed(2));
-        }
-      });
-      costByRecipe.cost = costProfitMarginCustomized['firstPrice'].cost;
-      return Number(total.toFixed(2));
-    }
-
-    // Fallback caso ingredients seja um array diretamente
-    if (!Array.isArray(ingredients)) return 0;
-
-    const total = ingredients.reduce((sum, item) => {
-      const value = parseFloat(item.portionCost) || 0;
-      return sum + value;
-    }, 0);
-    costByRecipe.cost = Number(total.toFixed(2));
-
-    return Number(total.toFixed(2));
-  };
-
-  const formatterRecipes = (recipe) => {
-    if (Array.isArray(recipe.FinalingridientsList)) {
-      setIngredientsSimple(recipe.FinalingridientsList);
-    } else {
-      setIngredientsBySize(recipe.FinalingridientsList);
-    }
-  };
 
   const extractLabelSizes = () => {
     return [
@@ -202,102 +157,9 @@ const RecipeDish = ({
     }
   };
 
-  const addIngredient = (size) => {
-    if (!isEmptyObject(customizedPriceObj)) {
-      setIngredientsBySize((prev) => ({
-        ...prev,
-        [size]: [...(prev[size] || []), ingridients],
-      }));
-    } else {
-      setIngredientsSimple((prev) => [...prev, ingridients]);
-    }
-    setIngridients({ name: '', amount: '', unitOfMeasurement: '' });
-  };
 
-  const reloadCurrentRecipesValue = () => {
-    if (!productList || productList.length === 0) return;
 
-    const getUpdatedCostData = (ingredient) => {
-      const matchedProduct = productList.find(
-        (product) => product.product.trim() === ingredient.name.trim()
-      );
 
-      if (!matchedProduct || matchedProduct.totalVolume === 0)
-        return {
-          costPerUnit: 0,
-          portionCost: 0,
-        };
-
-      const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
-      const portionCost = parseFloat(ingredient.amount) * costPerUnit;
-      //QUERO VOLTAR AQUIasdfasdfasdf
-      const warningAmountRawMaterial =
-        matchedProduct.totalVolume > matchedProduct.minimumAmount
-          ? true
-          : false;
-      const unavailableRawMaterial =
-        matchedProduct.totalVolume === 0 ? true : false;
-
-      return {
-        costPerUnit,
-        portionCost,
-        warningAmountRawMaterial,
-        unavailableRawMaterial,
-      };
-    };
-
-    // CASO 1: Receita simples (sem variação de tamanho)
-    if (isEmptyObject(customizedPriceObj)) {
-      const updatedIngredients = ingredientsSimple.map((ingredient) => {
-        const {
-          costPerUnit,
-          portionCost,
-          warningAmountRawMaterial,
-          unavailableRawMaterial,
-        } = getUpdatedCostData(ingredient);
-
-        return {
-          ...ingredient,
-          costPerUnit,
-          portionCost,
-          warningAmountRawMaterial,
-          unavailableRawMaterial,
-        };
-      });
-
-      setIngredientsSimple(updatedIngredients);
-      console.log('Receita simples atualizada:', updatedIngredients);
-    }
-
-    // CASO 2: Receita com variação de tamanho (customizedPriceObj presente)
-    else {
-      const updatedBySize = {};
-
-      Object.entries(ingredientsBySize).forEach(
-        ([sizeLabel, ingredientList]) => {
-          updatedBySize[sizeLabel] = ingredientList.map((ingredient) => {
-            const {
-              costPerUnit,
-              portionCost,
-              warningAmountRawMaterial,
-              unavailableRawMaterial,
-            } = getUpdatedCostData(ingredient);
-
-            return {
-              ...ingredient,
-              costPerUnit,
-              portionCost,
-              warningAmountRawMaterial,
-              unavailableRawMaterial,
-            };
-          });
-        }
-      );
-
-      setIngredientsBySize(updatedBySize);
-      console.log('Receitas por tamanho atualizadas:', updatedBySize);
-    }
-  };
 
   const sendRecipe = () => {
     // Lógica original de setRecipe
@@ -339,20 +201,10 @@ const RecipeDish = ({
     setRecipeModal(false);
   };
 
-  const removeItem = (sizeOrIndex, index) => {
-    if (!isEmptyObject(customizedPriceObj) && index !== undefined) {
-      // Caso com `customizedPriceObj` e dois parâmetros (size e index)
-      setIngredientsBySize((prev) => ({
-        ...prev,
-        [sizeOrIndex]: prev[sizeOrIndex]?.filter((_, i) => i !== index), // Remove o item específico
-      }));
-    } else if (!isEmptyObject(customizedPriceObj)) {
-      console.error('Index is required for customizedPriceObj scenario.');
-    } else {
-      // Caso sem `customizedPriceObj`, com apenas o index
-      const updatedList = ingredientsSimple.filter((_, i) => i !== sizeOrIndex); // Aqui, sizeOrIndex é tratado como o índice
-      setIngredientsSimple(updatedList);
-    }
+  // No componente visual
+  const handleAddIngredient = (size) => {
+    addIngredient(ingridients, size); // Chama o do hook
+    setIngridients({ name: '', amount: '', unitOfMeasurement: '' }); // Limpa UI
   };
 
   return (
@@ -392,7 +244,7 @@ const RecipeDish = ({
               onChange={handleChange}
             />
 
-            <button type="button" onClick={addIngredient}>
+            <button type="button" onClick={handleAddIngredient}>
               Adicione
             </button>
           </div>
@@ -495,7 +347,7 @@ const RecipeDish = ({
                 onChange={handleChange}
               />
 
-              <button type="button" onClick={() => addIngredient(label)}>
+              <button type="button" onClick={() => handleAddIngredient(label)}>
                 Adicione
               </button>
             </div>
