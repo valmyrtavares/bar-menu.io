@@ -82,7 +82,7 @@ const RequestListToBePrepared = ({ title }) => {
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
   React.useEffect(() => {
     if (!requestsDoneList) return;
-
+    //handleAutomaticFiscalIssuance(requestsDoneList)
     // se tiver pelo menos 1 item, apaga o localStorage
     if (requestsDoneList.length > 0) {
       localStorage.removeItem('backorder');
@@ -110,6 +110,12 @@ const RequestListToBePrepared = ({ title }) => {
   //     }
   //   }
   // }, [newCustomerPromotion, shouldRunEffect]);
+
+  // const handleAutomaticFiscalIssuance = (requestsDoneList) => {
+  //   if (requestsDoneList.length > 0 && requestsDoneList.paymentDone === true) {
+
+  //   }
+  // }
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData('requests');
@@ -900,7 +906,6 @@ const RequestListToBePrepared = ({ title }) => {
   };
 
   const openPrintScreen = (item) => {
-    console.log('item para nota fiscal');
     global.setUserNewRequest(item);
     navigate('/print');
   };

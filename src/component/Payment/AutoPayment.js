@@ -4,6 +4,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { v4 as uuidv4 } from 'uuid';
 import { io } from 'socket.io-client';
 import CloseBtn from '../closeBtn';
+import CpfNfPopup from './CpfNfPopup';
 
 const paymentOptions = [
   { label: 'Débito', value: 'DEBIT' },
@@ -21,6 +22,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [waitingForPayment, setWaitingForPayment] = useState(false);
   const [correlationId, setCorrelationId] = useState(null);
   const [message, setMessage] = useState('');
+  const [showCpfPopup, setShowCpfPopup] = useState(false);
+  const [cpfForInvoice, setCpfForInvoice] = useState('');
 
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
@@ -42,6 +45,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       if (statusTransaction === 'APPROVED') {
         setWaitingForPayment(false);
         setIdPayer(payload.idPayer || null);
+        setShowCpfPopup(true);
         onChoose(selected); // chama o onChoose como no fluxo aprovado
       } else if (statusTransaction === 'REJECTED') {
         setWaitingForPayment(false);
@@ -154,6 +158,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     }
   };
 
+  const onContinue = () => {
+    setAutoPayment(false);
+  }
+
   return (
     <div className={style.autoPaymentContainer}>
       <CloseBtn setClose={setAutoPayment} />
@@ -192,6 +200,9 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           Escolher
         </button>
       </form>
+      {showCpfPopup && (
+        <CpfNfPopup setShowCpfPopup={setShowCpfPopup} setCpfForInvoice={setCpfForInvoice} onContinue={onContinue} />
+      )}
     </div>
   );
 };
