@@ -117,20 +117,12 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
         return Number(total.toFixed(2));
     };
 
-    // Função auxiliar para retornar ambos os dados para o componente salvar
-    const getRecipeData = () => {
-        return {
-            ingredientsSimple,
-            ingredientsBySize
-        }
-    };
     return {
         ingredientsSimple,
         ingredientsBySize,
         addIngredient,
         removeItem,
         calculateItemCost,
-        getRecipeData,
         isEmptyObject // Útil exportar para o componente usar na renderização condicional
     };
 };

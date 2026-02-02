@@ -36,7 +36,6 @@ const RecipeDish = ({
     addIngredient,
     removeItem,
     calculateItemCost,
-    getRecipeData,
     isEmptyObject
   } = useRecipeIngredients(recipe, productList, customizedPriceObj);
 
