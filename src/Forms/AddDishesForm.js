@@ -91,7 +91,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
       setCostProfitMarginCustomized(
         dataObj.costProfitMarginCustomized
           ? dataObj.costProfitMarginCustomized
-          : {}
+          : {},
       );
     }
   }, [dataObj]);
@@ -147,7 +147,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setUrl(downloadURL);
           form.image = downloadURL;
-        }
+        },
       );
     }
   };
@@ -247,9 +247,6 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
     console.log('form', form);
   }, [form]);
 
-
-
-
   const handleSinglePriceUpdate = (totalCost) => {
     setForm((prevForm) => {
       // Pega o preço atual do formulário
@@ -278,33 +275,56 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
         if (p > 0 && c > 0) return (((p - c) / c) * 100).toFixed(2);
         return 0;
       };
+
       const newCostProfit = { ...prevForm.costProfitMarginCustomized };
-      let newCostPriceObj = { ...prevForm.costPriceObj }; // Prepara objeto de preço único
+      let newCostPriceObj = { ...prevForm.costPriceObj };
       let newMainPrice = prevForm.price;
 
-      ['firstPrice', 'secondPrice', 'thirdPrice'].forEach(key => {
+      ['firstPrice', 'secondPrice', 'thirdPrice'].forEach((key) => {
         if (updatedCostsObj[key]) {
           // Garante que existe a estrutura antes de alterar
-          if (!newCostProfit[key]) newCostProfit[key] = {};
+          // Usa o objeto existente em prevForm OU cria se não existir (cenário raro se fluxo seguido)
+          if (
+            !newCostProfit[key] &&
+            prevForm.CustomizedPrice &&
+            prevForm.CustomizedPrice[key]
+          ) {
+            newCostProfit[key] = { ...prevForm.CustomizedPrice[key] };
+          } else if (!newCostProfit[key]) {
+            newCostProfit[key] = {};
+          }
 
           const cost = updatedCostsObj[key].cost;
-          const price = newCostProfit[key].price;
+          // O preço deve vir de newCostProfit (que deve ter sido populado via CustomizePriceForm)
+          // Se newCostProfit não tiver, tentamos pegar de CustomizedPrice que é o espelho original
+          const price =
+            newCostProfit[key].price ||
+            (prevForm.CustomizedPrice && prevForm.CustomizedPrice[key]
+              ? prevForm.CustomizedPrice[key].price
+              : 0);
 
+          newCostProfit[key].price = price; // Garante que preço está lá
+          newCostProfit[key].cost = cost;
+          newCostProfit[key].percentage = calculatePct(price, cost);
+
+          // Lógica de sincronização com preço único se for o PRIMEIRO preço
           if (key === 'firstPrice' && price > 0) {
             newMainPrice = price;
             newCostPriceObj = {
               price: price,
               cost: cost,
-              percentage: calculatePct(price, cost)
+              percentage: calculatePct(price, cost),
+              // Se precisar de label: label: newCostProfit[key].label
             };
           }
         }
       });
+
       return {
         ...prevForm,
-        price: newMainPrice, // Atualiza preço principal
-        costPriceObj: newCostPriceObj, // Atualiza objeto de custo principal
-        costProfitMarginCustomized: newCostProfit
+        price: newMainPrice,
+        costPriceObj: newCostPriceObj,
+        costProfitMarginCustomized: newCostProfit,
       };
     });
   };

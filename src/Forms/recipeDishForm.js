@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../Helpers/Helpers.js';
 import useRecipeIngredients from '../Hooks/useRecipeIngredients';
 
-
 const RecipeDish = ({
   setRecipeModal,
   setRecipe,
@@ -17,7 +16,7 @@ const RecipeDish = ({
   costByRecipe, //object which contains the cost and label for single size
   costProfitMarginCustomized, //object which contains the cost and label for each size
   onSingleCostUpdate,
-  onCustomCostUpdate
+  onCustomCostUpdate,
 }) => {
   const [ingridients, setIngridients] = React.useState({
     name: '',
@@ -36,7 +35,7 @@ const RecipeDish = ({
     addIngredient,
     removeItem,
     calculateItemCost,
-    isEmptyObject
+    isEmptyObject,
   } = useRecipeIngredients(recipe, productList, customizedPriceObj);
 
   React.useEffect(() => {
@@ -48,7 +47,8 @@ const RecipeDish = ({
         .filter(
           (item) =>
             item.operationSupplies === false &&
-            (item.activityStatus === undefined || item.activityStatus === false)
+            (item.activityStatus === undefined ||
+              item.activityStatus === false),
         );
       setProductList(sortedData);
     };
@@ -61,10 +61,6 @@ const RecipeDish = ({
     }
   }, [recipe]);
 
-
-
-
-
   React.useEffect(() => {
     //#3
     calculateItemCost(ingredientsBySize);
@@ -73,8 +69,6 @@ const RecipeDish = ({
     if (ingredientsSimple)
       console.log('ingredientsSimple    ', ingredientsSimple);
   }, [ingredientsBySize, ingredientsSimple]);
-
-
 
   const grabSpecificItemInStock = (name) => {
     if (productList && productList.length > 0 && name) {
@@ -96,8 +90,6 @@ const RecipeDish = ({
     }
     return null;
   };
-
-
 
   const extractLabelSizes = () => {
     return [
@@ -155,10 +147,6 @@ const RecipeDish = ({
       }
     }
   };
-
-
-
-
 
   const sendRecipe = () => {
     // Lógica original de setRecipe
@@ -219,7 +207,7 @@ const RecipeDish = ({
             <select
               id="name"
               value={productList?.findIndex(
-                (product) => product.product === ingridients.name
+                (product) => product.product === ingridients.name,
               )}
               className={style.selectInput}
               onChange={handleChange}
@@ -269,11 +257,11 @@ const RecipeDish = ({
                         className={
                           itemData
                             ? alertMinimunAmount(
-                              itemData.product,
-                              itemData.totalVolume,
-                              itemData.minimumAmount,
-                              itemData.totalCost
-                            ).message
+                                itemData.product,
+                                itemData.totalVolume,
+                                itemData.minimumAmount,
+                                itemData.totalCost,
+                              ).message
                               ? 'warning'
                               : ''
                             : ''
@@ -322,7 +310,7 @@ const RecipeDish = ({
               <select
                 id="name"
                 value={productList?.findIndex(
-                  (product) => product.product === ingridients.name
+                  (product) => product.product === ingridients.name,
                 )}
                 className={style.selectInput}
                 onChange={handleChange}
@@ -372,11 +360,11 @@ const RecipeDish = ({
                           className={
                             itemData
                               ? alertMinimunAmount(
-                                itemData.product,
-                                itemData.totalVolume,
-                                itemData.minimumAmount,
-                                itemData.totalCost
-                              ).message
+                                  itemData.product,
+                                  itemData.totalVolume,
+                                  itemData.minimumAmount,
+                                  itemData.totalCost,
+                                ).message
                                 ? 'warning'
                                 : ''
                               : ''
