@@ -5,7 +5,7 @@ import Keyboard from '../Keyboard';
 import CloseBtn from '../closeBtn';
 import { GlobalContext } from '../../GlobalContext';
 
-const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
+const CpfNfPopup = ({ setShowCpfPopup, onContinue }) => {
     const [cpf, setCpf] = React.useState('');
     const [error, setError] = React.useState('');
     const [showKeyboard, setShowKeyboard] = React.useState(false);
@@ -58,13 +58,13 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
         if (digits.length > 6)
             formattedCpf = `${digits.substring(0, 3)}.${digits.substring(
                 3,
-                6
+                6,
             )}.${digits.substring(6)}`;
 
         if (digits.length > 9)
             formattedCpf = `${digits.substring(0, 3)}.${digits.substring(
                 3,
-                6
+                6,
             )}.${digits.substring(6, 9)}-${digits.substring(9, 11)}`;
 
         return formattedCpf;
@@ -123,9 +123,8 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
 
     // Botão "Não" - continua sem CPF
     const handleNo = () => {
-        setCpfForInvoice('');
         setShowCpfPopup(false);
-        onContinue();
+        onContinue('');
     };
 
     // Botão "Sim" - valida e salva o CPF
@@ -134,9 +133,8 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
 
         if (digits.length === 0) {
             // Se não digitou nada, continua sem CPF
-            setCpfForInvoice('');
             setShowCpfPopup(false);
-            onContinue();
+            onContinue('');
             return;
         }
 
@@ -151,16 +149,14 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
         }
 
         // CPF válido, salva e continua
-        setCpfForInvoice(digits);
         setShowCpfPopup(false);
-        onContinue();
+        onContinue(digits);
     };
 
     // Fecha o popup
     const handleClose = () => {
         setShowCpfPopup(false);
-        setCpfForInvoice('');
-        onContinue();
+        onContinue('');
     };
 
     return (
@@ -169,9 +165,7 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
             <div className={style.cpfNfPopupContainer}>
                 <CloseBtn setClose={handleClose} />
                 <h1>Deseja CPF na nota fiscal?</h1>
-                <p>
-                    Digite seu CPF ou clique em "Não" para continuar sem CPF
-                </p>
+                <p>Digite seu CPF ou clique em "Não" para continuar sem CPF</p>
 
                 <div className={style.cpfInputContainer}>
                     <Input
@@ -187,11 +181,7 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
                         onFocus={handleFocus}
                         readOnly={global.isToten} // No totem, só aceita entrada via teclado virtual
                     />
-                    {error && (
-                        <p className={style.errorMessage}>
-                            {error}
-                        </p>
-                    )}
+                    {error && <p className={style.errorMessage}>{error}</p>}
 
                     {showKeyboard && global.isToten && (
                         <Keyboard
@@ -203,16 +193,10 @@ const CpfNfPopup = ({ setShowCpfPopup, setCpfForInvoice, onContinue }) => {
                 </div>
 
                 <div className={style.buttonContainer}>
-                    <button
-                        className={style.btnNo}
-                        onClick={handleNo}
-                    >
+                    <button className={style.btnNo} onClick={handleNo}>
                         Não
                     </button>
-                    <button
-                        className={style.btnYes}
-                        onClick={handleYes}
-                    >
+                    <button className={style.btnYes} onClick={handleYes}>
                         Sim
                     </button>
                 </div>

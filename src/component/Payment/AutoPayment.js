@@ -23,7 +23,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [correlationId, setCorrelationId] = useState(null);
   const [message, setMessage] = useState('');
   const [showCpfPopup, setShowCpfPopup] = useState(false);
-  const [cpfForInvoice, setCpfForInvoice] = useState('');
+  const [paymentData, setPaymentData] = useState(null);
+
 
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
@@ -31,13 +32,13 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     const socket = io('https://payer-4ptm.onrender.com'); // url do seu backend
 
     socket.on('connect', () => {
-      console.log('Socket conectado', socket.id);
+
     });
 
     // evento enviado pelo backend quando webhook chegar
     // payload: { correlationId, status: 'SUCESSO'|'ERRO'|'PENDING', idPayer }
     socket.on('paymentStatus', (payload) => {
-      console.log('Resultado do pagamento via socket:', payload);
+      console.log('📦 PAYLOAD COMPLETO:', JSON.stringify(payload, null, 2));
 
       if (payload.correlationId !== correlationId) return;
       const { statusTransaction } = payload;
@@ -45,8 +46,29 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       if (statusTransaction === 'APPROVED') {
         setWaitingForPayment(false);
         setIdPayer(payload.idPayer || null);
+
+        // Captura TODOS os dados da transação para nota fiscal
+        setPaymentData({
+          idPayer: payload.idPayer,
+          cardBrand: payload.flag, // VISA, MASTERCARD, ELO, etc.
+          cardBrandCode: payload.flagCode, // Código da bandeira
+          nsu: payload.thirdPartyId, // NSU principal
+          nsuAuthorizer: payload.authorizerUsn, // NSU do autorizador
+          authorizationCode: payload.authorizerId, // Código de autorização
+          transactionDateTime: payload.transactionDateTime, // Data/hora da transação
+          acquirer: payload.acquirer, // STONE, CIELO, etc.
+          acquirerCNPJ: payload.acquirerCNPJ, // CNPJ do adquirente
+          value: payload.value, // Valor da transação
+          installments: payload.installments, // Número de parcelas
+          terminalId: payload.terminalId, // ID do terminal
+          paymentMethod: payload.paymentMethod, // CARD, PIX
+          paymentType: payload.paymentType, // CREDIT, DEBIT
+          customerReceipt: payload.reducedCustomerPaymentReceipt, // Cupom do cliente
+          shopReceipt: payload.reducedShopPaymentReceipt, // Cupom da loja
+        });
+
         setShowCpfPopup(true);
-        onChoose(selected); // chama o onChoose como no fluxo aprovado
+        // onChoose(selected); // chama o onChoose como no fluxo aprovado
       } else if (statusTransaction === 'REJECTED') {
         setWaitingForPayment(false);
         setMessage('Falha no pagamento. Tente novamente');
@@ -62,6 +84,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       socket.disconnect();
     };
   }, [correlationId]); // cuidado com dependências: inclua 'selected' se necessário
+
 
   function generateCorrelationId() {
     return uuidv4();
@@ -158,8 +181,9 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     }
   };
 
-  const onContinue = () => {
-    setAutoPayment(false);
+  const onContinue = (cpf) => {
+    setShowCpfPopup(false);
+    onChoose(selected, cpf, paymentData); // Passa dados completos da transação
   };
 
   return (
@@ -203,7 +227,6 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       {showCpfPopup && (
         <CpfNfPopup
           setShowCpfPopup={setShowCpfPopup}
-          setCpfForInvoice={setCpfForInvoice}
           onContinue={onContinue}
         />
       )}

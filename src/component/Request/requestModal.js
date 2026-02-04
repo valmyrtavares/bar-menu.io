@@ -60,6 +60,8 @@ const RequestModal = () => {
   const isAdminOrigin = !!location.state?.isAdminOrigin;
   const [stylePdv, setStylePdv] = React.useState(false);
   let methodPayment = '';
+  let cpfForInvoice = '';
+  let paymentTransactionData = null;
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -392,15 +394,35 @@ const RequestModal = () => {
         name: data.name === 'anonimo' ? data.fantasyName : data.name,
         idUser: data.id,
         done: true,
+        cpfForInvoice: cpfForInvoice ? cpfForInvoice : '',
         paymentDone:
           methodPayment &&
-          methodPayment !== 'CASH' &&
-          methodPayment !== 'desabled' &&
-          methodPayment !== 'ABORTED' &&
-          methodPayment !== 'REJECTED'
+            methodPayment !== 'CASH' &&
+            methodPayment !== 'desabled' &&
+            methodPayment !== 'ABORTED' &&
+            methodPayment !== 'REJECTED'
             ? true
             : false, // Verifica se o método de pagamento foi selecionado
         paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
+        // Dados completos da transação para nota fiscal
+        paymentDetails: paymentTransactionData ? {
+          idPayer: paymentTransactionData.idPayer,
+          cardBrand: paymentTransactionData.cardBrand, // VISA, MASTERCARD, etc.
+          cardBrandCode: paymentTransactionData.cardBrandCode,
+          nsu: paymentTransactionData.nsu, // NSU principal
+          nsuAuthorizer: paymentTransactionData.nsuAuthorizer, // NSU do autorizador
+          authorizationCode: paymentTransactionData.authorizationCode, // Código de autorização
+          transactionDateTime: paymentTransactionData.transactionDateTime, // Data/hora
+          acquirer: paymentTransactionData.acquirer, // STONE, CIELO, etc.
+          acquirerCNPJ: paymentTransactionData.acquirerCNPJ,
+          value: paymentTransactionData.value,
+          installments: paymentTransactionData.installments,
+          terminalId: paymentTransactionData.terminalId,
+          paymentMethod: paymentTransactionData.paymentMethod,
+          paymentType: paymentTransactionData.paymentType,
+          customerReceipt: paymentTransactionData.customerReceipt,
+          shopReceipt: paymentTransactionData.shopReceipt,
+        } : null,
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
         request: previousRequests, // Atribuir os pedidos recuperados
@@ -446,12 +468,11 @@ const RequestModal = () => {
       console.error('Erro ao atualizar o array no Firestore:', error);
     }
   };
-  const onChoose = async (selectedPayment) => {
+  const onChoose = async (selectedPayment, cpf, paymentData) => {
     if (!autoPaymentMachineOn) {
       await sendRequestToKitchen();
       return;
     }
-    console.log('selectedPayment   ', selectedPayment);
     if (!autoPayment) {
       setAutoPayment(true);
       return;
@@ -478,6 +499,8 @@ const RequestModal = () => {
         }, 7000);
       } else {
         methodPayment = selectedPayment;
+        cpfForInvoice = cpf;
+        paymentTransactionData = paymentData;
         sendRequestToKitchen();
       }
     }
@@ -577,8 +600,8 @@ const RequestModal = () => {
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
-      Array.isArray(userData.request) &&
-      userData.request.length > 0 ? (
+        Array.isArray(userData.request) &&
+        userData.request.length > 0 ? (
         userData.request.map((item, index) => (
           <div className="individual-dishes my-3" key={index}>
             <h2 onClick={() => callDishesModal(item)} className="my-0">
