@@ -4,6 +4,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { v4 as uuidv4 } from 'uuid';
 import { io } from 'socket.io-client';
 import CloseBtn from '../closeBtn';
+import CpfNfPopup from './CpfNfPopup';
 
 const paymentOptions = [
   { label: 'Débito', value: 'DEBIT' },
@@ -21,6 +22,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [waitingForPayment, setWaitingForPayment] = useState(false);
   const [correlationId, setCorrelationId] = useState(null);
   const [message, setMessage] = useState('');
+  const [showCpfPopup, setShowCpfPopup] = useState(false);
+  const [cpfForInvoice, setCpfForInvoice] = useState('');
 
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
@@ -42,6 +45,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       if (statusTransaction === 'APPROVED') {
         setWaitingForPayment(false);
         setIdPayer(payload.idPayer || null);
+        setShowCpfPopup(true);
         onChoose(selected); // chama o onChoose como no fluxo aprovado
       } else if (statusTransaction === 'REJECTED') {
         setWaitingForPayment(false);
@@ -106,7 +110,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
           message: {
             command: 'PAYMENT',
@@ -144,7 +148,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
         }),
       });
@@ -152,6 +156,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       console.error('Erro ao abortar o pagamento:', err);
       setMessage('Erro ao cancelar o pagamento. Tente novamente.');
     }
+  };
+
+  const onContinue = () => {
+    setAutoPayment(false);
   };
 
   return (
@@ -192,6 +200,13 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           Escolher
         </button>
       </form>
+      {showCpfPopup && (
+        <CpfNfPopup
+          setShowCpfPopup={setShowCpfPopup}
+          setCpfForInvoice={setCpfForInvoice}
+          onContinue={onContinue}
+        />
+      )}
     </div>
   );
 };
