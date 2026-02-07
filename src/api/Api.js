@@ -24,6 +24,26 @@ import {
 import { db } from '../config-firebase/firebase';
 
 /**
+ * Escuta em tempo real apenas os pedidos que já têm nota emitida (nfceIssued: true) 
+ * mas que ainda não foram impressos (nfcePrinted: false).
+ * Usado pelo FiscalObserver para otimizar performance e não ler a coleção inteira.
+ */
+export function fetchPendingPrints(onData) {
+  const q = query(
+    collection(db, 'requests'),
+    where('nfceIssued', '==', true),
+    where('nfcePrinted', '==', false) // Only get what needs printing
+  );
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    onData(data);
+  });
+}
+
+/**
  * Atualiza ou cria uma chave em um documento de uma coleção específica.
  * Após a atualização, recarrega a página para refletir as mudanças.
  *

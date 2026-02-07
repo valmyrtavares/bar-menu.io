@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
+import { issueAutoNfce } from '../../services/fiscalService';
 import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod';
 import { fetchInDataChanges } from '../../api/Api.js';
@@ -82,9 +83,89 @@ const RequestListToBePrepared = ({ title }) => {
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
   React.useEffect(() => {
     if (!requestsDoneList) return;
-    //handleAutomaticFiscalIssuance(requestsDoneList)
-    // se tiver pelo menos 1 item, apaga o localStorage
     if (requestsDoneList.length > 0) {
+      // Gatilho automático para NFC-e
+
+      // Gatilho automático para NFC-e com TRAVA (Lock)
+      // Evita duplicidade usando o campo 'sendingNfce'
+      const triggerFiscal = async () => {
+        for (const order of requestsDoneList) {
+          // 1. FILTRO LOCAL:
+          // - Já pagou? (paymentDone)
+          // - Nota NÃO emitida? (!nfceIssued)
+          // - NÃO está enviando agora? (!sendingNfce)
+          if (
+            order.paymentDone === true &&
+            !order.nfceIssued &&
+            !order.sendingNfce
+          ) {
+            console.log(
+              `[LOCK] Iniciando trava para pedido ${order.countRequest} (ID: ${order.id})`,
+            );
+
+            try {
+              // 2. TENTA TRAVAR NO BANCO:
+              // Define sendingNfce = true.
+              // Se outro processo tentar fazer isso ao mesmo tempo,
+              // ele vai ler o documento atualizado antes de tentar (se o listener for rápido)
+              // ou podemos confiar que este update é a "inteligência" central.
+              await updateDoc(doc(db, 'requests', order.id), {
+                sendingNfce: true,
+              });
+
+              console.log(
+                `[LOCK] Trava ativada para ${order.countRequest}. Enviando para Sefaz...`,
+              );
+
+              // 3. ENVIA PARA A API (Processo demorado)
+              const result = await issueAutoNfce(order);
+
+              // 4. FINALIZA
+              if (
+                result &&
+                result.status === 'autorizado' &&
+                result.caminho_danfe
+              ) {
+                // SUCESSO: Marca como emitido e solta aa trava
+                // Adicionamos nfcePrinted: false para o FiscalObserver pegar depois
+                await updateDoc(doc(db, 'requests', order.id), {
+                  nfceIssued: true,
+                  sendingNfce: false,
+                  nfcePrinted: false, // Prepara para o observer de impressão
+                });
+                console.log(
+                  `[SUCESSO] Nota emitida para ${order.countRequest}. Trava liberada.`,
+                );
+              } else {
+                // ERRO NA API: Solta a trava para tentar de novo (ou analise manual)
+                console.error(
+                  `[ERRO API] Falha autorização para ${order.countRequest}. Soltando trava.`,
+                  result,
+                );
+                await updateDoc(doc(db, 'requests', order.id), {
+                  sendingNfce: false,
+                });
+              }
+            } catch (err) {
+              // ERRO GERAL (Ex: Falha de rede ao travar)
+              console.error(
+                `[ERRO GERAL] Falha no processo para ${order.countRequest}:`,
+                err,
+              );
+              // Tenta soltar a trava para não travar o pedido para sempre
+              try {
+                await updateDoc(doc(db, 'requests', order.id), {
+                  sendingNfce: false,
+                });
+              } catch (unlockErr) {
+                console.error('Falha crítica ao destrancar pedido:', unlockErr);
+              }
+            }
+          }
+        }
+      };
+      triggerFiscal();
+
       localStorage.removeItem('backorder');
     }
 
@@ -624,10 +705,8 @@ const RequestListToBePrepared = ({ title }) => {
 
           setSelectedPromotion('');
           setTextPromotion(
-            `O cliente ${
-              benefitedClientFinded.name
-            } já usou a promoção ${title} na data ${
-              item.dateTime
+            `O cliente ${benefitedClientFinded.name
+            } já usou a promoção ${title} na data ${item.dateTime
             } na compra dos itens ${purchasedProducts
               .map((item) => item)
               .join(', ')}`,
@@ -787,14 +866,10 @@ const RequestListToBePrepared = ({ title }) => {
       });
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          benefitedClientObj.score
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - benefitedClientObj.score
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${benefitedClientObj.score
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - benefitedClientObj.score
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
@@ -836,14 +911,10 @@ const RequestListToBePrepared = ({ title }) => {
 
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          item.finalPriceRequest
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - finalPriceRequest
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${item.finalPriceRequest
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - finalPriceRequest
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
