@@ -20,6 +20,9 @@ export const GlobalStorage = ({ children }) => {
     textFont: 'sans serif',
   });
 
+  // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
+  const processedOrdersGlobal = React.useRef(new Set());
+
   return (
     <GlobalContext.Provider
       value={{
@@ -39,6 +42,7 @@ export const GlobalStorage = ({ children }) => {
         setUserNewRequest,
         setPdvRequest,
         pdvRequest,
+        processedOrdersGlobal,
       }}
     >
       {children}

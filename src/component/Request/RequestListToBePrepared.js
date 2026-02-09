@@ -81,24 +81,25 @@ const RequestListToBePrepared = ({ title }) => {
   }, []);
 
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
+
+  // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
   React.useEffect(() => {
     if (!requestsDoneList) return;
     if (requestsDoneList.length > 0) {
       // Gatilho automático para NFC-e
 
-      // Gatilho automático para NFC-e com TRAVA (Lock)
-      // Evita duplicidade usando o campo 'sendingNfce'
       const triggerFiscal = async () => {
         for (const order of requestsDoneList) {
           // 1. FILTRO LOCAL:
-          // - Já pagou? (paymentDone)
-          // - Nota NÃO emitida? (!nfceIssued)
-          // - NÃO está enviando agora? (!sendingNfce)
           if (
             order.paymentDone === true &&
             !order.nfceIssued &&
-            !order.sendingNfce
+            !order.sendingNfce &&
+            !global.processedOrdersGlobal.current.has(order.id) // <--- TRAVA GLOBAL
           ) {
+            // Marca IMEDIATAMENTE na memória para bloquear próximas renderizações
+            global.processedOrdersGlobal.current.add(order.id);
+
             console.log(
               `[LOCK] Iniciando trava para pedido ${order.countRequest} (ID: ${order.id})`,
             );
