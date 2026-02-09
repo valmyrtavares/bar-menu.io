@@ -164,7 +164,13 @@ const RequestListToBePrepared = ({ title }) => {
           }
         }
       };
-      triggerFiscal();
+
+      const enableAutoNfce = localStorage.getItem('enableAutoNfce');
+      const shouldTrigger = enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : true;
+
+      if (shouldTrigger) {
+        triggerFiscal();
+      }
 
       localStorage.removeItem('backorder');
     }

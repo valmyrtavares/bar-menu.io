@@ -30,6 +30,10 @@ const FormFrontImage = () => {
     'autoPaymentMachineOn',
     false
   );
+  const [automaticFiscalIssuance, setAutomaticFiscalIssuance] = useLocalStorage(
+    'enableAutoNfce',
+    true
+  );
 
   //Navigate
   const navigate = useNavigate();
@@ -75,6 +79,10 @@ const FormFrontImage = () => {
 
   const changeAutoPayment = () => {
     setautoPaymentMachineOn((prev) => !prev);
+  };
+
+  const changeAutomaticFiscalIssuance = () => {
+    setAutomaticFiscalIssuance((prev) => !prev);
   };
 
   const changeModePicture = () => {
@@ -201,6 +209,20 @@ const FormFrontImage = () => {
         <label className="form-check-label">
           <b>PDV</b>: Manter clicado para entrar no modo PDV (Ponto de Venda)
           que habilita a tela para uso em caixas de restaurantes.
+        </label>
+      </div>
+
+      <div className="form-check my-1">
+        <input
+          className="form-check-input"
+          id="automaticFiscalIssuance"
+          type="checkbox"
+          checked={automaticFiscalIssuance}
+          onChange={changeAutomaticFiscalIssuance}
+        />
+        <label className="form-check-label">
+          <b>Emissão de Notas Automática</b>: Quando selecionado, o sistema emite
+          automaticamente a NFC-e após a confirmação do pagamento.
         </label>
       </div>
     </>
