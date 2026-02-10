@@ -3,31 +3,33 @@
 html,
 body {
     touch-action: pan-x pan-y;
-        /* overscroll-behavior: none; */
+    /* overscroll-behavior: none; */
 }
 
-.main_title{
+.main_title {
     text-align: center;
-    color:red;
+    color: red;
 }
 
-.ultra-wrapper{
+.ultra-wrapper {
     max-width: 1200px;
-    margin:10px auto;
-    background: var(--bg-color)!important;
+    margin: 10px auto;
+    background: var(--bg-color) !important;
 }
 
- @media (min-width: 1000px){
+@media (min-width: 1000px) {
     .order-queue-container {
-        max-width:1500px !important;
+        max-width: 1500px !important;
         width: 100%;
     }
-} 
+}
+
 .warning {
     background-color: #ffcccc;
     color: #ff0000;
     font-weight: bold;
 }
+
 html,
 body {
     touch-action: none;
