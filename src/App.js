@@ -51,6 +51,8 @@ import AutoPaymentList from './component/Payment/AutoPaymentList';
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
+import FiscalObserver from './component/FiscalObserver';
+
 function App() {
   const [showHeader, setShowHeader] = React.useState(true);
   const [MainMenu, setMainMenu] = React.useState(() => MainMenuDefault);
@@ -92,6 +94,7 @@ function App() {
 
   return (
     <div className="ultra-wrapper">
+      <FiscalObserver />
       {showHeader && <Header />}
 
       <Routes>
