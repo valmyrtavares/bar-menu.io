@@ -1,6 +1,6 @@
 import React from 'react';
 import { GlobalContext } from '../../GlobalContext';
-import Input from '../../component/Input.js';
+import Input from '../Input.js';
 import '../../assets/styles/FiscalAttributes.css';
 import useFormValidation from '../../Hooks/useFormValidation.js';
 import {
@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { getBtnData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
+import { issueAutoNfce } from '../../services/fiscalService';
 
 const FiscalAttributes = () => {
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
@@ -61,11 +62,23 @@ const FiscalAttributes = () => {
 
     const parseDate = (str) => {
       if (!str) return new Date(0); // Data muito antiga caso falhe
-      const [datePart, timePart] = str.split(' ');
-      const [day, month, year] = datePart.split('/');
-      return new Date(
-        `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`
-      );
+      const parts = str.split(' ');
+      if (parts.length < 2) return new Date(0);
+
+      const [datePart, timePart] = parts;
+      const dateComponents = datePart.split('/');
+
+      if (dateComponents.length < 3) return new Date(0);
+
+      const [day, month, year] = dateComponents;
+
+      // Ensure padding for components to handle legacy data
+      const pad = (s) => (s ? s.padStart(2, '0') : '00');
+
+      const isoString = `${year}-${pad(month)}-${pad(day)}T${timePart}`;
+      const date = new Date(isoString);
+
+      return isNaN(date.getTime()) ? new Date(0) : date;
     };
 
     return documents.sort((a, b) => {
@@ -87,83 +100,54 @@ const FiscalAttributes = () => {
   };
 
   const sendNfceToSefaz = async () => {
-    nfce.data_emissao = isoDate();
-    nfce.items = [];
-    nfce.formas_pagamento = [];
-    nfce.formas_pagamento.push({
-      forma_pagamento: paymentMethodWay(paymentMethod),
-      valor_pagamento: finalPriceRequest,
-      bandeira_operadora: card,
-    });
-    for (let i = 0; i < request.length; i++) {
-      nfce.items.push({
-        numero_item: i + 1,
-        codigo_ncm: fillingNcmCode(request[i].category),
-        quantidade_comercial: 1.0,
-        quantidade_tributavel: 1.0,
-        descricao: request[i].name,
-        cfop: '5102',
-        codigo_produto: request[i].id,
-        valor_unitario_tributavel: request[i].finalPrice,
-        valor_unitario_comercial: request[i].finalPrice,
-        valor_desconto: 0,
-        icms_origem: '0',
-        icms_situacao_tributaria: '102',
-        unidade_comercial: 'un',
-        unidade_tributavel: 'un',
-        valor_total_tributos: '0.00',
-      });
-    }
-
-    console.log('Com item alterado    ', nfce);
-    const ref = generationUniqueRandomStrig();
-
-    // URL atualizada para o seu servidor
-    const url = `http://localhost:4000/api/send-nfce?ref=${ref}`;
-
-    // Transformar nfce em JSON
-    // const nfceJson = JSON.stringify(nfce);
-
-    // const payload = {
-    //   ref: ref,
-    //   nfceData: nfce,
-    // };
-    const payload = nfce; // <-- aqui, só o conteúdo da NFC-e
-
-    // console.log('Payload enviado:', payload);
-    // console.log('URL da requisição:', url);
-
-    console.log('Esse é o payload   ', payload);
+    // Agora usamos o serviço centralizado
+    // Criamos um objeto de pedido compatível com o serviço
+    const manualOrder = {
+      ...global.userNewRequest,
+      cpfForInvoice: form.cpf,
+      paymentMethod: paymentMethod, // Usa o que está no global
+      // Se for cartão, passamos a bandeira selecionada manualmente no paymentDetails
+      paymentDetails: (paymentMethod === 'CREDIT' || paymentMethod === 'DEBIT') ? {
+        cardBrandCode: card
+      } : null
+    };
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      console.log('Iniciando emissão manual de NFC-e...', manualOrder);
+      const result = await issueAutoNfce(manualOrder);
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Resposta da API CEFAZ:', result);
+      if (result.status === 'autorizado' && result.caminho_danfe) {
+        // Envia para o servidor local para impressão automática
+        try {
+          const printResponse = await fetch('http://localhost:4000/api/print-nfce', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              caminho_danfe: result.caminho_danfe,
+              nfceRef: result.ref || manualOrder.nfceRef // Passa a referência
+            })
+          });
 
-        await saveToFirestore(result, finalPriceRequest, ref);
-
-        if (result.status === 'autorizado' && result.caminho_danfe) {
-          const danfeUrl = `https://api.focusnfe.com.br${result.caminho_danfe}`;
-
-          // Abre o link do DANFE em uma nova aba e dispara o comando de impressão
-          const printWindow = window.open(danfeUrl, '_blank');
-          printWindow.onload = () => {
-            printWindow.print(); // Inicia a impressão assim que a página carrega
-          };
+          if (printResponse.ok) {
+            console.log('Impressão manual enviada ao backend com sucesso.');
+          } else {
+            console.error('Falha ao enviar impressão manual ao backend.');
+            alert('A nota foi emitida, mas houve um erro ao enviar para a impressora.');
+          }
+        } catch (printErr) {
+          console.error('Erro de conexão ao tentar imprimir:', printErr);
+          alert('Erro ao conectar com o servidor de impressão local (porta 4000).');
         }
-      } else {
-        console.error('Erro ao enviar NFC-e:', response.statusText);
       }
+
+      // Atualiza lista local de notas
+      const data = await getBtnData('taxDocuments');
+      const sortedData = sortByDateIssued(data);
+      setTaxDocument(sortedData);
+
     } catch (error) {
-      console.error('Erro na requisição:', error);
+      console.error('Erro na emissão manual:', error);
+      alert('Erro ao emitir nota fiscal. Verifique os logs.');
     }
   };
 
@@ -171,9 +155,8 @@ const FiscalAttributes = () => {
     try {
       const db = getFirestore(); // Inicializa o Firestore
       const currentDate = new Date();
-      const formattedDate = `${currentDate.getDate()}/${
-        currentDate.getMonth() + 1
-      }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
+        }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
       const resultWithDateAndPrice = {
         ...result,
         date_issued: formattedDate,
@@ -464,13 +447,27 @@ const FiscalAttributes = () => {
                 <td>{item.date_issued}</td>
                 <td>{item.total_value}</td>
                 <td>
-                  <a
-                    href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    className="btn btn-link"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      try {
+                        await fetch('http://localhost:4000/api/print-nfce', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            caminho_danfe: item.caminho_danfe,
+                            nfceRef: item.nfceRef || item.ref // Passa a referência
+                          })
+                        });
+                      } catch (err) {
+                        console.error('Erro ao reimprimir:', err);
+                        alert('Erro ao conectar com o serviço de impressão.');
+                      }
+                    }}
                   >
-                    nota
-                  </a>
+                    imprimir
+                  </button>
                 </td>
                 <td>
                   <button
