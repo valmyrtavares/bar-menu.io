@@ -25,15 +25,12 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [showCpfPopup, setShowCpfPopup] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
 
-
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
 
     const socket = io('https://payer-4ptm.onrender.com'); // url do seu backend
 
-    socket.on('connect', () => {
-
-    });
+    socket.on('connect', () => {});
 
     // evento enviado pelo backend quando webhook chegar
     // payload: { correlationId, status: 'SUCESSO'|'ERRO'|'PENDING', idPayer }
@@ -84,7 +81,6 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       socket.disconnect();
     };
   }, [correlationId]); // cuidado com dependências: inclua 'selected' se necessário
-
 
   function generateCorrelationId() {
     return uuidv4();
@@ -225,10 +221,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         </button>
       </form>
       {showCpfPopup && (
-        <CpfNfPopup
-          setShowCpfPopup={setShowCpfPopup}
-          onContinue={onContinue}
-        />
+        <CpfNfPopup setShowCpfPopup={setShowCpfPopup} onContinue={onContinue} />
       )}
     </div>
   );
