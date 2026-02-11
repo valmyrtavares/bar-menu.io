@@ -117,27 +117,9 @@ const FiscalAttributes = () => {
       const result = await issueAutoNfce(manualOrder);
 
       if (result.status === 'autorizado' && result.caminho_danfe) {
-        // Envia para o servidor local para impressão automática
-        try {
-          const printResponse = await fetch('http://localhost:4000/api/print-nfce', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              caminho_danfe: result.caminho_danfe,
-              nfceRef: result.ref || manualOrder.nfceRef // Passa a referência
-            })
-          });
-
-          if (printResponse.ok) {
-            console.log('Impressão manual enviada ao backend com sucesso.');
-          } else {
-            console.error('Falha ao enviar impressão manual ao backend.');
-            alert('A nota foi emitida, mas houve um erro ao enviar para a impressora.');
-          }
-        } catch (printErr) {
-          console.error('Erro de conexão ao tentar imprimir:', printErr);
-          alert('Erro ao conectar com o servidor de impressão local (porta 4000).');
-        }
+        // Abre o PDF para visualização
+        const danfeUrl = `https://api.focusnfe.com.br${result.caminho_danfe}`;
+        window.open(danfeUrl, '_blank');
       }
 
       // Atualiza lista local de notas
@@ -443,7 +425,15 @@ const FiscalAttributes = () => {
           {taxDocument &&
             taxDocument.map((item, index) => (
               <tr key={index}>
-                <td>{item.ref}</td>
+                <td>
+                  <a
+                    href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {item.ref}
+                  </a>
+                </td>
                 <td>{item.date_issued}</td>
                 <td>{item.total_value}</td>
                 <td>
