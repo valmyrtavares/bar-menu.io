@@ -206,10 +206,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           ))}
         </div>
         {loading && (
-          <DefaultComumMessage
-            msg="Efetue o pagamento na máquina de cartão ao lado"
-            onClose={abortPayment}
-          />
+          <DefaultComumMessage msg="Efetue o pagamento na máquina de cartão ao lado" />
         )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <button
