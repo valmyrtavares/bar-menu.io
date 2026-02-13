@@ -32,7 +32,7 @@ const FormFrontImage = () => {
   );
   const [automaticFiscalIssuance, setAutomaticFiscalIssuance] = useLocalStorage(
     'enableAutoNfce',
-    true
+    false
   );
 
   //Navigate

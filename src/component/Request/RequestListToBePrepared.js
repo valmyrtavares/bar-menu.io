@@ -172,7 +172,7 @@ const RequestListToBePrepared = ({ title }) => {
       const isPdv = localStorage.getItem('pdv') === 'true';
 
       const autoNfceActive =
-        enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : true;
+        enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : false;
       const shouldTrigger = autoNfceActive && isPdv;
 
       if (shouldTrigger) {
@@ -718,10 +718,8 @@ const RequestListToBePrepared = ({ title }) => {
 
           setSelectedPromotion('');
           setTextPromotion(
-            `O cliente ${
-              benefitedClientFinded.name
-            } já usou a promoção ${title} na data ${
-              item.dateTime
+            `O cliente ${benefitedClientFinded.name
+            } já usou a promoção ${title} na data ${item.dateTime
             } na compra dos itens ${purchasedProducts
               .map((item) => item)
               .join(', ')}`,
@@ -881,14 +879,10 @@ const RequestListToBePrepared = ({ title }) => {
       });
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          benefitedClientObj.score
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - benefitedClientObj.score
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${benefitedClientObj.score
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - benefitedClientObj.score
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
@@ -930,14 +924,10 @@ const RequestListToBePrepared = ({ title }) => {
 
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          item.finalPriceRequest
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - finalPriceRequest
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${item.finalPriceRequest
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - finalPriceRequest
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);

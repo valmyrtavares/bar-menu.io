@@ -68,7 +68,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
 
         const enableAutoNfce = localStorage.getItem('enableAutoNfce');
         const autoNfceActive =
-          enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : true;
+          enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : false;
 
         if (autoNfceActive) {
           setShowCpfPopup(true);
