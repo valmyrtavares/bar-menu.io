@@ -30,7 +30,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
 
     const socket = io('https://payer-4ptm.onrender.com'); // url do seu backend
 
-    socket.on('connect', () => {});
+    socket.on('connect', () => { });
 
     // evento enviado pelo backend quando webhook chegar
     // payload: { correlationId, status: 'SUCESSO'|'ERRO'|'PENDING', idPayer }
@@ -45,7 +45,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         setIdPayer(payload.idPayer || null);
 
         // Captura TODOS os dados da transação para nota fiscal
-        setPaymentData({
+        const currentPaymentData = {
           idPayer: payload.idPayer,
           cardBrand: payload.flag, // VISA, MASTERCARD, ELO, etc.
           cardBrandCode: payload.flagCode, // Código da bandeira
@@ -62,10 +62,19 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           paymentType: payload.paymentType, // CREDIT, DEBIT
           customerReceipt: payload.reducedCustomerPaymentReceipt, // Cupom do cliente
           shopReceipt: payload.reducedShopPaymentReceipt, // Cupom da loja
-        });
+        };
 
-        setShowCpfPopup(true);
-        // onChoose(selected); // chama o onChoose como no fluxo aprovado
+        setPaymentData(currentPaymentData);
+
+        const enableAutoNfce = localStorage.getItem('enableAutoNfce');
+        const autoNfceActive =
+          enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : true;
+
+        if (autoNfceActive) {
+          setShowCpfPopup(true);
+        } else {
+          onChoose(selected, null, currentPaymentData);
+        }
       } else if (statusTransaction === 'REJECTED') {
         setWaitingForPayment(false);
         setMessage('Falha no pagamento. Tente novamente');
