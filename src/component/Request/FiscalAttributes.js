@@ -107,9 +107,12 @@ const FiscalAttributes = () => {
       cpfForInvoice: form.cpf,
       paymentMethod: paymentMethod, // Usa o que está no global
       // Se for cartão, passamos a bandeira selecionada manualmente no paymentDetails
-      paymentDetails: (paymentMethod === 'CREDIT' || paymentMethod === 'DEBIT') ? {
-        cardBrandCode: card
-      } : null
+      paymentDetails:
+        paymentMethod === 'CREDIT' || paymentMethod === 'DEBIT'
+          ? {
+              cardBrandCode: card,
+            }
+          : null,
     };
 
     try {
@@ -126,7 +129,6 @@ const FiscalAttributes = () => {
       const data = await getBtnData('taxDocuments');
       const sortedData = sortByDateIssued(data);
       setTaxDocument(sortedData);
-
     } catch (error) {
       console.error('Erro na emissão manual:', error);
       alert('Erro ao emitir nota fiscal. Verifique os logs.');
@@ -137,8 +139,9 @@ const FiscalAttributes = () => {
     try {
       const db = getFirestore(); // Inicializa o Firestore
       const currentDate = new Date();
-      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
-        }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+      const formattedDate = `${currentDate.getDate()}/${
+        currentDate.getMonth() + 1
+      }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
       const resultWithDateAndPrice = {
         ...result,
         date_issued: formattedDate,
@@ -148,7 +151,7 @@ const FiscalAttributes = () => {
       };
       const docRef = await addDoc(
         collection(db, 'taxDocuments'),
-        resultWithDateAndPrice
+        resultWithDateAndPrice,
       ); // Adiciona o documento à coleção taxDocuments
 
       console.log('Documento adicionado com ID:', docRef.id);
@@ -230,7 +233,7 @@ const FiscalAttributes = () => {
   // Função para checar todas as NFS-e recebidas de um CNPJ específico
   const handleCheckNfses = async () => {
     const cnpj = '19337953000178'; // Substitua pelo CNPJ específico
-    const url = `http://localhost:4000/api/check-nfses/${cnpj}`; // URL do backend
+    const url = `https://focusrender.onrender.com/api/check-nfses/${cnpj}`; // URL do backend
 
     try {
       const response = await fetch(url, {
@@ -247,7 +250,7 @@ const FiscalAttributes = () => {
       } else {
         console.error(
           'Erro ao consultar NFS-e recebidas:',
-          response.statusText
+          response.statusText,
         );
       }
     } catch (error) {
@@ -263,7 +266,7 @@ const FiscalAttributes = () => {
 
     if (confirm) {
       setOpenpopCancelTax(null);
-      const url = `http://localhost:4000/api/cancel-nfce/${ref.ref}`; // URL do backend
+      const url = `https://focusrender.onrender.com/api/cancel-nfce/${ref.ref}`; // URL do backend
       console.log('Chamando backend com URL:', url);
 
       const body = {
@@ -307,8 +310,8 @@ const FiscalAttributes = () => {
 
         setTaxDocument((prevDocuments) =>
           prevDocuments.map((doc) =>
-            doc.ref === ref.ref ? { ...doc, activate: true } : doc
-          )
+            doc.ref === ref.ref ? { ...doc, activate: true } : doc,
+          ),
         );
       }
     } catch (error) {
@@ -337,7 +340,7 @@ const FiscalAttributes = () => {
 
     for (let i = 0; i < length; i++) {
       const randomChar = characters.charAt(
-        Math.floor(Math.random() * characters.length)
+        Math.floor(Math.random() * characters.length),
       );
       result += randomChar;
     }
@@ -442,14 +445,17 @@ const FiscalAttributes = () => {
                     onClick={async (e) => {
                       e.preventDefault();
                       try {
-                        await fetch('http://localhost:4000/api/print-nfce', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            caminho_danfe: item.caminho_danfe,
-                            nfceRef: item.nfceRef || item.ref // Passa a referência
-                          })
-                        });
+                        await fetch(
+                          'https://focusrender.onrender.com/api/print-nfce',
+                          {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              caminho_danfe: item.caminho_danfe,
+                              nfceRef: item.nfceRef || item.ref, // Passa a referência
+                            }),
+                          },
+                        );
                       } catch (err) {
                         console.error('Erro ao reimprimir:', err);
                         alert('Erro ao conectar com o serviço de impressão.');

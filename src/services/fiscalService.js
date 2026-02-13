@@ -57,11 +57,10 @@ const saveToFirestore = async (result, finalPrice, ref) => {
     const currentDate = new Date();
     const formattedDate = `${String(currentDate.getDate()).padStart(
       2,
-      '0'
-    )}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(
-      2,
-      '0'
-    )}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
+      '0',
+    )}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()} ${String(
+      currentDate.getHours(),
+    ).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
 
     const resultWithDateAndPrice = {
       ...result,
@@ -89,8 +88,6 @@ const saveToFirestore = async (result, finalPrice, ref) => {
  * @param {Object} order - Objeto do pedido (do Firestore)
  */
 export const issueAutoNfce = async (order) => {
-
-
   const nfce = {
     data_emissao: isoDate(),
     cnpj_emitente: '19337953000178',
@@ -141,7 +138,7 @@ export const issueAutoNfce = async (order) => {
 
   const ref = generationUniqueRandomString();
   // URL do backend (ajustar se necessário para produção)
-  const url = `http://localhost:4000/api/send-nfce?ref=${ref}`;
+  const url = `https://focusrender.onrender.com/api/send-nfce?ref=${ref}`;
 
   try {
     const response = await fetch(url, {
