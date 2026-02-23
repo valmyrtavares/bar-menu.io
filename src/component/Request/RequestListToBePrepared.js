@@ -168,11 +168,9 @@ const RequestListToBePrepared = ({ title }) => {
         }
       };
 
-      const enableAutoNfce = localStorage.getItem('enableAutoNfce');
+      const autoNfceActive = global.enableAutoNfce;
       const isPdv = localStorage.getItem('pdv') === 'true';
 
-      const autoNfceActive =
-        enableAutoNfce !== null ? JSON.parse(enableAutoNfce) : false;
       const shouldTrigger = autoNfceActive && isPdv;
 
       if (shouldTrigger) {

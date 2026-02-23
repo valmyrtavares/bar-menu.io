@@ -1,4 +1,6 @@
 import React from 'react';
+import { onSnapshot, doc } from 'firebase/firestore';
+import { db } from './config-firebase/firebase';
 
 export const GlobalContext = React.createContext();
 
@@ -10,6 +12,7 @@ export const GlobalStorage = ({ children }) => {
   const [userNewRequest, setUserNewRequest] = React.useState({});
   const [pdvRequest, setPdvRequest] = React.useState(false);
   const [warningLowRawMaterial, setWarningLowRawMaterial] = React.useState([]);
+  const [enableAutoNfce, setEnableAutoNfce] = React.useState(false);
   const [styles, setStyles] = React.useState({
     btnColor: '#b02121',
     secundaryBgColor: '#b02121',
@@ -19,6 +22,26 @@ export const GlobalStorage = ({ children }) => {
     titleFont: 'Arial',
     textFont: 'sans serif',
   });
+
+  // Listen for global configuration changes
+  React.useEffect(() => {
+    if (!db) {
+      console.warn('Firestore db instance not available in GlobalContext');
+      return;
+    }
+    const unsubscribe = onSnapshot(doc(db, 'GlobalConfig', 'nfcSettings'), (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        if (data.enableAutoNfce !== undefined) {
+          setEnableAutoNfce(data.enableAutoNfce);
+          // Also sync with localStorage for backward compatibility or components not using context
+          localStorage.setItem('enableAutoNfce', JSON.stringify(data.enableAutoNfce));
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
   const processedOrdersGlobal = React.useRef(new Set());
@@ -43,6 +66,8 @@ export const GlobalStorage = ({ children }) => {
         setPdvRequest,
         pdvRequest,
         processedOrdersGlobal,
+        enableAutoNfce,
+        setEnableAutoNfce,
       }}
     >
       {children}

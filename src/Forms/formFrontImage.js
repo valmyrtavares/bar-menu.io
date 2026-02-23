@@ -30,10 +30,7 @@ const FormFrontImage = () => {
     'autoPaymentMachineOn',
     false
   );
-  const [automaticFiscalIssuance, setAutomaticFiscalIssuance] = useLocalStorage(
-    'enableAutoNfce',
-    false
-  );
+  // Removed local useLocalStorage for enableAutoNfce, now using global.enableAutoNfce
 
   //Navigate
   const navigate = useNavigate();
@@ -81,8 +78,15 @@ const FormFrontImage = () => {
     setautoPaymentMachineOn((prev) => !prev);
   };
 
-  const changeAutomaticFiscalIssuance = () => {
-    setAutomaticFiscalIssuance((prev) => !prev);
+  const changeAutomaticFiscalIssuance = async () => {
+    const newValue = !global.enableAutoNfce;
+    try {
+      const docRef = doc(db, 'GlobalConfig', 'nfcSettings');
+      await setDoc(docRef, { enableAutoNfce: newValue }, { merge: true });
+      console.log('Global configuration updated!');
+    } catch (error) {
+      console.error('Error updating global configuration: ', error);
+    }
   };
 
   const changeModePicture = () => {
@@ -217,7 +221,7 @@ const FormFrontImage = () => {
           className="form-check-input"
           id="automaticFiscalIssuance"
           type="checkbox"
-          checked={automaticFiscalIssuance}
+          checked={global.enableAutoNfce}
           onChange={changeAutomaticFiscalIssuance}
         />
         <label className="form-check-label">
