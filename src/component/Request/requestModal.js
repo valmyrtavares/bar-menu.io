@@ -348,7 +348,10 @@ const RequestModal = () => {
   const addRequestUser = async (data) => {
     try {
       const userNewRequest = {
-        name: data.name === 'anonimo' ? data.fantasyName : data.name,
+        name:
+          data.name === 'anonimo' || data.name === 'anonymous'
+            ? data.fantasyName
+            : data.name,
         idUser: data.id,
         done: true,
         // recipe: item.recipe ? item.recipe : {},
@@ -391,7 +394,10 @@ const RequestModal = () => {
       const previousRequests = storedRequests ? JSON.parse(storedRequests) : [];
 
       const userNewRequest = {
-        name: data.name === 'anonimo' ? data.fantasyName : data.name,
+        name:
+          data.name === 'anonimo' || data.name === 'anonymous'
+            ? data.fantasyName
+            : data.name,
         idUser: data.id,
         done: true,
         cpfForInvoice: cpfForInvoice ? cpfForInvoice : '',
@@ -594,9 +600,16 @@ const RequestModal = () => {
         />
       )}
 
-      <p className="current-client">
+      <p
+        className="current-client"
+        onClick={stylePdv ? logout : undefined}
+        style={stylePdv ? { cursor: 'pointer' } : {}}
+        title={stylePdv ? 'Clique para trocar de cliente' : ''}
+      >
         <span>Cliente: </span>
-        {userData?.name === 'anonimo' ? userData?.fantasyName : userData?.name}
+        {userData?.name === 'anonimo' || userData?.name === 'anonymous'
+          ? userData?.fantasyName
+          : userData?.name}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
