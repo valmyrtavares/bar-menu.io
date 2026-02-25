@@ -12,6 +12,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  runTransaction,
 } from 'firebase/firestore';
 import style from '../../assets/styles/RequestListToBePrepared.module.scss';
 import { Link } from 'react-router-dom';
@@ -90,12 +91,12 @@ const RequestListToBePrepared = ({ title }) => {
 
       const triggerFiscal = async () => {
         for (const order of requestsDoneList) {
-          // 1. FILTRO LOCAL:
+          // 1. FILTRO RÁPIDO EM MEMÓRIA (mesmo tab, mesmo ciclo React):
           if (
             order.paymentDone === true &&
             !order.nfceIssued &&
             !order.sendingNfce &&
-            !global.processedOrdersGlobal.current.has(order.id) // <--- TRAVA GLOBAL
+            !global.processedOrdersGlobal.current.has(order.id)
           ) {
             // Marca IMEDIATAMENTE na memória para bloquear próximas renderizações
             global.processedOrdersGlobal.current.add(order.id);
@@ -105,17 +106,34 @@ const RequestListToBePrepared = ({ title }) => {
             );
 
             try {
-              // 2. TENTA TRAVAR NO BANCO:
-              // Define sendingNfce = true.
-              // Se outro processo tentar fazer isso ao mesmo tempo,
-              // ele vai ler o documento atualizado antes de tentar (se o listener for rápido)
-              // ou podemos confiar que este update é a "inteligência" central.
-              await updateDoc(doc(db, 'requests', order.id), {
-                sendingNfce: true,
+              // 2. TRAVA ATÔMICA NO FIRESTORE (protege contra múltiplas abas/dispositivos):
+              // runTransaction lê o documento fresco e só atualiza se ninguém mais travou.
+              // Se duas abas tentarem ao mesmo tempo, o Firestore garante que apenas uma vence.
+              const orderRef = doc(db, 'requests', order.id);
+              const acquired = await runTransaction(db, async (transaction) => {
+                const freshDoc = await transaction.get(orderRef);
+                if (!freshDoc.exists()) return false;
+                const freshData = freshDoc.data();
+
+                // Verifica com dados FRESCOS do servidor (não do snapshot local)
+                if (freshData.nfceIssued || freshData.sendingNfce) {
+                  return false; // Outro processo já travou ou emitiu
+                }
+
+                // Trava atômica — ninguém mais pode travar até liberarmos
+                transaction.update(orderRef, { sendingNfce: true });
+                return true;
               });
 
+              if (!acquired) {
+                console.log(
+                  `[LOCK] Pedido ${order.countRequest} já está sendo processado por outra instância. Ignorando.`,
+                );
+                continue; // Próximo pedido no loop
+              }
+
               console.log(
-                `[LOCK] Trava ativada para ${order.countRequest}. Enviando para Sefaz...`,
+                `[LOCK] Trava ATÔMICA ativada para ${order.countRequest}. Enviando para Sefaz...`,
               );
 
               // 3. ENVIA PARA A API (Processo demorado)
@@ -127,27 +145,26 @@ const RequestListToBePrepared = ({ title }) => {
                 result.status === 'autorizado' &&
                 result.caminho_danfe
               ) {
-                // SUCESSO: Marca como emitido e solta aa trava
-                // Adicionamos nfcePrinted: false para o FiscalObserver pegar depois
-                await updateDoc(doc(db, 'requests', order.id), {
+                // SUCESSO: Marca como emitido e solta a trava
+                await updateDoc(orderRef, {
                   nfceIssued: true,
                   sendingNfce: false,
-                  nfcePrinted: false, // Prepara para o observer de impressão
-                  caminho_danfe: result.caminho_danfe, // Link para o PDF
+                  nfcePrinted: false,
+                  caminho_danfe: result.caminho_danfe,
                   nfceStatus: result.status,
+                  nfceRef: result.ref,
                 });
                 console.log(
                   `[SUCESSO] Nota emitida para ${order.countRequest}. Trava liberada.`,
                 );
               } else {
-                // ERRO NA API: Solta a trava para tentar de novo (ou analise manual)
+                // ERRO NA API: Solta a trava para tentar de novo
                 console.error(
                   `[ERRO API] Falha autorização para ${order.countRequest}. Soltando trava.`,
                   result,
                 );
-                await updateDoc(doc(db, 'requests', order.id), {
-                  sendingNfce: false,
-                });
+                await updateDoc(orderRef, { sendingNfce: false });
+                global.processedOrdersGlobal.current.delete(order.id);
               }
             } catch (err) {
               // ERRO GERAL (Ex: Falha de rede ao travar)
@@ -155,7 +172,8 @@ const RequestListToBePrepared = ({ title }) => {
                 `[ERRO GERAL] Falha no processo para ${order.countRequest}:`,
                 err,
               );
-              // Tenta soltar a trava para não travar o pedido para sempre
+              // Solta ambas as travas para não travar o pedido para sempre
+              global.processedOrdersGlobal.current.delete(order.id);
               try {
                 await updateDoc(doc(db, 'requests', order.id), {
                   sendingNfce: false,

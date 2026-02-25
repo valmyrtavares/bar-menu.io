@@ -19,6 +19,7 @@
 .env.*
 .env.production
 cors.json
+*_output.txt
 
 
 

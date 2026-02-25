@@ -155,16 +155,10 @@ export const issueAutoNfce = async (order) => {
 
       await saveToFirestore(result, order.finalPriceRequest, ref);
 
-      // Atualiza o pedido original para marcar que a nota foi emitida
-      const orderRef = doc(db, 'requests', order.id);
-      await updateDoc(orderRef, {
-        nfceIssued: true,
-        nfceRef: ref,
-        nfceStatus: result.status,
-        caminho_danfe: result.caminho_danfe,
-      });
-
-      return result;
+      // Retorna o resultado + ref para que o chamador (triggerFiscal) faça o updateDoc
+      // IMPORTANTE: NÃO fazemos updateDoc aqui para evitar onSnapshot intermediário
+      // que causava race condition e notas duplicadas.
+      return { ...result, ref };
     } else {
       console.error('Erro ao enviar NFC-e:', response.statusText);
       throw new Error(`Erro na rede: ${response.statusText}`);

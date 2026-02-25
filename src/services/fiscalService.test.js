@@ -23,7 +23,7 @@ describe('issueAutoNfce', () => {
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve({ status: 'processando', success: true }),
+                json: () => Promise.resolve({ status: 'autorizado', success: true, caminho_danfe: '/mock.pdf' }),
             })
         );
 
@@ -75,4 +75,38 @@ describe('issueAutoNfce', () => {
         // Verify the CPF field sent to API is only digits
         expect(body.cpf_destinatario).toBe('12345678900');
     });
+
+    it('NÃO deve chamar updateDoc no documento do pedido (anti race condition)', async () => {
+        const mockOrder = {
+            id: 'order123',
+            paymentMethod: 'PIX',
+            finalPriceRequest: 1.00,
+            request: [{ name: 'Água', category: 'agua', finalPrice: 1.0 }],
+        };
+
+        await issueAutoNfce(mockOrder);
+
+        // issueAutoNfce NÃO deve atualizar o doc do pedido diretamente.
+        // Essa responsabilidade é do triggerFiscal para evitar onSnapshot intermediário.
+        expect(updateDoc).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar o resultado COM o campo ref para uso pelo triggerFiscal', async () => {
+        const mockOrder = {
+            id: 'order123',
+            paymentMethod: 'PIX',
+            finalPriceRequest: 1.00,
+            request: [{ name: 'Água', category: 'agua', finalPrice: 1.0 }],
+        };
+
+        const result = await issueAutoNfce(mockOrder);
+
+        // Deve conter os campos da API + ref gerado internamente
+        expect(result.status).toBe('autorizado');
+        expect(result.caminho_danfe).toBe('/mock.pdf');
+        expect(result.ref).toBeDefined();
+        expect(typeof result.ref).toBe('string');
+        expect(result.ref.length).toBe(34); // Tamanho padrão do generationUniqueRandomString
+    });
 });
+
