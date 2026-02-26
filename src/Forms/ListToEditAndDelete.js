@@ -121,6 +121,7 @@ const EditFormButton = () => {
             dataObj={dataObj}
             EditButtonTitle="Edite o Botão"
             setModalEditButton={setModalEditButton}
+            fetchDataCollection={fetchDataCollection}
           />
         </div>
       )}
@@ -153,6 +154,7 @@ const EditFormButton = () => {
             mainTitle="Edite o Prato"
             setShowPopupSideDisehs={setModalEditDishes}
             closeModal={closeModal}
+            fetchDataCollection={fetchDataCollection}
           />
         </div>
       )}
@@ -185,6 +187,7 @@ const EditFormButton = () => {
             dataObj={dataObj}
             EditSideDishesTitle="Edite o Acompanhamento"
             setModalEditSideDishes={setModalEditSideDishes}
+            fetchDataCollection={fetchDataCollection}
           />
         </div>
       )}

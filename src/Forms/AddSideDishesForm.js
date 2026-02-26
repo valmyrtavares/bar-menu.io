@@ -20,6 +20,7 @@ function AddSideDishesForm({
   dataObj,
   EditSideDishesTitle,
   setModalEditSideDishes,
+  fetchDataCollection,
 }) {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
@@ -167,7 +168,7 @@ function AddSideDishesForm({
     ) {
       alert(
         'O acompanhamento selecionado parece estar com volume ou custo inválido.\n' +
-          'Verifique se o produto ainda está disponível no estoque e atualize ou remova o acompanhamento.'
+        'Verifique se o produto ainda está disponível no estoque e atualize ou remova o acompanhamento.'
       );
       return form;
     }
@@ -204,6 +205,7 @@ function AddSideDishesForm({
       if (form.price && form.sideDishes) {
         addDoc(collection(db, 'sideDishes'), enrichedForm)
           .then((docRef) => {
+            if (fetchDataCollection) fetchDataCollection();
             if (!noNavigate) {
               navigate('/admin/editButton/sidedishes');
             } else {
@@ -218,6 +220,7 @@ function AddSideDishesForm({
       setDoc(doc(db, 'sideDishes', dataObj.id), enrichedForm)
         .then(() => {
           console.log('Document successfully updated !');
+          if (fetchDataCollection) fetchDataCollection();
           setModalEditSideDishes(false);
         })
         .catch((error) => {

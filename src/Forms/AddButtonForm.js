@@ -21,7 +21,13 @@ import '../assets/styles/form.css';
 import style from '../assets/styles/AddButtonForm.module.scss';
 import { Link } from 'react-router-dom';
 
-function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
+function AddButtonForm({
+  dataObj,
+  EditButtonTitle,
+  setModalEditButton,
+  fetchDataCollection,
+}) {
+
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -84,6 +90,7 @@ function AddButtonForm({ dataObj, EditButtonTitle, setModalEditButton }) {
       setDoc(doc(db, 'button', dataObj.id), form)
         .then(() => {
           console.log('Document successfully updated !');
+          if (fetchDataCollection) fetchDataCollection();
           navigate('/');
         })
         .catch((error) => {

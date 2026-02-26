@@ -22,7 +22,14 @@ import RecipeDish from './recipeDishForm.js';
 import useFormValidation from '../Hooks/useFormValidation.js';
 //import { cardClasses } from "@mui/material";
 
-function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
+function AddDishesForm({
+  dataObj,
+  mainTitle,
+  setModalEditDishes,
+  closeModal,
+  fetchDataCollection,
+}) {
+
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     title: '',
@@ -171,6 +178,7 @@ function AddDishesForm({ dataObj, mainTitle, setModalEditDishes, closeModal }) {
         : 'Receita Vazia';
       setDoc(doc(db, 'item', dataObj.id), form)
         .then(() => {
+          if (fetchDataCollection) fetchDataCollection();
           navigate('/');
           console.log('Document successfully updated !');
         })
