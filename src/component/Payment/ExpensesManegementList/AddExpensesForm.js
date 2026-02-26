@@ -339,43 +339,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             currentItem.totalVolume
           ),
         ];
-        await addDoc(collection(db, 'stock'), currentItem);
+        const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
         setLoadingAvailableMenuDishes(true);
-        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        const res = await checkUnavaiableRawMaterial(newDocRef.id);
         setLoadingAvailableMenuDishes(res);
       }
     }
   };
-
-  // const updateWanrningAmoutMessage = (
-  //   product,
-  //   totalVolume,
-  //   minimumAmount,
-  //   totalCost
-  // ) => {
-  //   const check = alertMinimunAmount(
-  //     product,
-  //     totalVolume,
-  //     minimumAmount,
-  //     totalCost
-  //   );
-
-  //   try {
-  //     const key = 'warningAmountMessage';
-  //     let stored = localStorage.getItem(key);
-  //     let warnings = stored ? JSON.parse(stored) : [];
-  //     if (!Array.isArray(warnings)) warnings = [];
-  //     warnings.push(check.message);
-  //     localStorage.setItem(key, JSON.stringify(warnings));
-  //     global.setWarningLowRawMaterial((prev) => [...prev, check.message]);
-  //   } catch (err) {
-  //     console.error(
-  //       'Erro ao atualizar warningAmountMessage no localStorage',
-  //       err
-  //     );
-  //   }
-  // };
-
   const stockHistoryList = (
     item,
     account,
@@ -406,10 +376,6 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     };
     return stockEventRegistration;
   };
-
-  // import { collection, addDoc } from 'firebase/firestore';
-  // import { db } from './firebaseConfig';
-
   const distributeItemsToExpenseList = async (
     items,
     account,
