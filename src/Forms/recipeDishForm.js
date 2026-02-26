@@ -190,6 +190,12 @@ const RecipeDish = ({
 
   // No componente visual
   const handleAddIngredient = (size) => {
+    if (!ingridients.name || !ingridients.amount) {
+      alert(
+        'Todos os campos precisam ser preenchidos para que a receita funcione. Por favor, preencha o tipo da matéria-prima e a quantidade.',
+      );
+      return;
+    }
     addIngredient(ingridients, size); // Chama o do hook
     setIngridients({ name: '', amount: '', unitOfMeasurement: '' }); // Limpa UI
   };
@@ -257,11 +263,11 @@ const RecipeDish = ({
                         className={
                           itemData
                             ? alertMinimunAmount(
-                                itemData.product,
-                                itemData.totalVolume,
-                                itemData.minimumAmount,
-                                itemData.totalCost,
-                              ).message
+                              itemData.product,
+                              itemData.totalVolume,
+                              itemData.minimumAmount,
+                              itemData.totalCost,
+                            ).message
                               ? 'warning'
                               : ''
                             : ''
@@ -360,11 +366,11 @@ const RecipeDish = ({
                           className={
                             itemData
                               ? alertMinimunAmount(
-                                  itemData.product,
-                                  itemData.totalVolume,
-                                  itemData.minimumAmount,
-                                  itemData.totalCost,
-                                ).message
+                                itemData.product,
+                                itemData.totalVolume,
+                                itemData.minimumAmount,
+                                itemData.totalCost,
+                              ).message
                                 ? 'warning'
                                 : ''
                               : ''
