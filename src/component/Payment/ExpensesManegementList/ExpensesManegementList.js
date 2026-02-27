@@ -352,7 +352,7 @@ const ExpensesManegementList = () => {
     <div className={expenses.customerListContainer}>
       <div className={expenses.containerIcon}>
         <a
-          href="https://docs.google.com/document/d/1fivBz-W4plvnU4f6pbeQbjp1CwxTlWkWZFB31X3sJvQ/edit?tab=t.6zko1a8dqs8y"
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.lastl0sptfl5#heading=h.ft9y0s2jnma8"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -367,9 +367,8 @@ const ExpensesManegementList = () => {
       </div>
       {showWarningDeletePopup && (
         <DefaultComumMessage
-          msg={`Você está prestes a excluir ${
-            excludeExpense.name ? excludeExpense.name : excludeExpense.product
-          }. Tem certeza?`}
+          msg={`Você está prestes a excluir ${excludeExpense.name ? excludeExpense.name : excludeExpense.product
+            }. Tem certeza?`}
           item={excludeExpense}
           onConfirm={deleteExpenses}
           onClose={() => setShowWarningDeltePopup(false)}

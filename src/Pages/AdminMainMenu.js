@@ -72,14 +72,12 @@ const AdminMainMenu = ({ children }) => {
         )}
       </div>
       <div
-        className={`${admin.containerAdminMainMenu} ${
-          !hideSideMenu ? admin.changeProportion : ''
-        }`}
+        className={`${admin.containerAdminMainMenu} ${!hideSideMenu ? admin.changeProportion : ''
+          }`}
       >
         <nav
-          className={`${admin.sidebar} ${
-            !hideSideMenu ? admin.hideSideMenu : ''
-          }`}
+          className={`${admin.sidebar} ${!hideSideMenu ? admin.hideSideMenu : ''
+            }`}
         >
           <div className={admin.sideMenu}>
             <NavLink to="/">Sair do Administrador</NavLink>
@@ -144,6 +142,16 @@ const AdminMainMenu = ({ children }) => {
           </div>
         </nav>
         <section>
+          <div className={admin.containerIcon}>
+            <a
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Abrir documentação"
+            >
+              <span>?</span>
+            </a>
+          </div>
           <h1> Menu do administrador</h1>;
           <div className={admin.mainContent}>
             {' '}

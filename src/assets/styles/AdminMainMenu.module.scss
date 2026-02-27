@@ -8,74 +8,109 @@
     &.changeProportion {
         grid-template-columns: 0 1fr; // sidebar recolhida
     }
-  .sidebar {
-      background-color: white;
-      padding: 3%;
-      height: 99vh;
-      overflow-y: auto;
-      transform: translateX(0);
-      opacity: 1;
-      transition: transform 0.3s ease, opacity 0.3s ease;
 
-      &.hideSideMenu {
-          transform: translateX(-100%); // desliza para fora
-          opacity: 0;
-      }
+    .sidebar {
+        background-color: white;
+        padding: 3%;
+        height: 99vh;
+        overflow-y: auto;
+        transform: translateX(0);
+        opacity: 1;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+
+        &.hideSideMenu {
+            transform: translateX(-100%); // desliza para fora
+            opacity: 0;
+        }
+
         link {
-                color: black;
-                text-decoration: none;
-                transition: color 0.3s;
-        
-                &:hover {
-                    color: gray;
-                }
-            }
-        
-            .active {
-                color: white !important;
-                font-weight: bold;
-                background: #14213dce !important;
+            color: black;
+            text-decoration: none;
+            transition: color 0.3s;
+
+            &:hover {
+                color: gray;
             }
         }
-        section {
-            background-color: rgb(196, 194, 194);
-            position: relative;
+
+        .active {
+            color: white !important;
+            font-weight: bold;
+            background: #14213dce !important;
+        }
+    }
+
+    section {
+        background_color: rgb(196, 194, 194);
+        position: relative;
+        z-index: 10;
+        padding: 5%;
+        color: #FCA311;
+        background: #14213D;
+        grid-column: 2; // força o Outlet sempre na segunda coluna
+
+        .containerIcon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             z-index: 10;
-            padding: 5%;
+
+            a {
+                display: flex;
+                align-items: center;
+                text-decoration: none;
+
+                span {
+                    font-size: 2rem;
+                    color: #ff9800;
+                    font-weight: bold;
+                    cursor: pointer;
+                    padding: 0;
+                    border-radius: 50%;
+                    background: #fff;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    width: 50px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+        }
+    }
+
+    .sideMenu {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        a {
+            padding: 12px 10px;
             color: #FCA311;
             background: #14213D;
-            grid-column: 2; // força o Outlet sempre na segunda coluna
-    
+        }
+
+        button {
+            padding: 12px 10px;
+            color: #FCA311;
+            background: #14213D;
+
+            a {
+                color: #FCA311;
+                background: none;
+            }
+        }
     }
-    .sideMenu{
-       margin-top:40px;
-       display: flex;
-       flex-direction: column;
-       gap: 5px;
-       a{
-          padding: 12px 10px;
-          color: #FCA311;
-          background:#14213D;   
-       }
-       button {
-          padding: 12px 10px;
-          color: #FCA311;
-          background: #14213D;       
-          
-           a{
-              color: #FCA311;
-              background:none;
-          }
-       }
-    }
+
     .mainContent {
-       background:rgb(218, 212, 212);
-       color:#14213D;
-       padding: 2%;
-       height: 80vh;
+        background: rgb(218, 212, 212);
+        color: #14213D;
+        padding: 2%;
+        height: 80vh;
         overflow-y: auto;
-       
-            
+
+
     }
 }
 
@@ -86,7 +121,3 @@
     left: 20%;
     z-index: 30;
 }
-
-
-
-

@@ -255,6 +255,21 @@ const ManagementRecipes = () => {
 
   return (
     <div className={style.containerManagementRecipes}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.0#heading=h.wzi88j6454il"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+          }}
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <div className={style.updateMenuMessageWrapper}>
         {loadingAvailableMenuDishes && <UpdateMenuMessage />}
       </div>
