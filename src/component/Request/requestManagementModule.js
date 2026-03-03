@@ -188,7 +188,12 @@ const RequestManagementModule = () => {
       vr: 0.07, // 7% para VR
     };
 
-    const feeRate = fees[paymentMethod] || 0; // Padrão 0 caso o método não seja encontrado
+    const feeRate =
+      paymentMethod === 'vr' ||
+        paymentMethod === 'VR_DEBIT' ||
+        paymentMethod === 'VR_CREDIT'
+        ? fees.vr
+        : fees[paymentMethod] || 0;
     let result = totalSum * feeRate;
     return result;
   };
@@ -290,10 +295,10 @@ const RequestManagementModule = () => {
 
       return currentCostData
         ? {
-            ...currentCostData,
-            cost: Number(currentCostData.cost), // Converte `cost` para número
-            price: Number(currentCostData.price), // Converte `price` para número
-          }
+          ...currentCostData,
+          cost: Number(currentCostData.cost), // Converte `cost` para número
+          price: Number(currentCostData.price), // Converte `price` para número
+        }
         : undefined;
     }
     return undefined;
@@ -395,8 +400,8 @@ const RequestManagementModule = () => {
           </thead>
           <tbody>
             {requestList &&
-            requestList.length > 0 &&
-            requestList[0].repetitions ? (
+              requestList.length > 0 &&
+              requestList[0].repetitions ? (
               requestList.map((item, index) => (
                 <tr key={index} onClick={() => sendAccountManagementData(item)}>
                   <td>{item.name}</td>

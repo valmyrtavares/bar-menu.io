@@ -11,6 +11,8 @@ const paymentOptions = [
   { label: 'Crédito', value: 'CREDIT' },
   { label: 'Pix', value: 'PIX' },
   { label: 'Dinheiro', value: 'CASH' },
+  { label: 'VR - Débito ', value: 'VR_DEBIT' },
+  { label: 'VR - Crédito ', value: 'VR_CREDIT' },
 ];
 
 const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
@@ -136,13 +138,20 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
           message: {
             command: 'PAYMENT',
             value: price,
             paymentMethod: selected === 'PIX' ? 'PIX' : 'CARD',
-            paymentType: selected === 'PIX' ? 'DEBIT' : selected,
+            paymentType:
+              selected === 'PIX'
+                ? 'DEBIT'
+                : selected === 'VR_DEBIT'
+                  ? 'DEBIT'
+                  : selected === 'VR_CREDIT'
+                    ? 'CREDIT'
+                    : selected,
             paymentMethodSubType: 'FULL_PAYMENT',
           },
         },
@@ -174,7 +183,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
         }),
       });

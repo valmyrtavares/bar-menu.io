@@ -14,7 +14,7 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
       setSelectedPaymentMethod('debit');
     } else if (paymentMethod === 'PIX') {
       setSelectedPaymentMethod('pix');
-    } else if (paymentMethod === 'VR') {
+    } else if (paymentMethod && paymentMethod.startsWith('VR')) {
       setSelectedPaymentMethod('vr');
     }
   }, [item]);

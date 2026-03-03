@@ -3,15 +3,19 @@
 .container-modal-request {
     min-height: 75vh;
 }
-.container-modal-request .warning-messages-container{
+
+.container-modal-request .warning-messages-container {
     position: relative;
-    left:20%
+    left: 20%
 }
 
 .container-modal-request .container-autoPayment {
-position: fixed;
-    top: 30vh;
-    left: 37%;
+    position: fixed;
+    top: 20vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+    /* Ensure it's above other elements */
 }
 
 .current-client {
@@ -36,12 +40,14 @@ position: fixed;
     align-items: center;
     border-radius: 10px;
 }
+
 .individual-dishes .cancel {
     cursor: pointer;
 }
-.individual-dishes button{
-    background:none;
-    border:none;
+
+.individual-dishes button {
+    background: none;
+    border: none;
     font-size: 35px;
 }
 
@@ -55,9 +61,10 @@ h3 {
 
 @media (min-width: 1000px) {
     h3 {
-      font-size: 34px; /* Altera o font-size para 26px */
+        font-size: 34px;
+        /* Altera o font-size para 26px */
     }
-  }
+}
 
 .individual-dishes h2 {
     font-size: 16px;
@@ -81,7 +88,7 @@ h3 {
 .individual-dishes p {
     background-color: transparent;
     color: var(--font-color);
-    font-family: var(--text-font);  
+    font-family: var(--text-font);
     margin-bottom: 0;
 }
 
@@ -91,11 +98,13 @@ h3 {
     margin-top: 200px;
     font-size: 25px;
 }
-.btnFinalRequest{
+
+.btnFinalRequest {
     display: flex;
     justify-content: center;
 }
-.btnFinalRequest .keep-shopping, 
+
+.btnFinalRequest .keep-shopping,
 .btnFinalRequest .send-request {
     width: 80%;
     text-align: center;
@@ -111,24 +120,29 @@ h3 {
 }
 
 @media (min-width: 1000px) {
-    .individual-dishes h2{
-        font-size: 27px;        
+    .individual-dishes h2 {
+        font-size: 27px;
     }
+
     .status-request-pend {
         font-size: 27px;
     }
-    .dishes-price {  
-        font-size: 27px;        
-    }
-    .cancel {  
+
+    .dishes-price {
         font-size: 27px;
-        
     }
-    .individual-dishes {  
-        border: solid 5px var(--secundary-bg-color);   
+
+    .cancel {
+        font-size: 27px;
+
+    }
+
+    .individual-dishes {
+        border: solid 5px var(--secundary-bg-color);
     }
 }
-.pdv-change{
+
+.pdv-change {
     background-color: white !important;
     min-width: 147%;
 }
