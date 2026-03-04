@@ -41,6 +41,8 @@ const mockGlobalContext = {
     setPdvRequest: jest.fn(),
     authorizated: true,
     setAuthorizated: jest.fn(),
+    orderBeingEdited: null,
+    setOrderBeingEdited: jest.fn(),
 };
 
 const renderWithContext = (contextValue) => {
@@ -112,5 +114,35 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
 
         // Como userData vem de um useEffect com fetchUser, vamos apenas verificar se o componente renderiza o fallback de nome
         // se o userData for nulo ou mockar o retorno do firestore.
+    });
+
+    it('deve exibir a faixa de edição e chamar as funções de cancelamento ao clicar em Cancelar Edição', async () => {
+        const orderBeingEdited = { id: 'req789', countRequest: 42, dateTime: '12/12/2026' };
+        const contextEditInfo = { ...mockGlobalContext, orderBeingEdited };
+
+        // Mock do window.confirm
+        const confirmSpy = jest.spyOn(window, 'confirm');
+        confirmSpy.mockImplementation(() => true);
+
+        renderWithContext(contextEditInfo);
+
+        // Verifica se a faixa de edição apareceu
+        expect(screen.getByText(/Você está editando o pedido #42/i)).toBeInTheDocument();
+
+        // Encontra o botão Cancelar Edição e clica
+        const cancelButton = screen.getByRole('button', { name: /Cancelar Edição/i });
+        fireEvent.click(cancelButton);
+
+        // Verifica se window.confirm foi chamado
+        expect(confirmSpy).toHaveBeenCalledWith("Tem certeza que deseja cancelar a edição? As adições ou remoções feitas no pedido não serão salvas.");
+
+        // O onClick invoca cancelEditOrder que deve chamar setOrderBeingEdited e navegar
+        await waitFor(() => {
+            expect(contextEditInfo.setOrderBeingEdited).toHaveBeenCalledWith(null);
+            expect(contextEditInfo.setPdvRequest).toHaveBeenCalledWith(false);
+            expect(mockNavigate).toHaveBeenCalledWith('/admin/requestlist');
+        });
+
+        confirmSpy.mockRestore();
     });
 });

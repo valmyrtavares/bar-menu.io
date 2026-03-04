@@ -11,6 +11,7 @@ export const GlobalStorage = ({ children }) => {
   const [authorizated, setAuthorizated] = React.useState(false);
   const [userNewRequest, setUserNewRequest] = React.useState({});
   const [pdvRequest, setPdvRequest] = React.useState(false);
+  const [orderBeingEdited, setOrderBeingEdited] = React.useState(null);
   const [warningLowRawMaterial, setWarningLowRawMaterial] = React.useState([]);
   const [enableAutoNfce, setEnableAutoNfce] = React.useState(false);
   const [styles, setStyles] = React.useState({
@@ -65,6 +66,8 @@ export const GlobalStorage = ({ children }) => {
         setUserNewRequest,
         setPdvRequest,
         pdvRequest,
+        orderBeingEdited,
+        setOrderBeingEdited,
         processedOrdersGlobal,
         enableAutoNfce,
         setEnableAutoNfce,

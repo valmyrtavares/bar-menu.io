@@ -359,14 +359,21 @@ const RequestModal = () => {
         request: data.request, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
         idPayer: idPayerRef.current,
-        dateTime: takeDataTime(),
-        countRequest: await countingRequest(),
+        dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
+        countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
       };
 
       setIsSubmitting(true);
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
-        addDoc(collection(db, 'requests'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        if (global.orderBeingEdited) {
+          const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
+          await updateDoc(requestDocRef, cleanedUserNewRequest);
+          global.setOrderBeingEdited(null);
+        } else {
+          addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+        }
+
         const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
         await updateDoc(userDocRef, {
           request: [],
@@ -434,14 +441,20 @@ const RequestModal = () => {
         request: previousRequests, // Atribuir os pedidos recuperados
         finalPriceRequest: finalPriceRequest,
         idPayer: idPayerRef.current,
-        dateTime: takeDataTime(),
-        countRequest: await countingRequest(),
+        dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
+        countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
       };
       //global.setUserNewRequest(userNewRequest);
       localStorage.removeItem('backorder');
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
-        addDoc(collection(db, 'requests'), cleanedUserNewRequest); //Com o nome da coleção e o id ele traz o objeto dentro userDocRef usa o userDocRef para referenciar mudando somente o request, ou seja um item do objeto
+        if (global.orderBeingEdited) {
+          const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
+          await updateDoc(requestDocRef, cleanedUserNewRequest);
+          global.setOrderBeingEdited(null);
+        } else {
+          addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+        }
         const userDocRef = doc(db, 'user', id);
         await updateDoc(userDocRef, {
           request: [],
@@ -535,9 +548,31 @@ const RequestModal = () => {
     }
   };
   const logout = () => {
+    if (global.orderBeingEdited) {
+      alert("Você não pode trocar de cliente enquanto edita um pedido. Cancele ou finalize a edição primeiro.");
+      return;
+    }
     localStorage.removeItem('userMenu');
     global.setAuthorizated(false);
     navigate('/create-customer');
+  };
+
+  const cancelEditOrder = async () => {
+    try {
+      const isConfirmed = window.confirm("Tem certeza que deseja cancelar a edição? As adições ou remoções feitas no pedido não serão salvas.");
+      if (!isConfirmed) return;
+
+      if (userData && userData.id) {
+        const userDocRef = doc(db, 'user', userData.id);
+        await updateDoc(userDocRef, { request: [] });
+      }
+
+      global.setOrderBeingEdited(null);
+      global.setPdvRequest(false);
+      navigate('/admin/requestlist');
+    } catch (err) {
+      console.error("Erro ao cancelar edição:", err);
+    }
   };
 
   const onClose = () => {
@@ -554,6 +589,17 @@ const RequestModal = () => {
     <section
       className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
     >
+      {global.orderBeingEdited && (
+        <div style={{ backgroundColor: '#ff9800', padding: '10px', textAlign: 'center', fontWeight: 'bold', color: 'white', borderRadius: '5px', marginBottom: '10px' }}>
+          Você está editando o pedido #{global.orderBeingEdited.countRequest}
+          <button
+            style={{ marginLeft: '15px', backgroundColor: '#d32f2f', color: 'white', padding: '5px 10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            onClick={cancelEditOrder}
+          >
+            Cancelar Edição
+          </button>
+        </div>
+      )}
       {openCloseTotenPupup && (
         <TotenRegisterPopup
           setOpenCloseTotenPopup={setOpenCloseTotenPopup}

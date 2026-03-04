@@ -1,0 +1,124 @@
+
+> bar-menu@0.1.0 test
+> react-scripts test src/component/Request/RequestListToBePrepared.test.js
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+  console.warn
+    ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 56 |[39m
+     [90m 57 |[39m [36mconst[39m renderWithContext [33m=[39m (contextValue[33m,[39m props [33m=[39m {}) [33m=>[39m {
+    [31m[1m>[22m[39m[90m 58 |[39m     [36mreturn[39m render(
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 59 |[39m         [33m<[39m[33mGlobalContext[39m[33m.[39m[33mProvider[39m value[33m=[39m{contextValue}[33m>[39m
+     [90m 60 |[39m             [33m<[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 61 |[39m                 [33m<[39m[33mRequestListToBePrepared[39m title[33m=[39m[32m"Pedidos da Cozinha"[39m {[33m...[39mprops} [33m/[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1740:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:63:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+      at renderWithContext (src/component/Request/RequestListToBePrepared.test.js:58:18)
+      at Object.<anonymous> (src/component/Request/RequestListToBePrepared.test.js:83:9)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  console.warn
+    ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 56 |[39m
+     [90m 57 |[39m [36mconst[39m renderWithContext [33m=[39m (contextValue[33m,[39m props [33m=[39m {}) [33m=>[39m {
+    [31m[1m>[22m[39m[90m 58 |[39m     [36mreturn[39m render(
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 59 |[39m         [33m<[39m[33mGlobalContext[39m[33m.[39m[33mProvider[39m value[33m=[39m{contextValue}[33m>[39m
+     [90m 60 |[39m             [33m<[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 61 |[39m                 [33m<[39m[33mRequestListToBePrepared[39m title[33m=[39m[32m"Pedidos da Cozinha"[39m {[33m...[39mprops} [33m/[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1740:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:63:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+      at renderWithContext (src/component/Request/RequestListToBePrepared.test.js:58:18)
+      at Object.<anonymous> (src/component/Request/RequestListToBePrepared.test.js:83:9)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+FAIL src/component/Request/RequestListToBePrepared.test.js (5.179 s)
+  RequestListToBePrepared - Funcionalidade de Edição
+    √ deve renderizar o componente basico (206 ms)
+    × deve exibir o botao de Editar Pedido se estiver no PDV e o pedido nao tiver sido pago (1 ms)
+    × Nao deve exibir Editar Pedido se o pedido ja foi pago mesmo estando no pdv
+
+  ● RequestListToBePrepared - Funcionalidade de Edição › deve exibir o botao de Editar Pedido se estiver no PDV e o pedido nao tiver sido pago
+
+    TypeError: fetchInDataChanges.mockImplementation is not a function
+
+    [0m [90m 90 |[39m         [90m// mock the API call in useEffect[39m
+     [90m 91 |[39m         [36mconst[39m { fetchInDataChanges } [33m=[39m require([32m'../../api/Api'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 92 |[39m         fetchInDataChanges[33m.[39mmockImplementation((collection[33m,[39m callback) [33m=>[39m {
+     [90m    |[39m                            [31m[1m^[22m[39m
+     [90m 93 |[39m             callback([
+     [90m 94 |[39m                 { id[33m:[39m [32m'123'[39m[33m,[39m name[33m:[39m [32m'Zezinho'[39m[33m,[39m paymentDone[33m:[39m [36mfalse[39m[33m,[39m orderDelivered[33m:[39m [36mfalse[39m[33m,[39m countRequest[33m:[39m [35m1[39m[33m,[39m dateTime[33m:[39m [32m'12:00'[39m[33m,[39m finalPriceRequest[33m:[39m [35m50[39m[33m,[39m request[33m:[39m [] }
+     [90m 95 |[39m             ])[33m;[39m[0m
+
+      at Object.<anonymous> (src/component/Request/RequestListToBePrepared.test.js:92:28)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● RequestListToBePrepared - Funcionalidade de Edição › Nao deve exibir Editar Pedido se o pedido ja foi pago mesmo estando no pdv
+
+    TypeError: fetchInDataChanges.mockImplementation is not a function
+
+    [0m [90m 124 |[39m     it([32m'Nao deve exibir Editar Pedido se o pedido ja foi pago mesmo estando no pdv'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 125 |[39m         [36mconst[39m { fetchInDataChanges } [33m=[39m require([32m'../../api/Api'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 126 |[39m         fetchInDataChanges[33m.[39mmockImplementation((collection[33m,[39m callback) [33m=>[39m {
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 127 |[39m             callback([
+     [90m 128 |[39m                 { id[33m:[39m [32m'123'[39m[33m,[39m name[33m:[39m [32m'Zezinho'[39m[33m,[39m paymentDone[33m:[39m [36mtrue[39m[33m,[39m orderDelivered[33m:[39m [36mfalse[39m[33m,[39m countRequest[33m:[39m [35m1[39m[33m,[39m dateTime[33m:[39m [32m'12:00'[39m[33m,[39m finalPriceRequest[33m:[39m [35m50[39m[33m,[39m request[33m:[39m [] }
+     [90m 129 |[39m             ])[33m;[39m[0m
+
+      at Object.<anonymous> (src/component/Request/RequestListToBePrepared.test.js:126:28)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 1 passed, 3 total
+Snapshots:   0 total
+Time:        6.85 s
+Ran all test suites matching /src\\component\\Request\\RequestListToBePrepared.test.js/i.

@@ -1009,6 +1009,51 @@ const RequestListToBePrepared = ({ title }) => {
     global.setUserNewRequest(item);
     navigate('/print');
   };
+
+  const handleEditOrder = async (item) => {
+    if (global.orderBeingEdited) {
+      alert('Já existe um pedido sendo editado. Finalize ou cancele a edição anterior para editar outro pedido.');
+      return;
+    }
+
+    try {
+      global.setOrderBeingEdited({
+        id: item.id,
+        countRequest: item.countRequest,
+        dateTime: item.dateTime,
+        discount: item.discount || 0
+      });
+
+      localStorage.setItem(
+        'userMenu',
+        JSON.stringify({ id: item.idUser, name: item.name })
+      );
+
+      const userDocRef = doc(db, 'user', item.idUser);
+      const userDocSnap = await getDoc(userDocRef);
+      let currentRequests = [];
+      if (userDocSnap.exists() && userDocSnap.data().request) {
+        currentRequests = userDocSnap.data().request;
+      }
+
+      if (item.request && item.request.length > 0) {
+        currentRequests.push(...item.request);
+      }
+
+      const cleanArray = currentRequests.map(r => cleanObject(r));
+
+      await updateDoc(userDocRef, {
+        request: cleanArray,
+      });
+
+      global.setPdvRequest(true);
+    } catch (error) {
+      console.error('Error starting order edit:', error);
+      alert('Houve um erro ao tentar editar o pedido. Tente novamente.');
+      global.setOrderBeingEdited(null);
+    }
+  };
+
   const toggleRequest = (id) => {
     setOpenRequests((prev) => ({
       ...prev,
@@ -1112,6 +1157,7 @@ const RequestListToBePrepared = ({ title }) => {
                     <button
                       onClick={() => openShowModal(item.id)}
                       className={style.pendent}
+                      disabled={global.orderBeingEdited?.id === item.id}
                     >
                       Cancelar pedido
                     </button>
@@ -1136,22 +1182,32 @@ const RequestListToBePrepared = ({ title }) => {
                         />
                       )}
                     </div>
+                    {localStorage.getItem('pdv') === 'true' && !item.paymentDone && (
+                      <button
+                        className={style.pendent}
+                        style={{ backgroundColor: 'orange', color: 'white' }}
+                        onClick={() => handleEditOrder(item)}
+                        disabled={global.orderBeingEdited?.id === item.id}
+                      >
+                        {global.orderBeingEdited?.id === item.id ? 'Editando...' : 'Editar Pedido'}
+                      </button>
+                    )}
                     <button
-                      disabled={!item.paymentMethod}
+                      disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}
                       className={item.paymentDone ? style.done : style.pendent}
                       onClick={() => changeStatusPaid(item)}
                     >
                       Pago
                     </button>
                     <button
-                      disabled={!item.paymentDone}
+                      disabled={!item.paymentDone || global.orderBeingEdited?.id === item.id}
                       className={item.done ? style.pendent : style.done}
                       onClick={() => RequestDone(item)}
                     >
                       Pronto
                     </button>
                     <button
-                      disabled={item.done}
+                      disabled={item.done || global.orderBeingEdited?.id === item.id}
                       className={
                         item.orderDelivered ? style.done : style.pendent
                       }
@@ -1160,7 +1216,7 @@ const RequestListToBePrepared = ({ title }) => {
                       Entregue
                     </button>
                     <button
-                      disabled={!item.paymentMethod}
+                      disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}
                       className={style.btnFiscalAttributes}
                       onClick={() => openPrintScreen(item)}
                     >
