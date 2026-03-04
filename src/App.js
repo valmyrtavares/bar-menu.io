@@ -99,6 +99,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={React.createElement(MainMenu)} />
+        <Route path="/:tableNumber" element={React.createElement(MainMenu)} />
         <Route path="/new-layout" element={<MainPictureMenu />} />
         <Route path="/create-customer" element={<CreateCustomer />} />
         <Route path="/request" element={<RequestModal />} />

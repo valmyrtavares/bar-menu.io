@@ -4,7 +4,7 @@ import NestedBtn from '../component/nestedBtn';
 import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
 import MenuButton from '../component/menuHamburguerButton';
 import RequestModal from '../component/Request/requestModal.js';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import style from '../assets/styles/mainMenu.module.scss';
 import { common } from '@mui/material/colors';
 import { GlobalContext } from '../GlobalContext';
@@ -29,8 +29,15 @@ function MainMenu() {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
 
   const navigate = useNavigate();
+  const { tableNumber } = useParams();
 
   useEnsureAnonymousUser();
+
+  React.useEffect(() => {
+    if (tableNumber) {
+      localStorage.setItem('tableNumber', tableNumber);
+    }
+  }, [tableNumber]);
 
   React.useEffect(() => {
     checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten

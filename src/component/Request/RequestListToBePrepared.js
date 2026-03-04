@@ -1095,6 +1095,11 @@ const RequestListToBePrepared = ({ title }) => {
                   <p>
                     <span>Nome</span> {firstNameClient(item.name)}
                   </p>
+                  {item.tableNumber && (
+                    <p>
+                      <span>Mesa</span> {item.tableNumber}
+                    </p>
+                  )}
                   <p>
                     <span>Ordenação</span>: {item.countRequest}
                   </p>
@@ -1115,6 +1120,11 @@ const RequestListToBePrepared = ({ title }) => {
                     <p>
                       <span>Nome</span> {firstNameClient(item.name)}
                     </p>
+                    {item.tableNumber && (
+                      <p>
+                        <span>Mesa</span> {item.tableNumber}
+                      </p>
+                    )}
                     <p>
                       <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
                     </p>

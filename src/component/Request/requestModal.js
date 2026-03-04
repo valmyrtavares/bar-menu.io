@@ -361,6 +361,7 @@ const RequestModal = () => {
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
         countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
+        tableNumber: localStorage.getItem('tableNumber') || null,
       };
 
       setIsSubmitting(true);
@@ -443,6 +444,7 @@ const RequestModal = () => {
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
         countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
+        tableNumber: localStorage.getItem('tableNumber') || null,
       };
       //global.setUserNewRequest(userNewRequest);
       localStorage.removeItem('backorder');
@@ -656,6 +658,11 @@ const RequestModal = () => {
         {userData?.name === 'anonimo' || userData?.name === 'anonymous'
           ? userData?.fantasyName
           : userData?.name}
+        {localStorage.getItem('tableNumber') && (
+          <span style={{ marginLeft: '15px', color: '#ff9800' }}>
+            Mesa: {localStorage.getItem('tableNumber')}
+          </span>
+        )}
       </p>
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
