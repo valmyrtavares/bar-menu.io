@@ -36,6 +36,8 @@ function MainMenu() {
   React.useEffect(() => {
     if (tableNumber) {
       localStorage.setItem('tableNumber', tableNumber);
+    } else {
+      localStorage.removeItem('tableNumber');
     }
   }, [tableNumber]);
 
