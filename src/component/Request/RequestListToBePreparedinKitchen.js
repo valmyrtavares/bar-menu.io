@@ -62,7 +62,10 @@ const RequestListToBePrepared = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
-      let requestList = data.filter((item) => item.orderDelivered === false);
+      // Filter: orders not delivered AND (has table OR is paid)
+      let requestList = data.filter((item) =>
+        item.orderDelivered === false && (item.tableNumber || item.mesa || item.paymentDone)
+      );
       requestList = requestSorter(requestList);
 
       setRequestDoneList(requestList);
@@ -234,6 +237,27 @@ const RequestListToBePrepared = () => {
     if (item?.paymentDone === true && item?.done === false)
       return { status: 'Feito', color: 'green' };
     return { status: '', color: 'black' };
+  };
+
+  const handleToggleItemStatus = async (parentRequestId, itemIndex, field) => {
+    try {
+      const requestRef = doc(db, 'requests', parentRequestId);
+      const requestSnap = await getDoc(requestRef);
+      if (requestSnap.exists()) {
+        const data = requestSnap.data();
+        const updatedRequestItems = data.request.map((item, index) => {
+          if (index === itemIndex) {
+            return { ...item, [field]: !item[field] };
+          }
+          return item;
+        });
+
+        await updateDoc(requestRef, { request: updatedRequestItems });
+        console.log(`Item status ${field} updated for item index ${itemIndex}`);
+      }
+    } catch (error) {
+      console.error(`Error updating item status ${field}:`, error);
+    }
   };
 
   useEffect(() => {
@@ -562,10 +586,8 @@ const RequestListToBePrepared = () => {
 
           setSelectedPromotion('');
           setTextPromotion(
-            `O cliente ${
-              benefitedClientFinded.name
-            } já usou a promoção ${title} na data ${
-              item.dateTime
+            `O cliente ${benefitedClientFinded.name
+            } já usou a promoção ${title} na data ${item.dateTime
             } na compra dos itens ${purchasedProducts
               .map((item) => item)
               .join(', ')}`
@@ -725,14 +747,10 @@ const RequestListToBePrepared = () => {
       });
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          benefitedClientObj.score
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - benefitedClientObj.score
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${benefitedClientObj.score
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - benefitedClientObj.score
         }. As regras são:${currentPromotion.rules} `
       );
       setAddPromotion(false);
@@ -774,14 +792,10 @@ const RequestListToBePrepared = () => {
 
       setBenefitedClientEdited(benefitedClientObj);
       setTextPromotion(
-        `O cliente ${
-          item.name
-        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${
-          item.finalPriceRequest
-        } e o valor mínimo necessário é de ${
-          currentPromotion.minimumValue
-        } reais. Ele ainda deve consumir o valor de ${
-          currentPromotion.minimumValue - finalPriceRequest
+        `O cliente ${item.name
+        } ainda não alcançou o valor mínimo para resgatar esse desconto. O valor atual acumulado pelo cliente referente a essa  promoção é de  ${item.finalPriceRequest
+        } e o valor mínimo necessário é de ${currentPromotion.minimumValue
+        } reais. Ele ainda deve consumir o valor de ${currentPromotion.minimumValue - finalPriceRequest
         }. As regras são:${currentPromotion.rules} `
       );
       setAddPromotion(false);
@@ -861,203 +875,97 @@ const RequestListToBePrepared = () => {
         <Title mainTitle="COZINHA" />
       </Link>
       <WarningAmoutMessage />
-      {requestsDoneList &&
-        requestsDoneList.map((item, itemIndex) => {
-          const { status, color } = getStatusAndColor(item); // 👈 aqui
-          return (
-            item.paymentDone && (
+      <div className={style.kitchenItemsList}>
+        {requestsDoneList &&
+          (() => {
+            const allItems = [];
+            requestsDoneList.forEach((request) => {
+              if (request.request && Array.isArray(request.request)) {
+                request.request.forEach((item, indexInRequest) => {
+                  allItems.push({
+                    ...item,
+                    parentRequestId: request.id,
+                    indexInRequest: indexInRequest,
+                    clientName: request.name,
+                    tableNumber: request.tableNumber || request.mesa,
+                    orderDate: request.dateTime,
+                  });
+                });
+              }
+            });
+
+            // Sorting helper: parses 'DD/MM/YYYY - HH:MM' or 'DD/MM/YYYY HH:MM'
+            const parseDate = (str) => {
+              if (!str) return 0;
+              // Remove optional ' - ' and split
+              const normalized = str.replace(' - ', ' ');
+              const [datePart, timePart] = normalized.split(' ');
+              if (!datePart || !timePart) return 0;
+              const [day, month, year] = datePart.split('/');
+              const [hour, minute] = timePart.split(':');
+              return new Date(year, month - 1, day, hour, minute).getTime();
+            };
+
+            // Order: oldest first
+            const sortedItems = allItems.sort((a, b) => parseDate(a.orderDate) - parseDate(b.orderDate));
+
+            return sortedItems.map((item, index) => (
               <div
-                className={style.containerRequestListToBePrepared}
-                key={item.id}
-                style={{ border: `solid 2px ${color}` }}
+                className={style.kitchenItemRow}
+                key={`${item.parentRequestId}-${item.id}-${index}`}
               >
-                <button
-                  onClick={() => toggleRequest(item.id)}
-                  className={style.btnToggle}
-                >
-                  {openRequests[item.id] ? 'Expandir' : 'Recolher'}
-                </button>
-                {openRequests[item.id] ? (
-                  <div
-                    className={
-                      openRequests[item.id]
-                        ? style.requestIdClosed
-                        : style.requestId
-                    }
+                <div className={style.itemInfo}>
+                  <h4>{item.name}</h4>
+                  <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
+                  {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
+                  <p><span>Data:</span> {item.orderDate}</p>
+                </div>
+
+                <div className={style.itemAccompaniment}>
+                  <h5>Acompanhamentos:</h5>
+                  {item.sideDishes && item.sideDishes.length > 0 ? (
+                    <div className={style.sideDishes}>
+                      {item.sideDishes.map((side, sIndex) => (
+                        <span key={sIndex}>{side.name}{sIndex < item.sideDishes.length - 1 ? ', ' : ''}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>Sem acompanhamentos</p>
+                  )}
+                  {item.size && <p>Tamanho: <strong>{item.size}</strong></p>}
+                </div>
+
+                <div className={style.itemActions}>
+                  <button
+                    className={item.pronto ? style.done : style.pendent}
+                    onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'pronto')}
                   >
-                    <p>
-                      <span>Nome</span> {firstNameClient(item.name)}
-                    </p>
-                    <p>
-                      <span>Numero do pedido</span>: {item.countRequest}
-                    </p>
-                    <p>
-                      <span>Data</span> {item.dateTime}
-                    </p>
+                    Pronto
+                  </button>
+                  <button
+                    className={item.entregue ? style.done : style.pendent}
+                    onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'entregue')}
+                  >
+                    Entregue
+                  </button>
+                  <button
+                    onClick={() => setRecipeModal({ openModal: true, id: item.id })}
+                    className="btn btn-warning"
+                  >
+                    Receita
+                  </button>
+                </div>
 
-                    <p>
-                      <span>Status</span> {status}
-                    </p>
-                    <p>
-                      <span>Valor</span>R$ {item.finalPriceRequest},00
-                    </p>
-                  </div>
-                ) : (
-                  <div className={style.userContainer}>
-                    <div>
-                      <p>
-                        <span>Nome</span> {firstNameClient(item.name)}
-                      </p>
-
-                      <p>
-                        <span>Ordenação</span>: {item.countRequest}
-                      </p>
-                      <p>
-                        <span>Data</span> {item.dateTime}
-                      </p>
-                      <h2>Valor final R$ {item.finalPriceRequest},00</h2>
-                      <div className={style.customerProfileButton}>
-                        <ButtonCustomerProfile
-                          item={item}
-                          request={item.request}
-                          descontFinalPrice={descontFinalPrice}
-                        />
-                      </div>
-                      {/* <PaymentMethod
-                        item={item}
-                        onPaymentMethodChange={handlePaymentMethodChange}
-                      /> */}
-                      {/* <div className={style.promotionSelect}>
-                        <select
-                          name="selectedPromotion"
-                          value={selectedPromotion}
-                          onChange={(e) => handleSelectChange(e, item)}
-                        >
-                          <option value="">Selecione uma promoção </option>
-                          {promotions &&
-                            promotions.length > 0 &&
-                            promotions.map((promotion, index) => (
-                              <option key={index} value={index}>
-                                {promotion.title}
-                              </option>
-                            ))}
-                        </select>
-                      </div> */}
-                    </div>
-                    <div className={style.btnStatus}>
-                      {/* <button
-                        onClick={() => openShowModal(item.id)}
-                        className={style.pendent}
-                      >
-                        Cancelar pedido
-                      </button> */}
-                      <div>
-                        {ShowDefaultMessage && (
-                          <DefaultComumMessage
-                            msg="Você está prestes a excluir esse pedido"
-                            onClose={closeModal}
-                            onConfirm={() =>
-                              handleDeleteRequest(selectedRequestId)
-                            }
-                          />
-                        )}
-                      </div>
-                      <div>
-                        {messagePromotionPopup && (
-                          <MessagePromotions
-                            message={textPromotion}
-                            AddPromotion={AddPromotion}
-                            setClose={setMessagePromotionPopup}
-                            onContinue={addEditBenefitedClient}
-                          />
-                        )}
-                      </div>
-                      {/* <button
-                        disabled={!item.paymentMethod}
-                        className={
-                          item.paymentDone ? style.done : style.pendent
-                        }
-                        onClick={() => changeStatusPaid(item)}
-                      >
-                        Pago
-                      </button> */}
-                      <button
-                        disabled={!item.paymentDone}
-                        className={item.done ? style.pendent : style.done}
-                        onClick={() => RequestDone(item)}
-                      >
-                        Pronto
-                      </button>
-                      <button
-                        disabled={item.done}
-                        className={
-                          item.orderDelivered ? style.done : style.pendent
-                        }
-                        onClick={() => orderDelivery(item)}
-                      >
-                        Entregue
-                      </button>
-                      {/* <button
-                        disabled={!item.paymentMethod}
-                        className={style.btnFiscalAttributes}
-                        onClick={() => openPrintScreen(item)}
-                      >
-                        Nota Fiscal
-                      </button> */}
-                    </div>
-                  </div>
+                {recipeModal.openModal && recipeModal.id === item.id && (
+                  <RecipeModal
+                    setRecipeModal={setRecipeModal}
+                    recipeModal={recipeModal}
+                  />
                 )}
-                {item.request &&
-                  !openRequests[item.id] &&
-                  item.request.map((item, recipeIndex) => (
-                    <div className={style.requestItem} key={recipeIndex}>
-                      {recipeModal.openModal && (
-                        <RecipeModal
-                          setRecipeModal={setRecipeModal}
-                          recipeModal={recipeModal}
-                        />
-                      )}
-                      <div>
-                        <h5>{item.name}</h5>
-                        {/* <p>{getFirstFourLetters(item.id, 4)}</p> */}
-                        {item.category && (
-                          <p className={style.category}>
-                            Categoria {item.category}
-                          </p>
-                        )}
-                        {item.size && (
-                          <p>
-                            Tamanho:<strong>{item.size}</strong>
-                          </p>
-                        )}
-                        <h5>Acompanhamento</h5>
-                        <div className={style.sideDishesList}>
-                          {item.sideDishes && item.sideDishes.length > 0 ? (
-                            item.sideDishes.map((item, index) => (
-                              <p key={index}>{item.name},</p>
-                            ))
-                          ) : (
-                            <p>Não tem acompanhamento</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className={style.imageButton}>
-                        <img src={item.image} alt="123" />
-                        <button
-                          onClick={() =>
-                            setRecipeModal({ openModal: true, id: item.id })
-                          }
-                          className="btn btn-warning"
-                        >
-                          Receita
-                        </button>
-                      </div>
-                    </div>
-                  ))}
               </div>
-            )
-          );
-        })}
+            ));
+          })()}
+      </div>
     </div>
   );
 };

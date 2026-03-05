@@ -100,7 +100,12 @@ function MainMenu() {
 
   async function CheckLogin() {
     const userId = await CheckUser('userMenu', global.isToten);
-    navigate(userId);
+    const tableStored = localStorage.getItem('tableNumber');
+    if (userId === '/' && tableStored) {
+      navigate(`/${tableStored}`);
+    } else {
+      navigate(userId);
+    }
   }
 
   // const logToAnounimousInToten = () => {

@@ -5,9 +5,11 @@
     padding: 2px 7%;
     justify-content: end;
 }
-.updateMenuMessageWrapper{
-position: relative;
+
+.updateMenuMessageWrapper {
+    position: relative;
 }
+
 .allRequest {
     text-decoration: none;
     background: var(--secundary-bg-color);
@@ -21,21 +23,24 @@ position: relative;
     width: 90%;
     margin: 10px 5%;
     padding: 10px;
-    .btnToggle{
+
+    .btnToggle {
         position: relative;
-        top:0px;
+        top: 0px;
         border-radius: 5px;
         padding: 5px 10px;
         background: transparent;
-        border:none;
+        border: none;
     }
-    .requestIdClosed{
+
+    .requestIdClosed {
         display: flex;
         justify-content: space-around;
         gap: 10px;
         font-size: 15px;
         font-weight: bold;
-        p{
+
+        p {
             margin-bottom: 2px;
         }
     }
@@ -57,7 +62,7 @@ position: relative;
             flex-direction: column;
             gap: 10px;
             align-items: center;
-            
+
 
             .pendent {
                 background-color: red;
@@ -78,7 +83,8 @@ position: relative;
                 font-weight: bold;
                 min-width: 240px
             }
-            .PopupContainer{
+
+            .PopupContainer {
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -88,14 +94,15 @@ position: relative;
                 justify-content: center;
                 align-items: center;
                 background-color: rgba(0, 0, 0, 0.5);
-                
+
             }
-            .btnFiscalAttributes{
-                background-color:#e2c11d;
+
+            .btnFiscalAttributes {
+                background-color: #e2c11d;
                 width: 180px;
-                 min-width: 180px;
-                 color:white;
-                 border:none;
+                min-width: 180px;
+                color: white;
+                border: none;
             }
         }
 
@@ -123,11 +130,13 @@ position: relative;
             color: var(--title-font-color);
             margin-top: 10px;
         }
-        .promotionSelect{
+
+        .promotionSelect {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin: 10px 15%;
+
             select {
                 padding: 10px;
                 border-radius: 10px;
@@ -178,5 +187,23 @@ position: relative;
                 }
             }
         }
+    }
+
+    .indicatorPronto,
+    .indicatorEntregue {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        margin-left: 10px;
+        vertical-align: middle;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .indicatorPronto {
+        // You could vary color if requested, but user said "verde" for both
+        background-color: #28a745;
     }
 }

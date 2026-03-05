@@ -1246,7 +1246,12 @@ const RequestListToBePrepared = ({ title }) => {
                       />
                     )}
                     <div>
-                      <h5>{item.name}</h5>
+                      <h5>
+                        {item.name}
+                        {item.pronto && <span className={style.indicatorPronto}>Pronto</span>}
+                        {item.entregue && <span className={style.indicatorEntregue}>Entregue</span>}
+                      </h5>
+
                       <p>{getFirstFourLetters(item.id, 4)}</p>
                       {item.category && (
                         <p className={style.category}>
