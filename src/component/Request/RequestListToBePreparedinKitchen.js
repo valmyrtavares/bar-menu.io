@@ -955,17 +955,17 @@ const RequestListToBePrepared = () => {
                     Receita
                   </button>
                 </div>
-
-                {recipeModal.openModal && recipeModal.id === item.id && (
-                  <RecipeModal
-                    setRecipeModal={setRecipeModal}
-                    recipeModal={recipeModal}
-                  />
-                )}
               </div>
             ));
           })()}
       </div>
+
+      {recipeModal.openModal && (
+        <RecipeModal
+          setRecipeModal={setRecipeModal}
+          recipeModal={recipeModal}
+        />
+      )}
     </div>
   );
 };

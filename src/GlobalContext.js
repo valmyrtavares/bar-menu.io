@@ -47,6 +47,8 @@ export const GlobalStorage = ({ children }) => {
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
   const processedOrdersGlobal = React.useRef(new Set());
 
+  const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+
   return (
     <GlobalContext.Provider
       value={{
@@ -71,6 +73,8 @@ export const GlobalStorage = ({ children }) => {
         processedOrdersGlobal,
         enableAutoNfce,
         setEnableAutoNfce,
+        isInitialLoad,
+        setIsInitialLoad,
       }}
     >
       {children}
