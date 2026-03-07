@@ -1,0 +1,689 @@
+
+> bar-menu@0.1.0 test
+> react-scripts test src/component/Request/RequestList.test.js --watchAll=false
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+  console.error
+    Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
+
+    [0m [90m 54 |[39m         [33mApi[39m[33m.[39mgetPaginatedData[33m.[39mmockResolvedValueOnce(mockDataFirstPage)[33m;[39m
+     [90m 55 |[39m
+    [31m[1m>[22m[39m[90m 56 |[39m         render(
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 57 |[39m             [33m<[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 58 |[39m                 [33m<[39m[33mRequestList[39m [33m/[39m[33m>[39m
+     [90m 59 |[39m             [33m<[39m[33m/[39m[33mBrowserRouter[39m[33m>[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
+      at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
+      at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1736:7)
+      at node_modules/@testing-library/react/dist/act-compat.js:63:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+      at Object.<anonymous> (src/component/Request/RequestList.test.js:56:15)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  console.warn
+    ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 54 |[39m         [33mApi[39m[33m.[39mgetPaginatedData[33m.[39mmockResolvedValueOnce(mockDataFirstPage)[33m;[39m
+     [90m 55 |[39m
+    [31m[1m>[22m[39m[90m 56 |[39m         render(
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 57 |[39m             [33m<[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 58 |[39m                 [33m<[39m[33mRequestList[39m [33m/[39m[33m>[39m
+     [90m 59 |[39m             [33m<[39m[33m/[39m[33mBrowserRouter[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1740:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:63:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+      at Object.<anonymous> (src/component/Request/RequestList.test.js:56:15)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  console.warn
+    ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 54 |[39m         [33mApi[39m[33m.[39mgetPaginatedData[33m.[39mmockResolvedValueOnce(mockDataFirstPage)[33m;[39m
+     [90m 55 |[39m
+    [31m[1m>[22m[39m[90m 56 |[39m         render(
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 57 |[39m             [33m<[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 58 |[39m                 [33m<[39m[33mRequestList[39m [33m/[39m[33m>[39m
+     [90m 59 |[39m             [33m<[39m[33m/[39m[33mBrowserRouter[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1740:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:63:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+      at Object.<anonymous> (src/component/Request/RequestList.test.js:56:15)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+  console.error
+    Warning: An update to RequestList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at RequestList (C:\Codigo\bar-menu.io\src\component\Request\RequestList.js:19:56)
+        at Router (C:\Codigo\bar-menu.io\node_modules\react-router\lib\components.tsx:421:13)
+        at BrowserRouter (C:\Codigo\bar-menu.io\node_modules\react-router-dom\index.tsx:789:3)
+
+    [0m [90m 49 |[39m
+     [90m 50 |[39m       [36mconst[39m dataSorted [33m=[39m requestSorter(response[33m.[39mdata[33m,[39m [32m'direction'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 51 |[39m       setRequestDoneList(dataSorted)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 52 |[39m       setFirstDoc(response[33m.[39mfirstVisible)[33m;[39m
+     [90m 53 |[39m       setLastDoc(response[33m.[39mlastVisible)[33m;[39m
+     [90m 54 |[39m       setLoading([36mfalse[39m)[33m;[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setRequestDoneList (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at fetchRequest (src/component/Request/RequestList.js:51:7)
+
+  console.error
+    Warning: An update to RequestList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at RequestList (C:\Codigo\bar-menu.io\src\component\Request\RequestList.js:19:56)
+        at Router (C:\Codigo\bar-menu.io\node_modules\react-router\lib\components.tsx:421:13)
+        at BrowserRouter (C:\Codigo\bar-menu.io\node_modules\react-router-dom\index.tsx:789:3)
+
+    [0m [90m 50 |[39m       [36mconst[39m dataSorted [33m=[39m requestSorter(response[33m.[39mdata[33m,[39m [32m'direction'[39m)[33m;[39m
+     [90m 51 |[39m       setRequestDoneList(dataSorted)[33m;[39m
+    [31m[1m>[22m[39m[90m 52 |[39m       setFirstDoc(response[33m.[39mfirstVisible)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 53 |[39m       setLastDoc(response[33m.[39mlastVisible)[33m;[39m
+     [90m 54 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m 55 |[39m     } [36mcatch[39m (error) {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setFirstDoc (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at fetchRequest (src/component/Request/RequestList.js:52:7)
+
+  console.error
+    Warning: An update to RequestList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at RequestList (C:\Codigo\bar-menu.io\src\component\Request\RequestList.js:19:56)
+        at Router (C:\Codigo\bar-menu.io\node_modules\react-router\lib\components.tsx:421:13)
+        at BrowserRouter (C:\Codigo\bar-menu.io\node_modules\react-router-dom\index.tsx:789:3)
+
+    [0m [90m 51 |[39m       setRequestDoneList(dataSorted)[33m;[39m
+     [90m 52 |[39m       setFirstDoc(response[33m.[39mfirstVisible)[33m;[39m
+    [31m[1m>[22m[39m[90m 53 |[39m       setLastDoc(response[33m.[39mlastVisible)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 54 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m 55 |[39m     } [36mcatch[39m (error) {
+     [90m 56 |[39m       console[33m.[39merror(error)[33m;[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setLastDoc (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at fetchRequest (src/component/Request/RequestList.js:53:7)
+
+  console.error
+    Warning: An update to RequestList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at RequestList (C:\Codigo\bar-menu.io\src\component\Request\RequestList.js:19:56)
+        at Router (C:\Codigo\bar-menu.io\node_modules\react-router\lib\components.tsx:421:13)
+        at BrowserRouter (C:\Codigo\bar-menu.io\node_modules\react-router-dom\index.tsx:789:3)
+
+    [0m [90m 52 |[39m       setFirstDoc(response[33m.[39mfirstVisible)[33m;[39m
+     [90m 53 |[39m       setLastDoc(response[33m.[39mlastVisible)[33m;[39m
+    [31m[1m>[22m[39m[90m 54 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 55 |[39m     } [36mcatch[39m (error) {
+     [90m 56 |[39m       console[33m.[39merror(error)[33m;[39m
+     [90m 57 |[39m       setLoading([36mfalse[39m)[33m;[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setLoading (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at fetchRequest (src/component/Request/RequestList.js:54:7)
+
+FAIL src/component/Request/RequestList.test.js
+  RequestList Component
+    × 1. useEffect carrega os iniciais: verifica se getPaginatedData é chamado com init (194 ms)
+    × 2. Botão de Próximos 40: verifica clique e nova requisição next (1020 ms)
+    × 3. Botão de Anteriores: verifica retorno para a página 1 (prev) (1023 ms)
+    √ 4. Botão de recuperar request: dispara updateCollection, loading e redirect (91 ms)
+    √ 5. Desabilitamento de "Recuperar pedido" caso orderDelivered seja false (73 ms)
+
+  ● RequestList Component › 1. useEffect carrega os iniciais: verifica se getPaginatedData é chamado com init
+
+    TestingLibraryElementError: Unable to find an element with the text: /João/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"container-request-list"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"containerTitle"[39m
+            [36m>[39m
+              [36m<h3>[39m
+                [0mLista de Pedidos[0m
+              [36m</h3>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"pagination-controls"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-pagination"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mAnteriores[0m
+            [36m</button>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"page-info"[39m
+            [36m>[39m
+              [0mPágina [0m
+              [0m1[0m
+            [36m</span>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-pagination"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mPróximos [0m
+              [0m40[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+    [0m [90m 66 |[39m
+     [90m 67 |[39m         [90m// Verifica se os itens renderizaram[39m
+    [31m[1m>[22m[39m[90m 68 |[39m         expect(screen[33m.[39mgetByText([35m/João/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m    |[39m                       [31m[1m^[22m[39m
+     [90m 69 |[39m         expect(screen[33m.[39mgetByText([35m/Maria/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m 70 |[39m     })[33m;[39m
+     [90m 71 |[39m[0m
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/component/Request/RequestList.test.js:68:23)
+
+  ● RequestList Component › 2. Botão de Próximos 40: verifica clique e nova requisição next
+
+    expect(element).not.toBeDisabled()
+
+    Received element is disabled:
+      <button class="btn-pagination" disabled="" />
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"container-request-list"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"containerTitle"[39m
+              [36m>[39m
+                [36m<h3>[39m
+                  [0mLista de Pedidos[0m
+                [36m</h3>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"request"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"customer"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn-restore-order"[39m
+                [36m>[39m
+                  [0mRecuperar pedido[0m
+                [36m</button>[39m
+                [36m<h3>[39m
+                  [0mCliente[0m
+                [36m</h3>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-name"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mNome[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0mJoão[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-request"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mPedido[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m1[0m
+                  [0m/[0m
+                  [36m<strong>[39m
+                    [0m100[0m
+                  [36m</strong>[39m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mTipo de pagamento[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mValor Total R$ [0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m50[0m
+                  [0m,00[0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [0m [0m
+                  [36m<span>[39m
+                    [0mData[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"idUser"[39m
+                [36m>[39m
+                  [36m<span />[39m
+                  [0m [0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div />[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"request"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"customer"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn-restore-order"[39m
+                  [33mdisabled[39m=[32m""[39m
+                [36m>[39m
+                  [0mRecuperar pedido[0m
+                [36m</button>[39m
+                [36m<h3>[39m
+                  [0mCliente[0m
+                [36m</h3>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-name"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mNome[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0mMaria[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-request"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mPedido[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m2[0m
+                  [0m/[0m
+                  [36m<strong>[39m
+                    [0m99[0m
+                  [36m</strong>[39m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mTipo de pagamento[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mValor Total R$ [0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m30[0m
+                  [0m,00[0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [0m [0m
+                  [36m<span>[39m
+                    [0mData[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"idUser"[39m
+                [36m>[39m
+                  [36m<span />[39m
+                  [0m [0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div />[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"pagination-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"btn-pagination"[39m
+                [33mdisabled[39m=[32m""[39m
+              [36m>[39m
+                [0mAnteriores[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"page-info"[39m
+              [36m>[39m
+                [0mPágina [0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"btn-pagination"[39m
+                [33mdisabled[39m=[32m""[39m
+              [36m>[39m
+                [0mPróximos [0m
+                [0m40[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 81 |[39m
+     [90m 82 |[39m         [90m// Espera os dados carregarem e o botão ficar habliitado[39m
+    [31m[1m>[22m[39m[90m 83 |[39m         [36mawait[39m waitFor(() [33m=>[39m expect(screen[33m.[39mgetByText([35m/Próximos 40/i[39m))[33m.[39mnot[33m.[39mtoBeDisabled())[33m;[39m
+     [90m    |[39m                                                                          [31m[1m^[22m[39m
+     [90m 84 |[39m
+     [90m 85 |[39m         [90m// Prepara mock da 2ª página[39m
+     [90m 86 |[39m         [33mApi[39m[33m.[39mgetPaginatedData[33m.[39mmockResolvedValueOnce(mockDataSecondPage)[33m;[39m[0m
+
+      at src/component/Request/RequestList.test.js:83:74
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/wait-for.js:127:77)
+      at checkRealTimersCallback (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/wait-for.js:121:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● RequestList Component › 3. Botão de Anteriores: verifica retorno para a página 1 (prev)
+
+    expect(element).not.toBeDisabled()
+
+    Received element is disabled:
+      <button class="btn-pagination" disabled="" />
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"container-request-list"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"containerTitle"[39m
+              [36m>[39m
+                [36m<h3>[39m
+                  [0mLista de Pedidos[0m
+                [36m</h3>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"request"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"customer"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn-restore-order"[39m
+                [36m>[39m
+                  [0mRecuperar pedido[0m
+                [36m</button>[39m
+                [36m<h3>[39m
+                  [0mCliente[0m
+                [36m</h3>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-name"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mNome[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0mJoão[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-request"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mPedido[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m1[0m
+                  [0m/[0m
+                  [36m<strong>[39m
+                    [0m100[0m
+                  [36m</strong>[39m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mTipo de pagamento[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mValor Total R$ [0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m50[0m
+                  [0m,00[0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [0m [0m
+                  [36m<span>[39m
+                    [0mData[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"idUser"[39m
+                [36m>[39m
+                  [36m<span />[39m
+                  [0m [0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div />[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"request"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"customer"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn-restore-order"[39m
+                  [33mdisabled[39m=[32m""[39m
+                [36m>[39m
+                  [0mRecuperar pedido[0m
+                [36m</button>[39m
+                [36m<h3>[39m
+                  [0mCliente[0m
+                [36m</h3>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-name"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mNome[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0mMaria[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"customer-request"[39m
+                [36m>[39m
+                  [36m<span>[39m
+                    [0mPedido[0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m2[0m
+                  [0m/[0m
+                  [36m<strong>[39m
+                    [0m99[0m
+                  [36m</strong>[39m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mTipo de pagamento[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [36m<span>[39m
+                    [0mValor Total R$ [0m
+                  [36m</span>[39m
+                  [0m [0m
+                  [0m30[0m
+                  [0m,00[0m
+                [36m</p>[39m
+                [36m<p>[39m
+                  [0m [0m
+                  [36m<span>[39m
+                    [0mData[0m
+                  [36m</span>[39m
+                  [0m [0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"idUser"[39m
+                [36m>[39m
+                  [36m<span />[39m
+                  [0m [0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div />[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"pagination-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"btn-pagination"[39m
+                [33mdisabled[39m=[32m""[39m
+              [36m>[39m
+                [0mAnteriores[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"page-info"[39m
+              [36m>[39m
+                [0mPágina [0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"btn-pagination"[39m
+                [33mdisabled[39m=[32m""[39m
+              [36m>[39m
+                [0mPróximos [0m
+                [0m40[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+    [0m [90m 108 |[39m             [33m<[39m[33m/[39m[33mBrowserRouter[39m[33m>[39m
+     [90m 109 |[39m         )[33m;[39m
+    [31m[1m>[22m[39m[90m 110 |[39m         [36mawait[39m waitFor(() [33m=>[39m expect(screen[33m.[39mgetByText([35m/Próximos 40/i[39m))[33m.[39mnot[33m.[39mtoBeDisabled())[33m;[39m
+     [90m     |[39m                                                                          [31m[1m^[22m[39m
+     [90m 111 |[39m
+     [90m 112 |[39m         [90m// Preparando p/ página 2[39m
+     [90m 113 |[39m         [33mApi[39m[33m.[39mgetPaginatedData[33m.[39mmockResolvedValueOnce(mockDataSecondPage)[33m;[39m[0m
+
+      at src/component/Request/RequestList.test.js:110:74
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/wait-for.js:127:77)
+      at checkRealTimersCallback (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/wait-for.js:121:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 2 passed, 5 total
+Snapshots:   0 total
+Time:        4.705 s, estimated 6 s
+Ran all test suites matching /src\\component\\Request\\RequestList.test.js/i.
