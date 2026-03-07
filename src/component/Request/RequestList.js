@@ -1,15 +1,16 @@
 import React from 'react';
 
-import '../../assets/styles/RequestList.css';
+import '../../assets/styles/RequestList.scss';
 import {
   // fetchInDataChanges,
   // checkAndTrimRequests,
   getBtnData,
+  updateCollection,
 } from '../../api/Api.js';
 import { getFirstFourLetters } from '../../Helpers/Helpers.js';
 import { requestSorter } from '../../Helpers/Helpers.js';
 import Title from '../title.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 // import Input from "../Input.js";
@@ -21,6 +22,9 @@ const RequestList = () => {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [cancelPaymentMessage, setCancelPaymentMessage] = React.useState(false);
   const [disabledCancelButton, setDisabledCancelButton] = React.useState(false);
+  const [isRestoring, setIsRestoring] = React.useState(false);
+  const [restoringId, setRestoringId] = React.useState(null);
+  const navigate = useNavigate();
   const [form, setForm] = React.useState({
     category: '',
     search: '',
@@ -45,6 +49,20 @@ const RequestList = () => {
     setRequestDoneList(dataSorted);
   };
 
+  const handleRestoreOrder = async (requestId) => {
+    try {
+      setIsRestoring(true);
+      setRestoringId(requestId);
+      await updateCollection('requests', requestId, { orderDelivered: false });
+      // Redirect to PDV screen
+      navigate('/admin/requestlist');
+    } catch (error) {
+      console.error('Error restoring order:', error);
+      setIsRestoring(false);
+      setRestoringId(null);
+    }
+  };
+
   return (
     <div className="container-request-list">
       {cancelPaymentMessage && (
@@ -57,6 +75,13 @@ const RequestList = () => {
         requestsDoneList.map((item) => (
           <div key={item.id} className="request">
             <div className="customer">
+              <button
+                className="btn-restore-order"
+                disabled={(isRestoring && restoringId === item.id) || !item.orderDelivered}
+                onClick={() => handleRestoreOrder(item.id)}
+              >
+                {isRestoring && restoringId === item.id ? 'Trazendo pedido na tela...' : 'Recuperar pedido'}
+              </button>
               <h3>Cliente</h3>
               <p className="customer-name">
                 <span>Nome</span> {item.name}

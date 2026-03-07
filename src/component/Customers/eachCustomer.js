@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../assets/styles/eachCustomer.css';
-import '../../assets/styles/RequestList.css';
+import '../../assets/styles/RequestList.scss';
 import {
   collection,
   query,
