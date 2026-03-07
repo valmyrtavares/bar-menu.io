@@ -11,6 +11,11 @@ import {
   getDoc,
   deleteDoc,
   updateDoc,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
 } from 'firebase/firestore';
 import {
   getStorage,
@@ -379,6 +384,64 @@ export async function replaceDocument(collectionName, docId, newData) {
       `Erro ao substituir o documento ${docId} na coleção "${collectionName}":`,
       error
     );
+    throw error;
+  }
+}
+
+/**
+ * Recupera dados de uma coleção com paginação (Server-Side).
+ * 
+ * @param {string} collectionName - Nome da coleção (ex: 'requests').
+ * @param {string} orderByField - Campo numérico para ordenação (ex: 'countRequest').
+ * @param {string} orderDirection - 'asc' ou 'desc'.
+ * @param {number} pageSize - Quantidade de itens por página (ex: 40).
+ * @param {object} cursorDoc - O documento Firebase de referência para continuar a busca.
+ * @param {string} directionType - 'init' (primeira carga), 'next' (próxima página) ou 'prev' (página anterior).
+ */
+export async function getPaginatedData(
+  collectionName,
+  orderByField,
+  orderDirection,
+  pageSize,
+  cursorDoc,
+  directionType
+) {
+  const db = getFirestore();
+  const colRef = collection(db, collectionName);
+
+  let q = query(colRef, orderBy(orderByField, orderDirection));
+
+  if (directionType === 'init') {
+    q = query(q, limit(pageSize));
+  } else if (directionType === 'next' && cursorDoc) {
+    q = query(q, startAfter(cursorDoc), limit(pageSize));
+  } else if (directionType === 'prev' && cursorDoc) {
+    q = query(q, endBefore(cursorDoc), limitToLast(pageSize));
+  } else {
+    // Fallback pra init caso falte o cursor
+    q = query(q, limit(pageSize));
+  }
+
+  try {
+    const querySnapshot = await getDocs(q);
+
+    // Extrai o primeiro e o último documento (snapshots originais, necessários para as referências de startAfter/endBefore)
+    const firstVisible = querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null;
+    const lastVisible = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null;
+
+    let array = [];
+    querySnapshot.forEach((docSnap) => {
+      array.push({ ...docSnap.data(), id: docSnap.id });
+    });
+
+    return {
+      data: array,
+      firstVisible,
+      lastVisible,
+      empty: querySnapshot.empty
+    };
+  } catch (error) {
+    console.error(`Erro ao buscar página em ${collectionName}:`, error);
     throw error;
   }
 }

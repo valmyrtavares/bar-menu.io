@@ -4,7 +4,7 @@ import '../../assets/styles/RequestList.scss';
 import {
   // fetchInDataChanges,
   // checkAndTrimRequests,
-  getBtnData,
+  getPaginatedData,
   updateCollection,
 } from '../../api/Api.js';
 import { getFirstFourLetters } from '../../Helpers/Helpers.js';
@@ -24,6 +24,10 @@ const RequestList = () => {
   const [disabledCancelButton, setDisabledCancelButton] = React.useState(false);
   const [isRestoring, setIsRestoring] = React.useState(false);
   const [restoringId, setRestoringId] = React.useState(null);
+  const [firstDoc, setFirstDoc] = React.useState(null);
+  const [lastDoc, setLastDoc] = React.useState(null);
+  const [pageNumber, setPageNumber] = React.useState(1);
+  const PAGE_SIZE = 40;
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     category: '',
@@ -35,18 +39,23 @@ const RequestList = () => {
   }
 
   React.useEffect(() => {
-    fetchRequest();
+    fetchRequest(null, 'init');
   }, []);
 
-  const fetchRequest = async () => {
-    const data = await getBtnData('requests');
+  const fetchRequest = async (cursorDoc = null, direction = 'init') => {
+    try {
+      setLoading(true);
+      const response = await getPaginatedData('requests', 'countRequest', 'desc', PAGE_SIZE, cursorDoc, direction);
 
-    const dataSorted = requestSorter(data, 'direction');
-    console.log(
-      'Ordenados:',
-      dataSorted.map((item) => item.countRequest),
-    );
-    setRequestDoneList(dataSorted);
+      const dataSorted = requestSorter(response.data, 'direction');
+      setRequestDoneList(dataSorted);
+      setFirstDoc(response.firstVisible);
+      setLastDoc(response.lastVisible);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
   };
 
   const handleRestoreOrder = async (requestId) => {
@@ -129,6 +138,30 @@ const RequestList = () => {
             </div>
           </div>
         ))}
+
+      <div className="pagination-controls">
+        <button
+          className="btn-pagination"
+          disabled={pageNumber === 1 || loading}
+          onClick={() => {
+            setPageNumber(prev => prev - 1);
+            fetchRequest(firstDoc, 'prev');
+          }}
+        >
+          Anteriores
+        </button>
+        <span className="page-info">Página {pageNumber}</span>
+        <button
+          className="btn-pagination"
+          disabled={!lastDoc || requestsDoneList.length < PAGE_SIZE || loading}
+          onClick={() => {
+            setPageNumber(prev => prev + 1);
+            fetchRequest(lastDoc, 'next');
+          }}
+        >
+          Próximos {PAGE_SIZE}
+        </button>
+      </div>
     </div>
   );
 };

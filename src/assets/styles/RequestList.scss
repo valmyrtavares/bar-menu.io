@@ -77,3 +77,30 @@ h1 {
 .container-request-list .dishes .sidedishes {
     border-left: solid black .5px;
 }
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 10px;
+
+    .page-info {
+        font-weight: bold;
+        font-size: 14px;
+        color: var(--title-font-color);
+    }
+
+    .btn-pagination {
+        @include btnAdmin;
+        padding: 8px 16px;
+        width: 150px;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #888 !important;
+        }
+    }
+}
