@@ -96,6 +96,8 @@ describe('issueAutoNfce', () => {
             id: 'order123',
             paymentMethod: 'PIX',
             finalPriceRequest: 1.00,
+            countRequest: 123,
+            name: 'Cliente Teste',
             request: [{ name: 'Água', category: 'agua', finalPrice: 1.0 }],
         };
 
@@ -106,7 +108,9 @@ describe('issueAutoNfce', () => {
         expect(result.caminho_danfe).toBe('/mock.pdf');
         expect(result.ref).toBeDefined();
         expect(typeof result.ref).toBe('string');
-        expect(result.ref.length).toBe(34); // Tamanho padrão do generationUniqueRandomString
+
+        // Deve seguir o novo padrão de ref contendo os dados do pedido 'REQ--{pedido}--{nome}--{hash}'
+        expect(result.ref.startsWith('REQ--123--CLIENTE-TESTE--')).toBe(true);
     });
 });
 

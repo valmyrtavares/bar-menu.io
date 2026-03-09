@@ -136,7 +136,10 @@ export const issueAutoNfce = async (order) => {
     });
   }
 
-  const ref = generationUniqueRandomString();
+  const cleanName = (order.name || 'CLIENTE').replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-').substring(0, 15).toUpperCase();
+  const orderId = order.countRequest || 'SN';
+  const uniquePart = generationUniqueRandomString(8);
+  const ref = `REQ--${orderId}--${cleanName}--${uniquePart}`;
   // URL do backend (ajustar se necessário para produção)
   const url = `https://focusrender.onrender.com/api/send-nfce?ref=${ref}`;
 
