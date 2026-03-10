@@ -64,7 +64,7 @@ const RequestModal = () => {
   let cpfForInvoice = '';
   let paymentTransactionData = null;
 
-  const isTableClient = !pdv && !isToten && localStorage.getItem('tableNumber');
+  const isTableClient = !pdv && !global.isToten && localStorage.getItem('tableNumber');
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -386,14 +386,26 @@ const RequestModal = () => {
           const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
-        } else {
-          addDoc(collection(db, 'requests'), cleanedUserNewRequest);
-        }
 
-        const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
-        await updateDoc(userDocRef, {
-          request: [],
-        });
+          const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: global.orderBeingEdited.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
+        } else {
+          const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+          const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: docRef.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
+        }
       }
       setTotenMessage(false);
       if (pdv && global.pdvRequest) {
@@ -469,13 +481,26 @@ const RequestModal = () => {
           const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
+
+          const userDocRef = doc(db, 'user', id);
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: global.orderBeingEdited.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
         } else {
-          addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+          const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+          const userDocRef = doc(db, 'user', id);
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: docRef.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
         }
-        const userDocRef = doc(db, 'user', id);
-        await updateDoc(userDocRef, {
-          request: [],
-        });
       }
     }
   };
@@ -532,6 +557,28 @@ const RequestModal = () => {
               finalPriceRequest: updatedPrice
             });
 
+            // Mapeamos os novos itens para associar o ID do pedido e o novo índice neles.
+            // Os itens novos começam a partir do comprimento antigo do array 'request' do pedido aberto.
+            const startIndex = openOrderData.request ? openOrderData.request.length : 0;
+            let newItemsCount = 0;
+            const updatedUserRequests = data.request.map((uItem) => {
+              if (!uItem.sentToKitchen) {
+                const updatedItem = {
+                  ...uItem,
+                  sentToKitchen: true,
+                  parentRequestId: openOrderDoc.id,
+                  indexInRequest: startIndex + newItemsCount
+                };
+                newItemsCount++;
+                return updatedItem;
+              }
+              return uItem;
+            });
+
+            const userDocRef = doc(db, 'user', data.id);
+            await updateDoc(userDocRef, { request: updatedUserRequests });
+            setUserData({ ...data, request: updatedUserRequests });
+
             orderAddedOrUpdated = true;
           }
         }
@@ -552,19 +599,27 @@ const RequestModal = () => {
           };
 
           const cleanedUserNewRequest = cleanObject(newRequestForKitchen);
-          await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+          const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+
+          const updatedUserRequests = data.request.map((uItem, idx) => {
+            if (!uItem.sentToKitchen) {
+              // Como este é um novo doc de 'requests', o índice no doc será baseado na ordem nestes newItems
+              // Encontramos o índice de uItem dentro de newItems
+              const itemIndexInBatch = newItems.indexOf(uItem);
+              return {
+                ...uItem,
+                sentToKitchen: true,
+                parentRequestId: docRef.id,
+                indexInRequest: itemIndexInBatch
+              };
+            }
+            return uItem;
+          });
+
+          const userDocRef = doc(db, 'user', data.id);
+          await updateDoc(userDocRef, { request: updatedUserRequests });
+          setUserData({ ...data, request: updatedUserRequests });
         }
-
-        // Marca todos os itens do usuario como enviados no local (carrinho do cliente)
-        const updatedRequests = data.request.map((item) => ({ ...item, sentToKitchen: true }));
-
-        const userDocRef = doc(db, 'user', data.id);
-        await updateDoc(userDocRef, {
-          request: updatedRequests,
-        });
-
-        // Atualiza a tela sem recarregar e sem sair de onde está
-        setUserData({ ...data, request: updatedRequests });
       }
     } catch (error) {
       console.error('Erro ao enviar pedido para a cozinha:', error);
@@ -772,26 +827,15 @@ const RequestModal = () => {
           ? userData?.fantasyName
           : userData?.name}
         {localStorage.getItem('tableNumber') && (
-          <span style={{ marginLeft: '15px', color: '#ff9800' }}>
+          <span style={{ marginLeft: '15px', color: 'var(--title-font-color)' }}>
             Mesa: {localStorage.getItem('tableNumber')}
           </span>
         )}
       </p>
 
       {isTableClient && (
-        <div style={{ display: 'flex', justifyContent: 'flex-start', marginLeft: '10%', marginBottom: '20px' }}>
-          <button
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              background: 'var(--btn-color)',
-              color: 'var(--title-font-color)',
-              border: 'none',
-              borderRadius: '10px',
-              fontFamily: 'var(--title-font)',
-              fontWeight: 'bold'
-            }}
-          >
+        <div className="call-waiter-container">
+          <button className="call-waiter-btn">
             Chame o Garçon
           </button>
         </div>
@@ -808,9 +852,9 @@ const RequestModal = () => {
             </h2>
             <p className="dishes-price">R$ {item.finalPrice},00</p>
             {item.status === 'Pronto' ? (
-              <p className="status-request-pend" style={{ color: '#4caf50' }}>Pronto</p>
+              <p className="status-request-pend" style={{ color: 'var(--btn-color)' }}>Pronto</p>
             ) : item.sentToKitchen ? (
-              <p className="status-request-pend" style={{ color: '#ff9800' }}>Em preparo</p>
+              <p className="status-request-pend" style={{ color: 'var(--title-font-color)' }}>Em preparo</p>
             ) : (
               <>
                 <p className="status-request-pend">pendente</p>

@@ -146,3 +146,34 @@ h3 {
     background-color: white !important;
     min-width: 147%;
 }
+
+.call-waiter-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 10%;
+    margin-bottom: 20px;
+}
+
+.call-waiter-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: var(--btn-color);
+    color: var(--title-font-color);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--title-font);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .call-waiter-container {
+        justify-content: center;
+        margin-left: 0;
+    }
+    .call-waiter-btn {
+        width: 80%;
+        padding: 12px 25px;
+        font-size: 1.1rem;
+    }
+}

@@ -36,11 +36,10 @@ function MainMenu() {
   React.useEffect(() => {
     if (tableNumber) {
       localStorage.setItem('tableNumber', tableNumber);
-    } else if (global.isInitialLoad) {
-      // It's a hard reload/first visit to root
-      localStorage.removeItem('tableNumber');
     }
-    // After handling the URL, mark initial load as false so internal navigation preserves session
+    // Removido o else que limpava o tableNumber para garantir 
+    // que ele persista mesmo se o usuário recarregar a página 
+    // ou navegar internamente.
     global.setIsInitialLoad(false);
   }, [tableNumber]);
 

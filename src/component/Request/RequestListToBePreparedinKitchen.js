@@ -231,15 +231,37 @@ const RequestListToBePrepared = () => {
       const requestSnap = await getDoc(requestRef);
       if (requestSnap.exists()) {
         const data = requestSnap.data();
+        let newStatusValue = false;
         const updatedRequestItems = data.request.map((item, index) => {
           if (index === itemIndex) {
-            return { ...item, [field]: !item[field] };
+            newStatusValue = !item[field];
+            return { ...item, [field]: newStatusValue };
           }
           return item;
         });
 
         await updateDoc(requestRef, { request: updatedRequestItems });
         console.log(`Item status ${field} updated for item index ${itemIndex}`);
+
+        // Sincroniza com a coleção 'user' se o campo for 'entregue'
+        if (field === 'entregue' && data.idUser) {
+          const userRef = doc(db, 'user', data.idUser);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.request && Array.isArray(userData.request)) {
+              const updatedUserRequest = userData.request.map((userItem) => {
+                // Busca o item específico usando o ID do pedido original e o índice dentro desse pedido
+                if (userItem.parentRequestId === parentRequestId && userItem.indexInRequest === itemIndex) {
+                  return { ...userItem, status: newStatusValue ? 'Pronto' : '' };
+                }
+                return userItem;
+              });
+              await updateDoc(userRef, { request: updatedUserRequest });
+              console.log(`Status sincronizado com a coleção 'user' para o pedido ${parentRequestId} item ${itemIndex}`);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error(`Error updating item status ${field}:`, error);
@@ -835,7 +857,11 @@ const RequestListToBePrepared = () => {
         const userData = userSnap.data();
         if (userData.request && Array.isArray(userData.request)) {
           const updatedRequest = userData.request.map((reqItem) => {
-            return { ...reqItem, status: 'Pronto' };
+            // Apenas marca como 'Pronto' os itens que pertencem a este pedido específico (item.id)
+            if (reqItem.parentRequestId === item.id) {
+              return { ...reqItem, status: 'Pronto' };
+            }
+            return reqItem;
           });
           await updateDoc(userRef, { request: updatedRequest });
         }
