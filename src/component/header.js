@@ -28,20 +28,20 @@ function Header() {
 
   const headerClass = `main_header 
   ${global.isToten ? 'toten' : ''} 
-  ${
-    location.pathname.includes('/orderqueue') ||
-    location.pathname.includes('/create-customer')
+  ${location.pathname.includes('/orderqueue') ||
+      location.pathname.includes('/create-customer')
       ? 'orderqueue'
       : ''
-  }`.trim();
+    }`.trim();
 
   return (
     <header className={headerClass}>
       <nav>
-        <Link to="/">
-          {' '}
-          <img src={global.image} alt="google logo" />
-        </Link>
+        <div className="bar-header-container">
+          <Link to={localStorage.getItem('tableNumber') ? `/${localStorage.getItem('tableNumber')}` : "/"}>
+            <img src={global.image} alt="logo" />
+          </Link>
+        </div>
       </nav>
     </header>
   );

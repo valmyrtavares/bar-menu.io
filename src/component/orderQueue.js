@@ -81,7 +81,7 @@ const OrderQueue = () => {
     <div className="order-queue-container">
       <div className="title-btn-container">
         <h1> Fila de pedidos</h1>
-        <Link to="/">X</Link>
+        <Link to={localStorage.getItem('tableNumber') ? `/${localStorage.getItem('tableNumber')}` : "/"}>X</Link>
       </div>
       <p>Acompanhe abaixo o andamento e o status do seu pedido</p>
       {movingItem && <TransitionPopup movingItem={movingItem} />}

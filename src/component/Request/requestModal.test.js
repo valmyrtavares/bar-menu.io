@@ -28,6 +28,7 @@ jest.mock('firebase/firestore', () => ({
     getDocs: jest.fn(),
     addDoc: jest.fn(),
     doc: jest.fn(),
+    onSnapshot: jest.fn(),
 }));
 
 jest.mock('../../api/Api', () => ({
@@ -144,5 +145,57 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
         });
 
         confirmSpy.mockRestore();
+    });
+
+    it('deve habilitar fluxo Pós-Pagamento (Enviar pedido) quando o cliente tiver uma mesa selecionada e não for PDV/Toten', async () => {
+        // Mock tableNumber
+        localStorage.setItem('tableNumber', '23');
+        // pdv e isToten são false por default no localStorage limpo
+
+        // Mock userData com um request não enviado para a cozinha
+        const userData = { request: [{ name: 'Suco', finalPrice: 10, sentToKitchen: false }] };
+        const userDocSnap = { exists: () => true, data: () => userData };
+        const { onSnapshot } = require('firebase/firestore');
+        onSnapshot.mockImplementation((ref, callback) => {
+            callback(userDocSnap);
+            return jest.fn(); // mock unsubscribe
+        });
+
+        const context = { ...mockGlobalContext, pdvRequest: false };
+        renderWithContext(context);
+
+        // Deve mostrar a mesa na tela
+        await waitFor(() => {
+            expect(screen.getByText(/Mesa: 23/i)).toBeInTheDocument();
+        });
+
+        // O botão Enviar pedido deve estar presente (Pós-Pagamento)
+        expect(screen.getByRole('button', { name: /Enviar pedido/i })).toBeInTheDocument();
+        // O botão Finalizar (Pré-Pagamento manual / encerramento) também fica lá
+        expect(screen.getByRole('button', { name: /Finalizar/i })).toBeInTheDocument();
+    });
+
+    it('deve usar o Pré-Pagamento como padrão (Finalizar apenas) quando NÃO houver mesa selecionada', async () => {
+        // Sem tableNumber no localStorage
+
+        const userData = { request: [{ name: 'Suco', finalPrice: 10, sentToKitchen: false }] };
+        const userDocSnap = { exists: () => true, data: () => userData };
+        const { onSnapshot } = require('firebase/firestore');
+        onSnapshot.mockImplementation((ref, callback) => {
+            callback(userDocSnap);
+            return jest.fn(); // mock unsubscribe
+        });
+
+        const context = { ...mockGlobalContext, pdvRequest: false };
+        renderWithContext(context);
+
+        await waitFor(() => {
+            expect(screen.queryByText(/Mesa:/i)).not.toBeInTheDocument();
+        });
+
+        // O botão Enviar pedido NÃO deve estar presente (obriga o pré-pagamento pelo Finalizar)
+        expect(screen.queryByRole('button', { name: /Enviar pedido/i })).not.toBeInTheDocument();
+        // O botão Finalizar deve ser o único caminho para a cozinha
+        expect(screen.getByRole('button', { name: /Finalizar/i })).toBeInTheDocument();
     });
 });

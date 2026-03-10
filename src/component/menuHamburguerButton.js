@@ -24,7 +24,7 @@ const MenuButton = () => {
           </div>
           <ul>
             <li>
-              <Link to="/">Home</Link>
+              <Link to={localStorage.getItem('tableNumber') ? `/${localStorage.getItem('tableNumber')}` : "/"}>Home</Link>
             </li>
             <li>
               {" "}

@@ -257,8 +257,11 @@ const RequestListToBePrepared = ({ title }) => {
   const handleDeleteRequest = async (id) => {
     const data = await getOneItemColleciton('requests', id);
     await deleteData('requests', id);
-    if (data.name === 'anonimo') {
+    if (data.name === 'anonimo' || data.name === 'anonymous') {
       await deleteData('user', data.idUser);
+    } else if (data.idUser) {
+      const userRef = doc(db, 'user', data.idUser);
+      await updateDoc(userRef, { request: [] });
     }
     setShowDefaultMessage(false); // Fecha o modal após excluir
   };
@@ -987,22 +990,24 @@ const RequestListToBePrepared = ({ title }) => {
     }
   };
 
-  const orderDelivery = (item) => {
-    if (item.name === 'anonimo') {
-      deleteData('user', item.idUser);
+  const orderDelivery = async (item) => {
+    if (item.name === 'anonimo' || item.name === 'anonymous') {
+      await deleteData('user', item.idUser);
+    } else if (item.idUser) {
+      const userRef = doc(db, 'user', item.idUser);
+      await updateDoc(userRef, { request: [] });
     }
     // first step
-    updateIngredientsStock(item);
+    await updateIngredientsStock(item);
 
     item.orderDelivered = true;
-    setDoc(doc(db, 'requests', item.id), item)
-      .then(() => {
-        console.log('Document successfully updated !');
-        fetchUserRequests();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    try {
+      await setDoc(doc(db, 'requests', item.id), item);
+      console.log('Document successfully updated !');
+      fetchUserRequests();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const openPrintScreen = (item) => {
@@ -1223,7 +1228,7 @@ const RequestListToBePrepared = ({ title }) => {
                       }
                       onClick={() => orderDelivery(item)}
                     >
-                      Entregue
+                      Finalizar pedido
                     </button>
                     <button
                       disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}

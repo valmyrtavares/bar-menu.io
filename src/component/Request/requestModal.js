@@ -11,6 +11,7 @@ import {
   getDocs,
   addDoc,
   doc,
+  onSnapshot,
 } from 'firebase/firestore';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
@@ -62,6 +63,8 @@ const RequestModal = () => {
   let methodPayment = '';
   let cpfForInvoice = '';
   let paymentTransactionData = null;
+
+  const isTableClient = !pdv && !isToten && localStorage.getItem('tableNumber');
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
@@ -145,13 +148,25 @@ const RequestModal = () => {
   };
 
   React.useEffect(() => {
+    let unsubscribe;
     if (currentUser) {
-      fetchUser();
-
       if (backorder) {
         updateingNewCustomer(backorder);
       }
+      const userDocRef = doc(db, 'user', currentUser);
+      unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
+        const data = userDocSnap.data();
+        if (data) {
+          setUserData(data);
+          if (data.request && data.request.length > 0) {
+            setDisabledBtn(true);
+          }
+        }
+      });
     }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [currentUser]);
 
   React.useEffect(() => {
@@ -465,6 +480,99 @@ const RequestModal = () => {
     }
   };
 
+  const sendOrderToKitchenOnly = async () => {
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+
+    try {
+      const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+      const data = await getOneItemColleciton('user', currentUserNew.id);
+
+      if (data && data.request) {
+        // Filtra apenas itens novos (ainda não enviados para a cozinha)
+        const newItems = data.request.filter((item) => !item.sentToKitchen);
+
+        if (newItems.length === 0) {
+          isProcessing.current = false;
+          return; // Nada novo para enviar
+        }
+
+        // Calcula o preco final apenas dos itens novos
+        const newItemsPrice = newItems
+          .map((item) => item.finalPrice)
+          .reduce((ac, el) => ac + el, 0);
+
+        const currentTable = localStorage.getItem('tableNumber');
+        let orderAddedOrUpdated = false;
+
+        // Tentar encontrar um pedido aberto para esta mesa e para ESTE usuário específico
+        if (currentTable) {
+          const requestsRef = collection(db, 'requests');
+          const q = query(
+            requestsRef,
+            where('tableNumber', '==', currentTable),
+            where('idUser', '==', data.id),
+            where('orderDelivered', '==', false)
+          );
+
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            // Existe um ou mais pedidos abertos. Vamos pegar o primeiro (idealmente só deve haver um)
+            const openOrderDoc = querySnapshot.docs[0];
+            const openOrderData = openOrderDoc.data();
+
+            // Junta os pratos que já estavam lá com os novos
+            const updatedOrderRequests = [...(openOrderData.request || []), ...newItems];
+            const updatedPrice = (openOrderData.finalPriceRequest || 0) + newItemsPrice;
+
+            const requestDocRef = doc(db, 'requests', openOrderDoc.id);
+            await updateDoc(requestDocRef, {
+              request: updatedOrderRequests,
+              finalPriceRequest: updatedPrice
+            });
+
+            orderAddedOrUpdated = true;
+          }
+        }
+
+        // Se não encontrou pedido aberto (ou não tem mesa), cria um novo
+        if (!orderAddedOrUpdated) {
+          const newRequestForKitchen = {
+            name: data.name === 'anonimo' || data.name === 'anonymous' ? data.fantasyName : data.name,
+            idUser: data.id,
+            done: true,
+            orderDelivered: false,
+            request: newItems,
+            finalPriceRequest: newItemsPrice,
+            idPayer: idPayerRef.current,
+            dateTime: takeDataTime(),
+            countRequest: await countingRequest(),
+            tableNumber: currentTable || null,
+          };
+
+          const cleanedUserNewRequest = cleanObject(newRequestForKitchen);
+          await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+        }
+
+        // Marca todos os itens do usuario como enviados no local (carrinho do cliente)
+        const updatedRequests = data.request.map((item) => ({ ...item, sentToKitchen: true }));
+
+        const userDocRef = doc(db, 'user', data.id);
+        await updateDoc(userDocRef, {
+          request: updatedRequests,
+        });
+
+        // Atualiza a tela sem recarregar e sem sair de onde está
+        setUserData({ ...data, request: updatedRequests });
+      }
+    } catch (error) {
+      console.error('Erro ao enviar pedido para a cozinha:', error);
+    } finally {
+      isProcessing.current = false;
+    }
+  };
+
   const duplicateDish = async (index) => {
     // Cria uma cópia do array original
     const updatedRequest = [...userData.request];
@@ -542,7 +650,12 @@ const RequestModal = () => {
 
   const handleRoute = () => {
     if (!stylePdv) {
-      navigate('/');
+      const table = localStorage.getItem('tableNumber');
+      if (table) {
+        navigate(`/${table}`);
+      } else {
+        navigate('/');
+      }
     } else {
       global.setPdvRequest(false);
       navigate('/admin/requestlist');
@@ -664,6 +777,26 @@ const RequestModal = () => {
           </span>
         )}
       </p>
+
+      {isTableClient && (
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginLeft: '10%', marginBottom: '20px' }}>
+          <button
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              background: 'var(--btn-color)',
+              color: 'var(--title-font-color)',
+              border: 'none',
+              borderRadius: '10px',
+              fontFamily: 'var(--title-font)',
+              fontWeight: 'bold'
+            }}
+          >
+            Chame o Garçon
+          </button>
+        </div>
+      )}
+
       <h3>Esses são os seus pedidos até o momento</h3>
       {userData &&
         Array.isArray(userData.request) &&
@@ -674,11 +807,19 @@ const RequestModal = () => {
               {item.name}
             </h2>
             <p className="dishes-price">R$ {item.finalPrice},00</p>
-            <p className="status-request-pend">pendente</p>
-            <p className="cancel" onClick={() => deleteRequest(index)}>
-              Cancelar
-            </p>
-            <button onClick={() => duplicateDish(index)}>+</button>
+            {item.status === 'Pronto' ? (
+              <p className="status-request-pend" style={{ color: '#4caf50' }}>Pronto</p>
+            ) : item.sentToKitchen ? (
+              <p className="status-request-pend" style={{ color: '#ff9800' }}>Em preparo</p>
+            ) : (
+              <>
+                <p className="status-request-pend">pendente</p>
+                <p className="cancel" onClick={() => deleteRequest(index)}>
+                  Cancelar
+                </p>
+                <button onClick={() => duplicateDish(index)}>+</button>
+              </>
+            )}
           </div>
         ))
       ) : (
@@ -689,6 +830,17 @@ const RequestModal = () => {
           Continue Comprando
         </button>
       </div>
+      {isTableClient && (
+        <div className="btnFinalRequest" style={{ marginTop: '10px', marginBottom: '10px' }}>
+          <button
+            disabled={isSubmitting || (userData && userData.request && userData.request.filter(item => !item.sentToKitchen).length === 0)}
+            className="send-request"
+            onClick={sendOrderToKitchenOnly}
+          >
+            Enviar pedido
+          </button>
+        </div>
+      )}
       <div className="btnFinalRequest">
         <button
           disabled={isSubmitting}

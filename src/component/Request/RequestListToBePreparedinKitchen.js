@@ -129,20 +129,6 @@ const RequestListToBePrepared = () => {
     }
   };
 
-  const handleDeleteRequest = async (id) => {
-    const data = await getOneItemColleciton('requests', id);
-    await deleteData('requests', id);
-    if (data.name === 'anonimo') {
-      await deleteData('user', data.idUser);
-    }
-    setShowDefaultMessage(false); // Fecha o modal após excluir
-  };
-
-  // const openShowModal = (id) => {
-  //   setShowDefaultMessage(true);
-  //   setSelectedRequestId(id);
-  // };
-
   const closeModal = () => {
     setShowDefaultMessage(false);
   };
@@ -839,22 +825,33 @@ const RequestListToBePrepared = () => {
     }
   };
 
-  const orderDelivery = (item) => {
-    if (item.name === 'anonimo') {
-      deleteData('user', item.idUser);
+  const orderDelivery = async (item) => {
+    if (item.name === 'anonimo' || item.name === 'anonymous') {
+      await deleteData('user', item.idUser);
+    } else if (item.idUser) {
+      const userRef = doc(db, 'user', item.idUser);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.request && Array.isArray(userData.request)) {
+          const updatedRequest = userData.request.map((reqItem) => {
+            return { ...reqItem, status: 'Pronto' };
+          });
+          await updateDoc(userRef, { request: updatedRequest });
+        }
+      }
     }
 
-    updateIngredientsStock(item);
+    await updateIngredientsStock(item);
 
     item.orderDelivered = true;
-    setDoc(doc(db, 'requests', item.id), item)
-      .then(() => {
-        console.log('Document successfully updated !');
-        fetchUserRequests();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    try {
+      await setDoc(doc(db, 'requests', item.id), item);
+      console.log('Document successfully updated !');
+      fetchUserRequests();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // const openPrintScreen = (item) => {
