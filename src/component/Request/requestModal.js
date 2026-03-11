@@ -377,7 +377,9 @@ const RequestModal = () => {
     )}/${now.getFullYear()} - ${String(now.getHours()).padStart(
       2,
       '0',
-    )}:${String(now.getMinutes()).padStart(2, '0')}`;
+    )}:${String(now.getMinutes()).padStart(2, '0')}:${String(
+      now.getSeconds(),
+    ).padStart(2, '0')}`;
     return formattedDateTime;
   };
 
@@ -406,6 +408,7 @@ const RequestModal = () => {
         request: data.request.map((item, idx) => ({
           ...item,
           sentToKitchen: true,
+          sentToKitchenTime: takeDataTime(),
           parentRequestId: global.orderBeingEdited ? global.orderBeingEdited.id : null,
           indexInRequest: idx
         })),
@@ -512,7 +515,12 @@ const RequestModal = () => {
         } : null,
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
-        request: previousRequests, // Atribuir os pedidos recuperados
+        request: previousRequests.map((item, idx) => ({
+          ...item,
+          sentToKitchen: true,
+          sentToKitchenTime: takeDataTime(),
+          indexInRequest: idx
+        })),
         finalPriceRequest: finalPriceRequest,
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
@@ -599,6 +607,7 @@ const RequestModal = () => {
             const newItemsPrepared = newItems.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
+              sentToKitchenTime: takeDataTime(),
               parentRequestId: openOrderDoc.id,
               indexInRequest: (openOrderData.request ? openOrderData.request.length : 0) + idx
             }));
@@ -662,6 +671,7 @@ const RequestModal = () => {
             request: newItems.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
+              sentToKitchenTime: takeDataTime(),
               indexInRequest: idx
             })),
             finalPriceRequest: newItemsPrice,

@@ -82,8 +82,11 @@ const RequestListToBePrepared = () => {
     const [datePart, timePart] = normalized.split(' ');
     if (!datePart || !timePart) return new Date();
     const [day, month, year] = datePart.split('/');
-    const [hour, minute] = timePart.split(':');
-    return new Date(year, month - 1, day, hour, minute);
+    const timeParts = timePart.split(':');
+    const hour = parseInt(timeParts[0], 10);
+    const minute = parseInt(timeParts[1], 10);
+    const second = parseInt(timeParts[2] || 0, 10);
+    return new Date(Number(year), Number(month) - 1, Number(day), hour, minute, second);
   };
 
   React.useEffect(() => {
@@ -980,7 +983,7 @@ const RequestListToBePrepared = () => {
                       indexInRequest: indexInRequest,
                       clientName: request.name,
                       tableNumber: request.tableNumber || request.mesa,
-                      orderDate: request.dateTime,
+                      orderDate: item.sentToKitchenTime || request.dateTime,
                     });
                   }
                 });
