@@ -161,7 +161,11 @@ const RequestListToBePrepared = ({ title }) => {
 
     fetchData();
 
-    return () => unsubscribe();
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas

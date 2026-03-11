@@ -960,12 +960,14 @@ const RequestListToBePrepared = () => {
 
                 <div className={style.itemActions}>
                   <button
+                    disabled={item.pronto}
                     className={item.pronto ? style.done : style.pendent}
                     onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'pronto')}
                   >
                     Pronto
                   </button>
                   <button
+                    disabled={item.entregue}
                     className={item.entregue ? style.done : style.pendent}
                     onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'entregue')}
                   >
