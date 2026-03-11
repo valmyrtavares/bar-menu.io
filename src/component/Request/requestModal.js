@@ -189,7 +189,7 @@ const RequestModal = () => {
       unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
         const data = userDocSnap.data();
         if (data) {
-          setUserData(data);
+          setUserData({ ...data, id: userDocSnap.id });
           if (data.request && data.request.length > 0) {
             setDisabledBtn(true);
           }
@@ -218,7 +218,7 @@ const RequestModal = () => {
       const userDocSnap = await getDoc(userDocRef);
       const data = userDocSnap.data();
       if (data) {
-        setUserData(data);
+        setUserData({ ...data, id: userDocSnap.id });
 
         if (userData) {
           if (userData.request.length > 0) {
@@ -403,12 +403,17 @@ const RequestModal = () => {
         done: true,
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
-        request: data.request, // Atribuir os pedidos recuperados
+        request: data.request.map((item, idx) => ({
+          ...item,
+          sentToKitchen: true,
+          parentRequestId: global.orderBeingEdited ? global.orderBeingEdited.id : null,
+          indexInRequest: idx
+        })),
         finalPriceRequest: finalPriceRequest,
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
         countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
-        tableNumber: localStorage.getItem('tableNumber') || null,
+        tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
       };
 
       setIsSubmitting(true);
@@ -418,6 +423,7 @@ const RequestModal = () => {
           const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
+          localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV após editar
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
           const updatedRequests = data.request.map((item, idx) => ({
@@ -429,6 +435,14 @@ const RequestModal = () => {
           await updateDoc(userDocRef, { request: updatedRequests });
         } else {
           const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+
+          // Se acabamos de criar o pedido, atualizamos os documentos com o ID real
+          const finalItemsWithId = cleanedUserNewRequest.request.map(item => ({
+            ...item,
+            parentRequestId: docRef.id
+          }));
+          await updateDoc(docRef, { request: finalItemsWithId });
+
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
           const updatedRequests = data.request.map((item, idx) => ({
             ...item,
@@ -503,7 +517,7 @@ const RequestModal = () => {
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
         countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
-        tableNumber: localStorage.getItem('tableNumber') || null,
+        tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
       };
       //global.setUserNewRequest(userNewRequest);
       localStorage.removeItem('backorder');
@@ -513,6 +527,7 @@ const RequestModal = () => {
           const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
+          localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV após editar
 
           const userDocRef = doc(db, 'user', id);
           const updatedRequests = data.request.map((item, idx) => ({
@@ -579,16 +594,31 @@ const RequestModal = () => {
             const openOrderDoc = querySnapshot.docs[0];
             const openOrderData = openOrderDoc.data();
 
+            // Prepara os novos itens com a flag de envio
+            const newItemsPrepared = newItems.map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              parentRequestId: openOrderDoc.id,
+              indexInRequest: (openOrderData.request ? openOrderData.request.length : 0) + idx
+            }));
+
             // Junta os pratos que já estavam lá com os novos
-            const updatedOrderRequests = [...(openOrderData.request || []), ...newItems];
+            const updatedOrderRequests = [...(openOrderData.request || []), ...newItemsPrepared];
             const updatedPrice = (openOrderData.finalPriceRequest || 0) + newItemsPrice;
 
             const requestDocRef = doc(db, 'requests', openOrderDoc.id);
-            await updateDoc(requestDocRef, {
+            const updateFields = {
               request: updatedOrderRequests,
               finalPriceRequest: updatedPrice,
               done: true
-            });
+            };
+
+            // Se estamos editando, garantimos que o tableNumber não mude para null se o original tinha um
+            if (global.orderBeingEdited && !currentTable) {
+              updateFields.tableNumber = openOrderData.tableNumber || null;
+            }
+
+            await updateDoc(requestDocRef, updateFields);
 
             // Mapeamos os novos itens para associar o ID do pedido e o novo índice neles.
             // Os itens novos começam a partir do comprimento antigo do array 'request' do pedido aberto.
@@ -612,6 +642,11 @@ const RequestModal = () => {
             await updateDoc(userDocRef, { request: updatedUserRequests });
             setUserData({ ...data, request: updatedUserRequests });
 
+            if (global.orderBeingEdited) {
+              global.setOrderBeingEdited(null);
+              localStorage.removeItem('tableNumber');
+            }
+
             orderAddedOrUpdated = true;
           }
         }
@@ -623,7 +658,11 @@ const RequestModal = () => {
             idUser: data.id,
             done: true,
             orderDelivered: false,
-            request: newItems,
+            request: newItems.map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              indexInRequest: idx
+            })),
             finalPriceRequest: newItemsPrice,
             idPayer: idPayerRef.current,
             dateTime: takeDataTime(),
@@ -631,13 +670,23 @@ const RequestModal = () => {
             tableNumber: currentTable || null,
           };
 
+          // Caso extratégico: se estamos vindo do PDV e o currentTable falhou na busca, mas sabemos o que estamos editando
+          if (global.orderBeingEdited && !currentTable) {
+            newRequestForKitchen.tableNumber = global.orderBeingEdited.tableNumber || null;
+          }
+
           const cleanedUserNewRequest = cleanObject(newRequestForKitchen);
           const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
 
+          // Atualiza o parentRequestId nos itens recém criados
+          const itemsWithParentId = cleanedUserNewRequest.request.map(item => ({
+            ...item,
+            parentRequestId: docRef.id
+          }));
+          await updateDoc(doc(db, 'requests', docRef.id), { request: itemsWithParentId });
+
           const updatedUserRequests = data.request.map((uItem, idx) => {
             if (!uItem.sentToKitchen) {
-              // Como este é um novo doc de 'requests', o índice no doc será baseado na ordem nestes newItems
-              // Encontramos o índice de uItem dentro de newItems
               const itemIndexInBatch = newItems.indexOf(uItem);
               return {
                 ...uItem,
@@ -815,6 +864,7 @@ const RequestModal = () => {
 
       global.setOrderBeingEdited(null);
       global.setPdvRequest(false);
+      localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV ao cancelar
       navigate('/admin/requestlist');
     } catch (err) {
       console.error("Erro ao cancelar edição:", err);

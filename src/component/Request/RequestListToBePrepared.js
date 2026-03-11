@@ -1128,7 +1128,8 @@ const RequestListToBePrepared = ({ title }) => {
         id: item.id,
         countRequest: item.countRequest,
         dateTime: item.dateTime,
-        discount: item.discount || 0
+        discount: item.discount || 0,
+        tableNumber: item.tableNumber || null
       });
 
       localStorage.setItem(
@@ -1136,13 +1137,25 @@ const RequestListToBePrepared = ({ title }) => {
         JSON.stringify({ id: item.idUser, name: item.name })
       );
 
+      if (item.tableNumber) {
+        localStorage.setItem('tableNumber', item.tableNumber);
+      } else {
+        localStorage.removeItem('tableNumber');
+      }
+
       const userDocRef = doc(db, 'user', item.idUser);
       // Aqui o problema reportado: o 'item.request' que vem da base já contém o pedido exato que queremos editar.
       // E ao adicionar a array 'request' do 'user' novamente por cima do 'item.request', as informações dobram.
       // A solução é recarregar no user.request APENAS os itens da requisição atual que está sendo editada.
+      // E garantimos que as flags que o cliente usa para habilitar botões (sentToKitchen) estejam presentes.
 
       const cleanArray = item.request && item.request.length > 0
-        ? item.request.map(r => cleanObject(r))
+        ? item.request.map((r, idx) => ({
+          ...cleanObject(r),
+          sentToKitchen: true,
+          parentRequestId: item.id,
+          indexInRequest: idx
+        }))
         : [];
 
       await updateDoc(userDocRef, {
