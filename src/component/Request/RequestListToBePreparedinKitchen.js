@@ -1009,7 +1009,7 @@ const RequestListToBePrepared = () => {
                     <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
                     {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
                     <p><span>Data:</span> {item.orderDate}</p>
-                    <p style={{ fontWeight: 'bold', color: 'blue' }}><span>Tempo:</span> {formattedTime}</p>
+                    <p style={{ fontWeight: 'bold', color: 'var(--title-font-color)' }}><span>Tempo:</span> {formattedTime}</p>
                   </div>
 
                   <div className={style.itemAccompaniment}>

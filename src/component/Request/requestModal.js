@@ -555,6 +555,7 @@ const RequestModal = () => {
   const sendOrderToKitchenOnly = async () => {
     if (isProcessing.current) return;
     isProcessing.current = true;
+    setIsSubmitting(true);
 
     try {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
@@ -707,6 +708,7 @@ const RequestModal = () => {
       console.error('Erro ao enviar pedido para a cozinha:', error);
     } finally {
       isProcessing.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -964,7 +966,7 @@ const RequestModal = () => {
           <button
             className="call-waiter-btn"
             style={{
-              color: 'white',
+              color: 'var(--title-font-color)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: '5px',
@@ -1025,7 +1027,7 @@ const RequestModal = () => {
             className="send-request"
             onClick={sendOrderToKitchenOnly}
           >
-            Enviar pedido
+            {isSubmitting ? "ENVIANDO..." : "Enviar pedido"}
           </button>
         </div>
       )}

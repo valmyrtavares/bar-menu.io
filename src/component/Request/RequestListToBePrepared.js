@@ -1469,20 +1469,16 @@ const RequestListToBePrepared = ({ title }) => {
                       />
                     )}
                     <div>
-                      <h5>
-                        {item.name}
+                      <h5 style={{ textAlign: 'center', marginBottom: '8px' }}>{item.name}</h5>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '5px', flexWrap: 'wrap' }}>
                         {item.pronto && <span className={style.indicatorPronto}>Pronto</span>}
-                        {item.entregue && (
-                          <>
-                            <span className={style.indicatorEntregue}>Entregue</span>
-                            {item.tempo_levado && (
-                              <span style={{ marginLeft: '10px', fontSize: '0.9rem', color: '#666' }}>
-                                ({item.tempo_levado})
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </h5>
+                        {item.entregue && <span className={style.indicatorEntregue}>Entregue</span>}
+                      </div>
+                      {item.entregue && item.tempo_levado && (
+                        <div style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666', fontWeight: 'bold', marginBottom: '5px' }}>
+                          ({item.tempo_levado})
+                        </div>
+                      )}
 
                       <p>{getFirstFourLetters(item.id, 4)}</p>
                       {item.category && (
