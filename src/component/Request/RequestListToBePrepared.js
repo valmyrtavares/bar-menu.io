@@ -1157,6 +1157,26 @@ const RequestListToBePrepared = ({ title }) => {
     }
   };
 
+  const handleRequestItemCancellation = async (order, itemIndex) => {
+    const dish = order.request[itemIndex];
+    const isConfirmed = window.confirm(`Deseja solicitar o cancelamento do item "${dish.name}" para a cozinha?`);
+    if (!isConfirmed) return;
+
+    try {
+      const orderRef = doc(db, 'requests', order.id);
+      const updatedRequest = [...order.request];
+      updatedRequest[itemIndex] = { ...dish, cancelRequested: true };
+
+      await updateDoc(orderRef, {
+        request: updatedRequest
+      });
+      alert('Solicitação de cancelamento enviada para a cozinha.');
+    } catch (err) {
+      console.error('Erro ao solicitar cancelamento:', err);
+      alert('Erro ao solicitar cancelamento. Tente novamente.');
+    }
+  };
+
   const toggleRequest = (id) => {
     setOpenRequests((prev) => ({
       ...prev,
@@ -1473,6 +1493,14 @@ const RequestListToBePrepared = ({ title }) => {
                         className="btn btn-warning"
                       >
                         Receita
+                      </button>
+                      <button
+                        onClick={() => handleRequestItemCancellation(requestsDoneList[itemIndex], recipeIndex)}
+                        className="btn btn-danger"
+                        disabled={item.pronto || item.entregue || item.cancelRequested}
+                        style={{ marginLeft: '10px' }}
+                      >
+                        {item.cancelRequested ? 'Cancelamento Solicitado' : 'Cancelar Item'}
                       </button>
                     </div>
                   </div>

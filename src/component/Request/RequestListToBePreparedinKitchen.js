@@ -268,6 +268,48 @@ const RequestListToBePrepared = () => {
     }
   };
 
+  const handleConfirmCancellation = async (parentRequestId, itemIndex, userId) => {
+    try {
+      const requestRef = doc(db, 'requests', parentRequestId);
+      const requestSnap = await getDoc(requestRef);
+      if (requestSnap.exists()) {
+        const data = requestSnap.data();
+        const cancelledItem = data.request[itemIndex];
+        const itemPrice = Number(cancelledItem.finalPrice) || 0;
+
+        // Remove do array do pedido
+        const updatedRequestItems = [...data.request];
+        updatedRequestItems.splice(itemIndex, 1);
+
+        // Atualiza o valor total
+        const newTotal = Math.max(0, (Number(data.finalPriceRequest) || 0) - itemPrice);
+
+        await updateDoc(requestRef, {
+          request: updatedRequestItems,
+          finalPriceRequest: newTotal
+        });
+
+        // Sincroniza com o usuário
+        if (userId) {
+          const userRef = doc(db, 'user', userId);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.request && Array.isArray(userData.request)) {
+              const updatedUserRequest = userData.request.filter(
+                (userItem) => !(userItem.parentRequestId === parentRequestId && userItem.indexInRequest === itemIndex)
+              );
+              await updateDoc(userRef, { request: updatedUserRequest });
+            }
+          }
+        }
+        console.log(`Item index ${itemIndex} cancelled in kitchen.`);
+      }
+    } catch (error) {
+      console.error('Error confirming cancellation:', error);
+    }
+  };
+
   useEffect(() => {
     setColorStatusRequest('red');
   }, [requestsDoneList]);
@@ -934,11 +976,15 @@ const RequestListToBePrepared = () => {
 
             return sortedItems.map((item, index) => (
               <div
-                className={style.kitchenItemRow}
+                className={`${style.kitchenItemRow} ${item.cancelRequested ? style.cancelRequestedRow : ''}`}
                 key={`${item.parentRequestId}-${item.id}-${index}`}
+                style={item.cancelRequested ? { border: '3px solid red', backgroundColor: '#fff5f5' } : {}}
               >
                 <div className={style.itemInfo}>
                   <h4>{item.name}</h4>
+                  {item.cancelRequested && (
+                    <p style={{ color: 'red', fontWeight: 'bold', fontSize: '1.2rem' }}>⚠️ ITEM CANCELADO PELO GARÇOM</p>
+                  )}
                   <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
                   {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
                   <p><span>Data:</span> {item.orderDate}</p>
@@ -967,18 +1013,28 @@ const RequestListToBePrepared = () => {
                     Pronto
                   </button>
                   <button
-                    disabled={item.entregue}
+                    disabled={item.entregue || item.cancelRequested}
                     className={item.entregue ? style.done : style.pendent}
                     onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'entregue')}
                   >
                     Entregue
                   </button>
-                  <button
-                    onClick={() => setRecipeModal({ openModal: true, id: item.id })}
-                    className="btn btn-warning"
-                  >
-                    Receita
-                  </button>
+                  {item.cancelRequested ? (
+                    <button
+                      className={style.pendent}
+                      style={{ backgroundColor: 'red', color: 'white', fontWeight: 'bold' }}
+                      onClick={() => handleConfirmCancellation(item.parentRequestId, item.indexInRequest, requestsDoneList.find(r => r.id === item.parentRequestId)?.idUser)}
+                    >
+                      Confirmar Cancelamento
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setRecipeModal({ openModal: true, id: item.id })}
+                      className="btn btn-warning"
+                    >
+                      Receita
+                    </button>
+                  )}
                 </div>
               </div>
             ));
