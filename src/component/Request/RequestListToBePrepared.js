@@ -1326,7 +1326,7 @@ const RequestListToBePrepared = ({ title }) => {
                       </button>
                     )}
                     <button
-                      disabled={item.orderDelivered || global.orderBeingEdited?.id === item.id}
+                      disabled={!item.paymentDone || item.orderDelivered || global.orderBeingEdited?.id === item.id}
                       className={
                         item.orderDelivered ? style.done : style.pendent
                       }
