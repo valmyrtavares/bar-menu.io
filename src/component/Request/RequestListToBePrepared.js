@@ -65,6 +65,89 @@ const RequestListToBePrepared = ({ title }) => {
   const [currentRequest, setCurrentRequest] = React.useState(null);
   const [sideDishesList, setSideDishesList] = React.useState([]);
   const [openRequests, setOpenRequests] = React.useState({});
+
+  const [showFinalizarMessage, setShowFinalizarMessage] = React.useState(false);
+  const [selectedItemToFinalize, setSelectedItemToFinalize] = React.useState(null);
+
+  const openFinalizarModal = (item) => {
+    setShowFinalizarMessage(true);
+    setSelectedItemToFinalize(item);
+  };
+
+  const closeFinalizarModal = () => {
+    setShowFinalizarMessage(false);
+    setSelectedItemToFinalize(null);
+  };
+
+  const confirmFinalizarPedido = async () => {
+    if (selectedItemToFinalize) {
+      await orderDelivery(selectedItemToFinalize);
+    }
+    closeFinalizarModal();
+  };
+
+  const getPostpaidButtonState = (item) => {
+    if (!item.request || item.request.length === 0) return { label: 'PENDENTE', color: 'red', className: style.pendent };
+
+    const hasToDeliver = item.request.some((req) => req.entregue && !req.deliveredByWaiter);
+    const allDelivered = item.request.every((req) => req.entregue && req.deliveredByWaiter);
+
+    if (hasToDeliver) {
+      return { label: 'NOVA ENTREGA', color: 'yellow', className: style.pendent, inlineStyle: { backgroundColor: 'yellow', color: 'black' } };
+    } else if (allDelivered) {
+      return { label: 'PRONTO', color: 'green', className: style.done, inlineStyle: {} };
+    } else {
+      return { label: 'PENDENTE', color: 'red', className: style.pendent, inlineStyle: {} };
+    }
+  };
+
+  const handleWaiterDelivery = async (item) => {
+    const currentState = getPostpaidButtonState(item);
+    if (currentState.label === 'NOVA ENTREGA') {
+      const updatedRequests = item.request.map((req) => {
+        if (req.entregue && !req.deliveredByWaiter) {
+          return { ...req, deliveredByWaiter: true };
+        }
+        return req;
+      });
+      item.request = updatedRequests;
+
+      const allDelivered = updatedRequests.every((req) => req.entregue && req.deliveredByWaiter);
+      if (allDelivered) {
+        item.done = false;
+      } else {
+        item.done = true;
+      }
+
+      try {
+        await setDoc(doc(db, 'requests', item.id), item);
+
+        if (item.idUser) {
+          const userDocRef = doc(db, 'user', item.idUser);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.request && Array.isArray(userData.request)) {
+              const newUserDataRequests = userData.request.map((uReq) => {
+                if (uReq.parentRequestId === item.id) {
+                  const match = updatedRequests.find((r) => r.indexInRequest === uReq.indexInRequest);
+                  if (match) {
+                    return match;
+                  }
+                }
+                return uReq;
+              });
+              await updateDoc(userDocRef, { request: newUserDataRequests });
+            }
+          }
+        }
+        fetchUserRequests();
+      } catch (err) {
+        console.error("Erro ao atualizar entregas", err);
+      }
+    }
+  };
+
   //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
   //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
 
@@ -1074,6 +1157,13 @@ const RequestListToBePrepared = ({ title }) => {
       <div className={style.updateMenuMessageWrapper}>
         {loadingAvailableMenuDishes && <UpdateMenuMessage />}
       </div>
+      {showFinalizarMessage && (
+        <DefaultComumMessage
+          msg="Você tem certeza que deseja finalizar este pedido?"
+          onClose={closeFinalizarModal}
+          onConfirm={() => confirmFinalizarPedido()}
+        />
+      )}
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
           const { status, color } = getStatusAndColor(item); // 👈 aqui
@@ -1177,7 +1267,7 @@ const RequestListToBePrepared = ({ title }) => {
                       Cancelar pedido
                     </button>
                     <div>
-                      {ShowDefaultMessage && (
+                      {ShowDefaultMessage && selectedRequestId === item.id && (
                         <DefaultComumMessage
                           msg="Você está prestes a excluir esse pedido"
                           onClose={closeModal}
@@ -1214,21 +1304,35 @@ const RequestListToBePrepared = ({ title }) => {
                     >
                       Pago
                     </button>
+                    {item.tableNumber ? (() => {
+                      const btnState = getPostpaidButtonState(item);
+                      return (
+                        <button
+                          disabled={item.orderDelivered || global.orderBeingEdited?.id === item.id || btnState.label === 'PRONTO'}
+                          className={btnState.className}
+                          style={btnState.inlineStyle}
+                          onClick={() => handleWaiterDelivery(item)}
+                        >
+                          {btnState.label}
+                        </button>
+                      );
+                    })() : (
+                      <button
+                        disabled={item.done || global.orderBeingEdited?.id === item.id}
+                        className={item.done ? style.pendent : style.done}
+                        onClick={() => RequestDone(item)}
+                      >
+                        Pronto
+                      </button>
+                    )}
                     <button
-                      disabled={!item.paymentDone || global.orderBeingEdited?.id === item.id}
-                      className={item.done ? style.pendent : style.done}
-                      onClick={() => RequestDone(item)}
-                    >
-                      Pronto
-                    </button>
-                    <button
-                      disabled={item.done || global.orderBeingEdited?.id === item.id}
+                      disabled={item.orderDelivered || global.orderBeingEdited?.id === item.id}
                       className={
                         item.orderDelivered ? style.done : style.pendent
                       }
-                      onClick={() => orderDelivery(item)}
+                      onClick={() => openFinalizarModal(item)}
                     >
-                      Finalizar pedido
+                      Finalizar
                     </button>
                     <button
                       disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}

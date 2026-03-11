@@ -554,7 +554,8 @@ const RequestModal = () => {
             const requestDocRef = doc(db, 'requests', openOrderDoc.id);
             await updateDoc(requestDocRef, {
               request: updatedOrderRequests,
-              finalPriceRequest: updatedPrice
+              finalPriceRequest: updatedPrice,
+              done: true
             });
 
             // Mapeamos os novos itens para associar o ID do pedido e o novo índice neles.
