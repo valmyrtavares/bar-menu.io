@@ -49,8 +49,12 @@ const RequestModal = () => {
   const [autoPayment, setAutoPayment] = React.useState(false); //Habilita o pagamento automático
   const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
   const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(true);
-  const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] =
-    React.useState(false);
+  const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] = React.useState(false);
+
+  // Waiter Call Feature State
+  const [waiterCallActive, setWaiterCallActive] = React.useState(false);
+  const [waiterCallMessage, setWaiterCallMessage] = React.useState(false);
+
   const idPayerRef = React.useRef('');
 
   const [pdv, setPdv] = useLocalStorage('pdv', false);
@@ -135,9 +139,37 @@ const RequestModal = () => {
       } else {
         setDisabledBtn(true);
       }
+      checkWaiterCallStatus();
     }
     console.log('userData mudou:', userData);
   }, [userData]);
+
+  const checkWaiterCallStatus = async () => {
+    try {
+      if (isTableClient && userData && userData.id) {
+        const currentTable = localStorage.getItem('tableNumber');
+        const q = query(
+          collection(db, 'requests'),
+          where('idUser', '==', userData.id),
+          where('tableNumber', '==', currentTable),
+          where('orderDelivered', '==', false)
+        );
+        // NOVO: Usando onSnapshot para reagir quando o PDV fechar o chamado
+        onSnapshot(q, (snapshot) => {
+          if (!snapshot.empty) {
+            const orderData = snapshot.docs[0].data();
+            if (orderData.waiterCall && orderData.waiterCall.active) {
+              setWaiterCallActive(true);
+            } else {
+              setWaiterCallActive(false);
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error checking waiter call status', error);
+    }
+  };
 
   const hasRequest = () => {
     if (userData.request.length > 0) {
@@ -629,6 +661,49 @@ const RequestModal = () => {
     }
   };
 
+  const handleCallWaiter = async () => {
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+    try {
+      const currentTable = localStorage.getItem('tableNumber');
+      if (userData && currentTable) {
+        const q = query(
+          collection(db, 'requests'),
+          where('tableNumber', '==', currentTable),
+          where('idUser', '==', userData.id),
+          where('orderDelivered', '==', false)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const openOrderDoc = querySnapshot.docs[0];
+          const requestDocRef = doc(db, 'requests', openOrderDoc.id);
+
+          await updateDoc(requestDocRef, {
+            waiterCall: {
+              active: true,
+              callerName:
+                userData.name === 'anonimo' || userData.name === 'anonymous'
+                  ? userData.fantasyName
+                  : userData.name,
+              tableNumber: currentTable,
+              timestamp: Date.now(),
+            },
+          });
+
+          setWaiterCallActive(true);
+
+        } else {
+          alert('Você precisa enviar um pedido antes de chamar o garçom.');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao chamar o garçom:', error);
+    } finally {
+      isProcessing.current = false;
+    }
+  };
+
   const duplicateDish = async (index) => {
     // Cria uma cópia do array original
     const updatedRequest = [...userData.request];
@@ -835,9 +910,22 @@ const RequestModal = () => {
       </p>
 
       {isTableClient && (
-        <div className="call-waiter-container">
-          <button className="call-waiter-btn">
-            Chame o Garçon
+        <div className="call-waiter-container" style={{ textAlign: 'center', marginBottom: '15px' }}>
+          <button
+            className="call-waiter-btn"
+            style={{
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              fontWeight: 'bold',
+              cursor: waiterCallActive ? 'not-allowed' : 'pointer',
+              opacity: waiterCallActive ? 0.7 : 1
+            }}
+            disabled={waiterCallActive || isSubmitting}
+            onClick={handleCallWaiter}
+          >
+            {waiterCallActive ? "Garçom a caminho..." : "Chame o Garçom"}
           </button>
         </div>
       )}

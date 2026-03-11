@@ -69,6 +69,9 @@ const RequestListToBePrepared = ({ title }) => {
   const [showFinalizarMessage, setShowFinalizarMessage] = React.useState(false);
   const [selectedItemToFinalize, setSelectedItemToFinalize] = React.useState(null);
 
+  // NOVO: Estado para armazenar os chamados do garçom pendentes
+  const [pendingWaiterCalls, setPendingWaiterCalls] = React.useState([]);
+
   const openFinalizarModal = (item) => {
     setShowFinalizarMessage(true);
     setSelectedItemToFinalize(item);
@@ -157,6 +160,18 @@ const RequestListToBePrepared = ({ title }) => {
       requestList = requestSorter(requestList);
 
       setRequestDoneList(requestList);
+
+      // NOVO: Verificar chamados pendentes
+      const newWaiterCalls = requestList.filter(
+        (req) => req.waiterCall && req.waiterCall.active === true
+      );
+
+      // Atualiza os chamados garantindo que novos pedidos sejam adicionados e os fechados saiam da tela
+      setPendingWaiterCalls((prevCalls) => {
+        const keepCalls = prevCalls.filter(pc => newWaiterCalls.some(nc => nc.id === pc.id));
+        const addCalls = newWaiterCalls.filter(nc => !prevCalls.some(pc => pc.id === nc.id));
+        return [...keepCalls, ...addCalls];
+      });
     });
 
     fetchData();
@@ -1155,6 +1170,72 @@ const RequestListToBePrepared = ({ title }) => {
 
   return (
     <div>
+      {/* OVERLAY EXCLUSIVO DOS CHAMADOS DE GARÇOM - CENTRALIZADO E COM FUNDO ESCURO */}
+      {pendingWaiterCalls.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          gap: '15px'
+        }}>
+          {pendingWaiterCalls.map((callReq) => (
+            <div key={callReq.id} style={{
+              backgroundColor: '#f44336',
+              color: 'white',
+              padding: '25px 30px',
+              borderRadius: '8px',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              minWidth: '350px',
+              textAlign: 'center'
+            }}>
+              <h3 style={{ margin: '0 0 15px 0', fontSize: '1.5rem' }}>⚠️ Chamado de Mesa</h3>
+              <p style={{ margin: '0 0 20px 0', fontSize: '1.2rem' }}>
+                O cliente <strong>{callReq.waiterCall?.callerName}</strong> da mesa <strong>{callReq.waiterCall?.tableNumber}</strong> pede a presença do responsável.
+              </p>
+              <button
+                onClick={async () => {
+                  try {
+                    // 1. Remove visualmente da tela local instântaneamente (Aparência suave pro usuário)
+                    setPendingWaiterCalls(prev => prev.filter(p => p.id !== callReq.id));
+
+                    // 2. Busca o documento fresquinho pra ver se alguém já fechou
+                    const docSnap = await getDoc(doc(db, 'requests', callReq.id));
+                    if (docSnap.exists() && docSnap.data().waiterCall?.active === true) {
+                      // 3. Atualiza falso no banco só a primeira vez
+                      await updateDoc(doc(db, 'requests', callReq.id), {
+                        'waiterCall.active': false
+                      });
+                    }
+                  } catch (e) { console.error('Error fechar chamado', e) }
+                }}
+                style={{
+                  backgroundColor: 'white',
+                  color: '#f44336',
+                  border: 'none',
+                  padding: '12px',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  cursor: 'pointer'
+                }}
+              >
+                OK
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Link to="/admin/admin">
         <Title mainTitle={title} />
       </Link>
