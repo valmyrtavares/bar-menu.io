@@ -991,7 +991,12 @@ const RequestModal = () => {
             </h2>
             <p className="dishes-price">R$ {item.finalPrice},00</p>
             {item.status === 'Pronto' ? (
-              <p className="status-request-pend" style={{ color: 'var(--btn-color)' }}>Pronto</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <p className="status-request-pend" style={{ color: 'var(--btn-color)', margin: 0 }}>Pronto</p>
+                {item.tempo_levado && (
+                  <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>{item.tempo_levado}</p>
+                )}
+              </div>
             ) : item.sentToKitchen ? (
               <p className="status-request-pend" style={{ color: 'var(--title-font-color)' }}>Em preparo</p>
             ) : (

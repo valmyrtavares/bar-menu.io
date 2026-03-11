@@ -120,6 +120,11 @@ const RequestList = () => {
                     <div>
                       <h3>item {index + 1}</h3>
                       <p>{dishe.name}</p>
+                      {dishe.tempo_levado && (
+                        <p style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>
+                          {dishe.tempo_levado}
+                        </p>
+                      )}
                       <p>R$ {dishe.finalPrice},00</p>
                     </div>
                     <div className="sidedishes">

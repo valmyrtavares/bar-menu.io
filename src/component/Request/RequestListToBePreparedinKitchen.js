@@ -57,8 +57,34 @@ const RequestListToBePrepared = () => {
   const [currentRequest, setCurrentRequest] = React.useState(null);
   const [sideDishesList, setSideDishesList] = React.useState([]);
   const [openRequests, setOpenRequests] = React.useState({});
-  //  const [newCustomerPromotion, setNewCustomerPromotion] = React.useState(null);
-  //  const [shouldRunEffect, setShouldRunEffect] = React.useState(false);
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+
+  // Update current time every second for the stopwatch
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDuration = (ms) => {
+    if (ms < 0) ms = 0;
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes} min e ${seconds} seg`;
+  };
+
+  const parseDate = (str) => {
+    if (!str) return new Date();
+    // Remove optional ' - ' and split
+    const normalized = str.replace(' - ', ' ');
+    const [datePart, timePart] = normalized.split(' ');
+    if (!datePart || !timePart) return new Date();
+    const [day, month, year] = datePart.split('/');
+    const [hour, minute] = timePart.split(':');
+    return new Date(year, month - 1, day, hour, minute);
+  };
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
@@ -225,7 +251,7 @@ const RequestListToBePrepared = () => {
     return { status: '', color: 'black' };
   };
 
-  const handleToggleItemStatus = async (parentRequestId, itemIndex, field) => {
+  const handleToggleItemStatus = async (parentRequestId, itemIndex, field, extraFields = {}) => {
     try {
       const requestRef = doc(db, 'requests', parentRequestId);
       const requestSnap = await getDoc(requestRef);
@@ -235,7 +261,7 @@ const RequestListToBePrepared = () => {
         const updatedRequestItems = data.request.map((item, index) => {
           if (index === itemIndex) {
             newStatusValue = !item[field];
-            return { ...item, [field]: newStatusValue };
+            return { ...item, [field]: newStatusValue, ...extraFields };
           }
           return item;
         });
@@ -947,97 +973,98 @@ const RequestListToBePrepared = () => {
             requestsDoneList.forEach((request) => {
               if (request.request && Array.isArray(request.request)) {
                 request.request.forEach((item, indexInRequest) => {
-                  allItems.push({
-                    ...item,
-                    parentRequestId: request.id,
-                    indexInRequest: indexInRequest,
-                    clientName: request.name,
-                    tableNumber: request.tableNumber || request.mesa,
-                    orderDate: request.dateTime,
-                  });
+                  if (!item.entregue) {
+                    allItems.push({
+                      ...item,
+                      parentRequestId: request.id,
+                      indexInRequest: indexInRequest,
+                      clientName: request.name,
+                      tableNumber: request.tableNumber || request.mesa,
+                      orderDate: request.dateTime,
+                    });
+                  }
                 });
               }
             });
 
-            // Sorting helper: parses 'DD/MM/YYYY - HH:MM' or 'DD/MM/YYYY HH:MM'
-            const parseDate = (str) => {
-              if (!str) return 0;
-              // Remove optional ' - ' and split
-              const normalized = str.replace(' - ', ' ');
-              const [datePart, timePart] = normalized.split(' ');
-              if (!datePart || !timePart) return 0;
-              const [day, month, year] = datePart.split('/');
-              const [hour, minute] = timePart.split(':');
-              return new Date(year, month - 1, day, hour, minute).getTime();
-            };
-
             // Order: oldest first
-            const sortedItems = allItems.sort((a, b) => parseDate(a.orderDate) - parseDate(b.orderDate));
+            const sortedItems = allItems.sort((a, b) => parseDate(a.orderDate).getTime() - parseDate(b.orderDate).getTime());
 
-            return sortedItems.map((item, index) => (
-              <div
-                className={`${style.kitchenItemRow} ${item.cancelRequested ? style.cancelRequestedRow : ''}`}
-                key={`${item.parentRequestId}-${item.id}-${index}`}
-                style={item.cancelRequested ? { border: '3px solid red', backgroundColor: '#fff5f5' } : {}}
-              >
-                <div className={style.itemInfo}>
-                  <h4>{item.name}</h4>
-                  {item.cancelRequested && (
-                    <p style={{ color: 'red', fontWeight: 'bold', fontSize: '1.2rem' }}>⚠️ ITEM CANCELADO PELO GARÇOM</p>
-                  )}
-                  <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
-                  {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
-                  <p><span>Data:</span> {item.orderDate}</p>
-                </div>
+            return sortedItems.map((item, index) => {
+              const orderDateTime = parseDate(item.orderDate);
+              const elapsedMs = currentTime - orderDateTime;
+              const formattedTime = formatDuration(elapsedMs);
 
-                <div className={style.itemAccompaniment}>
-                  <h5>Acompanhamentos:</h5>
-                  {item.sideDishes && item.sideDishes.length > 0 ? (
-                    <div className={style.sideDishes}>
-                      {item.sideDishes.map((side, sIndex) => (
-                        <span key={sIndex}>{side.name}{sIndex < item.sideDishes.length - 1 ? ', ' : ''}</span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>Sem acompanhamentos</p>
-                  )}
-                  {item.size && <p>Tamanho: <strong>{item.size}</strong></p>}
-                </div>
+              return (
+                <div
+                  className={`${style.kitchenItemRow} ${item.cancelRequested ? style.cancelRequestedRow : ''}`}
+                  key={`${item.parentRequestId}-${item.id}-${index}`}
+                  style={item.cancelRequested ? { border: '3px solid red', backgroundColor: '#fff5f5' } : {}}
+                >
+                  <div className={style.itemInfo}>
+                    <h4>{item.name}</h4>
+                    {item.cancelRequested && (
+                      <p style={{ color: 'red', fontWeight: 'bold', fontSize: '1.2rem' }}>⚠️ ITEM CANCELADO PELO GARÇOM</p>
+                    )}
+                    <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
+                    {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
+                    <p><span>Data:</span> {item.orderDate}</p>
+                    <p style={{ fontWeight: 'bold', color: 'blue' }}><span>Tempo:</span> {formattedTime}</p>
+                  </div>
 
-                <div className={style.itemActions}>
-                  <button
-                    disabled={item.pronto}
-                    className={item.pronto ? style.done : style.pendent}
-                    onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'pronto')}
-                  >
-                    Pronto
-                  </button>
-                  <button
-                    disabled={item.entregue || item.cancelRequested}
-                    className={item.entregue ? style.done : style.pendent}
-                    onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'entregue')}
-                  >
-                    Entregue
-                  </button>
-                  {item.cancelRequested ? (
+                  <div className={style.itemAccompaniment}>
+                    <h5>Acompanhamentos:</h5>
+                    {item.sideDishes && item.sideDishes.length > 0 ? (
+                      <div className={style.sideDishes}>
+                        {item.sideDishes.map((side, sIndex) => (
+                          <span key={sIndex}>{side.name}{sIndex < item.sideDishes.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>Sem acompanhamentos</p>
+                    )}
+                    {item.size && <p>Tamanho: <strong>{item.size}</strong></p>}
+                  </div>
+
+                  <div className={style.itemActions}>
                     <button
-                      className={style.pendent}
-                      style={{ backgroundColor: 'red', color: 'white', fontWeight: 'bold' }}
-                      onClick={() => handleConfirmCancellation(item.parentRequestId, item.indexInRequest, requestsDoneList.find(r => r.id === item.parentRequestId)?.idUser)}
+                      disabled={item.pronto}
+                      className={item.pronto ? style.done : style.pendent}
+                      onClick={() => handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'pronto')}
                     >
-                      Confirmar Cancelamento
+                      Pronto
                     </button>
-                  ) : (
                     <button
-                      onClick={() => setRecipeModal({ openModal: true, id: item.id })}
-                      className="btn btn-warning"
+                      disabled={item.entregue || item.cancelRequested}
+                      className={item.entregue ? style.done : style.pendent}
+                      onClick={() => {
+                        const duration = currentTime - parseDate(item.orderDate);
+                        const formattedDurationStr = `tempo levado: ${formatDuration(duration)}`;
+                        handleToggleItemStatus(item.parentRequestId, item.indexInRequest, 'entregue', { tempo_levado: formattedDurationStr });
+                      }}
                     >
-                      Receita
+                      Entregue
                     </button>
-                  )}
+                    {item.cancelRequested ? (
+                      <button
+                        className={style.pendent}
+                        style={{ backgroundColor: 'red', color: 'white', fontWeight: 'bold' }}
+                        onClick={() => handleConfirmCancellation(item.parentRequestId, item.indexInRequest, requestsDoneList.find(r => r.id === item.parentRequestId)?.idUser)}
+                      >
+                        Confirmar Cancelamento
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setRecipeModal({ openModal: true, id: item.id })}
+                        className="btn btn-warning"
+                      >
+                        Receita
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ));
+              );
+            });
           })()}
       </div>
 
