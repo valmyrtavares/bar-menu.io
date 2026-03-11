@@ -132,7 +132,6 @@ const RequestModal = () => {
         }
         console.log('order Storaged   ', orderStoraged);
       }
-      setIsSubmitting(hasRequest());
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -171,13 +170,6 @@ const RequestModal = () => {
     }
   };
 
-  const hasRequest = () => {
-    if (userData.request.length > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  };
 
   React.useEffect(() => {
     let unsubscribe;
@@ -360,9 +352,10 @@ const RequestModal = () => {
       }
       setWarningMsg(true);
     }
+    // Sempre libera o status após 2 segundos se não houver navegação ou conclusão antes
     setTimeout(() => {
       setIsSubmitting(false);
-      isProcessing.current = false; // Libera o botão novamente após um tempo
+      isProcessing.current = false;
     }, 2000);
   };
 
@@ -465,98 +458,104 @@ const RequestModal = () => {
       }
     } catch (error) {
       console.error('Erro ao adicionar pedido:', error);
+      setIsSubmitting(false);
+      isProcessing.current = false;
     }
   };
 
   //send request with finel price
   const addRequestUserToten = async (id) => {
-    if (id) {
-      const data = await getOneItemColleciton('user', id);
+    try {
+      if (id) {
+        setIsSubmitting(true);
+        const data = await getOneItemColleciton('user', id);
+        // ... rest of the function (condensed for tool usage)
+        const storedRequests = localStorage.getItem('backorder');
+        const previousRequests = storedRequests ? JSON.parse(storedRequests) : [];
 
-      // Recuperar os pedidos do anonymous, se existirem
-      const storedRequests = localStorage.getItem('backorder');
-      const previousRequests = storedRequests ? JSON.parse(storedRequests) : [];
-
-      const userNewRequest = {
-        name:
-          data.name === 'anonimo' || data.name === 'anonymous'
-            ? data.fantasyName
-            : data.name,
-        idUser: data.id,
-        done: true,
-        cpfForInvoice: cpfForInvoice ? cpfForInvoice : '',
-        paymentDone:
-          methodPayment &&
-            methodPayment !== 'CASH' &&
-            methodPayment !== 'desabled' &&
-            methodPayment !== 'ABORTED' &&
-            methodPayment !== 'REJECTED'
-            ? true
-            : false, // Verifica se o método de pagamento foi selecionado
-        paymentMethod: methodPayment, // Armazena o método de pagamento selecionado
-        // Dados completos da transação para nota fiscal
-        paymentDetails: paymentTransactionData ? {
-          idPayer: paymentTransactionData.idPayer,
-          cardBrand: paymentTransactionData.cardBrand, // VISA, MASTERCARD, etc.
-          cardBrandCode: paymentTransactionData.cardBrandCode,
-          nsu: paymentTransactionData.nsu, // NSU principal
-          nsuAuthorizer: paymentTransactionData.nsuAuthorizer, // NSU do autorizador
-          authorizationCode: paymentTransactionData.authorizationCode, // Código de autorização
-          transactionDateTime: paymentTransactionData.transactionDateTime, // Data/hora
-          acquirer: paymentTransactionData.acquirer, // STONE, CIELO, etc.
-          acquirerCNPJ: paymentTransactionData.acquirerCNPJ,
-          value: paymentTransactionData.value,
-          installments: paymentTransactionData.installments,
-          terminalId: paymentTransactionData.terminalId,
-          paymentMethod: paymentTransactionData.paymentMethod,
-          paymentType: paymentTransactionData.paymentType,
-          customerReceipt: paymentTransactionData.customerReceipt,
-          shopReceipt: paymentTransactionData.shopReceipt,
-        } : null,
-        // recipe: item.recipe ? item.recipe : {},
-        orderDelivered: false,
-        request: previousRequests.map((item, idx) => ({
-          ...item,
-          sentToKitchen: true,
-          sentToKitchenTime: takeDataTime(),
-          indexInRequest: idx
-        })),
-        finalPriceRequest: finalPriceRequest,
-        idPayer: idPayerRef.current,
-        dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
-        countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
-        tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
-      };
-      //global.setUserNewRequest(userNewRequest);
-      localStorage.removeItem('backorder');
-      if (userNewRequest) {
-        const cleanedUserNewRequest = cleanObject(userNewRequest);
-        if (global.orderBeingEdited) {
-          const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
-          await updateDoc(requestDocRef, cleanedUserNewRequest);
-          global.setOrderBeingEdited(null);
-          localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV após editar
-
-          const userDocRef = doc(db, 'user', id);
-          const updatedRequests = data.request.map((item, idx) => ({
+        const userNewRequest = {
+          name:
+            data.name === 'anonimo' || data.name === 'anonymous'
+              ? data.fantasyName
+              : data.name,
+          idUser: data.id,
+          done: true,
+          cpfForInvoice: cpfForInvoice ? cpfForInvoice : '',
+          paymentDone:
+            methodPayment &&
+              methodPayment !== 'CASH' &&
+              methodPayment !== 'desabled' &&
+              methodPayment !== 'ABORTED' &&
+              methodPayment !== 'REJECTED'
+              ? true
+              : false,
+          paymentMethod: methodPayment,
+          paymentDetails: paymentTransactionData ? {
+            idPayer: paymentTransactionData.idPayer,
+            cardBrand: paymentTransactionData.cardBrand,
+            cardBrandCode: paymentTransactionData.cardBrandCode,
+            nsu: paymentTransactionData.nsu,
+            nsuAuthorizer: paymentTransactionData.nsuAuthorizer,
+            authorizationCode: paymentTransactionData.authorizationCode,
+            transactionDateTime: paymentTransactionData.transactionDateTime,
+            acquirer: paymentTransactionData.acquirer,
+            acquirerCNPJ: paymentTransactionData.acquirerCNPJ,
+            value: paymentTransactionData.value,
+            installments: paymentTransactionData.installments,
+            terminalId: paymentTransactionData.terminalId,
+            paymentMethod: paymentTransactionData.paymentMethod,
+            paymentType: paymentTransactionData.paymentType,
+            customerReceipt: paymentTransactionData.customerReceipt,
+            shopReceipt: paymentTransactionData.shopReceipt,
+          } : null,
+          orderDelivered: false,
+          request: previousRequests.map((item, idx) => ({
             ...item,
             sentToKitchen: true,
-            parentRequestId: global.orderBeingEdited.id,
+            sentToKitchenTime: takeDataTime(),
             indexInRequest: idx
-          }));
-          await updateDoc(userDocRef, { request: updatedRequests });
-        } else {
-          const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
-          const userDocRef = doc(db, 'user', id);
-          const updatedRequests = data.request.map((item, idx) => ({
-            ...item,
-            sentToKitchen: true,
-            parentRequestId: docRef.id,
-            indexInRequest: idx
-          }));
-          await updateDoc(userDocRef, { request: updatedRequests });
+          })),
+          finalPriceRequest: finalPriceRequest,
+          idPayer: idPayerRef.current,
+          dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
+          countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
+          tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
+        };
+
+        localStorage.removeItem('backorder');
+        if (userNewRequest) {
+          const cleanedUserNewRequest = cleanObject(userNewRequest);
+          if (global.orderBeingEdited) {
+            const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
+            await updateDoc(requestDocRef, cleanedUserNewRequest);
+            global.setOrderBeingEdited(null);
+            localStorage.removeItem('tableNumber');
+
+            const userDocRef = doc(db, 'user', id);
+            const updatedRequests = data.request.map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              parentRequestId: global.orderBeingEdited.id,
+              indexInRequest: idx
+            }));
+            await updateDoc(userDocRef, { request: updatedRequests });
+          } else {
+            const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+            const userDocRef = doc(db, 'user', id);
+            const updatedRequests = data.request.map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              parentRequestId: docRef.id,
+              indexInRequest: idx
+            }));
+            await updateDoc(userDocRef, { request: updatedRequests });
+          }
         }
       }
+    } catch (error) {
+      console.error('Erro ao adicionar pedido Toten:', error);
+      setIsSubmitting(false);
+      isProcessing.current = false;
     }
   };
 
@@ -1033,7 +1032,7 @@ const RequestModal = () => {
       {isTableClient && (
         <div className="btnFinalRequest" style={{ marginTop: '10px', marginBottom: '10px' }}>
           <button
-            disabled={isSubmitting || (userData && userData.request && userData.request.filter(item => !item.sentToKitchen).length === 0)}
+            disabled={isSubmitting || !userData || (userData.request && userData.request.filter(item => !item.sentToKitchen).length === 0)}
             className="send-request"
             onClick={sendOrderToKitchenOnly}
           >
