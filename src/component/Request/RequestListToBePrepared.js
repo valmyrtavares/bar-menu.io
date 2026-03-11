@@ -1137,17 +1137,13 @@ const RequestListToBePrepared = ({ title }) => {
       );
 
       const userDocRef = doc(db, 'user', item.idUser);
-      const userDocSnap = await getDoc(userDocRef);
-      let currentRequests = [];
-      if (userDocSnap.exists() && userDocSnap.data().request) {
-        currentRequests = userDocSnap.data().request;
-      }
+      // Aqui o problema reportado: o 'item.request' que vem da base já contém o pedido exato que queremos editar.
+      // E ao adicionar a array 'request' do 'user' novamente por cima do 'item.request', as informações dobram.
+      // A solução é recarregar no user.request APENAS os itens da requisição atual que está sendo editada.
 
-      if (item.request && item.request.length > 0) {
-        currentRequests.push(...item.request);
-      }
-
-      const cleanArray = currentRequests.map(r => cleanObject(r));
+      const cleanArray = item.request && item.request.length > 0
+        ? item.request.map(r => cleanObject(r))
+        : [];
 
       await updateDoc(userDocRef, {
         request: cleanArray,
