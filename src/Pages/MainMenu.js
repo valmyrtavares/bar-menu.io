@@ -36,12 +36,14 @@ function MainMenu() {
   React.useEffect(() => {
     if (tableNumber) {
       localStorage.setItem('tableNumber', tableNumber);
+    } else if (global.isInitialLoad && window.location.pathname === '/') {
+      localStorage.removeItem('tableNumber');
     }
     // Removido o else que limpava o tableNumber para garantir 
     // que ele persista mesmo se o usuário recarregar a página 
     // ou navegar internamente.
     global.setIsInitialLoad(false);
-  }, [tableNumber]);
+  }, [tableNumber, global.isInitialLoad]);
 
   React.useEffect(() => {
     checkToten(); // Verifica se o toten existe no localStorage e define o estado global isToten
