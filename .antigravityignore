@@ -1,0 +1,34 @@
+# Dependências (O maior vilão de tokens)
+node_modules/
+bower_components/
+
+# Builds e Saídas (A IA não precisa ler código compilado)
+dist/
+build/
+.next/
+out/
+
+# Arquivos de Log e Cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.cache/
+
+# Git e Configurações de IDE
+.git/
+.vscode/
+.idea/
+
+# Mídias e Assets (IA de código não precisa ler binários)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.mp4
+*.pdf
+
+# Variáveis de ambiente (Segurança!)
+.env
+.env.local

@@ -135,7 +135,8 @@ const RequestListToBePrepared = ({ title }) => {
                 if (uReq.parentRequestId === item.id) {
                   const match = updatedRequests.find((r) => r.indexInRequest === uReq.indexInRequest);
                   if (match) {
-                    return match;
+                    // Preserve the 'status' field which is used by RequestModal
+                    return { ...uReq, ...match, status: uReq.status || match.status };
                   }
                 }
                 return uReq;
