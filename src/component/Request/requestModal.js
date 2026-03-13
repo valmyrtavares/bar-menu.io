@@ -30,6 +30,8 @@ import { GlobalContext } from '../../GlobalContext';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 //import { cardClasses } from "@mui/material";
 import { getAnonymousUser } from '../../Hooks/useEnsureAnonymousUser.js';
+import BillFeedbackPopup from './BillFeedbackPopup';
+import BillSummaryPopup from './BillSummaryPopup';
 import { TRUE } from 'sass';
 
 const RequestModal = () => {
@@ -50,6 +52,12 @@ const RequestModal = () => {
   const [errorPaymentMessage, setErrorPaymentMessage] = React.useState('false');
   const [autoPaymentMachineOn, setAutoPaymentMachineOn] = React.useState(true);
   const [totenRejectPaymentMessage, setTotenRejectPaymentMessage] = React.useState(false);
+  const [billPopUpStep, setBillPopUpStep] = React.useState(0); // 0: closed, 1: ratings, 2: bill summary
+  const [serviceRating, setServiceRating] = React.useState(0);
+  const [foodRating, setFoodRating] = React.useState(0);
+  const [waiterComment, setWaiterComment] = React.useState('');
+  const [includeServiceCharge, setIncludeServiceCharge] = React.useState(true);
+  const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
 
   // Waiter Call Feature State
   const [waiterCallActive, setWaiterCallActive] = React.useState(false);
@@ -141,6 +149,19 @@ const RequestModal = () => {
       checkWaiterCallStatus();
     }
     console.log('userData mudou:', userData);
+  }, [userData]);
+
+  // Reset payment processing if order is cleared/paid by PDV (requests array becomes empty or null)
+  React.useEffect(() => {
+    if (isProcessingPayment && (!userData?.request || userData.request.length === 0)) {
+      setIsProcessingPayment(false);
+      setBillPopUpStep(0);
+    }
+  }, [userData, isProcessingPayment]);
+
+  const allRequestsReady = React.useMemo(() => {
+    if (!userData || !userData.request || userData.request.length === 0) return false;
+    return userData.request.every(item => item.status === 'Pronto');
   }, [userData]);
 
   const checkWaiterCallStatus = async () => {
@@ -1042,13 +1063,39 @@ const RequestModal = () => {
       )}
       <div className="btnFinalRequest">
         <button
-          disabled={isSubmitting}
+          disabled={isSubmitting || (isTableClient && !allRequestsReady)}
           className="send-request"
-          onClick={openRegisterPopup}
+          onClick={isTableClient ? () => setBillPopUpStep(1) : openRegisterPopup}
         >
-          Finalizar
+          {isTableClient ? "Pedir a conta" : "Finalizar"}
         </button>
       </div>
+
+      {/* Bill Popups Refactored */}
+      {billPopUpStep === 1 && (
+        <BillFeedbackPopup 
+          serviceRating={serviceRating}
+          setServiceRating={setServiceRating}
+          foodRating={foodRating}
+          setFoodRating={setFoodRating}
+          waiterComment={waiterComment}
+          setWaiterComment={setWaiterComment}
+          onCancel={() => setBillPopUpStep(0)}
+          onConfirm={() => setBillPopUpStep(2)}
+        />
+      )}
+
+      {billPopUpStep === 2 && (
+        <BillSummaryPopup 
+          requests={userData.request}
+          subtotal={finalPriceRequest}
+          includeServiceCharge={includeServiceCharge}
+          setIncludeServiceCharge={setIncludeServiceCharge}
+          isProcessingPayment={isProcessingPayment}
+          onBack={() => setBillPopUpStep(1)}
+          onPay={() => setIsProcessingPayment(true)}
+        />
+      )}
     </section>
   );
 };

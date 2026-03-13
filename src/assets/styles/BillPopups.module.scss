@@ -1,0 +1,229 @@
+@import 'variables';
+
+.billPopupOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.billPopup {
+    background-color: var(--bg-color); /* Vinho do sistema */
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.9);
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 3px solid var(--btn-color); /* Amarelo do botão */
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 25px;
+        color: var(--font-color); /* Off-white */
+        font-family: var(--title-font);
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+}
+
+.ratingSection {
+    margin-bottom: 25px;
+    text-align: center;
+
+    p {
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: var(--btn-color);
+        font-family: var(--title-font);
+        font-size: 1.1rem;
+    }
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    font-size: 45px;
+    cursor: pointer;
+}
+
+.star {
+    color: rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s, color 0.2s;
+
+    &:hover {
+        transform: scale(1.2);
+    }
+
+    &.active {
+        color: var(--btn-color);
+    }
+}
+
+.commentSection {
+    margin-bottom: 20px;
+    
+    p {
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: var(--font-color);
+    }
+
+    textarea {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        font-family: var(--text-font);
+        resize: none;
+        box-sizing: border-box;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #333;
+        font-size: 1rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--btn-color);
+        }
+    }
+}
+
+.billTableContainer {
+    margin-bottom: 25px;
+    border: 2px solid var(--btn-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: var(--font-color); /* Fundo claro para contraste */
+}
+
+.billTable {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        color: #333;
+        font-weight: bold;
+    }
+
+    th {
+        background-color: rgba(0, 0, 0, 0.05);
+        font-weight: 800;
+        color: var(--bg-color);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+}
+
+.billingDetails {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 3px solid var(--btn-color);
+
+    div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 1.25rem;
+        color: var(--font-color);
+        font-family: var(--title-font);
+        font-weight: bold;
+    }
+}
+
+.serviceCharge {
+    label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: var(--font-color);
+
+        input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--btn-color);
+        }
+    }
+}
+
+.totalFinal {
+    font-weight: 900;
+    font-size: 1.8rem !important;
+    color: var(--btn-color) !important;
+    margin-top: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px dashed var(--btn-color);
+}
+
+.popupActions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 35px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.actionBtn {
+    flex: 1;
+    min-width: 120px;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none !important;
+    font-family: var(--title-font);
+    font-size: 1.1rem;
+    transition: all 0.2s;
+    background-color: var(--btn-color) !important;
+    color: var(--title-font-color) !important;
+    height: auto !important;
+    margin: 0 !important;
+
+    &:hover:not(:disabled) {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+
+    &:disabled {
+        filter: grayscale(0.8) brightness(0.7);
+        cursor: not-allowed;
+        transform: none;
+    }
+}
+
+.cancelBtn {
+    filter: brightness(0.8);
+}
+
+.waiterComingMessage {
+    width: 100%;
+    text-align: center;
+    margin-top: 25px;
+    color: var(--btn-color);
+    font-family: var(--title-font);
+    font-size: 1.4rem;
+    font-weight: 900;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
