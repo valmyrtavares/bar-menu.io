@@ -103,12 +103,33 @@ const RequestList = () => {
                 <span>Tipo de pagamento</span> {item.paymentMethod}
               </p>
               <p>
+                <span>Itens R$ </span> {(item.finalPriceRequest - (item.serviceChargeValue || 0))},00
+              </p>
+              {item.serviceChargeEnabled && (
+                <p style={{ color: 'var(--btn-color)', fontWeight: 'bold' }}>
+                  <span>Taxa de Serviço (10%) R$ </span> {item.serviceChargeValue},00
+                </p>
+              )}
+              <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
                 <span>Valor Total R$ </span> {item.finalPriceRequest},00
               </p>
               <p>
-                {' '}
                 <span>Data</span> {item.dateTime}
               </p>
+              
+              {item.customerFeedback && (
+                <div style={{ marginTop: '10px', padding: '8px', borderLeft: '3px solid var(--btn-color)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+                   {item.customerFeedback.service && (
+                    <p style={{ fontSize: '0.85rem' }}><span>Avaliação Serviço:</span> {item.customerFeedback.service}</p>
+                   )}
+                   {item.customerFeedback.product && (
+                    <p style={{ fontSize: '0.85rem' }}><span>Avaliação Produto:</span> {item.customerFeedback.product}</p>
+                   )}
+                   {item.customerFeedback.comment && (
+                    <p style={{ fontSize: '0.85rem', fontStyle: 'italic' }}><span>Comentário:</span> "{item.customerFeedback.comment}"</p>
+                   )}
+                </div>
+              )}
               <p className="idUser">
                 <span></span> {item.idUser}
               </p>

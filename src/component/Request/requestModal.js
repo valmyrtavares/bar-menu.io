@@ -59,6 +59,91 @@ const RequestModal = () => {
   const [includeServiceCharge, setIncludeServiceCharge] = React.useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
 
+  const syncServiceChargeToFirestore = async (isEnabled) => {
+    try {
+      const currentTable = localStorage.getItem('tableNumber');
+      if (userData && currentTable) {
+        const q = query(
+          collection(db, 'requests'),
+          where('tableNumber', '==', currentTable),
+          where('idUser', '==', userData.id),
+          where('orderDelivered', '==', false)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const openOrderDoc = querySnapshot.docs[0];
+          const requestDocRef = doc(db, 'requests', openOrderDoc.id);
+          const itemsTotal = userData.request.reduce((acc, curr) => acc + curr.finalPrice, 0);
+
+          await updateDoc(requestDocRef, {
+            serviceChargeEnabled: isEnabled,
+            serviceChargeValue: isEnabled ? (itemsTotal * 0.1) : 0,
+            finalPriceRequest: isEnabled ? (itemsTotal * 1.1) : itemsTotal
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing service charge:', error);
+    }
+  };
+
+  const handleServiceChargeChange = (isEnabled) => {
+    setIncludeServiceCharge(isEnabled);
+    syncServiceChargeToFirestore(isEnabled);
+  };
+
+  const handlePaymentFinalization = async () => {
+    setIsProcessingPayment(true);
+    try {
+      const currentTable = localStorage.getItem('tableNumber');
+      if (userData && currentTable) {
+        const q = query(
+          collection(db, 'requests'),
+          where('tableNumber', '==', currentTable),
+          where('idUser', '==', userData.id),
+          where('orderDelivered', '==', false)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const openOrderDoc = querySnapshot.docs[0];
+          const requestDocRef = doc(db, 'requests', openOrderDoc.id);
+
+          const itemsTotal = userData.request.reduce((acc, curr) => acc + curr.finalPrice, 0);
+          const totalFinalWithService = includeServiceCharge 
+            ? itemsTotal * 1.1 
+            : itemsTotal;
+
+          const feedback = {};
+          if (serviceRating > 0) feedback.service = serviceRating;
+          if (foodRating > 0) feedback.product = foodRating;
+          if (waiterComment.trim()) {
+            const words = waiterComment.trim().split(/\s+/);
+            const truncatedComment = words.length > 5 
+              ? words.slice(0, 5).join(' ') + '...' 
+              : waiterComment.trim();
+            feedback.comment = truncatedComment;
+            feedback.fullComment = waiterComment.trim();
+          }
+
+          const updateData = {};
+          if (Object.keys(feedback).length > 0) {
+            updateData.customerFeedback = feedback;
+          }
+
+          updateData.serviceChargeEnabled = includeServiceCharge;
+          updateData.serviceChargeValue = includeServiceCharge ? (itemsTotal * 0.1) : 0;
+          updateData.finalPriceRequest = totalFinalWithService;
+
+          await updateDoc(requestDocRef, updateData);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+    }
+  };
+
   // Waiter Call Feature State
   const [waiterCallActive, setWaiterCallActive] = React.useState(false);
   const [waiterCallMessage, setWaiterCallMessage] = React.useState(false);
@@ -1090,10 +1175,10 @@ const RequestModal = () => {
           requests={userData.request}
           subtotal={finalPriceRequest}
           includeServiceCharge={includeServiceCharge}
-          setIncludeServiceCharge={setIncludeServiceCharge}
+          setIncludeServiceCharge={handleServiceChargeChange}
           isProcessingPayment={isProcessingPayment}
           onBack={() => setBillPopUpStep(1)}
-          onPay={() => setIsProcessingPayment(true)}
+          onPay={handlePaymentFinalization}
         />
       )}
     </section>

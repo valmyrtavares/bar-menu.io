@@ -1344,7 +1344,35 @@ const RequestListToBePrepared = ({ title }) => {
                     <p>
                       <span>Data</span> {item.dateTime}
                     </p>
-                    <h2>Valor final R$ {item.finalPriceRequest},00</h2>
+                    <h4 style={{ textAlign: 'center', margin: '5px 0', borderTop: '1px dashed #ccc', paddingTop: '10px' }}>
+                      Itens: R$ {(item.finalPriceRequest - (item.serviceChargeValue || 0))},00
+                    </h4>
+                    {item.serviceChargeEnabled && (
+                      <h4 style={{ textAlign: 'center', margin: '5px 0', color: 'var(--btn-color)' }}>
+                        Taxa de Serviço (10%): R$ {item.serviceChargeValue},00
+                      </h4>
+                    )}
+                    <h2 style={{ marginTop: '5px' }}>Valor final R$ {item.finalPriceRequest},00</h2>
+                    
+                    {item.customerFeedback && (
+                      <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '8px', borderLeft: '5px solid var(--btn-color)' }}>
+                        {item.customerFeedback.service && (
+                          <p style={{ fontSize: '0.9rem', textAlign: 'left', marginBottom: '4px' }}>
+                            <span>Avaliação do serviço:</span> {item.customerFeedback.service} / 5
+                          </p>
+                        )}
+                        {item.customerFeedback.product && (
+                          <p style={{ fontSize: '0.9rem', textAlign: 'left', marginBottom: '4px' }}>
+                            <span>Avaliação do produto:</span> {item.customerFeedback.product} / 5
+                          </p>
+                        )}
+                        {item.customerFeedback.comment && (
+                          <p style={{ fontSize: '0.9rem', textAlign: 'left', fontStyle: 'italic', marginTop: '8px' }}>
+                            <span>Comentário:</span> "{item.customerFeedback.comment}"
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className={style.customerProfileButton}>
                       <ButtonCustomerProfile
                         item={item}
