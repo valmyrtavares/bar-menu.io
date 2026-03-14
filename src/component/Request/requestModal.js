@@ -58,6 +58,7 @@ const RequestModal = () => {
   const [waiterComment, setWaiterComment] = React.useState('');
   const [includeServiceCharge, setIncludeServiceCharge] = React.useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
+  const [activeRequestDocId, setActiveRequestDocId] = React.useState(null);
 
   const syncServiceChargeToFirestore = async (isEnabled) => {
     try {
@@ -136,6 +137,14 @@ const RequestModal = () => {
           updateData.serviceChargeValue = includeServiceCharge ? (itemsTotal * 0.1) : 0;
           updateData.finalPriceRequest = totalFinalWithService;
 
+          // Adiciona a notificação de pagamento para o PDV
+          updateData.paymentCall = {
+            active: true,
+            tableNumber: currentTable,
+            callerName: userData.name || 'Cliente'
+          };
+
+          setActiveRequestDocId(openOrderDoc.id);
           await updateDoc(requestDocRef, updateData);
         }
       }
@@ -143,6 +152,25 @@ const RequestModal = () => {
       console.error('Error saving feedback:', error);
     }
   };
+
+  // Close popups when order is finalized by waiter
+  React.useEffect(() => {
+    if (!isProcessingPayment || !activeRequestDocId) return;
+
+    const requestDocRef = doc(db, 'requests', activeRequestDocId);
+
+    const unsubscribe = onSnapshot(requestDocRef, (docSnap) => {
+      if (docSnap.exists() && docSnap.data().orderDelivered === true) {
+        // Order was finalized by waiter. Close the process.
+        console.log('Active order finalized by waiter. Closing popups.');
+        setIsProcessingPayment(false);
+        setBillPopUpStep(0); // Fecha os popups completamente
+        setActiveRequestDocId(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isProcessingPayment, activeRequestDocId]);
 
   // Waiter Call Feature State
   const [waiterCallActive, setWaiterCallActive] = React.useState(false);
@@ -238,11 +266,14 @@ const RequestModal = () => {
 
   // Reset payment processing if order is cleared/paid by PDV (requests array becomes empty or null)
   React.useEffect(() => {
-    if (isProcessingPayment && (!userData?.request || userData.request.length === 0)) {
-      setIsProcessingPayment(false);
-      setBillPopUpStep(0);
+    if (!userData?.request || userData.request.length === 0) {
+      if (billPopUpStep > 0) {
+        setIsProcessingPayment(false);
+        setBillPopUpStep(0);
+        setActiveRequestDocId(null);
+      }
     }
-  }, [userData, isProcessingPayment]);
+  }, [userData, billPopUpStep]);
 
   const allRequestsReady = React.useMemo(() => {
     if (!userData || !userData.request || userData.request.length === 0) return false;

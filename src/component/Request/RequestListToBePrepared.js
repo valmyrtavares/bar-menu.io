@@ -71,6 +71,7 @@ const RequestListToBePrepared = ({ title }) => {
 
   // NOVO: Estado para armazenar os chamados do garçom pendentes
   const [pendingWaiterCalls, setPendingWaiterCalls] = React.useState([]);
+  const [pendingPaymentCalls, setPendingPaymentCalls] = React.useState([]);
 
   const openFinalizarModal = (item) => {
     setShowFinalizarMessage(true);
@@ -83,10 +84,11 @@ const RequestListToBePrepared = ({ title }) => {
   };
 
   const confirmFinalizarPedido = async () => {
-    if (selectedItemToFinalize) {
-      await orderDelivery(selectedItemToFinalize);
+    const itemToFinalize = selectedItemToFinalize;
+    closeFinalizarModal(); // Fecha o modal imediatamente
+    if (itemToFinalize) {
+      await orderDelivery(itemToFinalize);
     }
-    closeFinalizarModal();
   };
 
   const getPostpaidButtonState = (item) => {
@@ -157,7 +159,7 @@ const RequestListToBePrepared = ({ title }) => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
-      let requestList = data.filter((item) => item.orderDelivered === false);
+      let requestList = data.filter((item) => !item.orderDelivered);
       requestList = requestSorter(requestList);
 
       setRequestDoneList(requestList);
@@ -171,6 +173,17 @@ const RequestListToBePrepared = ({ title }) => {
       setPendingWaiterCalls((prevCalls) => {
         const keepCalls = prevCalls.filter(pc => newWaiterCalls.some(nc => nc.id === pc.id));
         const addCalls = newWaiterCalls.filter(nc => !prevCalls.some(pc => pc.id === nc.id));
+        return [...keepCalls, ...addCalls];
+      });
+
+      // NOVO: Verificar chamados de PAGAMENTO pendentes
+      const newPaymentCalls = requestList.filter(
+        (req) => req.paymentCall && req.paymentCall.active === true
+      );
+
+      setPendingPaymentCalls((prevCalls) => {
+        const keepCalls = prevCalls.filter(pc => newPaymentCalls.some(nc => nc.id === pc.id));
+        const addCalls = newPaymentCalls.filter(nc => !prevCalls.some(pc => pc.id === nc.id));
         return [...keepCalls, ...addCalls];
       });
     });
@@ -1094,22 +1107,32 @@ const RequestListToBePrepared = ({ title }) => {
   };
 
   const orderDelivery = async (item) => {
-    if (item.name === 'anonimo' || item.name === 'anonymous') {
-      await deleteData('user', item.idUser);
-    } else if (item.idUser) {
-      const userRef = doc(db, 'user', item.idUser);
-      await updateDoc(userRef, { request: [] });
-    }
-    // first step
-    await updateIngredientsStock(item);
-
-    item.orderDelivered = true;
     try {
-      await setDoc(doc(db, 'requests', item.id), item);
-      console.log('Document successfully updated !');
-      fetchUserRequests();
+      // 1. Marcar como entregue IMEDIATAMENTE no Firestore para sumir da tela ativa
+      const requestRef = doc(db, 'requests', item.id);
+      await updateDoc(requestRef, { 
+        orderDelivered: true,
+        done: true // Garante que o status também reflita "feito"
+      });
+
+      console.log('Document marked as delivered. UI should update via listener.');
+
+      // 2. Limpar carrinho do usuário se for anônimo ou resetar se for fixo
+      if (item.name === 'anonimo' || item.name === 'anonymous') {
+        await deleteData('user', item.idUser);
+      } else if (item.idUser) {
+        const userRef = doc(db, 'user', item.idUser);
+        await updateDoc(userRef, { request: [] });
+      }
+
+      // 3. Atualizar estoque (processo mais pesado)
+      await updateIngredientsStock(item);
+      
+      console.log('Stock updated successfully!');
+      // fetchUserRequests(); // Removido: o listener de tempo real já cuida da atualização da lista
     } catch (error) {
-      console.log(error);
+      console.error('Erro ao finalizar pedido:', error);
+      alert('Houve um erro ao finalizar o pedido, mas os dados básicos foram salvos.');
     }
   };
 
@@ -1200,8 +1223,8 @@ const RequestListToBePrepared = ({ title }) => {
 
   return (
     <div>
-      {/* OVERLAY EXCLUSIVO DOS CHAMADOS DE GARÇOM - CENTRALIZADO E COM FUNDO ESCURO */}
-      {pendingWaiterCalls.length > 0 && (
+      {/* OVERLAY EXCLUSIVO DOS CHAMADOS DE GARÇOM E PAGAMENTO - CENTRALIZADO E COM FUNDO ESCURO */}
+      {(pendingWaiterCalls.length > 0 || pendingPaymentCalls.length > 0) && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -1216,6 +1239,7 @@ const RequestListToBePrepared = ({ title }) => {
           flexDirection: 'column',
           gap: '15px'
         }}>
+          {/* Chamados de Mesa */}
           {pendingWaiterCalls.map((callReq) => (
             <div key={callReq.id} style={{
               backgroundColor: '#f44336',
@@ -1235,13 +1259,9 @@ const RequestListToBePrepared = ({ title }) => {
               <button
                 onClick={async () => {
                   try {
-                    // 1. Remove visualmente da tela local instântaneamente (Aparência suave pro usuário)
                     setPendingWaiterCalls(prev => prev.filter(p => p.id !== callReq.id));
-
-                    // 2. Busca o documento fresquinho pra ver se alguém já fechou
                     const docSnap = await getDoc(doc(db, 'requests', callReq.id));
                     if (docSnap.exists() && docSnap.data().waiterCall?.active === true) {
-                      // 3. Atualiza falso no banco só a primeira vez
                       await updateDoc(doc(db, 'requests', callReq.id), {
                         'waiterCall.active': false
                       });
@@ -1251,6 +1271,51 @@ const RequestListToBePrepared = ({ title }) => {
                 style={{
                   backgroundColor: 'white',
                   color: '#f44336',
+                  border: 'none',
+                  padding: '12px',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  cursor: 'pointer'
+                }}
+              >
+                OK
+              </button>
+            </div>
+          ))}
+
+          {/* Chamados de PAGAMENTO */}
+          {pendingPaymentCalls.map((payReq) => (
+            <div key={payReq.id} style={{
+              backgroundColor: '#ff9800', // Cor laranja para pagamento
+              color: 'white',
+              padding: '25px 30px',
+              borderRadius: '8px',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              minWidth: '350px',
+              textAlign: 'center'
+            }}>
+              <h3 style={{ margin: '0 0 15px 0', fontSize: '1.5rem' }}>💰 Solicitação de Pagamento</h3>
+              <p style={{ margin: '0 0 20px 0', fontSize: '1.2rem' }}>
+                Dirija-se a mesa <strong>{payReq.paymentCall?.tableNumber}</strong> para finalizar o pagamento.
+              </p>
+              <button
+                onClick={async () => {
+                  try {
+                    setPendingPaymentCalls(prev => prev.filter(p => p.id !== payReq.id));
+                    const docSnap = await getDoc(doc(db, 'requests', payReq.id));
+                    if (docSnap.exists() && docSnap.data().paymentCall?.active === true) {
+                      await updateDoc(doc(db, 'requests', payReq.id), {
+                        'paymentCall.active': false
+                      });
+                    }
+                  } catch (e) { console.error('Error fechar chamado pagamento', e) }
+                }}
+                style={{
+                  backgroundColor: 'white',
+                  color: '#ff9800',
                   border: 'none',
                   padding: '12px',
                   borderRadius: '4px',
