@@ -160,7 +160,7 @@ const TotenRegisterPopup = ({
             name: recoveredClient.name,
           }),
         );
-        setCurrentUser(recoveredClient);
+        setCurrentUser(recoveredClient.id);
         setOpenCloseTotenPopup(false);
         global.isToten ? onChoose() : sendRequestToKitchen();
 
@@ -204,7 +204,7 @@ const TotenRegisterPopup = ({
 
         global.isToten ? onChoose() : sendRequestToKitchen();
         // Atualiza o estado do cliente atual
-        setCurrentUser(currentUser);
+        setCurrentUser(currentUser.id);
 
         // Fecha o popup
         setOpenCloseTotenPopup(false);

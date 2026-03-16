@@ -138,7 +138,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
           message: {
             command: 'PAYMENT',
@@ -183,7 +183,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
         }),
       });
