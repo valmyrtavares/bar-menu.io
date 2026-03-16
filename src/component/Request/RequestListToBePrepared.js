@@ -106,6 +106,12 @@ const RequestListToBePrepared = ({ title }) => {
     }
   };
 
+  const isOrderFullyFinished = (item) => {
+    if (!item.request || item.request.length === 0) return false;
+    // Um pedido está totalmente finalizado se todos os pratos estão PRONTOS e ENTREGUES pela cozinha
+    return item.request.every(req => req.pronto && req.entregue);
+  };
+
   const handleWaiterDelivery = async (item) => {
     const currentState = getPostpaidButtonState(item);
     if (currentState.label === 'NOVA ENTREGA') {
@@ -473,13 +479,21 @@ const RequestListToBePrepared = ({ title }) => {
   //   return;
   // };
   const getStatusAndColor = (item) => {
+    const fullyFinished = isOrderFullyFinished(item);
+
     if (!item?.paymentDone) return { status: 'Não pago', color: 'red' };
     if (item?.paymentDone === false && item?.done === true)
       return { status: 'Não pago', color: 'red' };
-    if (item?.paymentDone === true && item?.done === true)
+    
+    // Se o pagamento foi feito
+    if (item?.paymentDone === true) {
+      // Se já foi marcado como 'done' OU se todos os itens já estão prontos/entregues
+      if (item?.done === false || fullyFinished) {
+        return { status: 'Feito', color: 'green' };
+      }
       return { status: 'Pago', color: 'yellow' };
-    if (item?.paymentDone === true && item?.done === false)
-      return { status: 'Feito', color: 'green' };
+    }
+
     return { status: '', color: 'black' };
   };
 
@@ -1525,19 +1539,17 @@ const RequestListToBePrepared = ({ title }) => {
                         </button>
                       );
                     })() : (
-                      <button
-                        disabled={item.done || global.orderBeingEdited?.id === item.id}
-                        className={item.done ? style.pendent : style.done}
+                    <button
+                        disabled={item.done === false || isOrderFullyFinished(item) || global.orderBeingEdited?.id === item.id}
+                        className={(item.done === false || isOrderFullyFinished(item)) ? style.done : style.pendent}
                         onClick={() => RequestDone(item)}
                       >
                         Pronto
                       </button>
                     )}
                     <button
-                      disabled={!item.paymentDone || item.orderDelivered || global.orderBeingEdited?.id === item.id}
-                      className={
-                        item.orderDelivered ? style.done : style.pendent
-                      }
+                      disabled={!item.paymentDone || item.orderDelivered || global.orderBeingEdited?.id === item.id || !isOrderFullyFinished(item)}
+                      className={style.pendent}
                       onClick={() => openFinalizarModal(item)}
                     >
                       Finalizar
