@@ -337,6 +337,12 @@ export const requestSorter = (ObjList, direction) => {
   return sortedList;
 };
 
+export const isOrderFullyFinished = (item) => {
+  if (!item.request || item.request.length === 0) return false;
+  // Um pedido está totalmente finalizado se todos os pratos estão PRONTOS e ENTREGUES pela cozinha
+  return item.request.every((req) => req.pronto && req.entregue);
+};
+
 export const logToAnounimousInToten = (setNameClient) => {
   const noCustomer = {
     name: 'anonimo',

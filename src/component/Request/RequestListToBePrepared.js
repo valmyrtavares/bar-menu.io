@@ -22,6 +22,7 @@ import {
   getFirstFourLetters,
   requestSorter,
   firstNameClient,
+  isOrderFullyFinished,
 } from '../../Helpers/Helpers.js';
 import RecipeModal from './RecipeModal';
 
@@ -108,11 +109,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
     }
   };
 
-  const isOrderFullyFinished = (item) => {
-    if (!item.request || item.request.length === 0) return false;
-    // Um pedido está totalmente finalizado se todos os pratos estão PRONTOS e ENTREGUES pela cozinha
-    return item.request.every(req => req.pronto && req.entregue);
-  };
+  // isOrderFullyFinished importado de Helpers.js
 
   const handleWaiterDelivery = async (item) => {
     const currentState = getPostpaidButtonState(item);
@@ -1128,7 +1125,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       const requestRef = doc(db, 'requests', item.id);
       await updateDoc(requestRef, { 
         orderDelivered: true,
-        done: true // Garante que o status também reflita "feito"
+        done: false // Garantir que está como "Feito" ao finalizar para sumir corretamente do 'Em preparo' se houver lag
       });
 
       console.log('Document marked as delivered. UI should update via listener.');
@@ -1545,9 +1542,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       );
                     })() : (
                     <button
-                        disabled={item.done === false || isOrderFullyFinished(item) || global.orderBeingEdited?.id === item.id}
-                        className={(item.done === false || isOrderFullyFinished(item)) ? style.done : style.pendent}
-                        onClick={() => RequestDone(item)}
+                        disabled={true}
+                        className={isOrderFullyFinished(item) ? style.done : style.pendent}
                       >
                         Pronto
                       </button>

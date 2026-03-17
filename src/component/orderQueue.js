@@ -3,7 +3,11 @@ import { db } from '../config-firebase/firebase';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { fetchInDataChanges } from '../api/Api.js';
 import '../assets/styles/orderQueue.css';
-import { getFirstFourLetters, firstNameClient } from '../Helpers/Helpers.js';
+import {
+  getFirstFourLetters,
+  firstNameClient,
+  isOrderFullyFinished,
+} from '../Helpers/Helpers.js';
 import { requestSorter } from '../Helpers/Helpers.js';
 import { Link } from 'react-router-dom';
 import TransitionPopup from './Request/TrasitionPopup';
@@ -21,17 +25,25 @@ const OrderQueue = () => {
 
   React.useEffect(() => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
-      // Separando os dados em duas listas com base no campo `done`
+      // Filtrar apenas pedidos que NÃO foram entregues (finalizados)
+      const activeOrders = data.filter((item) => !item.orderDelivered);
 
-      let waitingLineData = data.filter((item) => item.done);
-      waitingLineData = requestSorter(waitingLineData);
-      let doneLineData = data.filter(
-        (item) => item.done === false && item.orderDelivered === false
+      // Separando os dados em duas listas com base no status de finalização
+      // Em preparo: done é true (vindo do modal) E ainda não está totalmente pronto na cozinha
+      let waitingLineData = activeOrders.filter(
+        (item) => item.done && !isOrderFullyFinished(item)
       );
+      waitingLineData = requestSorter(waitingLineData);
+
+      // Pronto: cozinha marcou tudo como pronto/entregue OU done foi setado como false manualmente
+      let doneLineData = activeOrders.filter(
+        (item) => item.done === false || isOrderFullyFinished(item)
+      );
+      doneLineData = requestSorter(doneLineData);
+
       console.log('data   ', data);
       console.log('doneLineData   ', doneLineData);
       console.log('waitingLineData   ', waitingLineData);
-      doneLineData = requestSorter(doneLineData);
 
       setWaitingLine(waitingLineData);
       setDoneLine(doneLineData);

@@ -71,7 +71,12 @@ const CreateCustomer = () => {
       const userId = await CheckUser('userMenu', false, global.packageTier);
       if (userId === '/') {
         global.setAuthorizated(true);
-        navigate(userId);
+        const table = localStorage.getItem('tableNumber');
+        if (table) {
+          navigate(`/${table}`);
+        } else {
+          navigate(userId);
+        }
       }
     }
     const fetchSalut = async () => {
@@ -128,7 +133,12 @@ const CreateCustomer = () => {
         })
         .then(() => {
           if (!pdv) {
-            navigate('/');
+            const table = localStorage.getItem('tableNumber');
+            if (table) {
+              navigate(`/${table}`);
+            } else {
+              navigate('/');
+            }
           } else {
             navigate('/admin/requestlist');
           }
@@ -183,7 +193,12 @@ const CreateCustomer = () => {
       })
       .then(() => {
         if (!pdv) {
-          navigate('/');
+          const table = localStorage.getItem('tableNumber');
+          if (table) {
+            navigate(`/${table}`);
+          } else {
+            navigate('/');
+          }
         } else {
           navigate('/admin/requestlist');
         }

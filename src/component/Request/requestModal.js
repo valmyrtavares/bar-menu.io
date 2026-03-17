@@ -556,7 +556,10 @@ const RequestModal = () => {
           const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
-          localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV após editar
+          // Só limpa o tableNumber se estivermos explicitamente no modo PDV/Admin
+          if (pdv || stylePdv) {
+            localStorage.removeItem('tableNumber');
+          }
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
           const updatedRequests = data.request.map((item, idx) => ({
@@ -666,24 +669,29 @@ const RequestModal = () => {
             const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
             await updateDoc(requestDocRef, cleanedUserNewRequest);
             global.setOrderBeingEdited(null);
-            localStorage.removeItem('tableNumber');
+            if (pdv || stylePdv) {
+              localStorage.removeItem('tableNumber');
+            }
 
             const userDocRef = doc(db, 'user', id);
             const updatedRequests = data.request.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               parentRequestId: global.orderBeingEdited.id,
-              indexInRequest: idx
+              indexInRequest: idx,
             }));
             await updateDoc(userDocRef, { request: updatedRequests });
           } else {
-            const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+            const docRef = await addDoc(
+              collection(db, 'requests'),
+              cleanedUserNewRequest,
+            );
             const userDocRef = doc(db, 'user', id);
             const updatedRequests = data.request.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               parentRequestId: docRef.id,
-              indexInRequest: idx
+              indexInRequest: idx,
             }));
             await updateDoc(userDocRef, { request: updatedRequests });
           }
@@ -790,7 +798,9 @@ const RequestModal = () => {
 
             if (global.orderBeingEdited) {
               global.setOrderBeingEdited(null);
-              localStorage.removeItem('tableNumber');
+              if (pdv || stylePdv) {
+                localStorage.removeItem('tableNumber');
+              }
             }
 
             orderAddedOrUpdated = true;
@@ -1012,7 +1022,9 @@ const RequestModal = () => {
 
       global.setOrderBeingEdited(null);
       global.setPdvRequest(false);
-      localStorage.removeItem('tableNumber'); // Limpa o contexto de mesa no PDV ao cancelar
+      if (pdv || stylePdv) {
+        localStorage.removeItem('tableNumber');
+      }
       navigate('/admin/requestlist');
     } catch (err) {
       console.error("Erro ao cancelar edição:", err);

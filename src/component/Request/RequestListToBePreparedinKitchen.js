@@ -20,6 +20,7 @@ import {
   getFirstFourLetters,
   requestSorter,
   firstNameClient,
+  isOrderFullyFinished,
 } from '../../Helpers/Helpers.js';
 import RecipeModal from './RecipeModal.js';
 
@@ -244,13 +245,21 @@ const RequestListToBePrepared = () => {
   //   return;
   // };
   const getStatusAndColor = (item) => {
+    const fullyFinished = isOrderFullyFinished(item);
+
     if (!item?.paymentDone) return { status: 'Não pago', color: 'red' };
     if (item?.paymentDone === false && item?.done === true)
       return { status: 'Não pago', color: 'red' };
-    if (item?.paymentDone === true && item?.done === true)
+    
+    // Se o pagamento foi feito
+    if (item?.paymentDone === true) {
+      // Se já foi marcado como 'done' OU se todos os itens já estão prontos/entregues
+      if (item?.done === false || fullyFinished) {
+        return { status: 'Feito', color: 'green' };
+      }
       return { status: 'Pago', color: 'yellow' };
-    if (item?.paymentDone === true && item?.done === false)
-      return { status: 'Feito', color: 'green' };
+    }
+
     return { status: '', color: 'black' };
   };
 
