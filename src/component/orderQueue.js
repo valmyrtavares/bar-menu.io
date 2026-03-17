@@ -18,6 +18,7 @@ const OrderQueue = () => {
   const [waitingLine, setWaitingLine] = React.useState([]);
   const [doneLine, setDoneLine] = React.useState([]);
   const [movingItem, setMovingItem] = React.useState(null);
+  const [soundEnabled, setSoundEnabled] = React.useState(true); // Tenta iniciar como habilitado
 
   // Guardar os estados anteriores das listas
   const prevDoneLine = React.useRef(doneLine);
@@ -86,7 +87,19 @@ const OrderQueue = () => {
 
   const playSound = () => {
     const audio = new Audio(audioFile); // Caminho para o som
-    audio.play();
+    audio.play().catch((error) => {
+      console.error("Autoplay bloqueado pelo navegador:", error);
+      setSoundEnabled(false); // Mostra o botão para o usuário ativar o som
+    });
+  };
+
+  const handleEnableSound = () => {
+    const audio = new Audio(audioFile);
+    audio.play().then(() => {
+      setSoundEnabled(true);
+    }).catch(err => {
+      console.error("Ainda não foi possível ativar o som:", err);
+    });
   };
 
   return (
@@ -96,6 +109,14 @@ const OrderQueue = () => {
         <Link to={localStorage.getItem('tableNumber') ? `/${localStorage.getItem('tableNumber')}` : "/"}>X</Link>
       </div>
       <p>Acompanhe abaixo o andamento e o status do seu pedido</p>
+
+      {!soundEnabled && (
+        <div className="sound-activation-container" onClick={handleEnableSound}>
+          <span>🔔 O som de alerta está bloqueado pelo navegador.</span>
+          <button>Ativar Som</button>
+        </div>
+      )}
+
       {movingItem && <TransitionPopup movingItem={movingItem} />}
 
       <div className="list-columns">

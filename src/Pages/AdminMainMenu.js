@@ -111,8 +111,8 @@ const AdminMainMenu = ({ children }) => {
 
             <NavLink
               to="/admin/customer"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={ packageTier !== 2 && packageTier !== 3 ? admin.disabledLink : '' }
+              onClick={(e) => packageTier !== 2 && packageTier !== 3 && e.preventDefault()}
             >
               Lista de Clientes
             </NavLink>
@@ -170,8 +170,8 @@ const AdminMainMenu = ({ children }) => {
             </NavLink>
             <NavLink
               to="/admin/promotions"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={ packageTier !== 2 && packageTier !== 3 ? admin.disabledLink : '' }
+              onClick={(e) => packageTier !== 2 && packageTier !== 3 && e.preventDefault()}
             >
               Promoções
             </NavLink>

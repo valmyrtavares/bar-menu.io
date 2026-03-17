@@ -64,6 +64,39 @@ const MasterControl = () => {
         >
           Pacote Completo {global.packageTier === 2 && '(Ativo)'}
         </button>
+
+        <button
+          onClick={() => changePackage(3)}
+          disabled={loading || global.packageTier === 3}
+          style={{
+            padding: '20px 40px',
+            fontSize: '1.2rem',
+            backgroundColor: global.packageTier === 3 ? '#ccc' : '#2196f3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: global.packageTier === 3 ? 'default' : 'pointer',
+          }}
+        >
+          Básico + Clientes {global.packageTier === 3 && '(Ativo)'}
+        </button>
+
+        <button
+          disabled={true}
+          style={{
+            padding: '20px 40px',
+            fontSize: '1.2rem',
+            backgroundColor: '#ccc',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'not-allowed',
+            opacity: 0.6
+          }}
+          title="Módulo em desenvolvimento"
+        >
+          Básico + Matéria Prima (Em breve)
+        </button>
       </div>
 
       <div style={{ marginTop: '50px', textAlign: 'left', display: 'inline-block' }}>
@@ -72,7 +105,13 @@ const MasterControl = () => {
           <li><strong>ID da Instância:</strong> {global.id || 'Não detectado'}</li>
           <li><strong>Modo Totem:</strong> {global.isToten ? 'Sim' : 'Não'}</li>
           <li><strong>NFC-e Automática:</strong> {global.enableAutoNfce ? 'Ativo' : 'Inativo'}</li>
-          <li><strong>Tier Atual:</strong> {global.packageTier === 1 ? 'Básico (1)' : 'Completo (2)'}</li>
+          <li><strong>Tier Atual:</strong> {
+            global.packageTier === 1 ? 'Básico (1)' :
+            global.packageTier === 2 ? 'Completo (2)' :
+            global.packageTier === 3 ? 'Básico + Clientes (3)' :
+            global.packageTier === 4 ? 'Básico + Matéria Prima (4)' :
+            `Desconhecido (${global.packageTier})`
+          }</li>
         </ul>
       </div>
     </div>

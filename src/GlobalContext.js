@@ -25,7 +25,11 @@ export const GlobalStorage = ({ children }) => {
   });
 
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
-  const [packageTier, setPackageTier] = React.useState(1); // 1 = Basic, 2 = Full
+  const [packageTier, setPackageTier] = React.useState(1); 
+  // 1 = Básico (No registration, restricted admin)
+  // 2 = Completo (All features)
+  // 3 = Básico + Gestão de Clientes (Registration enabled, Clients/Promotions admin enabled)
+  // 4 = Básico + Gestão de Matéria Prima (Inactive)
 
   // Listen for global configuration changes
   React.useEffect(() => {

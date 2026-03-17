@@ -308,14 +308,14 @@ export async function CheckUser(check, isToten, packageTier) {
       localStorage.removeItem(check);
       // No pacote básico (1), não queremos passar pela tela de busca de CPF (NoLog)
       // Queremos ir direto para a tela de apelido (create-customer)
-      if (packageTier === 1) {
+      if (Number(packageTier) === 1) {
         return '/create-customer';
       }
-      return '/admin/check-customer-nologr';
+      return '/admin/check-customer-nolog';
     }
   } else {
     // Mesma lógica aqui: se for pacote básico, vai direto pro apelido
-    if (packageTier === 1) {
+    if (Number(packageTier) === 1) {
       return '/create-customer';
     }
     return '/admin/check-customer-nolog';
