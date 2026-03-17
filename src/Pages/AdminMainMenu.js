@@ -100,49 +100,81 @@ const AdminMainMenu = ({ children }) => {
               Edite seus acompanhamentos
             </NavLink>
 
-            {packageTier === 2 && (
-              <>
-                <NavLink
-                  to="/admin/stock"
-                  style={{ color: warningMessage ? 'red' : undefined }}
-                >
-                  Estoque
-                </NavLink>
+            <NavLink
+              to="/admin/stock"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              style={{ color: warningMessage ? 'red' : undefined }}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Estoque
+            </NavLink>
 
-                <NavLink to="/admin/customer">Lista de Clientes</NavLink>
-                <NavLink to="/admin/operationCost">
-                  Cadastro de Custo de Operações
-                </NavLink>
+            <NavLink
+              to="/admin/customer"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Lista de Clientes
+            </NavLink>
+            <NavLink
+              to="/admin/operationCost"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Cadastro de Custo de Operações
+            </NavLink>
 
-                <NavLink
-                  to="/admin/managementRecipes"
-                  style={{ color: warningMessage ? 'red' : undefined }}
-                >
-                  Receitas
-                </NavLink>
+            <NavLink
+              to="/admin/managementRecipes"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              style={{ color: warningMessage ? 'red' : undefined }}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Receitas
+            </NavLink>
 
-                <NavLink to="/admin/request">Vendas</NavLink>
+            <NavLink
+              to="/admin/request"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Vendas
+            </NavLink>
 
-                <NavLink to="/admin/sell-flow">Fechamento de Caixa</NavLink>
-              </>
-            )}
+            <NavLink
+              to="/admin/sell-flow"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Fechamento de Caixa
+            </NavLink>
 
             <NavLink to="/admin/frontimage">Adicione sua marca</NavLink>
 
-            {packageTier === 2 && (
-              <NavLink to="/admin/expenses">
-                Despesas
-              </NavLink>
-            )}
+            <NavLink
+              to="/admin/expenses"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Despesas
+            </NavLink>
 
             <NavLink to="/admin/styles">Gerenciando Estilos</NavLink>
 
-            {packageTier === 2 && (
-              <>
-                <NavLink to="/admin/welcome">Saudação inicial</NavLink>
-                <NavLink to="/admin/promotions">Promoções</NavLink>
-              </>
-            )}
+            <NavLink
+              to="/admin/welcome"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Saudação inicial
+            </NavLink>
+            <NavLink
+              to="/admin/promotions"
+              className={packageTier !== 2 ? admin.disabledLink : ''}
+              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+            >
+              Promoções
+            </NavLink>
             
             <NavLink to="/admin/documentation">Documentação</NavLink>
 

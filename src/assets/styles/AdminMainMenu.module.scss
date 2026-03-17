@@ -41,7 +41,7 @@
     }
 
     section {
-        background_color: rgb(196, 194, 194);
+        background-color: rgb(196, 194, 194);
         position: relative;
         z-index: 10;
         padding: 5%;
@@ -100,6 +100,12 @@
                 color: #FCA311;
                 background: none;
             }
+        }
+
+        .disabledLink {
+            opacity: 0.8;
+            cursor: not-allowed !important;
+            pointer-events: none;
         }
     }
 

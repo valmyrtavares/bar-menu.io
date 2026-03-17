@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../config-firebase/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { GlobalContext } from '../GlobalContext';
@@ -7,6 +8,7 @@ import style from '../assets/styles/AdminMainMenu.module.scss';
 const MasterControl = () => {
   const global = React.useContext(GlobalContext);
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
 
   const changePackage = async (tier) => {
     setLoading(true);
@@ -14,6 +16,7 @@ const MasterControl = () => {
       const docRef = doc(db, 'GlobalConfig', 'packageSettings');
       await setDoc(docRef, { packageTier: tier }, { merge: true });
       alert(`Pacote alterado para ${tier === 1 ? 'Básico' : 'Completo'}!`);
+      navigate('/admin');
     } catch (error) {
       console.error('Erro ao atualizar pacote:', error);
       alert('Erro ao atualizar pacote. Verifique o console.');
