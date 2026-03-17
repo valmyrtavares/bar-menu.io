@@ -47,6 +47,7 @@ import MainPictureMenu from './Pages/MainPictureMenu';
 import { getOneItemColleciton } from './api/Api';
 import { GlobalContext } from './GlobalContext.js';
 import AutoPaymentList from './component/Payment/AutoPaymentList';
+import MasterControl from './Pages/MasterControl';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
@@ -146,6 +147,7 @@ function App() {
           <Route path="requestlistcheck" element={<RequestList />} />
           <Route path="auto-payment" element={<AutoPaymentList />} />
           <Route path="managementRecipes" element={<ManagementRecipes />} />
+          <Route path="master-control" element={<MasterControl />} />
         </Route>
 
         {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}

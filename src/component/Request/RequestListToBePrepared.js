@@ -35,9 +35,9 @@ import {
   checkUnavaiableRawMaterial,
 } from '../../Helpers/Helpers';
 
-//import { debugErrorMap } from 'firebase/auth';
+//import { getOneItemColleciton } from '../../api/Api';
 
-const RequestListToBePrepared = ({ title }) => {
+const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
   const [ShowDefaultMessage, setShowDefaultMessage] = React.useState(false);
@@ -52,6 +52,8 @@ const RequestListToBePrepared = ({ title }) => {
   });
 
   // const { isOpen, toggle } = useModal();
+
+  const [categories, setCategories] = React.useState([]);
   const [promotions, setPromotions] = React.useState([]);
   const [selectedPromotion, setSelectedPromotion] = React.useState('');
   const [benefitedClient, setBenefitedClient] = React.useState([]);
@@ -1139,10 +1141,13 @@ const RequestListToBePrepared = ({ title }) => {
         await updateDoc(userRef, { request: [] });
       }
 
-      // 3. Atualizar estoque (processo mais pesado)
-      await updateIngredientsStock(item);
-      
-      console.log('Stock updated successfully!');
+      // 3. Atualizar estoque (processo mais pesado) - Apenas se o pacote for completo
+      if (global.packageTier === 2) {
+        await updateIngredientsStock(item);
+        console.log('Stock updated successfully!');
+      } else {
+        console.log('Stock update skipped (Basic Package)');
+      }
       // fetchUserRequests(); // Removido: o listener de tempo real já cuida da atualização da lista
     } catch (error) {
       console.error('Erro ao finalizar pedido:', error);

@@ -24,30 +24,44 @@ export const GlobalStorage = ({ children }) => {
     textFont: 'sans serif',
   });
 
+  const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+  const [packageTier, setPackageTier] = React.useState(1); // 1 = Basic, 2 = Full
+
   // Listen for global configuration changes
   React.useEffect(() => {
     if (!db) {
       console.warn('Firestore db instance not available in GlobalContext');
       return;
     }
-    const unsubscribe = onSnapshot(doc(db, 'GlobalConfig', 'nfcSettings'), (docSnapshot) => {
+    const unsubscribeNfc = onSnapshot(doc(db, 'GlobalConfig', 'nfcSettings'), (docSnapshot) => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         if (data.enableAutoNfce !== undefined) {
           setEnableAutoNfce(data.enableAutoNfce);
-          // Also sync with localStorage for backward compatibility or components not using context
           localStorage.setItem('enableAutoNfce', JSON.stringify(data.enableAutoNfce));
         }
       }
     });
 
-    return () => unsubscribe();
+    const unsubscribePackage = onSnapshot(doc(db, 'GlobalConfig', 'packageSettings'), (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        if (data.packageTier !== undefined) {
+          setPackageTier(Number(data.packageTier));
+        }
+      } else {
+        // Se não existir, assume o básico por segurança
+      }
+    });
+
+    return () => {
+      unsubscribeNfc();
+      unsubscribePackage();
+    };
   }, []);
 
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
   const processedOrdersGlobal = React.useRef(new Set());
-
-  const [isInitialLoad, setIsInitialLoad] = React.useState(true);
 
   return (
     <GlobalContext.Provider
@@ -75,6 +89,8 @@ export const GlobalStorage = ({ children }) => {
         setEnableAutoNfce,
         isInitialLoad,
         setIsInitialLoad,
+        packageTier,
+        setPackageTier,
       }}
     >
       {children}

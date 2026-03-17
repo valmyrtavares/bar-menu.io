@@ -2,6 +2,7 @@ import React from 'react';
 import admin from '../assets/styles/AdminMainMenu.module.scss';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
+import { GlobalContext } from '../GlobalContext';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const AdminMainMenu = ({ children }) => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [hideSideMenu, setHideSideMenu] = React.useState(true);
   const [warningMessage, setWarningMessage] = React.useState(false);
+  const { packageTier } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
     if (!localStorage.hasOwnProperty('token')) {
@@ -98,39 +100,50 @@ const AdminMainMenu = ({ children }) => {
               Edite seus acompanhamentos
             </NavLink>
 
-            <NavLink
-              to="/admin/stock"
-              style={{ color: warningMessage ? 'red' : undefined }}
-            >
-              Estoque
-            </NavLink>
+            {packageTier === 2 && (
+              <>
+                <NavLink
+                  to="/admin/stock"
+                  style={{ color: warningMessage ? 'red' : undefined }}
+                >
+                  Estoque
+                </NavLink>
 
-            <NavLink to="/admin/customer">Lista de Clientes</NavLink>
-            <NavLink to="/admin/operationCost">
-              Cadastro de Custo de Operações
-            </NavLink>
+                <NavLink to="/admin/customer">Lista de Clientes</NavLink>
+                <NavLink to="/admin/operationCost">
+                  Cadastro de Custo de Operações
+                </NavLink>
 
-            <NavLink
-              to="/admin/managementRecipes"
-              style={{ color: warningMessage ? 'red' : undefined }}
-            >
-              Receitas
-            </NavLink>
+                <NavLink
+                  to="/admin/managementRecipes"
+                  style={{ color: warningMessage ? 'red' : undefined }}
+                >
+                  Receitas
+                </NavLink>
 
-            <NavLink to="/admin/request">Vendas</NavLink>
+                <NavLink to="/admin/request">Vendas</NavLink>
 
-            <NavLink to="/admin/sell-flow">Fechamento de Caixa</NavLink>
+                <NavLink to="/admin/sell-flow">Fechamento de Caixa</NavLink>
+              </>
+            )}
 
             <NavLink to="/admin/frontimage">Adicione sua marca</NavLink>
 
-            <NavLink to="/admin/expenses" c>
-              Despesas
-            </NavLink>
+            {packageTier === 2 && (
+              <NavLink to="/admin/expenses">
+                Despesas
+              </NavLink>
+            )}
 
             <NavLink to="/admin/styles">Gerenciando Estilos</NavLink>
 
-            <NavLink to="/admin/welcome">Saudação inicial</NavLink>
-            <NavLink to="/admin/promotions">Promoções</NavLink>
+            {packageTier === 2 && (
+              <>
+                <NavLink to="/admin/welcome">Saudação inicial</NavLink>
+                <NavLink to="/admin/promotions">Promoções</NavLink>
+              </>
+            )}
+            
             <NavLink to="/admin/documentation">Documentação</NavLink>
 
             <NavLink to="/admin/requestlist">PDV</NavLink>

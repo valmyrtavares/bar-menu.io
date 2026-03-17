@@ -20,6 +20,7 @@ import style from '../assets/styles/AddDishesForm.module.scss';
 import CustomizePriceForm from './CustomizePriceForm';
 import RecipeDish from './recipeDishForm.js';
 import useFormValidation from '../Hooks/useFormValidation.js';
+import { GlobalContext } from '../GlobalContext.js';
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({
@@ -64,6 +65,7 @@ function AddDishesForm({
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
   const { handleBlur } = useFormValidation();
+  const { packageTier } = React.useContext(GlobalContext);
 
   //FIRESTORE
 
@@ -407,22 +409,33 @@ function AddDishesForm({
           type="text"
           onChange={handleChange}
         />
-        <div className={style.boxPrice}>
-          <button
-            className="btn btn-success"
-            type="button"
-            onClick={() => setShowPopupCostAndPrice(true)}
-          >
-            Preço R$ {form.price},00
-          </button>
-          <button
-            className="btn btn-success"
-            type="button"
-            onClick={() => setShowPopupCustomizePrice(true)}
-          >
-            Preço Customizado
-          </button>
-        </div>
+        {packageTier === 2 ? (
+          <div className={style.boxPrice}>
+            <button
+              className="btn btn-success"
+              type="button"
+              onClick={() => setShowPopupCostAndPrice(true)}
+            >
+              Preço R$ {form.price},00
+            </button>
+            <button
+              className="btn btn-success"
+              type="button"
+              onClick={() => setShowPopupCustomizePrice(true)}
+            >
+              Preço Customizado
+            </button>
+          </div>
+        ) : (
+          <Input
+            id="price"
+            label="Preço R$"
+            required
+            value={form.price}
+            type="number"
+            onChange={handleChange}
+          />
+        )}
         <Input
           id="image"
           label="Link da imagem"
@@ -490,7 +503,9 @@ function AddDishesForm({
       </div>
       <div className={style.sidedishesRecipeBtnContainer}>
         <button onClick={openModalSideDishes}> Acompanhamentos</button>
-        <button onClick={openRecipeModal}> Receita</button>
+        {packageTier === 2 && (
+          <button onClick={openRecipeModal}> Receita</button>
+        )}
       </div>
     </div>
   );
