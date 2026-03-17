@@ -1,6 +1,6 @@
 import React, { useEffect, useContext } from "react";
 import { GlobalContext } from "./GlobalContext";
-import { getBtnData } from "./api/Api";
+import { getBtnData, getOneItemColleciton } from "./api/Api";
 
 const StyleProvider = ({ children }) => {
   const { setStyles } = useContext(GlobalContext);
@@ -20,8 +20,10 @@ const StyleProvider = ({ children }) => {
   useEffect(() => {
     async function fetchStyles() {
       try {
-        const data = await getBtnData("styles");
-        const stylesObj = data[1]; // Certifique-se de que o data[1] realmente contém o objeto de estilos
+        const stylesObj = await getOneItemColleciton(
+          "styles",
+          "Ka5eQA5um9W3vA5gyV70"
+        );
 
         setStyles(stylesObj);
         const cssVariables = convertToCSSVariables(stylesObj);

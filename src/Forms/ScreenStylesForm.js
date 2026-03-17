@@ -10,7 +10,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { getBtnData } from '../api/Api';
+import { getBtnData, getOneItemColleciton } from '../api/Api';
 import { Link } from 'react-router-dom';
 
 function ScreenStylesForm() {
@@ -28,9 +28,13 @@ function ScreenStylesForm() {
 
   React.useEffect(() => {
     async function getSytylesData() {
-      const data = await getBtnData('styles');
-      console.log(data);
-      setForm(data[1]);
+      try {
+        const data = await getOneItemColleciton('styles', 'Ka5eQA5um9W3vA5gyV70');
+        console.log(data);
+        setForm(data);
+      } catch (error) {
+        console.error('Error fetching styles:', error);
+      }
     }
     getSytylesData();
   }, []);
