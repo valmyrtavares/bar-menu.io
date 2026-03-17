@@ -49,14 +49,14 @@ const CreateCustomer = () => {
   //*************************************************************** */
 
   React.useEffect(() => {
-    if (form.name === '') {
-      // Ativa o botão de "não quero deixar meus dados" quando o nome está vazio
-
-      anonymousClient.current.disabled = false;
-    } else {
-      // Desativa o botão quando há dados no nome
-
-      anonymousClient.current.disabled = true;
+    if (anonymousClient.current) {
+      if (form.name === '') {
+        // Ativa o botão de "não quero deixar meus dados" quando o nome está vazio
+        anonymousClient.current.disabled = false;
+      } else {
+        // Desativa o botão quando há dados no nome
+        anonymousClient.current.disabled = true;
+      }
     }
   }, [form]);
 
@@ -68,7 +68,7 @@ const CreateCustomer = () => {
       setPdv(pdv);
     }
     async function CheckLogin() {
-      const userId = await CheckUser('userMenu');
+      const userId = await CheckUser('userMenu', false, global.packageTier);
       if (userId === '/') {
         global.setAuthorizated(true);
         navigate(userId);
@@ -365,108 +365,112 @@ const CreateCustomer = () => {
           {welcome.gift && <p>{welcome.gift}</p>}
         </main>
       )}
-      <div className="create-new-customer-btns">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => justNameFantasy()}
-          ref={anonymousClient}
-        >
-          Continuar sem os meus dados
-        </button>
-      </div>
-      {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
-      <form onSubmit={handleSubmit} className="m-1">
-        <Input
-          id="cpf"
-          autoComplete="off"
-          required
-          label="CPF"
-          value={form.cpf}
-          type="text"
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-        />
-        {showCpfKeyboard && global.isToten && (
-          <Keyboard
-            handleBlur={handleBlur}
-            addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, 'cpf')}
-            id="cpf"
-          />
-        )}
-        {error.cpf && <div className="error-form">{error.cpf}</div>}
-        {clientFinded.length > 0 && cpfModal && (
-          <CpfMessage
-            clientFinded={clientFinded}
-            cpf={form.cpf}
-            setCpfModal={setCpfModal}
-            pdv={pdv}
-          />
-        )}
-        <Input
-          id="name"
-          autoComplete="off"
-          required
-          label="Nome"
-          value={form.name}
-          type="text"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
-        {showNameKeyboard && global.isToten && (
-          <TextKeyboard
-            addCharacter={addCharacter}
-            id="name"
-            closeKeyboard={() => closeKeyboard(form.name, 'name')}
-          />
-        )}
-        <Input
-          id="phone"
-          required
-          label="Celular"
-          autoComplete="off"
-          value={form.phone}
-          type="text"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
-        {showPhoneKeyboard && global.isToten && (
-          <Keyboard
-            handleBlur={handleBlur}
-            addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
-            id="phone"
-          />
-        )}
-        {error.phone && <div className="error-form">{error.phone}</div>}
-        <Input
-          id="birthday"
-          required
-          label="Aniversário"
-          value={form.birthday}
-          type="text"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
-        {showBirthdayKeyboard && global.isToten && (
-          <Keyboard
-            handleBlur={handleBlur}
-            addCharacter={addCharacter}
-            closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
-            id="birthday"
-          />
-        )}
-
-        {error.birthday && <div className="error-form">{error.birthday}</div>}
-
+      {global.packageTier !== 1 && (
         <div className="create-new-customer-btns">
-          <button type="submit" className="btn btn-primary">
-            Cadastrar
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => justNameFantasy()}
+            ref={anonymousClient}
+          >
+            Continuar sem os meus dados
           </button>
         </div>
-      </form>
+      )}
+      {errorPopup && <Error error={error} setErrorPopup={setErrorPopup} />}
+      {global.packageTier !== 1 && (
+        <form onSubmit={handleSubmit} className="m-1">
+          <Input
+            id="cpf"
+            autoComplete="off"
+            required
+            label="CPF"
+            value={form.cpf}
+            type="text"
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+          {showCpfKeyboard && global.isToten && (
+            <Keyboard
+              handleBlur={handleBlur}
+              addCharacter={addCharacter}
+              closeKeyboard={() => closeKeyboard(form.cpf, 'cpf')}
+              id="cpf"
+            />
+          )}
+          {error.cpf && <div className="error-form">{error.cpf}</div>}
+          {clientFinded.length > 0 && cpfModal && (
+            <CpfMessage
+              clientFinded={clientFinded}
+              cpf={form.cpf}
+              setCpfModal={setCpfModal}
+              pdv={pdv}
+            />
+          )}
+          <Input
+            id="name"
+            autoComplete="off"
+            required
+            label="Nome"
+            value={form.name}
+            type="text"
+            onFocus={handleFocus}
+            onChange={handleChange}
+          />
+          {showNameKeyboard && global.isToten && (
+            <TextKeyboard
+              addCharacter={addCharacter}
+              id="name"
+              closeKeyboard={() => closeKeyboard(form.name, 'name')}
+            />
+          )}
+          <Input
+            id="phone"
+            required
+            label="Celular"
+            autoComplete="off"
+            value={form.phone}
+            type="text"
+            onFocus={handleFocus}
+            onChange={handleChange}
+          />
+          {showPhoneKeyboard && global.isToten && (
+            <Keyboard
+              handleBlur={handleBlur}
+              addCharacter={addCharacter}
+              closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
+              id="phone"
+            />
+          )}
+          {error.phone && <div className="error-form">{error.phone}</div>}
+          <Input
+            id="birthday"
+            required
+            label="Aniversário"
+            value={form.birthday}
+            type="text"
+            onFocus={handleFocus}
+            onChange={handleChange}
+          />
+          {showBirthdayKeyboard && global.isToten && (
+            <Keyboard
+              handleBlur={handleBlur}
+              addCharacter={addCharacter}
+              closeKeyboard={() => closeKeyboard(form.cpf, 'phone')}
+              id="birthday"
+            />
+          )}
+
+          {error.birthday && <div className="error-form">{error.birthday}</div>}
+
+          <div className="create-new-customer-btns">
+            <button type="submit" className="btn btn-primary">
+              Cadastrar
+            </button>
+          </div>
+        </form>
+      )}
       {/* <Link to="/menu" className="btn btn-warning">
         Não quero deixar meus dados
       </Link> */}

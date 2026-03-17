@@ -293,7 +293,7 @@ export function getFirstFourLetters(inputString, max) {
   return inputString ? inputString.slice(0, max) : '';
 }
 
-export async function CheckUser(check, isToten) {
+export async function CheckUser(check, isToten, packageTier) {
   if (localStorage.hasOwnProperty(check)) {
     const userMenu = JSON.parse(localStorage.getItem(check));
     const userList = await getBtnData('user');
@@ -306,9 +306,18 @@ export async function CheckUser(check, isToten) {
       }
     } else {
       localStorage.removeItem(check);
+      // No pacote básico (1), não queremos passar pela tela de busca de CPF (NoLog)
+      // Queremos ir direto para a tela de apelido (create-customer)
+      if (packageTier === 1) {
+        return '/create-customer';
+      }
       return '/admin/check-customer-nologr';
     }
   } else {
+    // Mesma lógica aqui: se for pacote básico, vai direto pro apelido
+    if (packageTier === 1) {
+      return '/create-customer';
+    }
     return '/admin/check-customer-nolog';
   }
 }

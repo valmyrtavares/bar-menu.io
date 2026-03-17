@@ -63,18 +63,18 @@ function MainMenu() {
     if (!totenExist || global.isToten !== true) {
       global.setIsToten(false);
       if (!global.authorizated) {
-        CheckLogin();
+        CheckLogin(global.packageTier);
       }
     } else {
       global.setIsToten(true);
-      CheckLogin();
+      CheckLogin(global.packageTier);
     }
   };
 
   React.useEffect(() => {
     if (!global.isToten) {
       if (!global.authorizated) {
-        CheckLogin();
+        CheckLogin(global.packageTier);
       }
     }
     fetchData();
@@ -98,12 +98,12 @@ function MainMenu() {
     if (global.isToten === null) return; // Espera até que tenha um valor válido
 
     if (!global.authorizated) {
-      CheckLogin();
+      CheckLogin(global.packageTier);
     }
   }, [global.isToten]); // Reexecuta quando global.isToten for atualizado
 
-  async function CheckLogin() {
-    const userId = await CheckUser('userMenu', global.isToten);
+  async function CheckLogin(packageTier) {
+    const userId = await CheckUser('userMenu', global.isToten, packageTier);
     const tableStored = localStorage.getItem('tableNumber');
     if (userId === '/' && tableStored) {
       navigate(`/${tableStored}`);

@@ -21,7 +21,7 @@ const WarningMessage = ({
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (customer === 'anonimo') {
+    if (customer === 'anonimo' && global.packageTier !== 1) {
       setDeaingAnonymousCustomer(true);
     }
     console.log('requests', requests);

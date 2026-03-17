@@ -36,7 +36,7 @@ const SubHeaderCustomer = ({ logoutCustomer, nameClient }) => {
       <section className={global.isToten ? style.headerToten : ''}>
         {!global.isToten && (
           <div>
-            <p onClick={logoutCustomer}>
+            <p onClick={global.packageTier === 1 ? null : logoutCustomer}>
               Bem vindo {nameClient && <span>{nameClient}</span>}
             </p>
           </div>
