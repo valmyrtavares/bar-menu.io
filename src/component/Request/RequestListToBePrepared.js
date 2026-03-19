@@ -1212,21 +1212,71 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
 
   const handleRequestItemCancellation = async (order, itemIndex) => {
     const dish = order.request[itemIndex];
-    const isConfirmed = window.confirm(`Deseja solicitar o cancelamento do item "${dish.name}" para a cozinha?`);
-    if (!isConfirmed) return;
+    
+    // Determina se o pedido já está na cozinha (se tem mesa ou se já foi pago)
+    const isInKitchen = order.tableNumber || order.mesa || order.paymentDone;
 
-    try {
-      const orderRef = doc(db, 'requests', order.id);
-      const updatedRequest = [...order.request];
-      updatedRequest[itemIndex] = { ...dish, cancelRequested: true };
+    if (!isInKitchen) {
+      // Fluxo PRÉ-PAGO e ainda não pago -> Item NÃO está na cozinha.
+      // Podemos cancelar diretamente no PDV.
+      const isConfirmed = window.confirm(`Deseja cancelar o item "${dish.name}"?`);
+      if (!isConfirmed) return;
 
-      await updateDoc(orderRef, {
-        request: updatedRequest
-      });
-      alert('Solicitação de cancelamento enviada para a cozinha.');
-    } catch (err) {
-      console.error('Erro ao solicitar cancelamento:', err);
-      alert('Erro ao solicitar cancelamento. Tente novamente.');
+      try {
+        const orderRef = doc(db, 'requests', order.id);
+        const itemPrice = Number(dish.finalPrice) || 0;
+
+        // Remove do array de itens do pedido
+        const updatedRequest = [...order.request];
+        updatedRequest.splice(itemIndex, 1);
+
+        // Atualiza o valor total do pedido
+        const newTotal = Math.max(0, (Number(order.finalPriceRequest) || 0) - itemPrice);
+
+        await updateDoc(orderRef, {
+          request: updatedRequest,
+          finalPriceRequest: newTotal
+        });
+
+        // Sincroniza a remoção com o documento do usuário (carrinho/histórico ativo)
+        if (order.idUser) {
+          const userRef = doc(db, 'user', order.idUser);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.request && Array.isArray(userData.request)) {
+              // Remove o item que corresponde a esta requisição e índice
+              const updatedUserRequest = userData.request.filter(
+                (userItem) => !(userItem.parentRequestId === order.id && userItem.indexInRequest === itemIndex)
+              );
+              await updateDoc(userRef, { request: updatedUserRequest });
+            }
+          }
+        }
+        alert('Item cancelado com sucesso.');
+      } catch (err) {
+        console.error('Erro ao cancelar item:', err);
+        alert('Erro ao cancelar item. Tente novamente.');
+      }
+    } else {
+      // Fluxo PÓS-PAGO ou já PAGO -> Item ESTÁ (ou esteve) na cozinha.
+      // Solicita confirmação do cancelamento para a cozinha.
+      const isConfirmed = window.confirm(`Deseja solicitar o cancelamento do item "${dish.name}" para a cozinha?`);
+      if (!isConfirmed) return;
+
+      try {
+        const orderRef = doc(db, 'requests', order.id);
+        const updatedRequest = [...order.request];
+        updatedRequest[itemIndex] = { ...dish, cancelRequested: true };
+
+        await updateDoc(orderRef, {
+          request: updatedRequest
+        });
+        alert('Solicitação de cancelamento enviada para a cozinha.');
+      } catch (err) {
+        console.error('Erro ao solicitar cancelamento:', err);
+        alert('Erro ao solicitar cancelamento. Tente novamente.');
+      }
     }
   };
 
@@ -1622,7 +1672,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       <button
                         onClick={() => handleRequestItemCancellation(requestsDoneList[itemIndex], recipeIndex)}
                         className="btn btn-danger"
-                        disabled={item.pronto || item.entregue || item.cancelRequested}
+                        disabled={item.pronto || item.entregue || item.cancelRequested || requestsDoneList[itemIndex].paymentDone}
                         style={{ marginLeft: '10px' }}
                       >
                         {item.cancelRequested ? 'Cancelamento Solicitado' : 'Cancelar Item'}
