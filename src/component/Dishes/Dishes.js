@@ -48,7 +48,7 @@ function Dishes({ newItem }) {
           <div className="container-request-button">
             <button className="request-client">
               {' '}
-              {item?.lowAmountRawMaterial
+              {(item?.lowAmountRawMaterial && Number(global.packageTier) !== 1 && Number(global.packageTier) !== 3)
                 ? 'Indisponível'
                 : 'Faça o seu pedido'}
             </button>

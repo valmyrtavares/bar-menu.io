@@ -368,9 +368,9 @@ const DishesModal = ({ item, setModal }) => {
         <button
           type="submit"
           className="request-client-modal"
-          disabled={item.lowAmountRawMaterial}
+          disabled={item.lowAmountRawMaterial && Number(global.packageTier) !== 1 && Number(global.packageTier) !== 3}
         >
-          {item.lowAmountRawMaterial
+          {item.lowAmountRawMaterial && Number(global.packageTier) !== 1 && Number(global.packageTier) !== 3
             ? 'Indisponível'
             : isSubmitting
             ? 'Enviando...'

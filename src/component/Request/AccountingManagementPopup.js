@@ -98,13 +98,26 @@ const AccountingManagementPopup = ({
       // Verifica se encontrou algum documento
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0]; // Pega o primeiro documento encontrado
-        const costPriceObj = doc.data(); // Obtém os dados do documento
+        const data = doc.data(); // Obtém os dados do documento
+        
+        // Se for modo básico, não tem costPriceObj complexo
+        if (data.isBasic) {
+          return {
+            cost: 0,
+            price: data.price,
+            percentage: 0,
+            profit: data.price,
+            isBasic: true
+          };
+        }
+
+        const costPriceObj = data.costPriceObj;
         // Retorna o objeto com os dados de custo e preço
         return {
-          cost: costPriceObj.costPriceObj.cost,
-          price: costPriceObj.price,
-          percentage: costPriceObj.costPriceObj.percentage,
-          profit: costPriceObj.costPriceObj.profit,
+          cost: costPriceObj?.cost || 0,
+          price: data.price,
+          percentage: costPriceObj?.percentage || 0,
+          profit: costPriceObj?.profit || data.price,
         };
       } else {
         console.log('Acompanhamento não encontrado');
@@ -177,11 +190,11 @@ const AccountingManagementPopup = ({
             return (
               <tr key={`${index}-sideDish-${sideIndex}`}>
                 <td colSpan="5"></td> {/* Células vazias para alinhamento */}
-                <td>{sideDish.name}</td>
-                <td>{sideData?.cost || 'N/A'}</td>
+                <td>{sideDish.name} {sideData?.isBasic ? '(Básico)' : ''}</td>
+                <td>{sideData?.cost || 0}</td>
                 <td>{sideData?.price || 'N/A'}</td>
                 <td>{sideProfit || 'N/A'}</td>
-                <td>{sideData?.percentage || 'N/A'}</td>
+                <td>{sideData?.percentage || 0}</td>
               </tr>
             );
           })

@@ -52,13 +52,14 @@ function IncludeSideDishesForm({
       const newDish = {
         id: selectedDish.id,
         price: selectedDish.price,
-        portionUsed: selectedDish.portionUsed,
+        portionUsed: selectedDish.portionUsed || 0,
         totalVolume: selectedDish.totalVolume || 0,
         totalCost: selectedDish.totalCost || 0,
         portionCost: selectedDish.portionCost || 0,
         costPerUnit: selectedDish.costPerUnit || 0,
         unit: selectedDish.unit || '',
         sideDishes: selectedDish.sideDishes,
+        isBasic: selectedDish.isBasic || false,
         ...(selectedDish.costPriceObj && {
           costPriceObj: selectedDish.costPriceObj,
         }),

@@ -312,13 +312,20 @@ const RequestManagementModule = () => {
       return { cost: 0, profit: 0 };
     }
 
+    // Se for modo básico, não tem costPriceObj
+    if (obj.isBasic) {
+      return {
+        cost: 0,
+        profit: Number(obj.price), // No modo básico, lucro bruto = preço
+      };
+    }
+
     if (
-      Number(obj.costPriceObj.cost) > Number(obj.costPriceObj.price) ||
-      Number(obj.costPriceObj.profit) > Number(obj.costPriceObj.price)
+      !obj.costPriceObj ||
+      Number(obj.costPriceObj.cost) > Number(obj.price) ||
+      Number(obj.costPriceObj.profit) > Number(obj.price)
     ) {
-      alert(
-        `O custo ou lucro do acomapanhamento ${obj.sideDishes} está incorreto, por favor verifique no estoque algum valor incompativel`
-      );
+      console.warn(`Aviso: Custo/Lucro do acompanhamento ${obj.sideDishes} pode estar inconsistente.`);
       return {
         cost: 0,
         profit: 0,

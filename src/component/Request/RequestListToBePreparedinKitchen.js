@@ -353,6 +353,12 @@ const RequestListToBePrepared = () => {
   }, [requestsDoneList]);
 
   const updateIngredientsStock = async (item) => {
+    // No pacote básico (1 ou 3), não realizamos baixa de estoque
+    if (Number(global.packageTier) === 1 || Number(global.packageTier) === 3) {
+      console.log('Pacote Básico: Baixa de estoque ignorada.');
+      return;
+    }
+
     const ObjPadrao = {
       CostPerUnit: 0,
       amount: 0,
@@ -435,6 +441,8 @@ const RequestListToBePrepared = () => {
       ) {
         for (let j = 0; j < currentItem.sideDishes.length; j++) {
           const sideDish = currentItem.sideDishes[j];
+          if (sideDish.isBasic) continue; // Pula baixa de estoque se for modo básico (sem vínculo)
+          
           ObjPadrao.totalVolume = -parseToNumber(sideDish.portionCost); // amount removed from stock
           ObjPadrao.product = sideDish.name;
           ObjPadrao.unitOfMeasurement = sideDish.unit || '';

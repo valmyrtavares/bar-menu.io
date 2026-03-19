@@ -164,8 +164,22 @@ function AddDishesForm({
   function handleSubmit(event) {
     event.preventDefault();
 
+    const cleanForm = (obj) => {
+      const newObj = { ...obj };
+      Object.keys(newObj).forEach((key) => {
+        if (newObj[key] === undefined) {
+          delete newObj[key];
+        } else if (newObj[key] && typeof newObj[key] === 'object' && !Array.isArray(newObj[key])) {
+          newObj[key] = cleanForm(newObj[key]);
+        }
+      });
+      return newObj;
+    };
+
+    const cleanedForm = cleanForm(form);
+
     if (!dataObj) {
-      addDoc(collection(db, 'item'), form)
+      addDoc(collection(db, 'item'), cleanedForm)
         .then((docRef) => {
           navigate('/');
         })
@@ -175,10 +189,10 @@ function AddDishesForm({
     } else {
       console.log('Dados completos', form);
 
-      form.recipe.Explanation = form.recipe.Explanation
-        ? form.recipe.Explanation
+      cleanedForm.recipe.Explanation = cleanedForm.recipe.Explanation
+        ? cleanedForm.recipe.Explanation
         : 'Receita Vazia';
-      setDoc(doc(db, 'item', dataObj.id), form)
+      setDoc(doc(db, 'item', dataObj.id), cleanedForm)
         .then(() => {
           if (fetchDataCollection) fetchDataCollection();
           navigate('/');

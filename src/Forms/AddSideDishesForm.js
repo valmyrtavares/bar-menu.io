@@ -15,6 +15,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import style from '../assets/styles/AddSideDishesForm.module.scss';
 import { updateItemsSideDishes, getBtnData } from '../api/Api';
+import { GlobalContext } from '../GlobalContext';
 
 function AddSideDishesForm({
   dataObj,
@@ -22,6 +23,8 @@ function AddSideDishesForm({
   setModalEditSideDishes,
   fetchDataCollection,
 }) {
+  const global = React.useContext(GlobalContext);
+  const isBasic = global.packageTier === 1 || global.packageTier === 3;
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     price: 0,
@@ -91,6 +94,17 @@ function AddSideDishesForm({
     const portionCost = Number(newForm.portionUsed) * Number(newForm.price);
 
     if (id === 'sideDishes') {
+      if (isBasic) {
+        setForm({
+          ...newForm,
+          sideDishes: value,
+          portionUsed: form.portionUsed || '1',
+          totalVolume: form.totalVolume || '1',
+          totalCost: form.totalCost || '0',
+          unit: form.unit || 'un',
+        });
+        return;
+      }
       const itemSelected = productList.find((item) => item.product === value);
 
       if (itemSelected) {
@@ -197,13 +211,58 @@ function AddSideDishesForm({
 
   function handleSubmit(event) {
     event.preventDefault();
+    
+    // No modo básico, ignoramos a construção complexa e validações de estoque
+    if (isBasic) {
+      if (form.price && form.sideDishes) {
+        const basicForm = {
+          sideDishes: form.sideDishes,
+          price: Number(form.price),
+          isBasic: true,
+          costPriceObj: { cost: 0, profit: Number(form.price), percentage: 0 }
+        };
+        
+        const action = dataObj 
+          ? setDoc(doc(db, 'sideDishes', dataObj.id), basicForm)
+          : addDoc(collection(db, 'sideDishes'), basicForm);
+
+        action
+          .then(() => {
+            if (fetchDataCollection) fetchDataCollection();
+            if (dataObj) {
+              setModalEditSideDishes(false);
+            } else if (!noNavigate) {
+              navigate('/admin/editButton/sidedishes');
+            } else {
+              setForm({ price: 0, sideDishes: '' });
+            }
+          })
+          .catch(console.error);
+      }
+      return;
+    }
+
+    const cleanFormData = (obj) => {
+      const newObj = { ...obj };
+      Object.keys(newObj).forEach((key) => {
+        if (newObj[key] === undefined) {
+          delete newObj[key];
+        } else if (newObj[key] && typeof newObj[key] === 'object' && !Array.isArray(newObj[key])) {
+          newObj[key] = cleanFormData(newObj[key]);
+        }
+      });
+      return newObj;
+    };
+
     const enrichedForm = isFormComplete(form)
       ? form
       : buildFormWithComputedData(form, productList);
-    //     if(en  enrichedForm.portionCost > enrichedForm.price)
+      
+    const cleanedForm = cleanFormData(enrichedForm);
+
     if (!dataObj) {
       if (form.price && form.sideDishes) {
-        addDoc(collection(db, 'sideDishes'), enrichedForm)
+        addDoc(collection(db, 'sideDishes'), cleanedForm)
           .then((docRef) => {
             if (fetchDataCollection) fetchDataCollection();
             if (!noNavigate) {
@@ -217,7 +276,7 @@ function AddSideDishesForm({
           });
       }
     } else {
-      setDoc(doc(db, 'sideDishes', dataObj.id), enrichedForm)
+      setDoc(doc(db, 'sideDishes', dataObj.id), cleanedForm)
         .then(() => {
           console.log('Document successfully updated !');
           if (fetchDataCollection) fetchDataCollection();
@@ -259,32 +318,63 @@ function AddSideDishesForm({
         />
       </Link>
       <form onSubmit={handleSubmit} className="m-1">
-        <select
-          id="sideDishes"
-          value={form.sideDishes}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecione o acompanhamento</option>
-          {productList &&
-            productList.map((category, index) => (
-              <option key={index} value={category.product}>
-                {category.product}
-              </option>
-            ))}
-        </select>
-        <input
-          id="portionUsed"
-          required
-          placeholder="Volume da porçao"
-          value={form.portionUsed}
-          type="text"
-          onChange={handleChange}
-        />
+        {isBasic ? (
+          <>
+            <input
+              id="sideDishes"
+              required
+              placeholder="Nome do acompanhamento"
+              value={form.sideDishes}
+              onChange={handleChange}
+            />
+            <input
+              id="price"
+              required
+              type="number"
+              placeholder="Preço R$"
+              value={form.price}
+              onChange={handleChange}
+              style={{ marginTop: '10px' }}
+            />
+          </>
+        ) : (
+          <>
+            {dataObj?.isBasic && (
+              <p style={{ color: 'orange', fontSize: '0.9rem', margin: '5px 0' }}>
+                ⚠️ Item do modo básico. Vincule ao estoque selecionando abaixo:
+              </p>
+            )}
+            <select
+              id="sideDishes"
+              value={form.sideDishes}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Selecione o acompanhamento</option>
+              {productList &&
+                productList.map((category, index) => (
+                  <option key={index} value={category.product}>
+                    {category.product}
+                  </option>
+                ))}
+            </select>
+          </>
+        )}
+        {!isBasic && (
+          <input
+            id="portionUsed"
+            required
+            placeholder="Volume da porçao"
+            value={form.portionUsed}
+            type="text"
+            onChange={handleChange}
+          />
+        )}
         <button
           className="btn btn-success"
           type="button"
-          onClick={() => setShowPopupCostAndPrice(true)}
+          onClick={() => !isBasic && setShowPopupCostAndPrice(true)}
+          style={{ cursor: isBasic ? 'default' : 'pointer' }}
         >
           Preço R$ {form.price},00
         </button>
