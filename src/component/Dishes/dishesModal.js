@@ -110,6 +110,7 @@ const DishesModal = ({ item, setModal }) => {
   //select side dishes
   const addSelectedMaximumNumberSideDishes = (e) => {
     const id = e.target.value;
+    if (id === "") return;
     const selectedItem = item.sideDishesElementList[id];
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
@@ -330,7 +331,7 @@ const DishesModal = ({ item, setModal }) => {
                       className="form-select"
                       onChange={addSelectedMaximumNumberSideDishes}
                     >
-                      <option value="">Selecione</option>
+                      <option value="" disabled selected>Selecione</option>
                       {item.sideDishesElementList &&
                         item.sideDishesElementList.map((item, index) => (
                           <option key={index} value={index}>
@@ -340,8 +341,8 @@ const DishesModal = ({ item, setModal }) => {
                         ))}
                     </select>
                   ) : (
-                    <p>
-                      O Numero máximo de acompanhamentos é{' '}
+                    <p style={{ fontSize: '0.85rem' }}>
+                      O número máximo de acompanhamentos é{' '}
                       {item.maxLimitSideDishes}
                     </p>
                   )}
