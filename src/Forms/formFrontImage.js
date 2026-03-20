@@ -159,20 +159,22 @@ const FormFrontImage = () => {
       <progress value={progress} max="100" />
       {url && <img className="image-preview" src={url} alt="Uploaded file" />}
 
-      <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="carrossel"
-          type="checkbox"
-          checked={publicStatement}
-          onChange={changePublicStatement}
-        />
-        <label className="form-check-label">
-          <b>Toten</b>: Manter selecionado para entrar no modo Toten que faráque
-          o cliente seja deslogado logo após o envio do pedido e o sistema
-          retornará para a tela inicial.
-        </label>
-      </div>
+      {global.canConfigToten && (
+        <div className="form-check my-1">
+          <input
+            className="form-check-input"
+            id="carrossel"
+            type="checkbox"
+            checked={publicStatement}
+            onChange={changePublicStatement}
+          />
+          <label className="form-check-label">
+            <b>Toten</b>: Manter selecionado para entrar no modo Toten que
+            faráque o cliente seja deslogado logo após o envio do pedido e o
+            sistema retornará para a tela inicial.
+          </label>
+        </div>
+      )}
 
       {/*} <div className="form-check my-1">
         <input

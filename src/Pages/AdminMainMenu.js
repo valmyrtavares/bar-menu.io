@@ -10,7 +10,7 @@ const AdminMainMenu = ({ children }) => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [hideSideMenu, setHideSideMenu] = React.useState(true);
   const [warningMessage, setWarningMessage] = React.useState(false);
-  const { packageTier } = React.useContext(GlobalContext);
+  const { hasClients, hasRawMaterial, hasFinancial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
     if (!localStorage.hasOwnProperty('token')) {
@@ -102,49 +102,49 @@ const AdminMainMenu = ({ children }) => {
 
             <NavLink
               to="/admin/stock"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
+              className={!hasRawMaterial ? admin.disabledLink : ''}
               style={{ color: warningMessage ? 'red' : undefined }}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
             >
               Estoque
             </NavLink>
 
             <NavLink
               to="/admin/customer"
-              className={ packageTier !== 2 && packageTier !== 3 ? admin.disabledLink : '' }
-              onClick={(e) => packageTier !== 2 && packageTier !== 3 && e.preventDefault()}
+              className={!hasClients ? admin.disabledLink : ''}
+              onClick={(e) => !hasClients && e.preventDefault()}
             >
               Lista de Clientes
             </NavLink>
             <NavLink
               to="/admin/operationCost"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
             >
               Cadastro de Custo de Operações
             </NavLink>
 
             <NavLink
               to="/admin/managementRecipes"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
+              className={!hasRawMaterial ? admin.disabledLink : ''}
               style={{ color: warningMessage ? 'red' : undefined }}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
             >
               Receitas
             </NavLink>
 
             <NavLink
               to="/admin/request"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
             >
               Vendas
             </NavLink>
 
             <NavLink
               to="/admin/sell-flow"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
             >
               Fechamento de Caixa
             </NavLink>
@@ -153,8 +153,8 @@ const AdminMainMenu = ({ children }) => {
 
             <NavLink
               to="/admin/expenses"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={!hasRawMaterial ? admin.disabledLink : ''}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
             >
               Despesas
             </NavLink>
@@ -163,15 +163,15 @@ const AdminMainMenu = ({ children }) => {
 
             <NavLink
               to="/admin/welcome"
-              className={packageTier !== 2 ? admin.disabledLink : ''}
-              onClick={(e) => packageTier !== 2 && e.preventDefault()}
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
             >
               Saudação inicial
             </NavLink>
             <NavLink
               to="/admin/promotions"
-              className={ packageTier !== 2 && packageTier !== 3 ? admin.disabledLink : '' }
-              onClick={(e) => packageTier !== 2 && packageTier !== 3 && e.preventDefault()}
+              className={!hasClients ? admin.disabledLink : ''}
+              onClick={(e) => !hasClients && e.preventDefault()}
             >
               Promoções
             </NavLink>

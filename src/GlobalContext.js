@@ -25,11 +25,11 @@ export const GlobalStorage = ({ children }) => {
   });
 
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
-  const [packageTier, setPackageTier] = React.useState(1); 
-  // 1 = Básico (No registration, restricted admin)
-  // 2 = Completo (All features)
-  // 3 = Básico + Gestão de Clientes (Registration enabled, Clients/Promotions admin enabled)
-  // 4 = Básico + Gestão de Matéria Prima (Inactive)
+  const [packageTier, setPackageTier] = React.useState(1);
+  const [hasClients, setHasClients] = React.useState(false);
+  const [hasRawMaterial, setHasRawMaterial] = React.useState(false);
+  const [hasFinancial, setHasFinancial] = React.useState(false);
+  const [canConfigToten, setCanConfigToten] = React.useState(false);
 
   // Listen for global configuration changes
   React.useEffect(() => {
@@ -53,6 +53,10 @@ export const GlobalStorage = ({ children }) => {
         if (data.packageTier !== undefined) {
           setPackageTier(Number(data.packageTier));
         }
+        setHasClients(!!data.hasClients);
+        setHasRawMaterial(!!data.hasRawMaterial);
+        setHasFinancial(!!data.hasFinancial);
+        setCanConfigToten(!!data.canConfigToten);
       } else {
         // Se não existir, assume o básico por segurança
       }
@@ -94,6 +98,10 @@ export const GlobalStorage = ({ children }) => {
         isInitialLoad,
         setIsInitialLoad,
         packageTier,
+        hasClients,
+        hasRawMaterial,
+        hasFinancial,
+        canConfigToten,
         setPackageTier,
       }}
     >
