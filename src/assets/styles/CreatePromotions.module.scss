@@ -3,25 +3,67 @@
 .formContainer {
     display: flex;
     justify-content: center;    
-    height: 100vh;
+    min-height: 100vh;
     padding: 20px;
     box-sizing: border-box;
+    position: relative;
+    background-color: #f5f5f5;
     
+    .containerIcon {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+
+        a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+
+            span {
+                font-size: 2rem;
+                color: #ff9800;
+                font-weight: bold;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease-in-out;
+
+                &:hover {
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
     .promotionForm {
         min-width: 800px;
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
         > div {
             display: flex;
             flex-direction: column;
             width: calc(50% - 20px);
-            margin: 20px 25%;
+            margin: 10px 25%;
             
             label {
                 margin-bottom: 5px;
+                font-weight: bold;
             }
             input:hover,
             select:hover,
             textarea:hover {
-                transform: scale(1.05);
+                transform: scale(1.02);
                 transition: transform 0.2s ease-in-out;
             }
             
@@ -31,14 +73,16 @@
                 padding: 8px;
                 box-sizing: border-box;
                 border-radius: 10px;
+                border: 1px solid #ccc;
             }
         }
         .rulesField {
             textarea {
-
-            
-                height: 200px !important;
-                background-color: #f0f0f0;
+                height: 120px !important;
+                background-color: #f9f9f9;
+                border-radius: 10px;
+                padding: 10px;
+                border: 1px solid #ccc;
             }
         }
         .dateField {
@@ -47,18 +91,85 @@
             justify-content: space-between;
             > div {
                 width: 48%;
+                margin: 0;
             }
         }
         .buttonContainer{
+            display: flex;
+            gap: 15px;
             button{
                 @include btnAdmin;
                 margin-top: 20px;
+                flex: 1;
+            }
+            .deleteButton {
+                background-color: #d9534f !important; // Red color for delete
+                margin-top: 20px;
+                flex: 1;
+                &:hover {
+                    background-color: #c9302c !important;
+                }
             }
         }
         @media (max-width: 768px) {
+            min-width: 100%;
             > div {
                 width: 100%;
+                margin: 10px 0;
+            }
+            .buttonContainer {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     }
-} 
+}
+
+.voucherSection {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px dashed #eee;
+    width: 50%;
+    margin: 30px 25% 10px 25% !important;
+
+    label {
+        color: #ff9800 !important;
+        font-weight: bold !important;
+        cursor: help;
+        margin-bottom: 10px;
+    }
+
+    .voucherInputWrapper {
+        display: flex;
+        flex-direction: row !important;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+
+        input {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff9800;
+            border: 2px solid #ff9800 !important;
+            padding: 10px !important;
+        }
+
+        .voucherButton {
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            height: 45px;
+
+            &:hover {
+                background-color: #e68a00;
+            }
+        }
+    }
+}

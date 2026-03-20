@@ -2,7 +2,7 @@ import React from 'react';
 import '../../assets/styles/ButtonCustomerProfile.css';
 import { getOneItemColleciton, getBtnData } from '../../api/Api';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
-import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 
 const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
@@ -10,6 +10,7 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
   const [promotionClient, setPromotionClient] = React.useState({});
   const [showPopup, setShowPopup] = React.useState(false);
   const [disabledCustomer, setDisabledCustomer] = React.useState(true);
+  const [voucherValue, setVoucherValue] = React.useState(0);
 
   const [form, setForm] = React.useState({
     name: '',
@@ -24,28 +25,47 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
 
   //Fetch user in firebase and check out if is it anonymous to fill the button's color and load the PromotionCient useState
   React.useEffect(() => {
-    const fetchOneCustomer = async () => {
-      const data = await getOneItemColleciton('user', item.idUser);
-
-      if (data && data.name !== 'anonimo') {
-        setDisabledCustomer(false);
-        setNoRegistration('registrated');
-        const isInVoucher = await fetchVoucherClients(item.idUser);
-
-        setPromotionClient(data);
-
-        if (isInVoucher) {
-          setDisabledCustomer(true);
-        } else {
-          setDisabledCustomer(false);
-        }
+    const fetchVoucherConfig = async () => {
+      const docRef = doc(db, 'GlobalConfig', 'voucherSettings');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setVoucherValue(docSnap.data().voucherValue || 0);
       }
     };
-    console.log('item   ', item);
-    if ((item, request)) {
+
+    const fetchOneCustomer = async () => {
+      const data = await getOneItemColleciton('user', item.idUser);
+      const currentVoucherValue = await getVoucherValueDirectly(); // Fetch directly to avoid stale state in validation
+
+      if (data && data.name !== 'anonimo') {
+        const isInVoucher = await fetchVoucherClients(item.idUser);
+        setPromotionClient(data);
+        setNoRegistration('registrated');
+
+        // Only clickable if registered, NOT used voucher, AND voucher value is > 0
+        if (!isInVoucher && currentVoucherValue > 0) {
+          setDisabledCustomer(false);
+        } else {
+          setDisabledCustomer(true);
+        }
+      } else {
+        setDisabledCustomer(true);
+      }
+    };
+
+    const getVoucherValueDirectly = async () => {
+      const docRef = doc(db, 'GlobalConfig', 'voucherSettings');
+      const docSnap = await getDoc(docRef);
+      const val = docSnap.exists() ? (docSnap.data().voucherValue || 0) : 0;
+      setVoucherValue(val);
+      return val;
+    };
+
+    if (item && request) {
+      fetchVoucherConfig();
       fetchOneCustomer();
     }
-  }, []);
+  }, [item, request]);
 
   const fetchVoucherClients = async (idUser) => {
     const data = await getBtnData('voucherPromotion');
@@ -57,11 +77,7 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
       'Retorna todos os clientes que já usaram o voucher   ',
       customerSelected
     );
-    if (customerSelected.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return customerSelected.length > 0;
   };
 
   React.useEffect(() => {
@@ -72,7 +88,7 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
 
         console.log('Documento adicionado com sucesso!', response);
         setDisabledCustomer(true);
-        descontFinalPrice(3, item.id);
+        descontFinalPrice(voucherValue, item.id);
       } catch (error) {
         // Captura e exibe o erro, se houver
         console.error('Erro ao adicionar o documento:', error);
@@ -99,7 +115,7 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
     setForm({
       name: item.name,
       dateTime: item.dateTime,
-      discount: 3,
+      discount: voucherValue, // Use dynamic value
       idUserVoucher: item.idUser,
       cpf: promotionClient.cpf,
       phone: promotionClient.phone,
