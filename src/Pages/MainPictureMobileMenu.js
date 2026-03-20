@@ -25,6 +25,7 @@ const MainPictureMobileMenu = () => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
+  const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -71,9 +72,9 @@ const MainPictureMobileMenu = () => {
     return <img src={src} alt="" />;
   };
 
-  const DishItemImage = ({ item }) => {
+  const DishItemImage = ({ item, onImageLoad }) => {
     const src = useCachedImage(item.id, item.image, 'thumb');
-    return <img src={src} alt="" />;
+    return <img src={src} alt="" onLoad={onImageLoad} onError={onImageLoad} />;
   };
 
   React.useEffect(() => {
@@ -85,6 +86,7 @@ const MainPictureMobileMenu = () => {
   const chooseCategory = async (parent, title) => {
     if (!dishes || dishes.length === 0) return;
 
+    setCategorySelected(title);
     setShowFilteredDishes(false);
 
     const filtered =
@@ -94,10 +96,23 @@ const MainPictureMobileMenu = () => {
 
     await ensureImagesInCache(filtered, 'thumb');
 
+    setLoadedImagesCount(0);
     setDishesFiltered(filtered);
-    setCategorySelected(title);
-    setShowFilteredDishes(true);
+    // showFilteredDishes(true) será chamado pelo useEffect de carregamento
   };
+
+  React.useEffect(() => {
+    if (dishesFiltered.length > 0 && loadedImagesCount >= dishesFiltered.length) {
+      setShowFilteredDishes(true);
+    }
+  }, [loadedImagesCount, dishesFiltered]);
+
+  React.useEffect(() => {
+    if (dishesFiltered.length > 0 && !showFilteredDishes) {
+      const timer = setTimeout(() => setShowFilteredDishes(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [dishesFiltered, showFilteredDishes]);
 
   const preparedRequest = (item) => {
     setItem(item);
@@ -182,7 +197,7 @@ const MainPictureMobileMenu = () => {
             <section className={style.dishes}>
               <h3 className={style.mainTitle}>{categorySelected}</h3>
               <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
-                {showFilteredDishes && dishesFiltered &&
+                {dishesFiltered &&
                   dishesFiltered.length > 0 &&
                   dishesFiltered.map((item, index) => (
                     <div
@@ -197,7 +212,10 @@ const MainPictureMobileMenu = () => {
                         </button>
                       </div>
                       <div className={style.image}>
-                        <DishItemImage item={item} />
+                        <DishItemImage 
+                          item={item} 
+                          onImageLoad={() => setLoadedImagesCount(prev => prev + 1)} 
+                        />
                       </div>
                     </div>
                   ))}

@@ -1,6 +1,13 @@
 // utils/imageCache.js
 import localforage from 'localforage';
 
+// 🚀 Hot Cache: Blobs pré-carregados na memória RAM para acesso INSTANTÂNEO
+const hotCache = new Map();
+
+export function getHotCache(id, type) {
+  return hotCache.get(`${type}-${id}`);
+}
+
 /**
  * Cria versões otimizadas (Thumb e Full) da imagem e salva no IndexedDB
  */
@@ -18,14 +25,14 @@ export async function cacheImage(id, imageUrl) {
     const blob = await response.blob();
     const bitmap = await createImageBitmap(blob);
 
-    // 1. Gera Thumbnail (Pequena e Leve)
+    // 1. Gera Thumbnail (Pequena e Leve) - Reduzido para 250px para Totem lento
     if (!hasThumb) {
-      await generateAndSave(id, bitmap, 300, 0.5, 'thumb');
+      await generateAndSave(id, bitmap, 250, 0.4, 'thumb');
     }
 
     // 2. Gera Full (Alta Resolução)
     if (!hasFull) {
-      await generateAndSave(id, bitmap, 1024, 0.75, 'full');
+      await generateAndSave(id, bitmap, 1024, 0.7, 'full');
     }
 
     bitmap.close();
@@ -61,7 +68,7 @@ async function generateAndSave(id, bitmap, maxWidth, quality, type) {
  */
 export async function precacheAllImages(db) {
   if (!db) return;
-  console.log('🚀 Iniciando pré-carregamento dual-res...');
+  console.log('🚀 Iniciando pré-carregamento total...');
 
   try {
     const { getDocs, collection } = await import('firebase/firestore');
@@ -90,27 +97,48 @@ export async function precacheAllImages(db) {
  * Retorna uma URL de objeto para a imagem cacheada (Thumb ou Full)
  */
 export async function getCachedImage(id, imageUrl, type = 'thumb') {
-  const cached = await localforage.getItem(`${type}-${id}`);
-  if (cached) {
-    return URL.createObjectURL(cached);
+  const key = `${type}-${id}`;
+  
+  // 1. Tenta Hot Cache (Memória) -> INSTANTÂNEO
+  if (hotCache.has(key)) {
+    return hotCache.get(key);
   }
+
+  // 2. Tenta Cold Cache (IndexedDB) -> ASYNC
+  const cached = await localforage.getItem(key);
+  if (cached) {
+    const url = URL.createObjectURL(cached);
+    hotCache.set(key, url); // Sobe para o Hot Cache
+    return url;
+  }
+
   return imageUrl;
 }
 
 /**
- * Retorna verdadeiro apenas quando as imagens de uma lista de itens estão no cache local
- * Útil para garantir que uma lista seja exibida toda de uma vez.
+ * GARANTE que as imagens estejam no Hot Cache (RAM) antes de retornar.
+ * Isso permite que o React renderize tudo de uma vez sem flickering.
  */
 export async function ensureImagesInCache(items, type = 'thumb') {
   const promises = items.map(async (item) => {
-    if (!item.image) return true;
-    const cached = await localforage.getItem(`${type}-${item.id}`);
-    if (cached) return true;
+    if (!item.image) return;
+    const key = `${type}-${item.id}`;
     
-    // Se não está no cache, tenta baixar rapidinho
-    await cacheImage(item.id, item.image);
-    return true;
+    if (hotCache.has(key)) return;
+
+    let blob = await localforage.getItem(key);
+    
+    if (!blob) {
+      // Se não está no IndexedDB, força o cacheamento agora
+      await cacheImage(item.id, item.image);
+      blob = await localforage.getItem(key);
+    }
+
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      hotCache.set(key, url);
+    }
   });
 
-  return Promise.all(promises);
+  await Promise.all(promises);
 }

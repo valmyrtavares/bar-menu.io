@@ -1,7 +1,7 @@
 import style from '../assets/styles/EachTotenDish.module.scss';
 import { useCachedImage } from '../Hooks/useCachedImage';
 
-const EachTotenDish = ({ item, index, preparedRequest }) => {
+const EachTotenDish = ({ item, index, preparedRequest, onImageLoad }) => {
   const src = useCachedImage(item.id, item.image, 'thumb');
 
   return (
@@ -11,7 +11,7 @@ const EachTotenDish = ({ item, index, preparedRequest }) => {
       key={item.id || index} // Evita recriação desnecessária
     >
       <div className={style.image}>
-        <img src={src} alt="" />
+        <img src={src} alt="" onLoad={onImageLoad} onError={onImageLoad} />
       </div>
       <h3>
         {item.title}

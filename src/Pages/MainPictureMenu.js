@@ -36,6 +36,7 @@ const MainPictureMenu = () => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
+  const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -91,20 +92,36 @@ const MainPictureMenu = () => {
     console.log('Escolhendo categoria:', title);
     if (!dishes || dishes.length === 0) return;
 
-    setShowFilteredDishes(false); // Esconde a grade anterior
+    setCategorySelected(title); // ⚡ Feedback INSTANTÂNEO na tela
+    setShowFilteredDishes(false); // Esconde a grade para carregar em lote
 
     const filtered =
       parent !== 'bestSellers'
         ? dishes.filter((item) => item.category === parent)
         : dishes.filter((item) => item.carrossel === true);
 
-    // ✅ GARANTIA: Só atualiza e mostra quando TODAS as imagens (thumbs) estiverem prontas no cache local
+    // ✅ GARANTIA: Só revela a grade quando TODAS as imagens novas estiverem na RAM (Hot Cache)
     await ensureImagesInCache(filtered, 'thumb');
 
+    setLoadedImagesCount(0); // Reseta contador de carregamento real (DOM)
     setDishesFiltered(filtered);
-    setCategorySelected(title);
-    setShowFilteredDishes(true); // Revela tudo de uma vez
+    // setShowFilteredDishes(true); // Removido! O useEffect abaixo cuidará disso quando todas carregarem no DOM
   };
+
+  // ✅ Revela a grade APENAS quando todas as imagens (DOM) terminarem de decodificar
+  React.useEffect(() => {
+    if (dishesFiltered.length > 0 && loadedImagesCount >= dishesFiltered.length) {
+      setShowFilteredDishes(true);
+    }
+  }, [loadedImagesCount, dishesFiltered]);
+
+  // Fail-safe: Se demorar mais de 2s, mostra o que tiver
+  React.useEffect(() => {
+    if (dishesFiltered.length > 0 && !showFilteredDishes) {
+      const timer = setTimeout(() => setShowFilteredDishes(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [dishesFiltered, showFilteredDishes]);
 
   React.useEffect(() => {
     if (dishes.length > 0) {
@@ -190,13 +207,14 @@ const MainPictureMenu = () => {
           <section className={style.dishes}>
             <h3 className={style.mainTitle}>{categorySelected}</h3>
             <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
-              {showFilteredDishes && dishesFiltered &&
+              {dishesFiltered &&
                 dishesFiltered.length > 0 &&
                 dishesFiltered.map((item, index) => (
                   <EachTotenDish
                     item={item}
                     index={index}
                     preparedRequest={preparedRequest}
+                    onImageLoad={() => setLoadedImagesCount((prev) => prev + 1)}
                   />
                 ))}
             </div>

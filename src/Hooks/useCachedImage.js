@@ -1,9 +1,10 @@
 // src/hooks/useCachedImage.js
 import { useEffect, useState } from 'react';
-import { getCachedImage, cacheImage } from '../util/imageCache';
+import { getCachedImage, cacheImage, getHotCache } from '../util/imageCache';
 
 export function useCachedImage(id, imageUrl, type = 'thumb') {
-  const [src, setSrc] = useState(imageUrl);
+  // ⚡ Tenta inicializar IMEDIATAMENTE do Hot Cache (RAM) se já estiver lá
+  const [src, setSrc] = useState(() => getHotCache(id, type) || imageUrl);
 
   useEffect(() => {
     let mounted = true;
