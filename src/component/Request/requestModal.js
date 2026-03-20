@@ -944,7 +944,7 @@ const RequestModal = () => {
       setAutoPayment(true);
       return;
     } else {
-      if (selectedPayment === 'dinheiro') {
+      if (selectedPayment === 'CASH') {
         sendRequestToKitchen();
         setAutoPayment(false);
       } else if (selectedPayment === 'desabled') {
@@ -969,6 +969,7 @@ const RequestModal = () => {
         cpfForInvoice = cpf;
         paymentTransactionData = paymentData;
         sendRequestToKitchen();
+        setAutoPayment(false);
       }
     }
   };

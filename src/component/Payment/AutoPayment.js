@@ -43,6 +43,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       const { statusTransaction } = payload;
       console.log('statusTransaction recebido no socket:', statusTransaction);
       if (statusTransaction === 'APPROVED') {
+        setLoading(false);
         setWaitingForPayment(false);
         setIdPayer(payload.idPayer || null);
 
@@ -76,11 +77,13 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           onChoose(selected, null, currentPaymentData);
         }
       } else if (statusTransaction === 'REJECTED') {
+        setLoading(false);
         setWaitingForPayment(false);
         setMessage('Falha no pagamento. Tente novamente');
         onChoose('desabled'); // manter seu comportamento anterior
       } else if (statusTransaction === 'ABORTED') {
         console.log('Objeto completo  ', payload);
+        setLoading(false);
         setWaitingForPayment(false);
         onChoose('ABORTED'); // seu caso antigo tratava como pending -> selecionado
       }
