@@ -12,6 +12,7 @@ import {
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
+import { ensureImagesInCache } from '../util/imageCache.js';
 
 const MainPictureMobileMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -23,6 +24,7 @@ const MainPictureMobileMenu = () => {
   const [openModalDishes, setOpenModalDishes] = React.useState(false);
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
+  const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -65,12 +67,12 @@ const MainPictureMobileMenu = () => {
   }, []);
 
   const CategoryItemImage = ({ item }) => {
-    const src = useCachedImage(item.id, item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg');
+    const src = useCachedImage(item.id, item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg', 'thumb');
     return <img src={src} alt="" />;
   };
 
   const DishItemImage = ({ item }) => {
-    const src = useCachedImage(item.id, item.image);
+    const src = useCachedImage(item.id, item.image, 'thumb');
     return <img src={src} alt="" />;
   };
 
@@ -80,19 +82,21 @@ const MainPictureMobileMenu = () => {
     }
   }, [dishes]);
 
-  const chooseCategory = (parent, title) => {
-    console.log('Essa é a minha categoria   ', parent);
-    if (dishes && dishes.length > 0) {
-      if (parent !== 'bestSellers') {
-        const filtered = dishes.filter((item) => item.category === parent);
-        setDishesFiltered(filtered);
-        setCategorySelected(title);
-      } else {
-        const filtered = dishes.filter((item) => item.carrossel === true);
-        setDishesFiltered(filtered);
-        setCategorySelected(title);
-      }
-    }
+  const chooseCategory = async (parent, title) => {
+    if (!dishes || dishes.length === 0) return;
+
+    setShowFilteredDishes(false);
+
+    const filtered =
+      parent !== 'bestSellers'
+        ? dishes.filter((item) => item.category === parent)
+        : dishes.filter((item) => item.carrossel === true);
+
+    await ensureImagesInCache(filtered, 'thumb');
+
+    setDishesFiltered(filtered);
+    setCategorySelected(title);
+    setShowFilteredDishes(true);
   };
 
   const preparedRequest = (item) => {
@@ -166,24 +170,23 @@ const MainPictureMobileMenu = () => {
                 menuButton.length > 0 &&
                 menuButton.map((item, index) => (
                   <div
-                    key={index}
-                    className={style.categoryItem}
-                    onClick={() => chooseCategory(item.parent, item.title)}
-                  >
-                    <h3>{item.title}</h3>
-                    <CategoryItemImage item={item} />
-                  </div>
+                  key={item.id}
+                  className={style.categoryItem}
+                  onClick={() => chooseCategory(item.parent, item.title)}
+                >
+                  <h3>{item.title}</h3>
+                  <CategoryItemImage item={item} />
+                </div>
                 ))}
             </nav>
             <section className={style.dishes}>
               <h3 className={style.mainTitle}>{categorySelected}</h3>
-              <div className={style.subContainer}>
-                {dishesFiltered &&
+              <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
+                {showFilteredDishes && dishesFiltered &&
                   dishesFiltered.length > 0 &&
                   dishesFiltered.map((item, index) => (
                     <div
                       className={style.itemContainer}
-                      style={{ animationDelay: `${index * 0.1}s` }}
                       key={item.id || index} // Evita recriação desnecessária
                     >
                       <div className={style.text}>

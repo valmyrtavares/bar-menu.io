@@ -2,7 +2,7 @@ import style from '../assets/styles/EachTotenDish.module.scss';
 import { useCachedImage } from '../Hooks/useCachedImage';
 
 const EachTotenDish = ({ item, index, preparedRequest }) => {
-  const src = useCachedImage(item.id, item.image);
+  const src = useCachedImage(item.id, item.image, 'thumb');
 
   return (
     <div

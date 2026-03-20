@@ -13,12 +13,14 @@ import {
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
+import { ensureImagesInCache } from '../util/imageCache.js';
 
 const CategoryItemImage = ({ item }) => {
   const src = useCachedImage(
     item.id,
     item.image ||
       'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg',
+    'thumb',
   );
   return <img src={src} alt="" />;
 };
@@ -85,23 +87,23 @@ const MainPictureMenu = () => {
     }
   }, [dishes]);
 
-  const chooseCategory = (parent, title) => {
-    console.log('Essa é a minha categoria   ', parent);
-    if (dishes && dishes.length > 0) {
-      setShowFilteredDishes(false); // Esconde temporariamente para revelar em lote
-      
-      const filtered = parent !== 'bestSellers' 
+  const chooseCategory = async (parent, title) => {
+    console.log('Escolhendo categoria:', title);
+    if (!dishes || dishes.length === 0) return;
+
+    setShowFilteredDishes(false); // Esconde a grade anterior
+
+    const filtered =
+      parent !== 'bestSellers'
         ? dishes.filter((item) => item.category === parent)
         : dishes.filter((item) => item.carrossel === true);
 
-      setDishesFiltered(filtered);
-      setCategorySelected(title);
+    // ✅ GARANTIA: Só atualiza e mostra quando TODAS as imagens (thumbs) estiverem prontas no cache local
+    await ensureImagesInCache(filtered, 'thumb');
 
-      // Aguarda um pequeno momento para o cache resolver e revela tudo junto
-      setTimeout(() => {
-        setShowFilteredDishes(true);
-      }, 50);
-    }
+    setDishesFiltered(filtered);
+    setCategorySelected(title);
+    setShowFilteredDishes(true); // Revela tudo de uma vez
   };
 
   React.useEffect(() => {

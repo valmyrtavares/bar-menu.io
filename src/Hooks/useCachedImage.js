@@ -2,28 +2,26 @@
 import { useEffect, useState } from 'react';
 import { getCachedImage, cacheImage } from '../util/imageCache';
 
-export function useCachedImage(id, imageUrl) {
-  const [src, setSrc] = useState(imageUrl); // fallback inicial
+export function useCachedImage(id, imageUrl, type = 'thumb') {
+  const [src, setSrc] = useState(imageUrl);
 
   useEffect(() => {
     let mounted = true;
 
     const load = async () => {
-      // já tenta cachear em paralelo
-      cacheImage(id, imageUrl);
-
-      // pega a versão local se existir
-      const finalUrl = await getCachedImage(id, imageUrl);
-
+      // pega a versão local se existir do tipo solicitado
+      const finalUrl = await getCachedImage(id, imageUrl, type);
       if (mounted) setSrc(finalUrl);
     };
 
-    load();
+    if (id && imageUrl) {
+      load();
+    }
 
     return () => {
       mounted = false;
     };
-  }, [id, imageUrl]);
+  }, [id, imageUrl, type]);
 
   return src;
 }

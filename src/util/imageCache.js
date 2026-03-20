@@ -1,101 +1,116 @@
 // utils/imageCache.js
 import localforage from 'localforage';
 
+/**
+ * Cria versões otimizadas (Thumb e Full) da imagem e salva no IndexedDB
+ */
 export async function cacheImage(id, imageUrl) {
   try {
-    const cached = await localforage.getItem(`image-${id}`);
-    if (cached) return; // já está no cache
+    const thumbKey = `thumb-${id}`;
+    const fullKey = `full-${id}`;
 
-    // 1. Baixar a imagem original
+    const hasThumb = await localforage.getItem(thumbKey);
+    const hasFull = await localforage.getItem(fullKey);
+
+    if (hasThumb && hasFull) return;
+
     const response = await fetch(imageUrl);
     const blob = await response.blob();
-
-    // 2. Transformar Blob em Image
     const bitmap = await createImageBitmap(blob);
 
-    // ⬇️ DEFINA AQUI a largura máxima desejada (Aumentado para Totem)
-    const MAX_WIDTH = 1024;
-
-    let newWidth = bitmap.width;
-    let newHeight = bitmap.height;
-
-    if (bitmap.width > MAX_WIDTH) {
-      newWidth = MAX_WIDTH;
-      newHeight = Math.round((bitmap.height * MAX_WIDTH) / bitmap.width);
+    // 1. Gera Thumbnail (Pequena e Leve)
+    if (!hasThumb) {
+      await generateAndSave(id, bitmap, 300, 0.5, 'thumb');
     }
 
-    // 3. Criar canvas reduzido
-    const canvas = document.createElement('canvas');
-    canvas.width = newWidth;
-    canvas.height = newHeight;
+    // 2. Gera Full (Alta Resolução)
+    if (!hasFull) {
+      await generateAndSave(id, bitmap, 1024, 0.75, 'full');
+    }
 
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0, newWidth, newHeight);
-
-    // 4. Converter para WebP (muito mais leve)
-    const optimizedBlob = await new Promise((resolve) =>
-      canvas.toBlob(
-        (blob) => resolve(blob),
-        'image/webp', // formato final
-        0.75 // qualidade 75%
-      )
-    );
-
-    // 5. Salvar no cache
-    await localforage.setItem(`image-${id}`, optimizedBlob);
-    
-    // Libera memória
-    URL.revokeObjectURL(bitmap);
+    bitmap.close();
   } catch (err) {
     console.error(`Erro ao cachear imagem ${id}:`, err);
   }
 }
 
+async function generateAndSave(id, bitmap, maxWidth, quality, type) {
+  let newWidth = bitmap.width;
+  let newHeight = bitmap.height;
+
+  if (bitmap.width > maxWidth) {
+    newWidth = maxWidth;
+    newHeight = Math.round((bitmap.height * maxWidth) / bitmap.width);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = newWidth;
+  canvas.height = newHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, newWidth, newHeight);
+
+  const optimizedBlob = await new Promise((resolve) =>
+    canvas.toBlob((b) => resolve(b), 'image/webp', quality)
+  );
+
+  await localforage.setItem(`${type}-${id}`, optimizedBlob);
+}
+
 /**
- * Pre-carrega todas as imagens das coleções de Pratos e Categorias no IndexedDB
+ * Pre-carrega todas as imagens das coleções no IndexedDB
  */
 export async function precacheAllImages(db) {
   if (!db) return;
-  console.log('🚀 Iniciando pré-carregamento de imagens...');
-  
+  console.log('🚀 Iniciando pré-carregamento dual-res...');
+
   try {
     const { getDocs, collection } = await import('firebase/firestore');
-    
-    // 1. Buscar Categorias
-    const catSnap = await getDocs(collection(db, 'category'));
-    const categories = catSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // 2. Buscar Pratos
-    const dishSnap = await getDocs(collection(db, 'dishes'));
-    const dishes = dishSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    const allItems = [...categories, ...dishes];
-    
-    // Processar em pequenos lotes para não travar o navegador
+    const [catSnap, dishSnap] = await Promise.all([
+      getDocs(collection(db, 'category')),
+      getDocs(collection(db, 'dishes')),
+    ]);
+
+    const allItems = [
+      ...catSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+      ...dishSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+    ];
+
     for (const item of allItems) {
       if (item.image) {
-        // Verifica se já existe antes de tentar baixar
-        const cached = await localforage.getItem(`image-${item.id}`);
-        if (!cached) {
-          console.log(`Pre-cache: ${item.title || item.name}`);
-          await cacheImage(item.id, item.image);
-        }
+        await cacheImage(item.id, item.image);
       }
     }
-    
     console.log('✅ Pré-carregamento concluído!');
   } catch (err) {
     console.error('Erro no pre-cache global:', err);
   }
 }
 
-export async function getCachedImage(id, imageUrl) {
-  const cached = await localforage.getItem(`image-${id}`);
-
+/**
+ * Retorna uma URL de objeto para a imagem cacheada (Thumb ou Full)
+ */
+export async function getCachedImage(id, imageUrl, type = 'thumb') {
+  const cached = await localforage.getItem(`${type}-${id}`);
   if (cached) {
     return URL.createObjectURL(cached);
   }
-
-  // primeira vez → usa a URL remota mesmo
   return imageUrl;
+}
+
+/**
+ * Retorna verdadeiro apenas quando as imagens de uma lista de itens estão no cache local
+ * Útil para garantir que uma lista seja exibida toda de uma vez.
+ */
+export async function ensureImagesInCache(items, type = 'thumb') {
+  const promises = items.map(async (item) => {
+    if (!item.image) return true;
+    const cached = await localforage.getItem(`${type}-${item.id}`);
+    if (cached) return true;
+    
+    // Se não está no cache, tenta baixar rapidinho
+    await cacheImage(item.id, item.image);
+    return true;
+  });
+
+  return Promise.all(promises);
 }

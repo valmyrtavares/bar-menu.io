@@ -45,10 +45,10 @@ const DishesModal = ({ item, setModal }) => {
   );
   const [radioDisabled, setRadioDisabled] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [pdv, setPdv] = useLocalStorage('pdv', false);
+  const pdv = useLocalStorage('pdv', false)[0];
 
   const navigate = useNavigate();
-  const src = useCachedImage(item.id, item.image);
+  const src = useCachedImage(item.id, item.image, 'full');
 
   React.useEffect(() => {
     calculateFinalCost();

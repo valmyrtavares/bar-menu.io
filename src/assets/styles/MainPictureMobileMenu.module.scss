@@ -92,8 +92,22 @@
                 max-height: 70vh; // Limita a altura máxima
                 overflow-y: auto;
                 display:block;
-               
-            
+                
+                opacity: 0;
+                transform: translateY(10px);
+                transition: none;
+
+                &.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                    transition: opacity 0.3s ease-in, transform 0.3s ease-out;
+                }
+
+                &.hidden {
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition: none;
+                }
 
                 .itemContainer {
                     margin: 5px 0;
