@@ -26,6 +26,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [message, setMessage] = useState('');
   const [showCpfPopup, setShowCpfPopup] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
+  const cpfRef = React.useRef('');
 
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
@@ -68,14 +69,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         };
 
         setPaymentData(currentPaymentData);
-
-        const autoNfceActive = JSON.parse(localStorage.getItem('enableAutoNfce') || 'false');
-
-        if (autoNfceActive) {
-          setShowCpfPopup(true);
-        } else {
-          onChoose(selected, null, currentPaymentData);
-        }
+        onChoose(selected, cpfRef.current, currentPaymentData);
       } else if (statusTransaction === 'REJECTED') {
         setLoading(false);
         setWaitingForPayment(false);
@@ -118,7 +112,19 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       return;
     }
 
-    console.log('Iniciando pagamento com:', selected, 'no valor de:', price);
+    const autoNfceActive = JSON.parse(
+      localStorage.getItem('enableAutoNfce') || 'false',
+    );
+
+    if (autoNfceActive) {
+      setShowCpfPopup(true);
+    } else {
+      startPaymentFlow(selected, '');
+    }
+  };
+
+  const startPaymentFlow = async (selectedP, cpf) => {
+    console.log('Iniciando pagamento com:', selectedP, 'no valor de:', price);
 
     try {
       setLoading(true);
@@ -134,7 +140,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         type: 'INPUT',
         origin: 'PAGAMENTO',
         data: {
-          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook', // 👈 agora aponta para o seu backend
+          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook',
           correlationId,
           flow: 'SYNC',
           automationName: 'GERACAOZ',
@@ -146,21 +152,21 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           message: {
             command: 'PAYMENT',
             value: price,
-            paymentMethod: selected === 'PIX' ? 'PIX' : 'CARD',
+            paymentMethod: selectedP === 'PIX' ? 'PIX' : 'CARD',
             paymentType:
-              selected === 'PIX'
+              selectedP === 'PIX'
                 ? 'DEBIT'
-                : selected === 'VR_DEBIT'
+                : selectedP === 'VR_DEBIT'
                   ? 'DEBIT'
-                  : selected === 'VR_CREDIT'
+                  : selectedP === 'VR_CREDIT'
                     ? 'CREDIT'
-                    : selected,
+                    : selectedP,
             paymentMethodSubType: 'FULL_PAYMENT',
           },
         },
       };
 
-      // 3️⃣ Envia ao backend hospedado no Render
+      // 3️⃣ Envia ao backend hospetado no Render
       await fetch('https://payer-4ptm.onrender.com/api/payer/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,6 +176,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
       console.error('Erro no pagamento:', err);
       setErrorMessage('Falha no pagamento. Tente novamente.');
       setMessage('Erro ao iniciar pagamento. Tente novamente.');
+      setLoading(false);
     }
   };
   const abortPayment = async () => {
@@ -198,7 +205,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
 
   const onContinue = (cpf) => {
     setShowCpfPopup(false);
-    onChoose(selected, cpf, paymentData); // Passa dados completos da transação
+    cpfRef.current = cpf;
+    startPaymentFlow(selected, cpf);
   };
 
   return (
