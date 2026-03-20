@@ -1,18 +1,17 @@
 import style from '../assets/styles/EachTotenDish.module.scss';
-//import { useCachedImage } from '../Hooks/useCachedImage';
+import { useCachedImage } from '../Hooks/useCachedImage';
 
 const EachTotenDish = ({ item, index, preparedRequest }) => {
-  // const src = useCachedImage(item.id, item.image);
+  const src = useCachedImage(item.id, item.image);
 
   return (
     <div
       onClick={item.lowAmountRawMaterial ? null : () => preparedRequest(item)}
       className={style.itemContainer}
-      style={{ animationDelay: `${index * 0.1}s` }}
       key={item.id || index} // Evita recriação desnecessária
     >
       <div className={style.image}>
-        <img src={item.image} alt="" />
+        <img src={src} alt="" />
       </div>
       <h3>
         {item.title}

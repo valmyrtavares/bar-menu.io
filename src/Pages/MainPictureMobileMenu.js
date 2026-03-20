@@ -11,6 +11,7 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
+import { useCachedImage } from '../Hooks/useCachedImage.js';
 
 const MainPictureMobileMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -62,6 +63,16 @@ const MainPictureMobileMenu = () => {
     };
     fetchData();
   }, []);
+
+  const CategoryItemImage = ({ item }) => {
+    const src = useCachedImage(item.id, item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg');
+    return <img src={src} alt="" />;
+  };
+
+  const DishItemImage = ({ item }) => {
+    const src = useCachedImage(item.id, item.image);
+    return <img src={src} alt="" />;
+  };
 
   React.useEffect(() => {
     if (dishes.length > 0) {
@@ -160,14 +171,7 @@ const MainPictureMobileMenu = () => {
                     onClick={() => chooseCategory(item.parent, item.title)}
                   >
                     <h3>{item.title}</h3>
-                    <img
-                      src={
-                        item.image
-                          ? item.image
-                          : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
-                      }
-                      alt=""
-                    />
+                    <CategoryItemImage item={item} />
                   </div>
                 ))}
             </nav>
@@ -190,7 +194,7 @@ const MainPictureMobileMenu = () => {
                         </button>
                       </div>
                       <div className={style.image}>
-                        <img src={item.image} alt="" />
+                        <DishItemImage item={item} />
                       </div>
                     </div>
                   ))}

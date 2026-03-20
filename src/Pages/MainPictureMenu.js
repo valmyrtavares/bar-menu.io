@@ -12,8 +12,16 @@ import {
   getAnonymousUser,
 } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
-// import { cacheImage } from '../util/imageCache.js';
-// import CategoryItem from './CategoryItem.js';
+import { useCachedImage } from '../Hooks/useCachedImage.js';
+
+const CategoryItemImage = ({ item }) => {
+  const src = useCachedImage(
+    item.id,
+    item.image ||
+      'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg',
+  );
+  return <img src={src} alt="" />;
+};
 
 const MainPictureMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -25,6 +33,7 @@ const MainPictureMenu = () => {
   const [openModalDishes, setOpenModalDishes] = React.useState(false);
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
+  const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -63,12 +72,6 @@ const MainPictureMenu = () => {
         }
         setDishes(dataItem);
         setIsLoading(false);
-        // dataItem.forEach((item) => {
-        //   cacheImage(item.id, item.image);
-        // });
-        // menuButton.forEach((item) => {
-        //   cacheImage(item.id, item.image);
-        // });
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -85,17 +88,27 @@ const MainPictureMenu = () => {
   const chooseCategory = (parent, title) => {
     console.log('Essa é a minha categoria   ', parent);
     if (dishes && dishes.length > 0) {
-      if (parent !== 'bestSellers') {
-        const filtered = dishes.filter((item) => item.category === parent);
-        setDishesFiltered(filtered);
-        setCategorySelected(title);
-      } else {
-        const filtered = dishes.filter((item) => item.carrossel === true);
-        setDishesFiltered(filtered);
-        setCategorySelected(title);
-      }
+      setShowFilteredDishes(false); // Esconde temporariamente para revelar em lote
+      
+      const filtered = parent !== 'bestSellers' 
+        ? dishes.filter((item) => item.category === parent)
+        : dishes.filter((item) => item.carrossel === true);
+
+      setDishesFiltered(filtered);
+      setCategorySelected(title);
+
+      // Aguarda um pequeno momento para o cache resolver e revela tudo junto
+      setTimeout(() => {
+        setShowFilteredDishes(true);
+      }, 50);
     }
   };
+
+  React.useEffect(() => {
+    if (dishes.length > 0) {
+      chooseCategory('bestSellers', 'OS MAIS VENDIDOS');
+    }
+  }, [dishes]);
 
   const preparedRequest = (item) => {
     setItem(item);
@@ -161,28 +174,21 @@ const MainPictureMenu = () => {
           <nav className={style.categories}>
             {menuButton &&
               menuButton.length > 0 &&
-              menuButton.map((item, index) => (
+              menuButton.map((item) => (
                 <div
-                  key={index}
+                  key={item.id}
                   className={style.categoryItem}
                   onClick={() => chooseCategory(item.parent, item.title)}
                 >
                   <h3>{item.title}</h3>
-                  <img
-                    src={
-                      item.image
-                        ? item.image
-                        : 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'
-                    }
-                    alt=""
-                  />
+                  <CategoryItemImage item={item} />
                 </div>
               ))}
           </nav>
           <section className={style.dishes}>
             <h3 className={style.mainTitle}>{categorySelected}</h3>
-            <div className={style.subContainer}>
-              {dishesFiltered &&
+            <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
+              {showFilteredDishes && dishesFiltered &&
                 dishesFiltered.length > 0 &&
                 dishesFiltered.map((item, index) => (
                   <EachTotenDish

@@ -13,8 +13,8 @@ export async function cacheImage(id, imageUrl) {
     // 2. Transformar Blob em Image
     const bitmap = await createImageBitmap(blob);
 
-    // ⬇️ DEFINA AQUI a largura máxima desejada
-    const MAX_WIDTH = 200;
+    // ⬇️ DEFINA AQUI a largura máxima desejada (Aumentado para Totem)
+    const MAX_WIDTH = 1024;
 
     let newWidth = bitmap.width;
     let newHeight = bitmap.height;
@@ -43,8 +43,49 @@ export async function cacheImage(id, imageUrl) {
 
     // 5. Salvar no cache
     await localforage.setItem(`image-${id}`, optimizedBlob);
+    
+    // Libera memória
+    URL.revokeObjectURL(bitmap);
   } catch (err) {
-    console.error('Erro ao cachear imagem:', err);
+    console.error(`Erro ao cachear imagem ${id}:`, err);
+  }
+}
+
+/**
+ * Pre-carrega todas as imagens das coleções de Pratos e Categorias no IndexedDB
+ */
+export async function precacheAllImages(db) {
+  if (!db) return;
+  console.log('🚀 Iniciando pré-carregamento de imagens...');
+  
+  try {
+    const { getDocs, collection } = await import('firebase/firestore');
+    
+    // 1. Buscar Categorias
+    const catSnap = await getDocs(collection(db, 'category'));
+    const categories = catSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // 2. Buscar Pratos
+    const dishSnap = await getDocs(collection(db, 'dishes'));
+    const dishes = dishSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    const allItems = [...categories, ...dishes];
+    
+    // Processar em pequenos lotes para não travar o navegador
+    for (const item of allItems) {
+      if (item.image) {
+        // Verifica se já existe antes de tentar baixar
+        const cached = await localforage.getItem(`image-${item.id}`);
+        if (!cached) {
+          console.log(`Pre-cache: ${item.title || item.name}`);
+          await cacheImage(item.id, item.image);
+        }
+      }
+    }
+    
+    console.log('✅ Pré-carregamento concluído!');
+  } catch (err) {
+    console.error('Erro no pre-cache global:', err);
   }
 }
 

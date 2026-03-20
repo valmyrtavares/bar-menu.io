@@ -68,6 +68,16 @@ export const GlobalStorage = ({ children }) => {
     };
   }, []);
 
+  // Pre-cachear imagens se for modo Toten
+  React.useEffect(() => {
+    const toten = JSON.parse(localStorage.getItem('isToten') || 'false');
+    if (toten && db) {
+      import('./util/imageCache').then((m) => {
+        m.precacheAllImages(db);
+      });
+    }
+  }, [db]);
+
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
   const processedOrdersGlobal = React.useRef(new Set());
 
