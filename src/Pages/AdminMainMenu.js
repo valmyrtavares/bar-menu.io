@@ -100,6 +100,23 @@ const AdminMainMenu = ({ children }) => {
               Edite seus acompanhamentos
             </NavLink>
 
+            {/* --- GRUPO: CLIENTES --- */}
+            <NavLink
+              to="/admin/customer"
+              className={!hasClients ? admin.disabledLink : ''}
+              onClick={(e) => !hasClients && e.preventDefault()}
+            >
+              Lista de Clientes
+            </NavLink>
+            <NavLink
+              to="/admin/promotions"
+              className={!hasClients ? admin.disabledLink : ''}
+              onClick={(e) => !hasClients && e.preventDefault()}
+            >
+              Promoções
+            </NavLink>
+
+            {/* --- GRUPO: MATÉRIA PRIMA --- */}
             <NavLink
               to="/admin/stock"
               className={!hasRawMaterial ? admin.disabledLink : ''}
@@ -108,13 +125,36 @@ const AdminMainMenu = ({ children }) => {
             >
               Estoque
             </NavLink>
-
             <NavLink
-              to="/admin/customer"
-              className={!hasClients ? admin.disabledLink : ''}
-              onClick={(e) => !hasClients && e.preventDefault()}
+              to="/admin/managementRecipes"
+              className={!hasRawMaterial ? admin.disabledLink : ''}
+              style={{ color: warningMessage ? 'red' : undefined }}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
             >
-              Lista de Clientes
+              Receitas
+            </NavLink>
+            <NavLink
+              to="/admin/expenses"
+              className={!hasRawMaterial ? admin.disabledLink : ''}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
+            >
+              Despesas
+            </NavLink>
+
+            {/* --- GRUPO: FINANCEIRO --- */}
+            <NavLink
+              to="/admin/request"
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
+            >
+              Vendas
+            </NavLink>
+            <NavLink
+              to="/admin/sell-flow"
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
+            >
+              Fechamento de Caixa
             </NavLink>
             <NavLink
               to="/admin/operationCost"
@@ -124,58 +164,10 @@ const AdminMainMenu = ({ children }) => {
               Cadastro de Custo de Operações
             </NavLink>
 
-            <NavLink
-              to="/admin/managementRecipes"
-              className={!hasRawMaterial ? admin.disabledLink : ''}
-              style={{ color: warningMessage ? 'red' : undefined }}
-              onClick={(e) => !hasRawMaterial && e.preventDefault()}
-            >
-              Receitas
-            </NavLink>
-
-            <NavLink
-              to="/admin/request"
-              className={!hasFinancial ? admin.disabledLink : ''}
-              onClick={(e) => !hasFinancial && e.preventDefault()}
-            >
-              Vendas
-            </NavLink>
-
-            <NavLink
-              to="/admin/sell-flow"
-              className={!hasFinancial ? admin.disabledLink : ''}
-              onClick={(e) => !hasFinancial && e.preventDefault()}
-            >
-              Fechamento de Caixa
-            </NavLink>
-
+            {/* --- GRUPO: BÁSICO / SISTEMA --- */}
+            <NavLink to="/admin/welcome">Saudação inicial</NavLink>
             <NavLink to="/admin/frontimage">Adicione sua marca</NavLink>
-
-            <NavLink
-              to="/admin/expenses"
-              className={!hasRawMaterial ? admin.disabledLink : ''}
-              onClick={(e) => !hasRawMaterial && e.preventDefault()}
-            >
-              Despesas
-            </NavLink>
-
             <NavLink to="/admin/styles">Gerenciando Estilos</NavLink>
-
-            <NavLink
-              to="/admin/welcome"
-              className={!hasFinancial ? admin.disabledLink : ''}
-              onClick={(e) => !hasFinancial && e.preventDefault()}
-            >
-              Saudação inicial
-            </NavLink>
-            <NavLink
-              to="/admin/promotions"
-              className={!hasClients ? admin.disabledLink : ''}
-              onClick={(e) => !hasClients && e.preventDefault()}
-            >
-              Promoções
-            </NavLink>
-            
             <NavLink to="/admin/documentation">Documentação</NavLink>
 
             <NavLink to="/admin/requestlist">PDV</NavLink>
