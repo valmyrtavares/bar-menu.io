@@ -1515,22 +1515,24 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       item={item}
                       onPaymentMethodChange={handlePaymentMethodChange}
                     />
-                    <div className={style.promotionSelect}>
-                      <select
-                        name="selectedPromotion"
-                        value={selectedPromotion}
-                        onChange={(e) => handleSelectChange(e, item)}
-                      >
-                        <option value="">Selecione uma promoção </option>
-                        {promotions &&
-                          promotions.length > 0 &&
-                          promotions.map((promotion, index) => (
-                            <option key={index} value={index}>
-                              {promotion.title}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
+                    {global.packageTier !== 1 && (
+                      <div className={style.promotionSelect}>
+                        <select
+                          name="selectedPromotion"
+                          value={selectedPromotion}
+                          onChange={(e) => handleSelectChange(e, item)}
+                        >
+                          <option value="">Promoções</option>
+                          {promotions &&
+                            promotions.length > 0 &&
+                            promotions.map((promotion, index) => (
+                              <option key={index} value={index}>
+                                {promotion.title}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
                   <div className={style.btnStatus}>
                     <button

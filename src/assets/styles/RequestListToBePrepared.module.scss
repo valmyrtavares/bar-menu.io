@@ -141,9 +141,10 @@
                 padding: 10px;
                 border-radius: 10px;
                 font-family: var(--title-font);
-                font-size: 1.2rem;
+                font-size: 0.9rem; // Reduzido para caber melhor
                 font-weight: bold;
-                width: 75%;
+                width: 90%; // Aumentado para melhor visibilidade
+                min-width: 150px;
             }
         }
     }
