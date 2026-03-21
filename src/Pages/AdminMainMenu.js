@@ -168,7 +168,13 @@ const AdminMainMenu = ({ children }) => {
             <NavLink to="/admin/welcome">Saudação inicial</NavLink>
             <NavLink to="/admin/frontimage">Configurações do Terminal</NavLink>
             <NavLink to="/admin/styles">Marca e Estilo</NavLink>
-            <NavLink to="/admin/documentation">Documentação</NavLink>
+            <a
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Documentação
+            </a>
 
             <NavLink to="/admin/requestlist">PDV</NavLink>
             <NavLink to="/admin/kitchen">Cozinha</NavLink>
