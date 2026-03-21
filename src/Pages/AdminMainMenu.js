@@ -166,8 +166,8 @@ const AdminMainMenu = ({ children }) => {
 
             {/* --- GRUPO: BÁSICO / SISTEMA --- */}
             <NavLink to="/admin/welcome">Saudação inicial</NavLink>
-            <NavLink to="/admin/frontimage">Adicione sua marca</NavLink>
-            <NavLink to="/admin/styles">Gerenciando Estilos</NavLink>
+            <NavLink to="/admin/frontimage">Configurações do Terminal</NavLink>
+            <NavLink to="/admin/styles">Marca e Estilo</NavLink>
             <NavLink to="/admin/documentation">Documentação</NavLink>
 
             <NavLink to="/admin/requestlist">PDV</NavLink>

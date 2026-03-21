@@ -1,0 +1,16 @@
+@use './mixin' as *;
+@import "./adminStyleReuse.module.scss";
+
+.formButtonSubmit {
+    @include containerButtonSubmit(30px 0);
+
+    button {
+        @include btnSubmit;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}

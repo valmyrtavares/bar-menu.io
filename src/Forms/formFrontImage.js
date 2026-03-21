@@ -14,8 +14,6 @@ import { useNavigate } from 'react-router-dom';
 import useLocalStorage from '../Hooks/useLocalStorage.js';
 
 const FormFrontImage = () => {
-  const [url, setUrl] = React.useState('');
-  const [progress, setProgress] = React.useState('');
   const global = React.useContext(GlobalContext);
   const [publicStatement, setPublicStatement] = useLocalStorage(
     'isToten',
@@ -110,54 +108,17 @@ const FormFrontImage = () => {
     console.log('publicStatement   ', publicStatement);
   }, [publicStatement]);
 
-  const onfileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const path = `frontImage/${file.name}`;
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setProgress(progress);
-        },
-        (error) => {
-          console.error('Erro no upload:', error.code, error.message);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          setUrl(downloadURL);
-          global.setImage(downloadURL);
-          setDoc(doc(db, 'frontImage', 'oIKq1AHF4cHMkqgOcz1h'), {
-            image: downloadURL,
-          })
-            .then(() => {
-              console.log('Document successfully updated !');
-              console.log('formFrontImage  85');
-              navigate('/');
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        }
-      );
-    }
-  };
   return (
     <>
       <Link to="/admin/admin">
-        <Title mainTitle="Adicione sua marca" />
+        <Title mainTitle="Configurações do Terminal" />
       </Link>
-      <Input
-        id="uploadImage"
-        label="Upload image"
-        type="file"
-        onChange={onfileChange}
-      />
-      <progress value={progress} max="100" />
-      {url && <img className="image-preview" src={url} alt="Uploaded file" />}
+
+      <div className="p-1">
+        <p className="text-secondary mb-4">
+          Defina como este computador deve se comportar no sistema. 
+          As opções marcadas abaixo afetam apenas este terminal (exceto a emissão de notas).
+        </p>
 
       {global.canConfigToten && (
         <div className="form-check my-1">
@@ -231,6 +192,7 @@ const FormFrontImage = () => {
           automaticamente a NFC-e após a confirmação do pagamento.
         </label>
       </div>
+    </div>
     </>
   );
 };
