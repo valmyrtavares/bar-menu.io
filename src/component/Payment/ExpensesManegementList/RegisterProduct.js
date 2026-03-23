@@ -20,7 +20,6 @@ import WarningMessage from '../../WarningMessages.js';
 const RegisterProduct = ({ setShowPopup }) => {
   const [form, setForm] = React.useState({
     name: '',
-    minimumAmount: '',
     unitOfMeasurement: '',
     operationSupplies: false,
   });
@@ -63,7 +62,6 @@ const RegisterProduct = ({ setShowPopup }) => {
     setOldName(item.name);
     setForm({
       name: item.name,
-      minimumAmount: item.minimumAmount,
       unitOfMeasurement: item.unitOfMeasurement,
     });
   };
@@ -91,7 +89,6 @@ const RegisterProduct = ({ setShowPopup }) => {
           <thead>
             <tr>
               <th>Produto</th>
-              <th>Volume mínimo</th>
               <th>Unidade de medida</th>
               <th>Produtos de Suporte</th>
               <th>Editar</th>
@@ -104,7 +101,6 @@ const RegisterProduct = ({ setShowPopup }) => {
               listProvider.map((requestItem, index) => (
                 <tr key={index}>
                   <td>{requestItem.name}</td>
-                  <td>{requestItem.minimumAmount || 0}</td>
                   <td>{requestItem.unitOfMeasurement}</td>
                   <td>
                     {requestItem.operationSupplies ? 'Insumo' : 'Materia Prima'}
@@ -163,13 +159,8 @@ const RegisterProduct = ({ setShowPopup }) => {
             unitOfMeasurement: form.unitOfMeasurement,
           };
 
-          // Adicionar `minimumAmount` somente se tiver um valor válido
-          if (form.minimumAmount !== undefined && form.minimumAmount !== null) {
-            updatedData.minimumAmount = form.minimumAmount;
-          }
-
           await updateDoc(stockRef, updatedData);
-          console.log(`SideDishes item updated successfully: ${docSnap.id}`);
+          console.log(`Stock item updated successfully: ${docSnap.id}`);
         }
       }
 
@@ -190,16 +181,9 @@ const RegisterProduct = ({ setShowPopup }) => {
             unitOfMeasurement: form.unitOfMeasurement,
           };
 
-          if (
-            form.unitOfMeasurement !== undefined &&
-            form.unitOfMeasurement !== null
-          ) {
-            updateData.unitOfMeasurement = form.minimumAmount;
-          }
-
           // Atualizar os campos em `sideDishes`
           await updateDoc(sideDishesRef, updateData);
-          console.log(`Stock item updated successfully: ${docSnap.id}`);
+          console.log(`SideDishes item updated successfully: ${docSnap.id}`);
         }
       }
 
@@ -210,7 +194,6 @@ const RegisterProduct = ({ setShowPopup }) => {
           setEditForm(false);
           setForm({
             name: '',
-            minimumAmount: '',
             unitOfMeasurement: '',
             operationSupplies: false,
           });
@@ -227,7 +210,6 @@ const RegisterProduct = ({ setShowPopup }) => {
         setForm({
           name: '',
           unitOfMeasurement: '',
-          minimumAmount: '',
           operationSupplies: false,
         });
       })
@@ -268,16 +250,6 @@ const RegisterProduct = ({ setShowPopup }) => {
             required
             label="Nome"
             value={form.name}
-            type="text"
-            onChange={handleChange}
-          />
-
-          <Input
-            id="minimumAmount"
-            autoComplete="off"
-            required
-            label="Volume mínimo"
-            value={form.minimumAmount}
             type="text"
             onChange={handleChange}
           />
