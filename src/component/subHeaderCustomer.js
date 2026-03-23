@@ -12,31 +12,32 @@ const PedidoButton = React.memo(({ navigate }) => {
         navigate(); // Chamamos a navegação aqui para ver se dispara corretamente
       }}
     >
-      Seus_Pedidos
+      Seus Pedidos
     </button>
   );
 });
 
 const SubHeaderCustomer = ({ logoutCustomer, nameClient }) => {
-  const global = React.useContext(GlobalContext);
+  const globalData = React.useContext(GlobalContext);
+  const { isToten, pdvRequest, hasClients } = globalData;
 
   const navigate = useNavigate();
 
   const handleNavigate = React.useCallback(() => {
     console.log('🚀 Navegação acionada!');
-    if (!global.pdvRequest) {
+    if (!pdvRequest) {
       navigate('/request');
     }
   }, [navigate]);
 
   return (
     <div
-      className={`${style.containerBtn} ${global.isToten ? style.toten : ''}`}
+      className={`${style.containerBtn} ${isToten ? style.toten : ''}`}
     >
-      <section className={global.isToten ? style.headerToten : ''}>
-        {!global.isToten && (
+      <section className={isToten ? style.headerToten : ''}>
+        {!isToten && (
           <div>
-            <p onClick={global.packageTier === 1 ? null : logoutCustomer}>
+            <p onClick={!hasClients ? null : logoutCustomer}>
               Bem vindo {nameClient && <span>{nameClient}</span>}
             </p>
           </div>
@@ -47,12 +48,13 @@ const SubHeaderCustomer = ({ logoutCustomer, nameClient }) => {
 
         <PedidoButton navigate={handleNavigate} />
 
-        {!global.isToten && (
+        {!isToten && (
           <button>
             <Link to="/orderqueue">Fila de pedidos</Link>
           </button>
         )}
-        {global.isToten && <Link to="/admin/admin"></Link>}
+
+        {isToten && <Link to="/admin/admin" style={{ opacity: 0, display: 'block', width: '50px', height: '50px' }}></Link>}
       </section>
     </div>
   );

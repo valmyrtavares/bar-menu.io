@@ -24,7 +24,7 @@ function AddSideDishesForm({
   fetchDataCollection,
 }) {
   const global = React.useContext(GlobalContext);
-  const isBasic = global.packageTier === 1 || global.packageTier === 3;
+  const isBasic = !global.hasRawMaterial;
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     price: 0,

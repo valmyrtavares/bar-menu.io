@@ -116,7 +116,7 @@ const NameForm = ({ justNameFantasy, setPopupName, totenForm }) => {
       <button 
         className="goon-btn" 
         onClick={() => {
-          if (global.packageTier === 1 && !form.name.trim()) {
+          if (!global.hasClients && !form.name.trim()) {
             alert('Por favor, digite um nome ou apelido para continuar.');
             return;
           }
@@ -125,7 +125,7 @@ const NameForm = ({ justNameFantasy, setPopupName, totenForm }) => {
       >
         Continue
       </button>
-      {!totenForm && global.packageTier !== 1 && (
+      {!totenForm && global.hasClients && (
         <div className="registration-promotion">
           <h4>Cadastre-se aqui e participe de nossas promoções</h4>
           <div className="container-registration-btn">

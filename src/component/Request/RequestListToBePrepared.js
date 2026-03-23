@@ -1139,7 +1139,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       }
 
       // 3. Atualizar estoque (processo mais pesado) - Apenas se o pacote for completo
-      if (global.packageTier === 2) {
+      if (global.hasRawMaterial) {
         await updateIngredientsStock(item);
         console.log('Stock updated successfully!');
       } else {

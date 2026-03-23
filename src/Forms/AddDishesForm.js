@@ -65,7 +65,7 @@ function AddDishesForm({
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
   const { handleBlur } = useFormValidation();
-  const { packageTier } = React.useContext(GlobalContext);
+  const { packageTier, hasRawMaterial } = React.useContext(GlobalContext);
 
   //FIRESTORE
 
@@ -423,7 +423,7 @@ function AddDishesForm({
           type="text"
           onChange={handleChange}
         />
-        {packageTier === 2 ? (
+        {hasRawMaterial ? (
           <div className={style.boxPrice}>
             <button
               className="btn btn-success"
@@ -517,7 +517,7 @@ function AddDishesForm({
       </div>
       <div className={style.sidedishesRecipeBtnContainer}>
         <button onClick={openModalSideDishes}> Acompanhamentos</button>
-        {packageTier === 2 && (
+        {hasRawMaterial && (
           <button onClick={openRecipeModal}> Receita</button>
         )}
       </div>

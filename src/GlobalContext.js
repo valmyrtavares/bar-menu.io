@@ -7,7 +7,9 @@ export const GlobalContext = React.createContext();
 export const GlobalStorage = ({ children }) => {
   const [image, setImage] = React.useState('');
   const [id, setId] = React.useState('');
-  const [isToten, setIsToten] = React.useState(null);
+  const [isToten, setIsToten] = React.useState(() => {
+    return JSON.parse(localStorage.getItem('isToten') || 'false');
+  });
   const [authorizated, setAuthorizated] = React.useState(false);
   const [userNewRequest, setUserNewRequest] = React.useState({});
   const [pdvRequest, setPdvRequest] = React.useState(false);

@@ -220,7 +220,7 @@ const TotenRegisterPopup = ({
     <div>
       <div className={style.overlay}></div> {/* Overlay para o fundo escuro */}
       {warningMessageToEmptyFields && (
-        <DefaultComumMessage msg={global.packageTier === 1 ? "Preencha o nome para que possamos chamar" : "Preencha o número de CPF se for cadastrado, ou nome para que possamos chamar"} />
+        <DefaultComumMessage msg={!global.hasClients ? "Preencha o nome para que possamos chamar" : "Preencha o número de CPF se for cadastrado, ou nome para que possamos chamar"} />
       )}
       {warningMessageCustomerNotFinded && (
         <DefaultComumMessage msg="Infelizmente não achamos o seu registro, Cadastre-se ou preencha um nome/apelido sem registro para ser chamado" />
@@ -249,7 +249,7 @@ const TotenRegisterPopup = ({
             )}
           </div>
         )}
-        {cpfOption && global.packageTier !== 1 && (
+        {cpfOption && global.hasClients && (
           <div>
             <h1>Se você já tem cadastro preencha com o seu CPF</h1>
             <div className="cpf-input">
