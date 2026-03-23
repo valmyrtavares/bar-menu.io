@@ -46,6 +46,7 @@ import MainPictureMenu from './Pages/MainPictureMenu';
 import { getOneItemColleciton } from './api/Api';
 import { GlobalContext } from './GlobalContext.js';
 import AutoPaymentList from './component/Payment/AutoPaymentList';
+import FinancialSummary from './component/Payment/FinancialSummary';
 import MasterControl from './Pages/MasterControl';
 
 import './style.css';
@@ -145,6 +146,7 @@ function App() {
           <Route path="requestlistcheck" element={<RequestList />} />
           <Route path="auto-payment" element={<AutoPaymentList />} />
           <Route path="managementRecipes" element={<ManagementRecipes />} />
+          <Route path="financial-summary" element={<FinancialSummary />} />
           <Route path="master-control" element={<MasterControl />} />
         </Route>
 

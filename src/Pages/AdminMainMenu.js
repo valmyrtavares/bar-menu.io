@@ -163,6 +163,13 @@ const AdminMainMenu = ({ children }) => {
             >
               Cadastro de Custo de Operações
             </NavLink>
+            <NavLink
+              to="/admin/financial-summary"
+              className={!hasFinancial ? admin.disabledLink : ''}
+              onClick={(e) => !hasFinancial && e.preventDefault()}
+            >
+              Resumo Financeiro
+            </NavLink>
 
             {/* --- GRUPO: BÁSICO / SISTEMA --- */}
             <NavLink to="/admin/welcome">Saudação inicial</NavLink>
