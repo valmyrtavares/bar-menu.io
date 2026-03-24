@@ -17,6 +17,8 @@ import style from '../../assets/styles/FinancialSummary.module.scss';
 import Title from '../title';
 import { Link } from 'react-router-dom';
 import { GlobalContext } from '../../GlobalContext';
+import AddExpensesForm from './ExpensesManegementList/AddExpensesForm';
+import CloseBtn from '../closeBtn';
 
 const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
@@ -26,6 +28,10 @@ const FinancialSummary = () => {
   const [sideDishes, setSideDishes] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [showOverduePopup, setShowOverduePopup] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [refreshData, setRefreshData] = useState(false);
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -93,8 +99,11 @@ const FinancialSummary = () => {
 
   const filteredData = useMemo(() => {
     const monthExpenses = expenses.filter(exp => {
-      const d = parseDate(exp.paymentDate || exp.dueDate);
-      return d && d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+      const dPay = parseDate(exp.paymentDate);
+      const dDue = parseDate(exp.dueDate);
+      const inPay = dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear;
+      const inDue = dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear;
+      return inPay || inDue;
     });
 
     const monthRevenue = revenue.filter(rev => {
@@ -109,21 +118,25 @@ const FinancialSummary = () => {
     const { monthExpenses, monthRevenue } = filteredData;
 
     const totalEstimatedFixed = monthExpenses
-      .filter(exp => exp.category === 'fixed')
+      .filter(exp => {
+        const dDue = parseDate(exp.dueDate);
+        return exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear;
+      })
       .reduce((acc, exp) => acc + (Number(exp.value) || 0), 0);
 
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
     const dailyData = Array.from({ length: daysInMonth }, (_, i) => ({
       day: i + 1,
-      profit: 0,      // Non-cumulative for tooltip
-      expenses: 0,    // Non-cumulative for tooltip
-      profitCum: 0,   // Cumulative (Green)
-      expensesCum: 0, // Cumulative (Red)
-      fixedRemaining: 0, // Cumulative (Yellow)
+      profit: 0,
+      expenses: 0,
+      profitCum: 0,
+      expensesCum: 0,
+      fixedRemaining: 0,
       expensesList: [],
+      dueFixedList: [],
     }));
 
-    // Calculate non-cumulative daily values first
+    // Daily Profit and Due Fixed Expenses
     monthRevenue.forEach(rev => {
       const d = parseDate(rev.dateTime);
       if (d) {
@@ -141,9 +154,20 @@ const FinancialSummary = () => {
     });
 
     monthExpenses.forEach(exp => {
-      const d = parseDate(exp.paymentDate || exp.dueDate);
-      if (d && exp.confirmation) { // Process as paid if confirmed
-        const dayIdx = d.getDate() - 1;
+      const dDue = parseDate(exp.dueDate);
+      if (exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear) {
+        const dayIdx = dDue.getDate() - 1;
+        if (dailyData[dayIdx]) {
+          dailyData[dayIdx].dueFixedList.push(exp);
+        }
+      }
+    });
+
+    // Daily actual payments
+    monthExpenses.forEach(exp => {
+      const dPay = parseDate(exp.paymentDate);
+      if (dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear && exp.confirmation) {
+        const dayIdx = dPay.getDate() - 1;
         if (dailyData[dayIdx]) {
           const val = Number(exp.confirmation) || 0;
           dailyData[dayIdx].expenses += val;
@@ -152,7 +176,6 @@ const FinancialSummary = () => {
       }
     });
 
-    // Calculate Cumulative patterns
     let currentProfitCum = 0;
     let currentExpensesCum = 0;
     let currentFixedRemaining = totalEstimatedFixed;
@@ -161,7 +184,6 @@ const FinancialSummary = () => {
       currentProfitCum += day.profit;
       currentExpensesCum += day.expenses;
       
-      // Decrease yellow line if fixed expenses were paid today
       day.expensesList.forEach(exp => {
         if (exp.category === 'fixed') {
           currentFixedRemaining -= exp.value;
@@ -174,7 +196,10 @@ const FinancialSummary = () => {
     });
 
     const totalPaidFixed = monthExpenses
-      .filter(exp => exp.category === 'fixed' && exp.paymentDate)
+      .filter(exp => {
+        const dPay = parseDate(exp.paymentDate);
+        return exp.category === 'fixed' && dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear;
+      })
       .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
     
     const profitTotal = dailyData[daysInMonth-1]?.profitCum || 0;
@@ -184,7 +209,9 @@ const FinancialSummary = () => {
     const overdue = monthExpenses.filter(exp => {
       if (exp.category !== 'fixed' || exp.paymentDate || !exp.dueDate) return false;
       const due = parseDate(exp.dueDate);
-      return due < new Date();
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      return due < today;
     });
 
     return { 
@@ -197,6 +224,12 @@ const FinancialSummary = () => {
       overdue 
     };
   }, [filteredData, items, sideDishes, selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (stats.overdue.length > 0) {
+      setShowOverduePopup(true);
+    }
+  }, [stats.overdue.length]);
 
   const groupedExpenses = useMemo(() => {
     const groups = {};
@@ -220,7 +253,7 @@ const FinancialSummary = () => {
 
   const CustomTooltipContent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-      const data = payload[payload.length - 1].payload; // Use cumulative data point
+      const data = payload[payload.length - 1].payload;
       return (
         <div className={style.customTooltip}>
           <h4>Dia {label}</h4>
@@ -246,7 +279,49 @@ const FinancialSummary = () => {
               ))}
             </div>
           )}
+          {data.dueFixedList && data.dueFixedList.length > 0 && (
+            <div className={`${style.details} ${style.dueSection}`}>
+              <h5 style={{ color: '#FCA311', marginBottom: '5px' }}>Vencimentos Hoje:</h5>
+              {data.dueFixedList.map((ex, i) => (
+                <div key={i} className={style.expenseItem}>
+                  <span>{ex.name}:</span>
+                  <span>R$ {Number(ex.value).toFixed(2)}</span>
+                </div>
+              ))}
+              <small style={{ color: '#ccc', display: 'block', marginTop: '5px' }}>Clique na bolinha para pagar</small>
+            </div>
+          )}
         </div>
+      );
+    }
+    return null;
+  };
+
+  const handleDotClick = (expense) => {
+    setSelectedExpense(expense);
+    setShowEditPopup(true);
+  };
+
+  const CustomYellowDot = (props) => {
+    const { cx, cy, payload } = props;
+    if (payload && payload.dueFixedList && payload.dueFixedList.length > 0) {
+      return (
+        <g 
+          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+          onClick={(e) => {
+              e.stopPropagation();
+              handleDotClick(payload.dueFixedList[0]);
+          }}
+        >
+          <circle 
+            cx={cx} cy={cy} r={7} 
+            fill="#FCA311" stroke="#fff" strokeWidth={2} 
+          />
+          <circle 
+            cx={cx} cy={cy} r={12} 
+            fill="transparent"
+          />
+        </g>
       );
     }
     return null;
@@ -256,6 +331,23 @@ const FinancialSummary = () => {
 
   return (
     <div className={style.container}>
+      {showOverduePopup && (
+        <div className={style.overduePopupOverlay}>
+          <div className={style.overduePopup}>
+            <h3>⚠️ Despesas Fixas Pendentes</h3>
+            <p>As seguintes contas ultrapassaram o vencimento e não foram pagas:</p>
+            <ul>
+              {stats.overdue.map(exp => (
+                <li key={exp.id}>
+                  <strong>{exp.name}</strong> - Venceu em: {exp.dueDate} (R$ {Number(exp.value).toFixed(2)})
+                </li>
+              ))}
+            </ul>
+            <button onClick={() => setShowOverduePopup(false)}>Entendi / Resolver Depois</button>
+          </div>
+        </div>
+      )}
+
       <Link to="/admin/admin">
         <Title mainTitle="Corrida do Lucro" />
       </Link>
@@ -295,27 +387,16 @@ const FinancialSummary = () => {
         </div>
       </div>
 
-      {stats.overdue.length > 0 && (
-        <div className={style.overdueAlert}>
-          <h3>⚠️ Atenção: Contas Fixas Atrasadas</h3>
-          <ul>
-            {stats.overdue.map(exp => (
-              <li key={exp.id}>{exp.name} - Venceu em: {exp.dueDate}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div className={style.chartCard}>
         <h3>🏁 Evolução Diária (Cumulativo)</h3>
         <div className={style.chartContainer}>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={stats.dailyData}>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={stats.dailyData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
               <XAxis dataKey="day" stroke="#ccc" />
               <YAxis stroke="#ccc" />
               <Tooltip content={<CustomTooltipContent />} />
-              <Legend verticalAlign="top" height={36}/>
+              <Legend verticalAlign="top" height={60}/>
               
               <Line 
                 type="monotone" 
@@ -342,7 +423,13 @@ const FinancialSummary = () => {
                 stroke="#FCA311" 
                 strokeWidth={2} 
                 strokeDasharray="5 5"
-                dot={false}
+                dot={<CustomYellowDot />}
+                activeDot={{ r: 8, onClick: (e, payload) => {
+                  if (payload && payload.payload.dueFixedList.length > 0) {
+                    handleDotClick(payload.payload.dueFixedList[0]);
+                  }
+                }}}
+                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -378,6 +465,15 @@ const FinancialSummary = () => {
           </table>
         </div>
       </div>
+      {showEditPopup && (
+        <div className={style.editOverlay}>
+          <AddExpensesForm 
+            setShowPopup={setShowEditPopup} 
+            setRefreshData={setRefreshData} 
+            obj={selectedExpense} 
+          />
+        </div>
+      )}
     </div>
   );
 };

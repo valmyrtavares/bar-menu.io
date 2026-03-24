@@ -33,6 +33,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     provider: '',
     confirmation: 0,
     items: [],
+    numberOfTimes: 1,
   });
 
   const [item, setItem] = React.useState({
@@ -58,6 +59,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [showPopupNote, setShowPopupNote] = React.useState(null);
   //const [currentAmountProduct, setCurrentAmountProduct] = React.useState('');
   const [total, setTotal] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     const fetchRegisterLists = async () => {
@@ -118,6 +120,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         account: obj.account || '',
         provider: obj.provider || '',
         items: obj.items || [],
+        numberOfTimes: obj.numberOfTimes || 1,
       });
 
       if (obj.items && obj.items.length > 0) {
@@ -413,43 +416,73 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-    /** 1. Garante que cada item tenha account, provider, paymentDate, expenseId */
-    const enrichedItems = form.items.map((item) => ({
-      ...item,
-      account: form.account,
-      provider: form.provider,
-      paymentDate: form.paymentDate,
-      expenseId: form.expenseId,
-    }));
-    console.log('Itens enriquecidos  ', enrichedItems);
-    /** 2. Cria um novo objeto form sem mutar o state original */
-    const dataToSave = { ...form, items: enrichedItems };
+    const installments = Number(form.numberOfTimes) || 1;
+    const isFixed = form.category === 'fixed';
 
-    /** 3. (Opcional) Se ainda usa handleStock ou distributeItemsToExpenseList */
-    if (enrichedItems.length > 0) {
-      if (enrichedItems.length > 0) {
-        await handleStock(enrichedItems, form.account, form.paymentDate);
-        const data = await getBtnData('stock');
-        handleWarningCleanup(data, enrichedItems);
+    const saveExpense = async (data) => {
+      if (obj) {
+        const docRef = doc(db, 'outgoing', obj.id);
+        await updateDoc(docRef, data);
+      } else {
+        await addDoc(collection(db, 'outgoing'), data);
       }
-    }
+    };
 
     try {
-      if (obj) {
-        // --- Atualização ---
-        const docRef = doc(db, 'outgoing', obj.id);
-        await updateDoc(docRef, dataToSave);
-        console.log('Documento atualizado com sucesso!');
+      if (!obj && isFixed && installments > 1) {
+        // Create multiple installments
+        const baseDueDate = new Date(form.dueDate + 'T00:00:00');
+        for (let i = 0; i < installments; i++) {
+          const installmentDate = new Date(baseDueDate);
+          installmentDate.setMonth(baseDueDate.getMonth() + i);
+          
+          const installmentData = {
+            ...form,
+            name: `${form.name} (${i + 1}/${installments})`,
+            dueDate: installmentDate.toISOString().split('T')[0],
+            // Only the first installment might have payment data if filled, 
+            // others start empty unless the user intended otherwise.
+            // But usually, one creates the debt first.
+            paymentDate: i === 0 ? form.paymentDate : '',
+            confirmation: i === 0 ? Number(form.confirmation) : 0,
+            numberOfTimes: installments
+          };
+
+          const enrichedItems = installmentData.items.map((item) => ({
+            ...item,
+            account: installmentData.account,
+            provider: installmentData.provider,
+            paymentDate: installmentData.paymentDate,
+            expenseId: installmentData.expenseId,
+          }));
+          
+          await addDoc(collection(db, 'outgoing'), { ...installmentData, items: enrichedItems });
+        }
       } else {
-        // --- Criação ---
-        await addDoc(collection(db, 'outgoing'), dataToSave);
-        console.log('Documento criado com sucesso!');
+        // Single save
+        const enrichedItems = form.items.map((item) => ({
+          ...item,
+          account: form.account,
+          provider: form.provider,
+          paymentDate: form.paymentDate,
+          expenseId: form.expenseId,
+        }));
+
+        if (enrichedItems.length > 0) {
+          await handleStock(enrichedItems, form.account, form.paymentDate);
+          const data = await getBtnData('stock');
+          handleWarningCleanup(data, enrichedItems);
+        }
+
+        await saveExpense({ ...form, items: enrichedItems });
       }
 
-      /** 4. Pós‑salvamento: reset UI */
       setRefreshData((prev) => !prev);
       setShowPopup(false);
+      setIsSubmitting(false);
       setForm({
         name: '',
         value: 0,
@@ -461,9 +494,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         account: '',
         provider: '',
         items: [],
+        numberOfTimes: 1,
       });
     } catch (error) {
       console.error('Erro ao salvar documento:', error);
+      setIsSubmitting(false);
     }
   };
 
@@ -505,6 +540,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           ...prevForm,
           name: selectedExpense.name,
           expenseId: selectedExpense.humanId,
+          numberOfTimes: selectedExpense.numberOfTimes || 1,
         }));
         return;
       }
@@ -629,7 +665,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           <Input
             id="paymentDate"
             autoComplete="off"
-            required
+            required={form.category !== 'fixed'}
             label="Data Pagamento"
             value={form.paymentDate}
             type="date"
@@ -639,9 +675,18 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           <Input
             id="confirmation"
             autoComplete="off"
-            required
+            required={form.category !== 'fixed'}
             label="Confirmação"
             value={form.confirmation}
+            type="number"
+            onFocus={handleFocus}
+            onChange={handleChange}
+          />
+          <Input
+            id="numberOfTimes"
+            autoComplete="off"
+            label="Parcelas"
+            value={form.numberOfTimes}
             type="number"
             onFocus={handleFocus}
             onChange={handleChange}
@@ -772,7 +817,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             </button>
           </fieldset>
         )}
-        <button>Enviar</button>
+        <button disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Enviar'}
+        </button>
       </form>
 
       {/* {showPopupNote && (
