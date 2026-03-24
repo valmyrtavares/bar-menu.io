@@ -34,6 +34,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     confirmation: 0,
     items: [],
     numberOfTimes: 1,
+    paymentProof: '',
   });
 
   const [item, setItem] = React.useState({
@@ -121,6 +122,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         provider: obj.provider || '',
         items: obj.items || [],
         numberOfTimes: obj.numberOfTimes || 1,
+        paymentProof: obj.paymentProof || '',
       });
 
       if (obj.items && obj.items.length > 0) {
@@ -139,6 +141,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         account: '',
         provider: '',
         items: [],
+        paymentProof: '',
       });
     }
   }, [obj]);
@@ -448,7 +451,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             // But usually, one creates the debt first.
             paymentDate: i === 0 ? form.paymentDate : '',
             confirmation: i === 0 ? Number(form.confirmation) : 0,
-            numberOfTimes: installments
+            numberOfTimes: installments,
+            paymentProof: i === 0 ? form.paymentProof : '',
           };
 
           const enrichedItems = installmentData.items.map((item) => ({
@@ -495,6 +499,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         provider: '',
         items: [],
         numberOfTimes: 1,
+        paymentProof: '',
       });
     } catch (error) {
       console.error('Erro ao salvar documento:', error);
@@ -625,112 +630,74 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       <form onSubmit={handleSubmit} className="m-1">
         <div className={style.formProduct}>
+          {/* Row 1: Name, Category, Provider */}
           <div className={style.selectform}>
-            <select
-              id="name"
-              required
-              value={form.expenseId}
-              onChange={handleChange}
-              onFocus={handleFocus}
-            >
-              <option>Selecione uma despesa</option>
-              {expensesList &&
-                expensesList.map((expense, index) => (
-                  <option key={index} value={String(expense.humanId)}>
-                    {expense.name}
-                  </option>
-                ))}
+            <select id="name" required value={form.expenseId} onChange={handleChange} onFocus={handleFocus}>
+              <option value="">Selecione uma despesa</option>
+              {expensesList && expensesList.map((expense, index) => (
+                <option key={index} value={String(expense.humanId)}>{expense.name}</option>
+              ))}
             </select>
           </div>
-          <Input
-            id="value"
-            autoComplete="off"
-            required
-            label="Valor"
-            value={form.value}
-            type="number"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
-          <Input
-            id="dueDate"
-            autoComplete="off"
-            required
-            label="Vencimento"
-            value={form.dueDate}
-            type="date"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
-          <Input
-            id="paymentDate"
-            autoComplete="off"
-            required={form.category !== 'fixed'}
-            label="Data Pagamento"
-            value={form.paymentDate}
-            type="date"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
-          <Input
-            id="confirmation"
-            autoComplete="off"
-            required={form.category !== 'fixed'}
-            label="Confirmação"
-            value={form.confirmation}
-            type="number"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
-          <Input
-            id="numberOfTimes"
-            autoComplete="off"
-            label="Parcelas"
-            value={form.numberOfTimes}
-            type="number"
-            onFocus={handleFocus}
-            onChange={handleChange}
-          />
           <div className={style.selectform}>
-            <select
-              id="provider"
-              required
-              onChange={handleChange}
-              value={form.provider}
-            >
-              <option>Selecione um fornecedor</option>
-              {providerList &&
-                providerList.length > 0 &&
-                providerList.map((category, index) => (
-                  <option key={index} value={category.provider}>
-                    {category.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <Input
-            id="account"
-            autoComplete="off"
-            className="account"
-            required
-            label="Nota fiscal"
-            value={form.account}
-            type="text"
-            onChange={handleChange}
-          />
-          <div className={style.selectform}>
-            <select
-              id="category"
-              value={form.category}
-              required
-              onChange={handleChange}
-            >
-              <option value="" disabled hidden>
-                Selecione o tipo de custo
-              </option>
+            <select id="category" value={form.category} required onChange={handleChange}>
+              <option value="" disabled hidden>Tipo de custo</option>
               <option value="fixed">Fixo</option>
-              <option value="variable"> Variável</option>
+              <option value="variable">Variável</option>
             </select>
+          </div>
+          <div className={style.selectform}>
+            <select id="provider" required onChange={handleChange} value={form.provider}>
+              <option value="">Fornecedor</option>
+              {providerList && providerList.map((category, index) => (
+                <option key={index} value={category.provider}>{category.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Row 2: Value, DueDate, NumberOfTimes */}
+          <Input id="value" required label="Valor" value={form.value} type="number" onChange={handleChange} />
+          <Input id="dueDate" required label="Vencimento" value={form.dueDate} type="date" onChange={handleChange} />
+          <Input id="numberOfTimes" label="Parcelas" value={form.numberOfTimes} type="number" onChange={handleChange} />
+
+          {/* Row 3: Account, PaymentDate, Confirmation */}
+          <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} />
+          <Input 
+            id="paymentDate" 
+            required={form.category !== 'fixed'} 
+            label="Data Pagamento" 
+            value={form.paymentDate} 
+            type="date" 
+            onChange={handleChange} 
+          />
+          <Input 
+            id="confirmation" 
+            required={form.category !== 'fixed'} 
+            label="Confirmação" 
+            value={form.confirmation} 
+            type="number" 
+            onChange={handleChange} 
+          />
+
+          {/* Row 4: PaymentProof */}
+          <div className={style.paymentProofRow}>
+            <Input
+              id="paymentProof"
+              autoComplete="off"
+              label="Link do Comprovante (PDF)"
+              value={form.paymentProof}
+              type="text"
+              onChange={handleChange}
+            />
+            {form.paymentProof && (
+              <button 
+                type="button" 
+                className={style.accessBtn}
+                onClick={() => window.open(form.paymentProof, '_blank')}
+              >
+                Acessar Comprovante
+              </button>
+            )}
           </div>
         </div>
         {showItemsDetailsForm && (

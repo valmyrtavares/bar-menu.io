@@ -21,29 +21,59 @@
 
     .formProduct {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        justify-items: center;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
         padding: 10px;
 
         div {
             width: 100%;
-            padding: 3%;
+            padding: 0;
+            
             input {
                width: 100%;
+               min-height: 45px;
             }
-
         }
+        
         .selectform {
           display: flex;
-          justify-content: start;
-          align-items: end;
-          margin-bottom:1rem;
-               select{
-                min-height: 60px;
-                border:none;
-                font-size:21px;
-               }
+          flex-direction: column;
+          justify-content: flex-end;
+          
+          select {
+            width: 100%;
+            min-height: 45px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            padding: 5px;
+          }
+        }
+
+        .paymentProofRow {
+            grid-column: span 3;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            width: 100%;
             
+            & > div {
+                flex: 1;
+            }
+
+            .accessBtn {
+                height: 45px;
+                padding: 0 15px;
+                background-color: #14213D;
+                color: white;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                
+                &:hover {
+                    background-color: #FCA311;
+                    color: #14213D;
+                }
+            }
         }
     }
 
