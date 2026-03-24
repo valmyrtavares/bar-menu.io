@@ -172,6 +172,11 @@ const AdminMainMenu = ({ children }) => {
             </NavLink>
 
             {/* --- GRUPO: BÁSICO / SISTEMA --- */}
+            <NavLink
+              to="/admin/excel-management"
+            >
+              Carga em Massa (Excel)
+            </NavLink>
             <NavLink to="/admin/welcome">Saudação inicial</NavLink>
             <NavLink to="/admin/frontimage">Configurações do Terminal</NavLink>
             <NavLink to="/admin/styles">Marca e Estilo</NavLink>

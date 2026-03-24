@@ -1,0 +1,115 @@
+.container {
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+
+  .info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border-left: 4px solid #b02121;
+    line-height: 1.6;
+    color: #ccc;
+  }
+
+  .message {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+
+    &.success {
+      background: #28a74522;
+      border: 1px solid #28a745;
+      color: #28a745;
+    }
+    &.error {
+      background: #dc354522;
+      border: 1px solid #dc3545;
+      color: #dc3545;
+    }
+    &.info {
+      background: #007bff22;
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  .card {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid #333;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #fff;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 25px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      button, .btnUpload {
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+        border: none;
+      }
+
+      .btnTemplate {
+        background: #333;
+        color: #fff;
+        &:hover { background: #444; }
+      }
+
+      .btnUpload {
+        background: #b02121;
+        color: #fff;
+        display: block;
+        &:hover { background: #d02a2a; }
+      }
+    }
+  }
+
+  .loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    padding: 40px;
+    border-radius: 16px;
+    z-index: 1000;
+    font-size: 1.2rem;
+    border: 1px solid #b02121;
+  }
+}

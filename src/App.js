@@ -39,7 +39,7 @@ import TrackStockProduct from './component/Stock/TrackStockProduct';
 import NoLog from './Forms/Login/NoLog';
 import PrintRequestCustomer from './component/Request/PrintRequestCustomer';
 import RequestManagementModule from './component/Request/requestManagementModule';
-// import UpdateCustomizedPriceButton from './component/admin/UpdateProductsIdButton.tsx';
+// import UpdateCustomizedPriceButton from './component/Admin/UpdateProductsIdButton.tsx';
 import SellFlowMangement from './component/Request/SellFlowMangement';
 import FiscalAttributes from './component/Request/FiscalAttributes';
 import MainPictureMenu from './Pages/MainPictureMenu';
@@ -47,6 +47,7 @@ import { getOneItemColleciton } from './api/Api';
 import { GlobalContext } from './GlobalContext.js';
 import AutoPaymentList from './component/Payment/AutoPaymentList';
 import FinancialSummary from './component/Payment/FinancialSummary';
+import ExcelManagement from './component/Admin/ExcelManagement';
 import MasterControl from './Pages/MasterControl';
 
 import './style.css';
@@ -147,6 +148,7 @@ function App() {
           <Route path="auto-payment" element={<AutoPaymentList />} />
           <Route path="managementRecipes" element={<ManagementRecipes />} />
           <Route path="financial-summary" element={<FinancialSummary />} />
+          <Route path="excel-management" element={<ExcelManagement />} />
           <Route path="master-control" element={<MasterControl />} />
         </Route>
 
