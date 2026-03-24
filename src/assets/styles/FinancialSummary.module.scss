@@ -8,13 +8,18 @@
 
 .headerContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 20px;
+}
+
+.titleRow {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 5px;
   
   .titleLink {
     text-decoration: none;
-    flex: 1;
+    display: inline-block;
 
     h3 {
       color: #FCA311 !important;
@@ -23,10 +28,11 @@
   }
 }
 
-.headerActions {
+.actionsRow {
+  width: 100%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 15px;
 }
 
 .annualToggle {

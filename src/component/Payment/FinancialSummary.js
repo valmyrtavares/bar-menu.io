@@ -541,16 +541,12 @@ const FinancialSummary = () => {
       )}
 
       <div className={style.headerContainer}>
-        <Link to="/admin/admin" className={style.titleLink}>
-          <Title mainTitle={`Corrida do Lucro ${viewMode === 'annual' ? 'Anual' : 'Mensal'}`} />
-        </Link>
-        <div className={style.headerActions}>
-          <button 
-            className={`${style.annualToggle} ${viewMode === 'annual' ? style.active : ''}`}
-            onClick={() => setViewMode(v => v === 'monthly' ? 'annual' : 'monthly')}
-          >
-            {viewMode === 'annual' ? '📊 Ver Mensal' : '📅 Resumo Anual'}
-          </button>
+        <div className={style.titleRow}>
+          <Link to="/admin/admin" className={style.titleLink}>
+            <Title mainTitle={`Corrida do Lucro ${viewMode === 'annual' ? 'Anual' : 'Mensal'}`} />
+          </Link>
+        </div>
+        <div className={style.actionsRow}>
           <div className={style.helpIconContainer}>
             <a
               href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.x6o9zkqvyxt2"
@@ -561,6 +557,12 @@ const FinancialSummary = () => {
               <span>?</span>
             </a>
           </div>
+          <button 
+            className={`${style.annualToggle} ${viewMode === 'annual' ? style.active : ''}`}
+            onClick={() => setViewMode(v => v === 'monthly' ? 'annual' : 'monthly')}
+          >
+            {viewMode === 'annual' ? '📊 Ver Mensal' : '📅 Resumo Anual'}
+          </button>
         </div>
       </div>
 
