@@ -126,6 +126,21 @@
   gap: 20px;
 }
 
+.dashboardCards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .card {
   padding: 20px;
   border-radius: 12px;
@@ -133,30 +148,95 @@
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  border-left: 4px solid #FCA311;
+  gap: 8px;
+  border-bottom: 4px solid #ddd;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
 
   span {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #777;
     font-weight: 600;
+    text-transform: uppercase;
   }
 
   strong {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: #14213D;
   }
 
   &.profit {
-    border-left-color: #00ff88;
-    background: #e6ffef;
-    small { color: #008855; font-weight: bold; }
+    border-bottom-color: #00ff88;
+    background: #f0fff4;
   }
 
   &.loss {
-    border-left-color: #ff4d4d;
-    background: #fff0f0;
-    small { color: #cc0000; font-weight: bold; }
+    border-bottom-color: #ff4d4d;
+    background: #fff5f5;
+  }
+
+  &.fixed {
+    border-bottom-color: #FCA311;
+    background: #fff9f0;
+  }
+
+  &.neutral {
+    border-bottom-color: #14213D;
+    background: #f8f9fa;
+  }
+
+  small {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+  }
+}
+
+.customTooltip {
+  background: rgba(20, 33, 61, 0.95);
+  border: 1px solid #444;
+  padding: 15px;
+  border-radius: 8px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  max-width: 250px;
+
+  h4 {
+    margin: 0 0 10px 0;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    color: #FCA311;
+  }
+
+  .tooltipItem {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+
+    &.green { color: #00ff88; }
+    &.red { color: #ff4d4d; }
+    &.yellow { color: #FCA311; }
+  }
+
+  .details {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+    font-size: 0.8rem;
+
+    .expenseItem {
+      display: flex;
+      justify-content: space-between;
+      color: #ccc;
+      margin-bottom: 2px;
+    }
   }
 }
 
