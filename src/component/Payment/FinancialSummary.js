@@ -7,11 +7,14 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
   ReferenceDot,
   Label,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import style from '../../assets/styles/FinancialSummary.module.scss';
 import Title from '../title';
@@ -19,6 +22,48 @@ import { Link } from 'react-router-dom';
 import { GlobalContext } from '../../GlobalContext';
 import AddExpensesForm from './ExpensesManegementList/AddExpensesForm';
 import CloseBtn from '../closeBtn';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
+
+const CustomLegend = ({ data, colors }) => {
+  return (
+    <div className={style.customLegendContainer}>
+      {data.map((entry, index) => {
+        const displayName = entry.name.length > 18 ? entry.name.substring(0, 15) + '...' : entry.name;
+        return (
+          <div key={`legend-${index}`} className={style.legendItem} title={entry.name}>
+            <span className={style.legendDot} style={{ backgroundColor: colors[index % colors.length] }}></span>
+            <span className={style.legendText}>{displayName}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const PieTooltip = ({ active, payload, isCurrency }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div style={{ 
+        backgroundColor: '#111', 
+        padding: '12px', 
+        border: '1px solid #FCA311', 
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+        minWidth: '150px'
+      }}>
+        <p style={{ color: '#FCA311', fontWeight: 'bold', margin: '0 0 5px 0', fontSize: '0.9rem' }}>
+          {data.name}
+        </p>
+        <p style={{ color: '#fff', margin: 0, fontSize: '0.85rem' }}>
+          {isCurrency ? `R$ ${Number(data.value).toFixed(2)}` : `${data.value} unidades`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
@@ -204,7 +249,7 @@ const FinancialSummary = () => {
     
     const profitTotal = dailyData[daysInMonth-1]?.profitCum || 0;
     const expensesTotal = dailyData[daysInMonth-1]?.expensesCum || 0;
-    const superavit = profitTotal - expensesTotal;
+    const remainingFixed = Math.max(0, totalEstimatedFixed - totalPaidFixed);
 
     const overdue = monthExpenses.filter(exp => {
       if (exp.category !== 'fixed' || exp.paymentDate || !exp.dueDate) return false;
@@ -214,14 +259,45 @@ const FinancialSummary = () => {
       return due < today;
     });
 
-    return { 
-      totalRevenue: profitTotal, 
-      totalPaid: expensesTotal, 
-      estimatedFixed: totalEstimatedFixed, 
-      remainingFixed: Math.max(0, totalEstimatedFixed - totalPaidFixed),
-      superavit, 
-      dailyData, 
-      overdue 
+    // Top Products Logic
+    const productMap = {};
+    monthRevenue.forEach(rev => {
+      (rev.request || []).forEach(item => {
+        const name = item.product || item.name || 'Produto s/ nome';
+        const qty = Number(item.amount || item.quantity || 1);
+        if (qty > 0) {
+          productMap[name] = (productMap[name] || 0) + qty;
+        }
+      });
+    });
+    const topProducts = Object.entries(productMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8); // Top 8
+
+    // Top Expenses Logic (Pie)
+    const expensePieMap = {};
+    monthExpenses.forEach(exp => {
+      const name = exp.name;
+      const value = Number(exp.confirmation || 0);
+      if (name && value > 0) {
+        expensePieMap[name] = (expensePieMap[name] || 0) + value;
+      }
+    });
+    const topExpensesPie = Object.entries(expensePieMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+
+    return {
+      totalRevenue: profitTotal,
+      totalPaid: expensesTotal,
+      remainingFixed,
+      superavit: profitTotal - expensesTotal - remainingFixed, // Adjusted superavit calculation
+      dailyData,
+      overdue,
+      topProducts,
+      topExpensesPie,
     };
   }, [filteredData, items, sideDishes, selectedMonth, selectedYear]);
 
@@ -395,7 +471,7 @@ const FinancialSummary = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
               <XAxis dataKey="day" stroke="#ccc" />
               <YAxis stroke="#ccc" />
-              <Tooltip content={<CustomTooltipContent />} />
+              <RechartsTooltip content={<CustomTooltipContent />} />
               <Legend verticalAlign="top" height={60}/>
               
               <Line 
@@ -465,6 +541,79 @@ const FinancialSummary = () => {
           </table>
         </div>
       </div>
+
+      <div className={style.pieChartsGrid}>
+        <div className={style.pieCard}>
+          <h3>🍕 Produtos Mais Vendidos (%)</h3>
+          {stats.topProducts.length > 0 ? (
+            <>
+              <div className={style.pieWrapper}>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={stats.topProducts}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={false}
+                      outerRadius={100}
+                      innerRadius={65}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      paddingAngle={3}
+                    >
+                      {stats.topProducts.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip content={<PieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <CustomLegend data={stats.topProducts} colors={COLORS} />
+            </>
+          ) : (
+            <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+          )}
+        </div>
+
+        <div className={style.pieCard}>
+          <h3>💸 Distribuição de Gastos</h3>
+          {stats.topExpensesPie.length > 0 ? (
+            <>
+              <div className={style.pieWrapper}>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={stats.topExpensesPie}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={false}
+                      outerRadius={100}
+                      innerRadius={65}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      paddingAngle={3}
+                    >
+                      {stats.topExpensesPie.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip content={<PieTooltip isCurrency={true} />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <CustomLegend data={stats.topExpensesPie} colors={COLORS} />
+            </>
+          ) : (
+            <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+          )}
+        </div>
+      </div>
+
       {showEditPopup && (
         <div className={style.editOverlay}>
           <AddExpensesForm 
