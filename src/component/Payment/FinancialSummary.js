@@ -424,9 +424,21 @@ const FinancialSummary = () => {
         </div>
       )}
 
-      <Link to="/admin/admin">
-        <Title mainTitle="Corrida do Lucro" />
-      </Link>
+      <div className={style.headerContainer}>
+        <Link to="/admin/admin" className={style.titleLink}>
+          <Title mainTitle="Corrida do Lucro" />
+        </Link>
+        <div className={style.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.x6o9zkqvyxt2"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+      </div>
 
       <div className={style.controls}>
         <select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
