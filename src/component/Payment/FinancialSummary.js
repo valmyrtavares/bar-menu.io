@@ -10,8 +10,8 @@ import {
   Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceDot,
-  Label,
+  BarChart,
+  Bar,
   PieChart,
   Pie,
   Cell,
@@ -73,6 +73,7 @@ const FinancialSummary = () => {
   const [sideDishes, setSideDishes] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'annual'
   const [showOverduePopup, setShowOverduePopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
@@ -160,6 +161,90 @@ const FinancialSummary = () => {
   }, [expenses, revenue, selectedMonth, selectedYear]);
 
   const stats = useMemo(() => {
+    if (viewMode === 'annual') {
+      const now = new Date();
+      const isSelectedCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth();
+      
+      let refMonth = selectedMonth;
+      let refYear = selectedYear;
+      if (isSelectedCurrentMonth) {
+        if (selectedMonth === 0) {
+          refMonth = 11; refYear = selectedYear - 1;
+        } else {
+          refMonth = selectedMonth - 1;
+        }
+      }
+
+      const refExpensesList = expenses.filter(exp => {
+        const dPay = parseDate(exp.paymentDate);
+        return dPay && dPay.getMonth() === refMonth && dPay.getFullYear() === refYear && exp.confirmation;
+      });
+      const refRevenueList = revenue.filter(rev => {
+        const d = parseDate(rev.dateTime);
+        return d && d.getMonth() === refMonth && d.getFullYear() === refYear;
+      });
+
+      const refProfit = refRevenueList.reduce((acc, rev) => {
+        let p = 0;
+        (rev.request || []).forEach(item => {
+          const price = Number(item.finalPrice) || 0;
+          const fee = calculateTransactionFee(price, rev.paymentMethod);
+          const cost = getProductCost(item.id, item.size, item.name);
+          const sideCost = (item.sideDishes || []).reduce((a, sd) => a + getSideDishCost(sd.name), 0);
+          p += (price - fee - cost - sideCost);
+        });
+        return acc + p;
+      }, 0);
+
+      const refVariable = refExpensesList
+        .filter(exp => exp.category !== 'fixed')
+        .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
+
+      const annualData = [];
+      let totalAnnualProfit = 0;
+      let totalAnnualVariable = 0;
+      let totalAnnualFixed = 0;
+
+      for (let i = 0; i < 12; i++) {
+        const m = (refMonth + i) % 12;
+        const y = refYear + Math.floor((refMonth + i) / 12);
+        
+        const monthFixed = expenses
+          .filter(exp => {
+            const dDue = parseDate(exp.dueDate);
+            return exp.category === 'fixed' && dDue && dDue.getMonth() === m && dDue.getFullYear() === y;
+          })
+          .reduce((acc, exp) => acc + (Number(exp.value) || 0), 0);
+
+        annualData.push({
+          month: m,
+          year: y,
+          profit: refProfit,
+          variable: refVariable,
+          fixed: monthFixed,
+          monthName: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m]
+        });
+
+        totalAnnualProfit += refProfit;
+        totalAnnualVariable += refVariable;
+        totalAnnualFixed += monthFixed;
+      }
+
+      return {
+        totalRevenue: totalAnnualProfit,
+        totalPaid: totalAnnualVariable,
+        totalFixed: totalAnnualFixed,
+        remainingFixed: totalAnnualFixed,
+        superavit: totalAnnualProfit - totalAnnualVariable - totalAnnualFixed,
+        dailyData: annualData,
+        viewMode: 'annual',
+        refMonthName: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][refMonth],
+        overdue: [], // not used in annual view
+        topProducts: [], // not used in annual view
+        topExpensesPie: [], // not used in annual view
+      };
+    }
+
     const { monthExpenses, monthRevenue } = filteredData;
 
     const totalEstimatedFixed = monthExpenses
@@ -299,13 +384,18 @@ const FinancialSummary = () => {
       topProducts,
       topExpensesPie,
     };
-  }, [filteredData, items, sideDishes, selectedMonth, selectedYear]);
+  }, [filteredData, items, sideDishes, selectedMonth, selectedYear, viewMode, expenses, revenue]);
 
   useEffect(() => {
     if (stats.overdue.length > 0) {
       setShowOverduePopup(true);
     }
   }, [stats.overdue.length]);
+
+  // Reset viewMode when period changes
+  useEffect(() => {
+    setViewMode('monthly');
+  }, [selectedMonth, selectedYear]);
 
   const groupedExpenses = useMemo(() => {
     const groups = {};
@@ -329,28 +419,54 @@ const FinancialSummary = () => {
 
   const CustomTooltipContent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-      const data = payload[payload.length - 1].payload;
+      if (viewMode === 'annual') {
+        const data = payload[0]?.payload || {};
+        const profit = Number(data.profit) || 0;
+        const variable = Number(data.variable) || 0;
+        const fixed = Number(data.fixed) || 0;
+        return (
+          <div className={style.customTooltip}>
+            <h4>{(data.monthName || '') + ' ' + (data.year || '')}</h4>
+            <div className={`${style.tooltipItem} ${style.green}`}>
+              <span>Lucro Estimado:</span>
+              <strong>R$ {profit.toFixed(2)}</strong>
+            </div>
+            <div className={`${style.tooltipItem} ${style.red}`}>
+              <span>Despesa Variável:</span>
+              <strong>R$ {variable.toFixed(2)}</strong>
+            </div>
+            <div className={`${style.tooltipItem} ${style.yellow}`}>
+              <span>Custo Fixo Real:</span>
+              <strong>R$ {fixed.toFixed(2)}</strong>
+            </div>
+          </div>
+        );
+      }
+      const data = payload[payload.length - 1]?.payload || {};
+      const profit = Number(data.profit) || 0;
+      const expenses = Number(data.expenses) || 0;
+      const fixedRemaining = Number(data.fixedRemaining) || 0;
       return (
         <div className={style.customTooltip}>
           <h4>Dia {label}</h4>
           <div className={`${style.tooltipItem} ${style.green}`}>
             <span>Lucro do Dia:</span>
-            <strong>R$ {data.profit.toFixed(2)}</strong>
+            <strong>R$ {profit.toFixed(2)}</strong>
           </div>
           <div className={`${style.tooltipItem} ${style.red}`}>
             <span>Gasto do Dia:</span>
-            <strong>R$ {data.expenses.toFixed(2)}</strong>
+            <strong>R$ {expenses.toFixed(2)}</strong>
           </div>
           <div className={`${style.tooltipItem} ${style.yellow}`}>
             <span>Custo Fixo Restante:</span>
-            <strong>R$ {data.fixedRemaining.toFixed(2)}</strong>
+            <strong>R$ {fixedRemaining.toFixed(2)}</strong>
           </div>
           {data.expensesList.length > 0 && (
             <div className={style.details}>
               {data.expensesList.map((ex, i) => (
                 <div key={i} className={style.expenseItem}>
-                  <span>{ex.name}:</span>
-                  <span>R$ {ex.value.toFixed(2)}</span>
+                  <span>{ex.name} ({ex.category === 'fixed' ? 'Fixa' : 'Var'}):</span>
+                  <strong>R$ {ex.value.toFixed(2)}</strong>
                 </div>
               ))}
             </div>
@@ -426,17 +542,25 @@ const FinancialSummary = () => {
 
       <div className={style.headerContainer}>
         <Link to="/admin/admin" className={style.titleLink}>
-          <Title mainTitle="Corrida do Lucro" />
+          <Title mainTitle={`Corrida do Lucro ${viewMode === 'annual' ? 'Anual' : 'Mensal'}`} />
         </Link>
-        <div className={style.helpIconContainer}>
-          <a
-            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.x6o9zkqvyxt2"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Abrir documentação"
+        <div className={style.headerActions}>
+          <button 
+            className={`${style.annualToggle} ${viewMode === 'annual' ? style.active : ''}`}
+            onClick={() => setViewMode(v => v === 'monthly' ? 'annual' : 'monthly')}
           >
-            <span>?</span>
-          </a>
+            {viewMode === 'annual' ? '📊 Ver Mensal' : '📅 Resumo Anual'}
+          </button>
+          <div className={style.helpIconContainer}>
+            <a
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.x6o9zkqvyxt2"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Abrir documentação"
+            >
+              <span>?</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -476,155 +600,175 @@ const FinancialSummary = () => {
       </div>
 
       <div className={style.chartCard}>
-        <h3>🏁 Evolução Diária (Cumulativo)</h3>
+        <h3>{viewMode === 'annual' ? '📊 Projeção de 12 Meses' : '🏁 Evolução Diária (Cumulativo)'}</h3>
         <div className={style.chartContainer}>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={stats.dailyData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-              <XAxis dataKey="day" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <RechartsTooltip content={<CustomTooltipContent />} />
-              <Legend verticalAlign="top" height={60}/>
-              
-              <Line 
-                type="monotone" 
-                dataKey="profitCum" 
-                name="Lucro (Corrida Verde)" 
-                stroke="#00ff88" 
-                strokeWidth={4} 
-                dot={{ r: 4, fill: '#00ff88', strokeWidth: 2 }} 
-                activeDot={{ r: 8 }} 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="expensesCum" 
-                name="Gastos (Corrida Vermelha)" 
-                stroke="#ff4d4d" 
-                strokeWidth={4} 
-                dot={{ r: 4, fill: '#ff4d4d', strokeWidth: 2 }} 
-                activeDot={{ r: 8 }} 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="fixedRemaining" 
-                name="Custo Fixo (Barreira Amarela)" 
-                stroke="#FCA311" 
-                strokeWidth={2} 
-                strokeDasharray="5 5"
-                dot={<CustomYellowDot />}
-                activeDot={{ r: 8, onClick: (e, payload) => {
-                  if (payload && payload.payload.dueFixedList.length > 0) {
-                    handleDotClick(payload.payload.dueFixedList[0]);
-                  }
-                }}}
-                isAnimationActive={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className={style.summaryGrid}>
-        <div className={style.tableSection}>
-          <h3>Detalhamento de Saídas</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Descrição</th>
-                <th>Tipo</th>
-                <th>Estimado</th>
-                <th>Pago</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groupedExpenses.map((group, i) => (
-                <tr key={i}>
-                  <td>{group.name}</td>
-                  <td>{group.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
-                  <td>R$ {group.estimated.toFixed(2)}</td>
-                  <td>R$ {group.paid.toFixed(2)}</td>
-                  <td className={group.pending ? style.pending : style.paidStatus}>
-                    {group.pending ? 'Pendente' : 'Pago'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className={style.pieChartsGrid}>
-        <div className={style.pieCard}>
-          <h3>🍕 Produtos Mais Vendidos (%)</h3>
-          {stats.topProducts.length > 0 ? (
-            <>
-              <div className={style.pieWrapper}>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={stats.topProducts}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={false}
-                      outerRadius={100}
-                      innerRadius={65}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      paddingAngle={3}
-                    >
-                      {stats.topProducts.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip content={<PieTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <CustomLegend data={stats.topProducts} colors={COLORS} />
-            </>
+          {viewMode === 'annual' ? (
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={stats.dailyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                <XAxis dataKey="monthName" stroke="#888" tick={{ fontSize: 12 }} />
+                <YAxis stroke="#888" tick={{ fontSize: 12 }} />
+                <RechartsTooltip content={<CustomTooltipContent />} />
+                <Bar dataKey="profit" fill="#00ff88" name="Lucro" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="fixed" fill="#FCA311" name="Fixo" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           ) : (
-            <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={stats.dailyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                <XAxis dataKey="day" stroke="#888" />
+                <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
+                <RechartsTooltip content={<CustomTooltipContent />} />
+                <Legend verticalAlign="top" height={36} />
+                
+                <Line 
+                  type="monotone" 
+                  dataKey="profitCum" 
+                  stroke="#00ff88" 
+                  strokeWidth={3}
+                  name="Lucro Acumulado"
+                  dot={{ r: 4, fill: '#00ff88', strokeWidth: 2 }} 
+                  activeDot={{ r: 8 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="expensesCum" 
+                  stroke="#ff4d4d" 
+                  strokeWidth={3}
+                  name="Gastos Acumulados"
+                  dot={{ r: 4, fill: '#ff4d4d', strokeWidth: 2 }} 
+                  activeDot={{ r: 8 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="fixedRemaining" 
+                  stroke="#FCA311" 
+                  strokeWidth={3}
+                  name="Custo Fixo Restante"
+                  dot={<CustomYellowDot />}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           )}
         </div>
-
-        <div className={style.pieCard}>
-          <h3>💸 Distribuição de Gastos</h3>
-          {stats.topExpensesPie.length > 0 ? (
-            <>
-              <div className={style.pieWrapper}>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={stats.topExpensesPie}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={false}
-                      outerRadius={100}
-                      innerRadius={65}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      paddingAngle={3}
-                    >
-                      {stats.topExpensesPie.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip content={<PieTooltip isCurrency={true} />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <CustomLegend data={stats.topExpensesPie} colors={COLORS} />
-            </>
-          ) : (
-            <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
-          )}
-        </div>
+        {viewMode === 'annual' && (
+          <div className={style.annualDisclaimer}>
+            * Estimativa baseada no mês de <strong>{stats.refMonthName}</strong>. 
+            O lucro e despesas variáveis são replicados, enquanto o custo fixo reflete o cronograma real das suas parcelas agendadas.
+          </div>
+        )}
       </div>
+
+      {viewMode === 'monthly' && (
+        <>
+          <div className={style.summaryGrid}>
+            <div className={style.tableSection}>
+              <h3>Detalhamento de Saídas</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th>Estimado</th>
+                    <th>Pago</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupedExpenses.map((group, i) => (
+                    <tr key={i}>
+                      <td>{group.name}</td>
+                      <td>{group.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
+                      <td>R$ {group.estimated.toFixed(2)}</td>
+                      <td>R$ {group.paid.toFixed(2)}</td>
+                      <td className={group.pending ? style.pending : style.paidStatus}>
+                        {group.pending ? 'Pendente' : 'Pago'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {viewMode === 'monthly' && (
+        <div className={style.pieChartsGrid}>
+          <div className={style.pieCard}>
+            <h3>🍕 Produtos Mais Vendidos (%)</h3>
+            {stats.topProducts.length > 0 ? (
+              <>
+                <div className={style.pieWrapper}>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={stats.topProducts}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={false}
+                        outerRadius={100}
+                        innerRadius={65}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        paddingAngle={3}
+                      >
+                        {stats.topProducts.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip content={<PieTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <CustomLegend data={stats.topProducts} colors={COLORS} />
+              </>
+            ) : (
+              <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+            )}
+          </div>
+
+          <div className={style.pieCard}>
+            <h3>💸 Distribuição de Gastos</h3>
+            {stats.topExpensesPie.length > 0 ? (
+              <>
+                <div className={style.pieWrapper}>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={stats.topExpensesPie}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={false}
+                        outerRadius={100}
+                        innerRadius={65}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        paddingAngle={3}
+                      >
+                        {stats.topExpensesPie.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip content={<PieTooltip isCurrency={true} />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <CustomLegend data={stats.topExpensesPie} colors={COLORS} />
+              </>
+            ) : (
+              <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showEditPopup && (
         <div className={style.editOverlay}>

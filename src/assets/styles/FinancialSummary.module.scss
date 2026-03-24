@@ -23,6 +23,34 @@
   }
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.annualToggle {
+  padding: 8px 16px;
+  background-color: transparent;
+  border: 2px solid #FCA311;
+  color: #FCA311;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: rgba(252, 163, 17, 0.1);
+    transform: translateY(-2px);
+  }
+
+  &.active {
+    background-color: #FCA311;
+    color: #14213D;
+  }
+}
+
 .helpIconContainer {
   a {
     display: flex;
@@ -107,6 +135,21 @@
   }
 }
 
+.annualDisclaimer {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: rgba(252, 163, 17, 0.05);
+  border-left: 4px solid #FCA311;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.5;
+
+  strong {
+    color: #FCA311;
+  }
+}
+
 .chartContainer {
   margin-top: 20px;
 }
@@ -123,6 +166,7 @@
 
 .tableSection {
   background: white;
+  color: #14213D;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
@@ -179,6 +223,7 @@
   padding: 20px;
   border-radius: 12px;
   background: white;
+  color: #14213D;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
