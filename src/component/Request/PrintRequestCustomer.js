@@ -58,7 +58,14 @@ const PrintRequestCustomer = () => {
               Item: <span>{item.name}</span>
             </h3>
             <p>
-              Valor <span>R$ {item.finalPrice},00</span>
+              Valor{' '}
+              <span>
+                R${' '}
+                {(Number(item.finalPrice) || 0).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
             </p>
             {item.sideDishes && <h5>Acompanhamento</h5>}
             {item.sideDishes &&
@@ -69,14 +76,27 @@ const PrintRequestCustomer = () => {
                     <span>{sidedishes.name}</span>
                   </p>
                   <p>
-                    <span>R${sidedishes.price},00</span>
+                    <span>
+                      R${' '}
+                      {sidedishes.price.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
                   </p>
                 </div>
               ))}
           </div>
         ))}
       <p>
-        TOTAL:<span> RS {finalPriceRequest},00</span>
+        TOTAL:{' '}
+        <span>
+          RS{' '}
+          {finalPriceRequest.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </span>
       </p>
       <Link to="/nfce" className="btn btn-success">
         Nota Fiscal

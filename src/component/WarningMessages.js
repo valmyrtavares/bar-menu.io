@@ -59,7 +59,15 @@ const WarningMessage = ({
         <div>
           <h1>Parabéns!</h1>
           <h1 style={style}>{message}</h1>
-          {finalPriceRequest && <h3>Valor Final R$ {finalPriceRequest},00</h3>}
+          {finalPriceRequest && (
+            <h3>
+              Valor Final R${' '}
+              {Number(finalPriceRequest).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </h3>
+          )}
           <div className={styles.containerBtn}>
             <button onClick={() => setWarningMsg(false)}>Cancelar</button>
             <button disabled={isSubmitting} onClick={sendRequestToKitchen}>

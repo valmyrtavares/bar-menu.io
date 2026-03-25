@@ -22,7 +22,10 @@ function Dishes({ newItem }) {
     if (price.toString().indexOf('.') !== -1) {
       return `R$${price.toString().replace('.', ',')}`;
     } else {
-      return `R$${price},00`;
+      return `R$ ${Number(price).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
     }
   };
 
@@ -53,7 +56,13 @@ function Dishes({ newItem }) {
                 : 'Faça o seu pedido'}
             </button>
             {item && (
-              <p className="price float-end fw-bold">R${item.price},00</p>
+              <p className="price float-end fw-bold">
+                R${' '}
+                {Number(item.price).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
             )}
           </div>
         </div>

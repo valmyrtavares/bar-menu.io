@@ -103,15 +103,30 @@ const RequestList = () => {
                 <span>Tipo de pagamento</span> {item.paymentMethod}
               </p>
               <p>
-                <span>Itens R$ </span> {(item.finalPriceRequest - (item.serviceChargeValue || 0))},00
+                <span>Itens R$ </span>{' '}
+                {(
+                  Number(item.finalPriceRequest || 0) -
+                  Number(item.serviceChargeValue || 0)
+                ).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               {item.serviceChargeEnabled && (
                 <p style={{ color: 'var(--btn-color)', fontWeight: 'bold' }}>
-                  <span>Taxa de Serviço (10%) R$ </span> {item.serviceChargeValue},00
+                  <span>Taxa de Serviço (10%) R$ </span>{' '}
+                  {(Number(item.serviceChargeValue) || 0).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </p>
               )}
               <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                <span>Valor Total R$ </span> {item.finalPriceRequest},00
+                <span>Valor Total R$ </span>{' '}
+                {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <p>
                 <span>Data</span> {item.dateTime}
@@ -146,7 +161,13 @@ const RequestList = () => {
                           {dishe.tempo_levado}
                         </p>
                       )}
-                      <p>R$ {dishe.finalPrice},00</p>
+                      <p>
+                        R${' '}
+                        {(Number(dishe.finalPrice) || 0).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </p>
                     </div>
                     <div className="sidedishes">
                       <p>

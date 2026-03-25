@@ -355,7 +355,14 @@ const DishesModal = ({ item, setModal }) => {
           {sideDishesListOnScreen &&
             sideDishesListOnScreen.map((item, index) => (
               <div className="side-dishe">
-                <p>{item.name}</p> <p> {item.price},00</p>{' '}
+                <p>{item.name}</p>{' '}
+                <p>
+                  {' '}
+                  {Number(item.price).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>{' '}
                 <button
                   type="button"
                   className="btn-close-side-dishes"

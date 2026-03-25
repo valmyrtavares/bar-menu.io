@@ -101,7 +101,11 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
               <div key={item.id} className="Allrequests">
                 <div className="customer">
                   <p>
-                    <span>Valor Total R$ </span> {item.finalPriceRequest},00
+                    <span>Valor Total R$ </span>{' '}
+                    {item.finalPriceRequest.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                   <p>
                     {' '}
@@ -115,7 +119,13 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
                         <div>
                           <h3>item {index + 1}</h3>
                           <p>{dishe.name}</p>
-                          <p>R$ {dishe.finalPrice},00</p>
+                          <p>
+                            R${' '}
+                            {dishe.finalPrice.toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </p>
                         </div>
                         <div className="sidedishes">
                           <p>

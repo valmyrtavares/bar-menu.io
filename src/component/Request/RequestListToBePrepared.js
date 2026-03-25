@@ -1452,7 +1452,11 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     <span>Status</span> {status}
                   </p>
                   <p>
-                    <span>Valor</span>R$ {item.finalPriceRequest},00
+                    <span>Valor</span>R${' '}
+                    {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               ) : (
@@ -1476,14 +1480,31 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       <span>Data</span> {item.dateTime}
                     </p>
                     <h4 style={{ textAlign: 'center', margin: '5px 0', borderTop: '1px dashed #ccc', paddingTop: '10px' }}>
-                      Itens: R$ {(item.finalPriceRequest - (item.serviceChargeValue || 0))},00
+                      Itens: R${' '}
+                      {(
+                        Number(item.finalPriceRequest || 0) -
+                        Number(item.serviceChargeValue || 0)
+                      ).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </h4>
                     {item.serviceChargeEnabled && (
                       <h4 style={{ textAlign: 'center', margin: '5px 0', color: 'var(--btn-color)' }}>
-                        Taxa de Serviço (10%): R$ {item.serviceChargeValue},00
+                        Taxa de Serviço (10%): R${' '}
+                        {(Number(item.serviceChargeValue) || 0).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </h4>
                     )}
-                    <h2 style={{ marginTop: '5px' }}>Valor final R$ {item.finalPriceRequest},00</h2>
+                    <h2 style={{ marginTop: '5px' }}>
+                      Valor final R${' '}
+                      {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </h2>
                     
                     {item.customerFeedback && (
                       <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '8px', borderLeft: '5px solid var(--btn-color)' }}>

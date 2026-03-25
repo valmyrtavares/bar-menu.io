@@ -396,7 +396,7 @@ const RequestModal = () => {
       const finalPrice = data.request
         .map((item) => item.finalPrice)
         .reduce((ac, el) => ac + el, 0);
-      setFinalPriceRequest(finalPrice);
+      setFinalPriceRequest(Number(finalPrice.toFixed(2)));
     }
   };
 
@@ -1154,7 +1154,13 @@ const RequestModal = () => {
             <h2 onClick={() => callDishesModal(item)} className="my-0">
               {item.name}
             </h2>
-            <p className="dishes-price">R$ {item.finalPrice},00</p>
+            <p className="dishes-price">
+              R${' '}
+              {item.finalPrice.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
             {item.status === 'Pronto' ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                 <p className="status-request-pend" style={{ color: 'var(--btn-color)', margin: 0 }}>Pronto</p>

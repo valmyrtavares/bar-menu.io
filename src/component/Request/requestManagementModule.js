@@ -431,10 +431,12 @@ const RequestManagementModule = () => {
               <td>Total</td>
               <td>{totalParams.amount}</td>
               <td>
-                {totalParams.discount
+                {(totalParams.discount
                   ? totalParams.totalValue - totalParams.discount
-                  : totalParams.totalValue}
-                ,00
+                  : totalParams.totalValue).toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </td>
               <td>{Number(totalParams.card || 0).toFixed(2)}</td>
               <td>{Number(totalParams.cost || 0).toFixed(2)}</td>
