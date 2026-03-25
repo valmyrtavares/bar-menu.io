@@ -63,7 +63,7 @@ const WarningMessage = ({
           <div className={styles.containerBtn}>
             <button onClick={() => setWarningMsg(false)}>Cancelar</button>
             <button disabled={isSubmitting} onClick={sendRequestToKitchen}>
-              Continuar
+              {isSubmitting ? 'ENVIANDO...' : 'Continuar'}
             </button>
           </div>
         </div>

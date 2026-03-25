@@ -457,43 +457,47 @@ const RequestModal = () => {
   const isProcessing = React.useRef(false); // Bloqueia múltiplas execuções
 
   const sendRequestToKitchen = async (e) => {
-    if (isProcessing.current) return; // Impede cliques repetidos
-    isProcessing.current = true; // Bloqueia a função
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
 
       if (pdv === true && global.pdvRequest) {
+        if (isProcessing.current) return;
+        isProcessing.current = true;
         const data = await getOneItemColleciton('user', currentUserNew.id);
         addRequestUser(data);
         global.setPdvRequest(false);
+        setTimeout(() => {
+          isProcessing.current = false;
+        }, 2000);
         return;
       } else if (isToten && isToten === true) {
+        if (isProcessing.current) return;
+        isProcessing.current = true;
         addRequestUserToten(currentUserNew.id);
         setTotenMessage(true);
         setTimeout(() => {
           setTotenMessage(false);
           navigate('/');
+          isProcessing.current = false;
         }, 5000);
-        isProcessing.current = false; // Libera novamente após a ação
-        //mostrar mensagem
         return;
       } else if (warningMsg) {
+        if (isProcessing.current) return;
+        isProcessing.current = true;
         const data = await getOneItemColleciton('user', currentUserNew.id);
-        console.log('Atual cliente   ', data);
         if (data) {
           if (isSubmitting) return;
           setIsSubmitting(true);
-          e.target.onclick = null;
           addRequestUser(data);
         }
+        setTimeout(() => {
+          setIsSubmitting(false);
+          isProcessing.current = false;
+        }, 2000);
+      } else {
+        setWarningMsg(true);
       }
-      setWarningMsg(true);
     }
-    // Sempre libera o status após 2 segundos se não houver navegação ou conclusão antes
-    setTimeout(() => {
-      setIsSubmitting(false);
-      isProcessing.current = false;
-    }, 2000);
   };
 
   const takeDataTime = () => {
