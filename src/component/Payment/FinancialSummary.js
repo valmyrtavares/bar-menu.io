@@ -125,6 +125,8 @@ const FinancialSummary = () => {
   const stats = useMemo(() => {
     if (viewMode === 'annual') {
       const now = new Date();
+      now.setHours(0, 0, 0, 0); // Reset time for date comparisons
+      
       const isSelectedCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth();
       
       let refMonth = selectedMonth;
@@ -137,27 +139,29 @@ const FinancialSummary = () => {
         }
       }
 
-      const refExpensesList = expenses.filter(exp => {
-        const dPay = parseDate(exp.paymentDate);
-        return dPay && dPay.getMonth() === refMonth && dPay.getFullYear() === refYear && exp.confirmation;
-      });
-      const refRevenueList = revenue.filter(rev => {
-        const d = parseDate(rev.dateTime);
-        return d && d.getMonth() === refMonth && d.getFullYear() === refYear;
-      });
-
-      const refProfit = refRevenueList.reduce((acc, rev) => {
-        let p = 0;
-        (rev.request || []).forEach(item => {
-          const price = Number(item.finalPrice) || 0;
-          p += price;
+      // 1. Calcula os dados do MÊS DE REFERÊNCIA (para projeções futuras)
+      const getRealStatsForMonth = (m, y) => {
+        const monthRevenue = revenue.filter(rev => {
+          const d = parseDate(rev.dateTime);
+          return d && d.getMonth() === m && d.getFullYear() === y;
         });
-        return acc + p;
-      }, 0);
+        const monthExpenses = expenses.filter(exp => {
+          const dPay = parseDate(exp.paymentDate);
+          return dPay && dPay.getMonth() === m && dPay.getFullYear() === y && exp.confirmation;
+        });
 
-      const refVariable = refExpensesList
-        .filter(exp => exp.category !== 'fixed')
-        .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
+        const profitValue = monthRevenue.reduce((acc, rev) => {
+          return acc + (rev.request || []).reduce((a, item) => a + (Number(item.finalPrice) || 0), 0);
+        }, 0);
+
+        const variableValue = monthExpenses
+          .filter(exp => exp.category !== 'fixed')
+          .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
+
+        return { profit: profitValue, variable: variableValue };
+      };
+
+      const refStats = getRealStatsForMonth(refMonth, refYear);
 
       const annualData = [];
       let totalAnnualProfit = 0;
@@ -165,9 +169,28 @@ const FinancialSummary = () => {
       let totalAnnualFixed = 0;
 
       for (let i = 0; i < 12; i++) {
-        const m = (refMonth + i) % 12;
-        const y = refYear + Math.floor((refMonth + i) / 12);
+        const m = (selectedMonth + i) % 12;
+        const y = selectedYear + Math.floor((selectedMonth + i) / 12);
         
+        // Compara com a data atual para decidir se usa Real ou Estimado
+        const targetDate = new Date(y, m, 1);
+        const currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        const isFuture = targetDate > currentDate;
+
+        let profit, variable;
+
+        if (isFuture) {
+          // Futuro: Usa estimativa baseada no mês de referência
+          profit = refStats.profit;
+          variable = refStats.variable;
+        } else {
+          // Passado ou Presente: Usa dados REAIS do mês em questão
+          const actualStats = getRealStatsForMonth(m, y);
+          profit = actualStats.profit;
+          variable = actualStats.variable;
+        }
+
+        // Custo Fixo: Sempre Real (baseado em dueDate)
         const monthFixed = expenses
           .filter(exp => {
             const dDue = parseDate(exp.dueDate);
@@ -178,14 +201,15 @@ const FinancialSummary = () => {
         annualData.push({
           month: m,
           year: y,
-          profit: refProfit,
-          variable: refVariable,
+          profit,
+          variable,
           fixed: monthFixed,
+          isEstimated: isFuture,
           monthName: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m]
         });
 
-        totalAnnualProfit += refProfit;
-        totalAnnualVariable += refVariable;
+        totalAnnualProfit += profit;
+        totalAnnualVariable += variable;
         totalAnnualFixed += monthFixed;
       }
 
@@ -198,9 +222,9 @@ const FinancialSummary = () => {
         dailyData: annualData,
         viewMode: 'annual',
         refMonthName: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][refMonth],
-        overdue: [], // not used in annual view
-        topProducts: [], // not used in annual view
-        topExpensesPie: [], // not used in annual view
+        overdue: [],
+        topProducts: [],
+        topExpensesPie: [],
       };
     }
 
@@ -383,12 +407,20 @@ const FinancialSummary = () => {
         return (
           <div className={style.customTooltip}>
             <h4>{(data.monthName || '') + ' ' + (data.year || '')}</h4>
+            <div className={style.statusBadge} style={{ 
+              color: data.isEstimated ? '#FCA311' : '#00ff88',
+              fontSize: '0.75rem',
+              marginBottom: '5px',
+              fontWeight: 'bold'
+            }}>
+              {data.isEstimated ? '📊 PROJEÇÃO' : '✅ DADOS REAIS'}
+            </div>
             <div className={`${style.tooltipItem} ${style.green}`}>
-              <span>Lucro Estimado:</span>
+              <span>{data.isEstimated ? 'Lucro Estimado:' : 'Lucro Real:'}</span>
               <strong>R$ {profit.toFixed(2)}</strong>
             </div>
             <div className={`${style.tooltipItem} ${style.red}`}>
-              <span>Despesa Variável:</span>
+              <span>{data.isEstimated ? 'Despesa Variável:' : 'Despesa Real:'}</span>
               <strong>R$ {variable.toFixed(2)}</strong>
             </div>
             <div className={`${style.tooltipItem} ${style.yellow}`}>
