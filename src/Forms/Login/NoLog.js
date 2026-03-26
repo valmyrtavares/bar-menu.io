@@ -39,8 +39,12 @@ const NoLog = () => {
         name: recoveredClient[0].name,
       };
       localStorage.setItem('userMenu', JSON.stringify(currentUser));
-
-      navigate('/');
+      const pdv = localStorage.getItem('pdv') === 'true';
+      if (pdv) {
+        navigate('/admin/requestlist');
+      } else {
+        navigate('/');
+      }
     } else {
       navigate('/create-customer');
     }

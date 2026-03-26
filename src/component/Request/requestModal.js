@@ -594,6 +594,19 @@ const RequestModal = () => {
         }
       }
       setTotenMessage(false);
+
+      const isPdvLocal = localStorage.getItem('pdv') === 'true';
+      if (isPdvLocal) {
+        try {
+          const userDocRef = doc(db, 'user', currentUser);
+          await updateDoc(userDocRef, { request: [] });
+          localStorage.removeItem('userMenu');
+          global.setAuthorizated(false);
+        } catch (err) {
+          console.error('Erro ao limpar sessão PDV:', err);
+        }
+      }
+
       if (pdv && global.pdvRequest) {
         navigate('/admin/requestlist');
         global.setPdvRequest(false);

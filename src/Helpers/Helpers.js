@@ -301,6 +301,8 @@ export async function CheckUser(check, isToten, packageTier) {
     if (currentUser && currentUser.length > 0 && currentUser[0].name) {
       if (isToten) {
         return '/new-layout';
+      } else if (localStorage.getItem('pdv') === 'true') {
+        return '/admin/requestlist';
       } else {
         return '/'; // return to main screen
       }
