@@ -211,7 +211,12 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       // Gatilho automático para NFC-e
 
       const triggerFiscal = async () => {
+        console.log(`[DEBUG NFCe] Analisando fila (${requestsDoneList.length} pedidos). ` +
+          `pdvLocal: ${localStorage.getItem('pdv')}, autoNfceContexto: ${global.enableAutoNfce}`);
         for (const order of requestsDoneList) {
+          console.log(`[DEBUG NFCe] Olhando pedido ${order.countRequest} (ID: ${order.id}). ` +
+            `paymentDone: ${order.paymentDone}, nfceIssued: ${order.nfceIssued}, sendingNfce: ${order.sendingNfce}`);
+
           // 1. FILTRO RÁPIDO EM MEMÓRIA (mesmo tab, mesmo ciclo React):
           if (
             order.paymentDone === true &&
@@ -254,11 +259,18 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
               }
 
               console.log(
-                `[LOCK] Trava ATÔMICA ativada para ${order.countRequest}. Enviando para Sefaz...`,
+                `[LOCK] Trava ATÔMICA ativada para ${order.countRequest}. Enviando para API (issueAutoNfce)...`,
               );
 
               // 3. ENVIA PARA A API (Processo demorado)
-              const result = await issueAutoNfce(order);
+              let result;
+              try {
+                result = await issueAutoNfce(order);
+                console.log(`[DEBUG NFCe] Retorno de issueAutoNfce para ${order.countRequest}:`, result);
+              } catch (apiErr) {
+                console.error(`[DEBUG NFCe] EXCEPTION no issueAutoNfce para ${order.countRequest}:`, apiErr);
+                throw apiErr; // Lança para o catch de erro geral tratar a trava
+              }
 
               // 4. FINALIZA
               if (
@@ -311,6 +323,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       const isPdv = localStorage.getItem('pdv') === 'true';
 
       const shouldTrigger = autoNfceActive && isPdv;
+
+      console.log(`[DEBUG NFCe] Analisando gatilho de emissão: enableAutoNfce=${autoNfceActive}, isPdv=${isPdv}, shouldTrigger=${shouldTrigger}`);
 
       if (shouldTrigger) {
         triggerFiscal();

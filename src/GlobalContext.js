@@ -70,14 +70,14 @@ export const GlobalStorage = ({ children }) => {
     };
   }, []);
 
-  // Pre-cachear imagens se for modo Toten
+  // Pre-cachear imagens desativado devido a bloqueio de CORS do Firebase Storage
   React.useEffect(() => {
-    const toten = JSON.parse(localStorage.getItem('isToten') || 'false');
-    if (toten && db) {
-      import('./util/imageCache').then((m) => {
-        m.precacheAllImages(db);
-      });
-    }
+    // const toten = JSON.parse(localStorage.getItem('isToten') || 'false');
+    // if (toten && db) {
+    //   import('./util/imageCache').then((m) => {
+    //     m.precacheAllImages(db);
+    //   });
+    // }
   }, [db]);
 
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação

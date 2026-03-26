@@ -141,7 +141,8 @@ export const issueAutoNfce = async (order) => {
   const uniquePart = generationUniqueRandomString(8);
   const ref = `REQ--${orderId}--${cleanName}--${uniquePart}`;
   // URL do backend (ajustar se necessário para produção)
-  const url = `https://focusrender.onrender.com/api/send-nfce?ref=${ref}`;
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://focusrender.onrender.com';
+  const url = `${backendUrl}/api/send-nfce?ref=${ref}`;
 
   try {
     const response = await fetch(url, {
@@ -149,7 +150,7 @@ export const issueAutoNfce = async (order) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(nfce),
+      body: JSON.stringify({ ref, nfceData: nfce }),
     });
 
     if (response.ok) {

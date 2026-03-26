@@ -7,21 +7,11 @@ import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckUser } from '../Helpers/Helpers.js';
 import { GlobalContext } from '../GlobalContext';
-import {
-  useEnsureAnonymousUser,
-  getAnonymousUser,
-} from '../Hooks/useEnsureAnonymousUser.js';
+import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
-import { useCachedImage } from '../Hooks/useCachedImage.js';
-import { ensureImagesInCache } from '../util/imageCache.js';
 
 const CategoryItemImage = ({ item }) => {
-  const src = useCachedImage(
-    item.id,
-    item.image ||
-      'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg',
-    'thumb',
-  );
+  const src = item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg';
   return <img src={src} alt="" />;
 };
 
@@ -100,8 +90,8 @@ const MainPictureMenu = () => {
         ? dishes.filter((item) => item.category === parent)
         : dishes.filter((item) => item.carrossel === true);
 
-    // ✅ GARANTIA: Só revela a grade quando TODAS as imagens novas estiverem na RAM (Hot Cache)
-    await ensureImagesInCache(filtered, 'thumb');
+    // Removido o bloqueio de cache manual via fetch (que estava dando erro de CORS)
+    // O useEffect abaixo, baseado em carregamento real do DOM (onImageLoad), dará conta do recado!
 
     setLoadedImagesCount(0); // Reseta contador de carregamento real (DOM)
     setDishesFiltered(filtered);

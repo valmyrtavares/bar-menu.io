@@ -31,7 +31,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
 
-    const socket = io('https://payer-4ptm.onrender.com'); // url do seu backend
+    const backendUrl = process.env.REACT_APP_PAYER_API_URL || 'https://payer-4ptm.onrender.com';
+    const socket = io(backendUrl); // url do seu backend
 
     socket.on('connect', () => { });
 
@@ -140,18 +141,18 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         type: 'INPUT',
         origin: 'PAGAMENTO',
         data: {
-          callbackUrl: 'https://payer-4ptm.onrender.com/api/payer/webhook',
+          callbackUrl: `${process.env.REACT_APP_PAYER_API_URL || 'https://payer-4ptm.onrender.com'}/api/payer/webhook`,
           correlationId,
           flow: 'SYNC',
           automationName: 'GERACAOZ',
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
           message: {
             command: 'PAYMENT',
-            value: price,
+            value: Number(price).toFixed(2),
             paymentMethod: selectedP === 'PIX' ? 'PIX' : 'CARD',
             paymentType:
               selectedP === 'PIX'
@@ -166,8 +167,9 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
         },
       };
 
-      // 3️⃣ Envia ao backend hospetado no Render
-      await fetch('https://payer-4ptm.onrender.com/api/payer/payment', {
+      // 3️⃣ Envia ao backend
+      const backendUrl = process.env.REACT_APP_PAYER_API_URL || 'https://payer-4ptm.onrender.com';
+      await fetch(`${backendUrl}/api/payer/payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payGo),
@@ -184,7 +186,8 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
     console.log('Pagamento abortado pelo usuário.');
     try {
       setMessage('Cancelando pagamento...');
-      await fetch('https://payer-4ptm.onrender.com/api/payer/abort', {
+      const backendUrl = process.env.REACT_APP_PAYER_API_URL || 'https://payer-4ptm.onrender.com';
+      await fetch(`${backendUrl}/api/payer/abort`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -193,7 +196,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: '01',
           },
         }),
       });

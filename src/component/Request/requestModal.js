@@ -79,8 +79,8 @@ const RequestModal = () => {
 
           await updateDoc(requestDocRef, {
             serviceChargeEnabled: isEnabled,
-            serviceChargeValue: isEnabled ? (itemsTotal * 0.1) : 0,
-            finalPriceRequest: isEnabled ? (itemsTotal * 1.1) : itemsTotal
+            serviceChargeValue: isEnabled ? Number((itemsTotal * 0.1).toFixed(2)) : 0,
+            finalPriceRequest: isEnabled ? Number((itemsTotal * 1.1).toFixed(2)) : itemsTotal
           });
         }
       }
@@ -134,8 +134,8 @@ const RequestModal = () => {
           }
 
           updateData.serviceChargeEnabled = includeServiceCharge;
-          updateData.serviceChargeValue = includeServiceCharge ? (itemsTotal * 0.1) : 0;
-          updateData.finalPriceRequest = totalFinalWithService;
+          updateData.serviceChargeValue = includeServiceCharge ? Number((itemsTotal * 0.1).toFixed(2)) : 0;
+          updateData.finalPriceRequest = Number(totalFinalWithService.toFixed(2));
 
           // Adiciona a notificação de pagamento para o PDV
           updateData.paymentCall = {
@@ -678,7 +678,7 @@ const RequestModal = () => {
             }
 
             const userDocRef = doc(db, 'user', id);
-            const updatedRequests = data.request.map((item, idx) => ({
+            const updatedRequests = (data.request || []).map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               parentRequestId: global.orderBeingEdited.id,
@@ -691,7 +691,7 @@ const RequestModal = () => {
               cleanedUserNewRequest,
             );
             const userDocRef = doc(db, 'user', id);
-            const updatedRequests = data.request.map((item, idx) => ({
+            const updatedRequests = (data.request || []).map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               parentRequestId: docRef.id,
@@ -767,7 +767,7 @@ const RequestModal = () => {
             const requestDocRef = doc(db, 'requests', openOrderDoc.id);
             const updateFields = {
               request: updatedOrderRequests,
-              finalPriceRequest: updatedPrice,
+              finalPriceRequest: Number(updatedPrice.toFixed(2)),
               done: true
             };
 
