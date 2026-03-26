@@ -69,8 +69,6 @@ const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
   const [expenses, setExpenses] = useState([]);
   const [revenue, setRevenue] = useState([]);
-  const [items, setItems] = useState([]);
-  const [sideDishes, setSideDishes] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'annual'
@@ -88,19 +86,9 @@ const FinancialSummary = () => {
       setRevenue(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    const unsubItems = onSnapshot(collection(db, 'item'), (snapshot) => {
-      setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
-    const unsubSideDishes = onSnapshot(collection(db, 'sideDishes'), (snapshot) => {
-      setSideDishes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
     return () => {
       unsubExpenses();
       unsubRevenue();
-      unsubItems();
-      unsubSideDishes();
     };
   }, []);
 
@@ -115,32 +103,6 @@ const FinancialSummary = () => {
     if (parts.length !== 3) return null;
     const [day, month, year] = parts.map(Number);
     return new Date(year, month - 1, day);
-  };
-
-  const calculateTransactionFee = (totalSum, paymentMethod) => {
-    const fees = { debit: 0.025, pix: 0.025, cash: 0, credite: 0.029, vr: 0.07 };
-    const method = (paymentMethod || '').toLowerCase();
-    const feeRate = method.includes('vr') ? fees.vr : fees[method] || 0;
-    return totalSum * feeRate;
-  };
-
-  const getProductCost = (requestId, size, name) => {
-    let dish = items.find(i => i.id === requestId);
-    if (!dish) dish = items.find(i => i.title?.trim().toLowerCase() === name?.trim().toLowerCase());
-    if (!dish) return 0;
-
-    const { costProfitMarginCustomized = {}, costPriceObj = {} } = dish;
-    if (size && costProfitMarginCustomized) {
-      const sizeData = Object.values(costProfitMarginCustomized).find(s => s.label === size);
-      if (sizeData) return Number(sizeData.cost) || 0;
-    }
-    return Number(costPriceObj.cost) || 0;
-  };
-
-  const getSideDishCost = (name) => {
-    const sd = sideDishes.find(s => s.sideDishes === name);
-    if (!sd || sd.isBasic) return 0;
-    return Number(sd.costPriceObj?.cost) || 0;
   };
 
   const filteredData = useMemo(() => {
@@ -188,10 +150,7 @@ const FinancialSummary = () => {
         let p = 0;
         (rev.request || []).forEach(item => {
           const price = Number(item.finalPrice) || 0;
-          const fee = calculateTransactionFee(price, rev.paymentMethod);
-          const cost = getProductCost(item.id, item.size, item.name);
-          const sideCost = (item.sideDishes || []).reduce((a, sd) => a + getSideDishCost(sd.name), 0);
-          p += (price - fee - cost - sideCost);
+          p += price;
         });
         return acc + p;
       }, 0);
@@ -274,10 +233,7 @@ const FinancialSummary = () => {
         if (dailyData[dayIdx]) {
           (rev.request || []).forEach(item => {
             const price = Number(item.finalPrice) || 0;
-            const fee = calculateTransactionFee(price, rev.paymentMethod);
-            const cost = getProductCost(item.id, item.size, item.name);
-            const sideCost = (item.sideDishes || []).reduce((acc, sd) => acc + getSideDishCost(sd.name), 0);
-            dailyData[dayIdx].profit += (price - fee - cost - sideCost);
+            dailyData[dayIdx].profit += price;
           });
         }
       }
@@ -384,7 +340,7 @@ const FinancialSummary = () => {
       topProducts,
       topExpensesPie,
     };
-  }, [filteredData, items, sideDishes, selectedMonth, selectedYear, viewMode, expenses, revenue]);
+  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue]);
 
   useEffect(() => {
     if (stats.overdue.length > 0) {
