@@ -147,6 +147,13 @@ h3 {
     min-width: 147%;
 }
 
+@media (max-width: 768px) {
+    .pdv-change {
+        min-width: 100%;
+        max-width: 100vw;
+    }
+}
+
 .call-waiter-container {
     display: flex;
     justify-content: flex-start;

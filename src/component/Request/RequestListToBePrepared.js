@@ -211,11 +211,15 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       // Gatilho automático para NFC-e
 
       const triggerFiscal = async () => {
+        /*
         console.log(`[DEBUG NFCe] Analisando fila (${requestsDoneList.length} pedidos). ` +
           `pdvLocal: ${localStorage.getItem('pdv')}, autoNfceContexto: ${global.enableAutoNfce}`);
+        */
         for (const order of requestsDoneList) {
+          /*
           console.log(`[DEBUG NFCe] Olhando pedido ${order.countRequest} (ID: ${order.id}). ` +
             `paymentDone: ${order.paymentDone}, nfceIssued: ${order.nfceIssued}, sendingNfce: ${order.sendingNfce}`);
+          */
 
           // 1. FILTRO RÁPIDO EM MEMÓRIA (mesmo tab, mesmo ciclo React):
           if (
@@ -227,9 +231,11 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             // Marca IMEDIATAMENTE na memória para bloquear próximas renderizações
             global.processedOrdersGlobal.current.add(order.id);
 
+            /*
             console.log(
               `[LOCK] Iniciando trava para pedido ${order.countRequest} (ID: ${order.id})`,
             );
+            */
 
             try {
               // 2. TRAVA ATÔMICA NO FIRESTORE (protege contra múltiplas abas/dispositivos):
@@ -258,17 +264,19 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 continue; // Próximo pedido no loop
               }
 
+              /*
               console.log(
                 `[LOCK] Trava ATÔMICA ativada para ${order.countRequest}. Enviando para API (issueAutoNfce)...`,
               );
+              */
 
               // 3. ENVIA PARA A API (Processo demorado)
               let result;
               try {
                 result = await issueAutoNfce(order);
-                console.log(`[DEBUG NFCe] Retorno de issueAutoNfce para ${order.countRequest}:`, result);
+                // console.log(`[DEBUG NFCe] Retorno de issueAutoNfce para ${order.countRequest}:`, result);
               } catch (apiErr) {
-                console.error(`[DEBUG NFCe] EXCEPTION no issueAutoNfce para ${order.countRequest}:`, apiErr);
+                // console.error(`[DEBUG NFCe] EXCEPTION no issueAutoNfce para ${order.countRequest}:`, apiErr);
                 throw apiErr; // Lança para o catch de erro geral tratar a trava
               }
 
@@ -1440,39 +1448,13 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 {openRequests[item.id] ? 'Recolher' : 'Expandir'}
               </button>
               {!openRequests[item.id] ? (
-                <div
-                  className={
-                    openRequests[item.id]
-                      ? style.requestId
-                      : style.requestIdClosed
-                  }
-                >
-                  <p>
-                    <span>Nome</span> {firstNameClient(item.name)}
-                  </p>
-                  {item.tableNumber && (
-                    <p>
-                      <span>Mesa</span> {item.tableNumber}
-                    </p>
-                  )}
-                  <p>
-                    <span>Ordenação</span>: {item.countRequest}
-                  </p>
-                  <p>
-                    <span>Data</span> {item.dateTime}
-                  </p>
-
-                  <p>
-                    <span>Status</span> {status}
-                  </p>
-                  <p>
-                    <span>Valor</span>R${' '}
-                    {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
+                  <div className={style.requestIdClosed}>
+                    <p>Nome: <strong>{firstNameClient(item.name)}</strong></p>
+                    {item.tableNumber && <p>Mesa: <strong>{item.tableNumber}</strong></p>}
+                    <p>Pedido: <strong>{item.countRequest}</strong></p>
+                    <p>Valor: <strong>R$ {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></p>
+                    <p>Status: <strong>{status}</strong></p>
+                  </div>
               ) : (
                 <div className={style.userContainer}>
                   <div>
@@ -1577,27 +1559,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     >
                       Cancelar pedido
                     </button>
-                    <div>
-                      {ShowDefaultMessage && selectedRequestId === item.id && (
-                        <DefaultComumMessage
-                          msg="Você está prestes a excluir esse pedido"
-                          onClose={closeModal}
-                          onConfirm={() =>
-                            handleDeleteRequest(selectedRequestId)
-                          }
-                        />
-                      )}
-                    </div>
-                    <div>
-                      {messagePromotionPopup && (
-                        <MessagePromotions
-                          message={textPromotion}
-                          AddPromotion={AddPromotion}
-                          setClose={setMessagePromotionPopup}
-                          onContinue={addEditBenefitedClient}
-                        />
-                      )}
-                    </div>
+
                     {localStorage.getItem('pdv') === 'true' && !item.paymentDone && (
                       <button
                         className={style.pendent}
@@ -1644,12 +1606,32 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     </button>
                     <button
                       disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}
-                      className={style.btnFiscalAttributes}
+                      className={`${style.pendent} ${style.btnFiscalAttributes}`}
                       onClick={() => openPrintScreen(item)}
                     >
-                      Nota Fiscal
+                      Nota
                     </button>
                   </div>
+
+                  {/* Modais movidos para fora da grid de botões */}
+                  {ShowDefaultMessage && selectedRequestId === item.id && (
+                    <DefaultComumMessage
+                      msg="Você está prestes a excluir esse pedido"
+                      onClose={closeModal}
+                      onConfirm={() =>
+                        handleDeleteRequest(selectedRequestId)
+                      }
+                    />
+                  )}
+
+                  {messagePromotionPopup && (
+                    <MessagePromotions
+                      message={textPromotion}
+                      AddPromotion={AddPromotion}
+                      setClose={setMessagePromotionPopup}
+                      onContinue={addEditBenefitedClient}
+                    />
+                  )}
                 </div>
               )}
               {item.request &&

@@ -32,6 +32,7 @@ export const GlobalStorage = ({ children }) => {
   const [hasRawMaterial, setHasRawMaterial] = React.useState(false);
   const [hasFinancial, setHasFinancial] = React.useState(false);
   const [canConfigToten, setCanConfigToten] = React.useState(false);
+  const [pdvMobileView, setPdvMobileView] = React.useState('menu'); // 'menu' ou 'orders'
 
   // Listen for global configuration changes
   React.useEffect(() => {
@@ -115,6 +116,8 @@ export const GlobalStorage = ({ children }) => {
         hasFinancial,
         canConfigToten,
         setPackageTier,
+        pdvMobileView,
+        setPdvMobileView,
       }}
     >
       {children}

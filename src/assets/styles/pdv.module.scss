@@ -1,4 +1,67 @@
-.pdvContainer{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
+.mainWrapper {
+    width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    background-color: var(--page-bg-color);
+    min-height: 100vh;
 }
+
+.fixedHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    background-color: var(--page-bg-color);
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+
+    .viewToggle {
+        text-align: center;
+        margin: 0 auto;
+        padding: 5px;
+        color: #14213D;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        opacity: 0.9;
+        font-family: var(--text-font);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+
+        &:active {
+            opacity: 1;
+            transform: scale(0.98);
+        }
+    }
+}
+
+.pdvContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    transition: transform 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+
+    &.mobileMode {
+        display: flex; // Para o slide funcionar melhor
+        width: 200%; // Duas seções de 100%
+        transition: transform 0.4s ease-in-out;
+        
+        &.showOrders {
+            transform: translateX(-50%); // Move para a segunda seção (Pedidos)
+        }
+
+        .viewSection {
+            flex: 0 0 50%; // Cada seção ocupa exatamente a largura da tela
+            width: 50%;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            white-space: normal;
+            transition: opacity 0.3s ease;
+
+            &.hide {
+                opacity: 0.3; // Em vez de display: none, usamos opacidade para manter no DOM durante o slide
+                pointer-events: none;
+            }
+        }
+    }
+}

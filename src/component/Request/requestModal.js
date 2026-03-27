@@ -610,6 +610,7 @@ const RequestModal = () => {
       if (pdv && global.pdvRequest) {
         navigate('/admin/requestlist');
         global.setPdvRequest(false);
+        global.setPdvMobileView('orders');
       } else {
         navigate('/orderqueue');
       }
@@ -882,6 +883,9 @@ const RequestModal = () => {
     } finally {
       isProcessing.current = false;
       setIsSubmitting(false);
+      if (pdv && global.pdvRequest) {
+        global.setPdvMobileView('orders');
+      }
     }
   };
 

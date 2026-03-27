@@ -208,3 +208,285 @@
         background-color: #28a745;
     }
 }
+
+@media (max-width: 1000px) {
+    .containerRequestListToBePrepared {
+        width: 96%;
+        margin: 10px 2%;
+        padding: 5px;
+
+        .btnToggle {
+            width: 100%;
+            padding: 8px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            color: #14213D;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .requestIdClosed {
+            display: grid;
+            grid-template-columns: auto auto; 
+            justify-content: center;
+            gap: 1px 12px;
+            padding: 3px 10px;
+            background-color: #fdfdfd;
+            border-bottom: 1px solid #eee;
+            font-size: 0.72rem; 
+            align-items: center;
+
+            p {
+                margin: 0 !important;
+                color: #444;
+                white-space: nowrap;
+                text-align: center;
+                
+                strong {
+                    color: #000;
+                    font-weight: 700;
+                }
+
+                &:last-child {
+                    grid-column: span 2; 
+                    text-align: center;
+                    border-top: 1px dashed #eee;
+                    padding-top: 1px;
+                    margin-top: 1px !important;
+                    font-weight: bold;
+                    color: #1a73e8;
+                    font-size: 0.7rem;
+                }
+            }
+        }
+
+        .userContainer {
+            .btnStatus {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                justify-content: space-between;
+                gap: 8px 10px;
+                width: 100%;
+                align-items: stretch;
+
+                button {
+                    min-width: 0 !important;
+                    width: 100%;
+                    font-size: 0.8rem;
+                    padding: 10px 4px;
+                    min-height: 55px; 
+                    height: 100%;
+                    line-height: 1.2;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    margin: 0; 
+                    border-radius: 10px;
+                    font-family: var(--title-font) !important;
+                    font-weight: bold;
+                    border: none;
+
+                    &:last-child:nth-child(odd) {
+                        grid-column: span 2; 
+                        width: 100%;
+                    }
+                }
+
+                .btnFiscalAttributes {
+                    background-color: #e2c11d !important;
+                    color: white;
+                }
+            }
+        }
+
+        .userContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+
+            > div:first-child {
+                border-bottom: 2px dashed #eee;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center; // Centraliza as primeiras linhas (Nome, Mesa, etc)
+
+                p {
+                    text-align: center;
+                    width: 100%;
+                }
+            }
+
+            p {
+                font-size: 15px;
+                text-align: center;
+                margin: 4px 0;
+                
+                span {
+                    min-width: unset;
+                    display: inline-block;
+                }
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                background: #fdfdfd;
+                padding: 10px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .btnStatus {
+                display: grid;
+                grid-template-columns: 48% 48%; // Duas colunas em porcentagem
+                justify-content: space-between;
+                gap: 10px 4%; // Espaçamento entre linhas e colunas
+                width: 100%;
+                align-items: stretch;
+
+                button {
+                    min-width: 0;
+                    width: 100%;
+                    font-size: 0.8rem; // Um pouco menor para caber textos longos
+                    padding: 10px 4px;
+                    min-height: 55px; // Altura mínima para uniformidade
+                    height: 100%;
+                    line-height: 1.2;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    margin: 0; 
+                    word-break: break-word; // Melhor que break-all para português
+                    white-space: normal; 
+                    overflow: hidden;
+                }
+
+                .btnFiscalAttributes {
+                    grid-column: auto; 
+                    width: 100%;
+                    background-color: #e2c11d !important;
+                    height: 100%;
+                    min-height: 55px;
+                    padding: 10px 4px;
+                    font-size: 0.8rem;
+                    margin: 0;
+                }
+            }
+        }
+
+        .requestItem {
+            display: flex;
+            flex-direction: column;
+            border: solid 1px #ffc0cb;
+            border-radius: 12px;
+            margin-top: 15px;
+            overflow: hidden;
+            background: #fff;
+
+            img {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                max-height: 250px;
+                object-fit: cover;
+                order: 2; // Imagem abaixo do botão cancelar
+            }
+
+            .imageButton {
+                display: flex;
+                flex-direction: column;
+                padding: 10px;
+                background: #fff5f5;
+                order: 3; // Contêiner de botões na base
+                gap: 10px;
+
+                button {
+                    width: 100%;
+                    font-size: 0.9rem;
+                    padding: 12px;
+                }
+
+                // Esconde botão de receita no mobile
+                .btn-warning, 
+                button[class*="btn-warning"] {
+                    display: none !important;
+                }
+
+                // Botão de cancelar acima da imagem
+                .btn-danger,
+                button[class*="btn-danger"] {
+                    order: 1;
+                    position: relative;
+                    margin: 0 !important;
+                    width: 100%;
+                }
+            }
+
+            // Precisamos que o botão de cancelar saia do .imageButton ou que o .imageButton mude
+            // Como no JSX os botões estão juntos da imagem, vamos usar display: contents
+            .imageButton {
+                display: flex;
+                flex-direction: column;
+                background: #fff;
+                padding: 0;
+                order: 2; // Toda essa seção abaixo do texto
+                
+                button:last-child {
+                    order: -1; // Move o cancelar para cima da imagem se for o último no JSX
+                    margin: 10px !important;
+                    width: calc(100% - 20px);
+                }
+
+                img {
+                    order: 0;
+                    margin-bottom: 10px;
+                }
+            }
+
+            div:first-child {
+                padding: 15px 10px;
+                order: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                h5 {
+                    font-size: 1.2rem;
+                    margin-bottom: 12px;
+                    text-align: center;
+                }
+
+                p {
+                    font-size: 15px;
+                    text-align: center !important;
+                    margin: 4px 0;
+                    width: 100%;
+                }
+
+                h5:last-of-type {
+                    margin-top: 10px;
+                    text-align: center;
+                }
+
+                .sideDishesList {
+                    justify-content: center;
+                    text-align: center;
+                    width: 100%;
+
+                    p {
+                        font-size: 14px;
+                        display: inline;
+                    }
+                }
+            }
+        }
+    }
+}

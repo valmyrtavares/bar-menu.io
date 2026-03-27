@@ -155,6 +155,8 @@ function PdvMainMenu() {
     }, 1200000);
   };
 
+
+
   const showPopup = () => {
     console.log('clicou');
     global.setPdvRequest((prev) => !prev);

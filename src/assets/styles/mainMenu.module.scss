@@ -5,6 +5,27 @@
     @include btnAdmin;
 }
 
+.mobileToggleBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    padding: 8px 12px;
+    background-color: var(--btn-color);
+    color: var(--title-font-color);
+    border: 2px solid var(--title-font-color);
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    font-family: var(--title-font);
+    
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
 .containerBtn {
     .headerToten {
             display: grid;

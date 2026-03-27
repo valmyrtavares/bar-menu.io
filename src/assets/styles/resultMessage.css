@@ -28,7 +28,26 @@
 }
 @media(max-width: 600px){
   .default-comum-message-container {
-    width: 80%; /* Ajusta a largura para telas menores */
+    width: 90%; 
+    max-width: 400px;
+    padding: 15px;
+  }
+
+  .default-comum-message-container h1 {
+    font-size: 1.2rem;
+    margin: 15px 0;
+  }
+
+  .default-comum-message-container h3 {
+    font-size: 1.5rem !important;
+    margin: 20px 5px;
+  }
+
+  .default-comum-message-container .container-button button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 1rem;
   }
 }
 
