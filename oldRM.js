@@ -566,17 +566,13 @@ const RequestModal = () => {
           }
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
-          if (global.orderBeingEdited.tableNumber) {
-            const updatedRequests = data.request.map((item, idx) => ({
-              ...item,
-              sentToKitchen: true,
-              parentRequestId: global.orderBeingEdited.id,
-              indexInRequest: idx
-            }));
-            await updateDoc(userDocRef, { request: updatedRequests });
-          } else {
-            await updateDoc(userDocRef, { request: [] });
-          }
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: global.orderBeingEdited.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
         } else {
           const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
 
@@ -588,17 +584,13 @@ const RequestModal = () => {
           await updateDoc(docRef, { request: finalItemsWithId });
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
-          if (cleanedUserNewRequest.tableNumber) {
-            const updatedRequests = data.request.map((item, idx) => ({
-              ...item,
-              sentToKitchen: true,
-              parentRequestId: docRef.id,
-              indexInRequest: idx
-            }));
-            await updateDoc(userDocRef, { request: updatedRequests });
-          } else {
-            await updateDoc(userDocRef, { request: [] });
-          }
+          const updatedRequests = data.request.map((item, idx) => ({
+            ...item,
+            sentToKitchen: true,
+            parentRequestId: docRef.id,
+            indexInRequest: idx
+          }));
+          await updateDoc(userDocRef, { request: updatedRequests });
         }
       }
       setTotenMessage(false);
@@ -606,10 +598,8 @@ const RequestModal = () => {
       const isPdvLocal = localStorage.getItem('pdv') === 'true';
       if (isPdvLocal) {
         try {
-          if (!userNewRequest.tableNumber) {
-            const userDocRef = doc(db, 'user', currentUser);
-            await updateDoc(userDocRef, { request: [] });
-          }
+          const userDocRef = doc(db, 'user', currentUser);
+          await updateDoc(userDocRef, { request: [] });
           localStorage.removeItem('userMenu');
           global.setAuthorizated(false);
         } catch (err) {
@@ -702,34 +692,26 @@ const RequestModal = () => {
             }
 
             const userDocRef = doc(db, 'user', id);
-            if (global.orderBeingEdited.tableNumber) {
-              const updatedRequests = (data.request || []).map((item, idx) => ({
-                ...item,
-                sentToKitchen: true,
-                parentRequestId: global.orderBeingEdited.id,
-                indexInRequest: idx,
-              }));
-              await updateDoc(userDocRef, { request: updatedRequests });
-            } else {
-              await updateDoc(userDocRef, { request: [] });
-            }
+            const updatedRequests = (data.request || []).map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              parentRequestId: global.orderBeingEdited.id,
+              indexInRequest: idx,
+            }));
+            await updateDoc(userDocRef, { request: updatedRequests });
           } else {
             const docRef = await addDoc(
               collection(db, 'requests'),
               cleanedUserNewRequest,
             );
             const userDocRef = doc(db, 'user', id);
-            if (cleanedUserNewRequest.tableNumber) {
-              const updatedRequests = (data.request || []).map((item, idx) => ({
-                ...item,
-                sentToKitchen: true,
-                parentRequestId: docRef.id,
-                indexInRequest: idx,
-              }));
-              await updateDoc(userDocRef, { request: updatedRequests });
-            } else {
-              await updateDoc(userDocRef, { request: [] });
-            }
+            const updatedRequests = (data.request || []).map((item, idx) => ({
+              ...item,
+              sentToKitchen: true,
+              parentRequestId: docRef.id,
+              indexInRequest: idx,
+            }));
+            await updateDoc(userDocRef, { request: updatedRequests });
           }
         }
       }
