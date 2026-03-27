@@ -69,10 +69,13 @@ const EditFormButton = () => {
         return;
       }
       await fetchData('button', item.id);
+      await fetchDataCollection();
     } else if (id === 'dishes') {
       await fetchData('item', item.id);
+      await fetchDataCollection();
     } else if (id === 'sidedishes') {
       await fetchData('sideDishes', item.id);
+      await fetchDataCollection();
     }
   }
 
