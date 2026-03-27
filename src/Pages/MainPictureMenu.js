@@ -27,6 +27,7 @@ const MainPictureMenu = () => {
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
   const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
+  const [isNestedCategory, setIsNestedCategory] = React.useState(false);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -80,19 +81,30 @@ const MainPictureMenu = () => {
 
   const chooseCategory = async (parent, title) => {
     console.log('Escolhendo categoria:', title);
+    setIsNestedCategory(false); // Reset nested category warning
     if (!dishes || dishes.length === 0) return;
-
+ 
     setCategorySelected(title); // ⚡ Feedback INSTANTÂNEO na tela
     setShowFilteredDishes(false); // Esconde a grade para carregar em lote
-
+ 
     const filtered =
       parent !== 'bestSellers'
         ? dishes.filter((item) => item.category === parent)
         : dishes.filter((item) => item.carrossel === true);
-
+ 
+    if (filtered.length === 0) {
+      setShowFilteredDishes(true);
+      if (global.isToten) {
+        const hasSubcategories = menuButton.some((btn) => btn.category === parent);
+        if (hasSubcategories) {
+          setIsNestedCategory(true);
+        }
+      }
+    }
+ 
     // Removido o bloqueio de cache manual via fetch (que estava dando erro de CORS)
     // O useEffect abaixo, baseado em carregamento real do DOM (onImageLoad), dará conta do recado!
-
+ 
     setLoadedImagesCount(0); // Reseta contador de carregamento real (DOM)
     setDishesFiltered(filtered);
     // setShowFilteredDishes(true); // Removido! O useEffect abaixo cuidará disso quando todas carregarem no DOM
@@ -197,6 +209,15 @@ const MainPictureMenu = () => {
           <section className={style.dishes}>
             <h3 className={style.mainTitle}>{categorySelected}</h3>
             <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
+              {isNestedCategory && (
+                <div className={style.nestedCategoryWarning}>
+                  <p>
+                    Essa categoria só pode ser acessada de um painel com botões e
+                    sem imagens. Acesse do seu celular para visualizar novos
+                    produtos.
+                  </p>
+                </div>
+              )}
               {dishesFiltered &&
                 dishesFiltered.length > 0 &&
                 dishesFiltered.map((item, index) => (

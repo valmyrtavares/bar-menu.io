@@ -106,6 +106,29 @@
 
         .dishes {
             background-color: var(--bg-color);
+            padding: 20px;
+
+            .nestedCategoryWarning {
+                width: 100%;
+                height: 50vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 40px;
+                background-color: rgba(var(--secundary-bg-color-rgb), 0.1);
+                border-radius: 20px;
+                margin-top: 20px;
+
+                p {
+                    font-size: 24px;
+                    color: var(--title-font-color);
+                    line-height: 1.5;
+                    max-width: 600px;
+                    font-weight: 500;
+                    opacity: 0.8;
+                }
+            }
         }
     }
 }
