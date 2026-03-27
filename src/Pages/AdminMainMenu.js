@@ -83,19 +83,19 @@ const AdminMainMenu = ({ children }) => {
         >
           <div className={admin.sideMenu}>
             <NavLink to="/">Sair do Administrador</NavLink>
-
-            <NavLink to="/admin/item">Adcione um prato</NavLink>
-
-            <NavLink to="/admin/editButton/dishes">Edite seus pratos</NavLink>
-
+ 
             <NavLink to="/admin/category">Adicione Categoria </NavLink>
-
+ 
             <NavLink to="/admin/editButton/cat">Edite suas categorias</NavLink>
-
+ 
+            <NavLink to="/admin/item">Adcione um prato</NavLink>
+ 
+            <NavLink to="/admin/editButton/dishes">Edite seus pratos</NavLink>
+ 
             <NavLink to="/admin/sidedishes">
               Adicione um novo acompanhamento
             </NavLink>
-
+ 
             <NavLink to="/admin/editButton/sidedishes">
               Edite seus acompanhamentos
             </NavLink>
