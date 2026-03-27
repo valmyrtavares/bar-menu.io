@@ -199,6 +199,7 @@ function MainMenu() {
                   item={item}
                   menuButton={menuButton}
                   dishes={dishes}
+                  depth={0}
                 />
               </div>
             ))}
