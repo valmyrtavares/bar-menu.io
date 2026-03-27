@@ -35,9 +35,7 @@ const DishesModal = ({ item, setModal }) => {
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
-    size: item.CustomizedPrice.firstLabel
-      ? item.CustomizedPrice.firstLabel
-      : '',
+    size: item.CustomizedPrice?.firstLabel || '',
   });
   const [itemOnScreen, setItemOnScreen] = React.useState('');
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
@@ -87,7 +85,7 @@ const DishesModal = ({ item, setModal }) => {
       if (form.size === '') {
         setForm((prev) => ({
           ...prev,
-          finalCost: item.costPriceObj.cost || 0,
+          finalCost: item.costPriceObj?.cost || 0,
         }));
       }
     }
@@ -115,7 +113,7 @@ const DishesModal = ({ item, setModal }) => {
     setTotalPrice(totalPrice + Number(selectedItem.price));
 
     let previousCost = Number(form.finalCost) || 0;
-    let additionCost = Number(selectedItem.portionCost) || 0;
+    let additionCost = Number(selectedItem?.portionCost) || 0;
 
     additionCost = additionCost > previousCost ? 0 : additionCost;
 
@@ -128,13 +126,13 @@ const DishesModal = ({ item, setModal }) => {
     setItemOnScreen({
       name: selectedItem.sideDishes,
       price: selectedItem.price,
-      portionUsed: selectedItem.portionUsed || 0,
-      portionCost: selectedItem.portionCost || 0,
-      costPerUnit: selectedItem.costPerUnit || 0,
-      idSideDish: selectedItem.id || 0,
-      unit: selectedItem.unit || 0,
-      totalCost: selectedItem.totalCost || 0,
-      totalVolume: selectedItem.totalVolume || 0,
+      portionUsed: selectedItem?.portionUsed || 0,
+      portionCost: selectedItem?.portionCost || 0,
+      costPerUnit: selectedItem?.costPerUnit || 0,
+      idSideDish: selectedItem?.id || 0,
+      unit: selectedItem?.unit || 0,
+      totalCost: selectedItem?.totalCost || 0,
+      totalVolume: selectedItem?.totalVolume || 0,
     });
   };
 
@@ -255,7 +253,7 @@ const DishesModal = ({ item, setModal }) => {
     setSideDishesListOnScreen(nameOnScreen); //atualiza a lista de nomes da tela
 
     let previousCost = Number(form.finalCost) || 0;
-    let additionCost = Number(itemSelected.portionCost) || 0;
+    let additionCost = Number(itemSelected?.portionCost) || 0;
     additionCost = additionCost > previousCost ? 0 : additionCost;
 
     const totalCostChange = Number((previousCost - additionCost).toFixed(2));

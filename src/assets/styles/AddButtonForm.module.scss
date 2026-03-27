@@ -13,6 +13,41 @@
 .containerAddButtonForm{
     background-color: $bgColorForm;
     padding: 20px;
+    position: relative; // Ensure icon can be absolute positioned relative to this
+
+    .containerIcon {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+
+        a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+
+            span {
+                font-size: 2rem;
+                color: #ff9800;
+                font-weight: bold;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease-in-out;
+
+                &:hover {
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
     form{
         .hiddenInput {
             display: none !important;

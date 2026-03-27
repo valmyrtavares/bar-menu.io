@@ -148,6 +148,16 @@ function AddButtonForm({
 
   return (
     <div className={style.containerAddButtonForm}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.u9jzavkidgyy#heading=h.mh1tz61eu5kb"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <div className="close-btn">
         {setModalEditButton ? (
           <button onClick={() => setModalEditButton(false)}>X</button>
