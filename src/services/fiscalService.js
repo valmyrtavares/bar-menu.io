@@ -40,14 +40,14 @@ const paymentMethodWay = (method) => {
   let op = {
     DEBIT: '04',
     CREDIT: '03',
-    PIX: '99',
+    PIX: '17', // Atualizado de 99 para 17 (PIX Dinamico) conforme SEFAZ
     CASH: '01',
     // Fallback for old cases or different naming
     debit: '04',
     credite: '03',
-    vr: '03',
+    vr: '11', // Atualizado de 03 para 11 (Vale Refeicao) conforme SEFAZ
     cash: '01',
-    pix: '99',
+    pix: '17', // Atualizado de 99 para 17 (PIX Dinamico) conforme SEFAZ
   };
   return op[method] || '99';
 };
@@ -108,6 +108,7 @@ export const issueAutoNfce = async (order) => {
   const paymentDetails = order.paymentDetails;
 
   nfce.formas_pagamento.push({
+    indicador_pagamento: '0', // 0: Pagamento à Vista
     forma_pagamento: paymentMethodWay(paymentMethod),
     valor_pagamento: order.finalPriceRequest,
     bandeira_operadora: paymentDetails ? paymentDetails.cardBrandCode : '',
