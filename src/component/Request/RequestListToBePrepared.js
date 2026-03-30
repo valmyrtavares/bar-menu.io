@@ -1216,7 +1216,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           ...cleanObject(r),
           sentToKitchen: true,
           parentRequestId: item.id,
-          indexInRequest: idx
+          indexInRequest: r.indexInRequest !== undefined ? r.indexInRequest : idx,
+          status: r.entregue ? 'Pronto' : (r.status || '')
         }))
         : [];
 
@@ -1250,7 +1251,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
 
         // Remove do array de itens do pedido
         const updatedRequest = [...order.request];
-        updatedRequest.splice(itemIndex, 1);
+        const arrayIndexToRemove = updatedRequest.findIndex(i => i.indexInRequest === itemIndex);
+        if (arrayIndexToRemove !== -1) {
+          updatedRequest.splice(arrayIndexToRemove, 1);
+        }
 
         // Atualiza o valor total do pedido
         const newTotal = Math.max(0, (Number(order.finalPriceRequest) || 0) - itemPrice);
@@ -1689,7 +1693,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                         Receita
                       </button>
                       <button
-                        onClick={() => handleRequestItemCancellation(requestsDoneList[itemIndex], recipeIndex)}
+                        onClick={() => handleRequestItemCancellation(requestsDoneList[itemIndex], item.indexInRequest)}
                         className="btn btn-danger"
                         disabled={item.pronto || item.entregue || item.cancelRequested || requestsDoneList[itemIndex].paymentDone}
                         style={{ marginLeft: '10px' }}

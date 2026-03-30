@@ -542,7 +542,7 @@ const RequestModal = () => {
         request: data.request.map((item, idx) => ({
           ...item,
           sentToKitchen: true,
-          sentToKitchenTime: takeDataTime(),
+          sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
           parentRequestId: global.orderBeingEdited ? global.orderBeingEdited.id : null,
           indexInRequest: idx
         })),
@@ -680,7 +680,7 @@ const RequestModal = () => {
           request: previousRequests.map((item, idx) => ({
             ...item,
             sentToKitchen: true,
-            sentToKitchenTime: takeDataTime(),
+            sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
             indexInRequest: idx
           })),
           finalPriceRequest: finalPriceRequest,
@@ -783,13 +783,18 @@ const RequestModal = () => {
             const openOrderDoc = querySnapshot.docs[0];
             const openOrderData = openOrderDoc.data();
 
+            // Calcula o próximo índice disponível para indexInRequest baseando-se no maior índice atual
+            const currentMaxIndex = openOrderData.request && openOrderData.request.length > 0
+              ? Math.max(...openOrderData.request.map((item) => item.indexInRequest || 0))
+              : -1;
+
             // Prepara os novos itens com a flag de envio
             const newItemsPrepared = newItems.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               sentToKitchenTime: takeDataTime(),
               parentRequestId: openOrderDoc.id,
-              indexInRequest: (openOrderData.request ? openOrderData.request.length : 0) + idx
+              indexInRequest: currentMaxIndex + 1 + idx
             }));
 
             // Junta os pratos que já estavam lá com os novos

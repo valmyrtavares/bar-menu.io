@@ -270,8 +270,8 @@ const RequestListToBePrepared = () => {
       if (requestSnap.exists()) {
         const data = requestSnap.data();
         let newStatusValue = false;
-        const updatedRequestItems = data.request.map((item, index) => {
-          if (index === itemIndex) {
+        const updatedRequestItems = data.request.map((item) => {
+          if (item.indexInRequest === itemIndex) {
             newStatusValue = !item[field];
             return { ...item, [field]: newStatusValue, ...extraFields };
           }
@@ -317,7 +317,10 @@ const RequestListToBePrepared = () => {
 
         // Remove do array do pedido
         const updatedRequestItems = [...data.request];
-        updatedRequestItems.splice(itemIndex, 1);
+        const arrayIndexToRemove = updatedRequestItems.findIndex(item => item.indexInRequest === itemIndex);
+        if (arrayIndexToRemove !== -1) {
+          updatedRequestItems.splice(arrayIndexToRemove, 1);
+        }
 
         // Atualiza o valor total
         const newTotal = Math.max(0, (Number(data.finalPriceRequest) || 0) - itemPrice);
@@ -997,7 +1000,7 @@ const RequestListToBePrepared = () => {
                     allItems.push({
                       ...item,
                       parentRequestId: request.id,
-                      indexInRequest: indexInRequest,
+                      indexInRequest: item.indexInRequest,
                       clientName: request.name,
                       tableNumber: request.tableNumber || request.mesa,
                       orderDate: item.sentToKitchenTime || request.dateTime,
