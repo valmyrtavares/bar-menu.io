@@ -1,9 +1,12 @@
 import React, { useState, useContext } from 'react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { db } from '../../config-firebase/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { GlobalContext } from '../../GlobalContext';
 import { Link } from 'react-router-dom';
+import { fetchCategoriesItem } from '../../api/Api';
 import Title from '../title';
 import style from '../../assets/styles/ExcelManagement.module.scss';
 
@@ -26,12 +29,60 @@ const ExcelManagement = () => {
     }
   };
 
-  const downloadTemplate = (key) => {
-    const { headers } = mappings[key];
-    const ws = XLSX.utils.aoa_to_sheet([headers]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Template");
-    XLSX.writeFile(wb, `${key}_template.xlsx`);
+  const downloadTemplate = async (key) => {
+    setLoading(true);
+    setMessage({ type: 'info', text: 'Prerparando template, verificando categorias...' });
+
+    try {
+      const { headers } = mappings[key];
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Template');
+      
+      worksheet.addRow(headers);
+      worksheet.getRow(1).font = { bold: true };
+      
+      worksheet.columns.forEach(column => {
+        column.width = 25;
+      });
+
+      if (key === 'item') {
+        const categories = await fetchCategoriesItem('button');
+        const validCategories = categories && categories.length > 0 ? categories : ['Principal'];
+
+        const hiddenSheetName = 'ValoresOcultos';
+        const hiddenSheet = workbook.addWorksheet(hiddenSheetName, { state: 'hidden' });
+        
+        validCategories.forEach((cat, index) => {
+          hiddenSheet.getCell(`A${index + 1}`).value = cat;
+        });
+
+        let endRow = validCategories.length;
+        if (endRow === 0) endRow = 1;
+
+        for (let rowNum = 2; rowNum <= 1000; rowNum++) {
+          worksheet.getCell(`B${rowNum}`).dataValidation = {
+            type: 'list',
+            allowBlank: true,
+            formulae: [`'${hiddenSheetName}'!$A$1:$A$${endRow}`],
+            showErrorMessage: true,
+            errorStyle: 'stop',
+            errorTitle: 'Categoria Inválida',
+            error: 'Você deve selecionar uma categoria existente a partir do menu suspenso ou edita-la no admin.'
+          };
+        }
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `${key}_template.xlsx`);
+      
+      setMessage({ type: 'success', text: 'Template baixado com sucesso!' });
+    } catch (error) {
+      console.error('Erro ao gerar template:', error);
+      setMessage({ type: 'error', text: 'Erro ao gerar o template.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileUpload = (e, key) => {

@@ -25,24 +25,26 @@
   }
   .main_header.toten nav img {
       left: -10px;
+      top: 34%;
+      transform: translate(36%, -53%);
   }
 
 
   .main_header.orderqueue nav img{
-max-width: 150px;
-transform: translate(337%, -17%);
-top: 20%;
-}
+      max-width: 150px;
+      left: 33%;
+      transform: translate(337%, -17%);
+      top: 20%;
+  }
 
 .main_header nav img {
     position: absolute;
-    top: 34%;
-    left: 33%;
-    transform: translate(36%, -53%);
-    max-width: 64%;
-    max-height: 62%;
-    width: auto;
-    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
 }
 .main_header nav::after{
     content: '';
