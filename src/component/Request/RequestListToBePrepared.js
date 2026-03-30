@@ -1455,6 +1455,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                   <div className={style.requestIdClosed}>
                     <p>Nome: <strong>{firstNameClient(item.name)}</strong></p>
                     {item.tableNumber && <p>Mesa: <strong>{item.tableNumber}</strong></p>}
+                    {item.deliveryAddress && <p style={{ color: 'var(--btn-color)', fontWeight: 'bold' }}>📍 ENTREGA</p>}
                     <p>Pedido: <strong>{item.countRequest}</strong></p>
                     <p>Valor: <strong>R$ {(Number(item.finalPriceRequest) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></p>
                     <p>Status: <strong>{status}</strong></p>
@@ -1479,6 +1480,33 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     <p>
                       <span>Data</span> {item.dateTime}
                     </p>
+                    {item.deliveryAddress && (
+                      <div style={{ backgroundColor: '#fff3cd', padding: '10px', borderRadius: '8px', borderLeft: '5px solid #ff9800', marginTop: '10px', marginBottom: '10px' }}>
+                        <h4 style={{ margin: '0 0 5px 0', color: '#d32f2f' }}>📍 Endereço de Entrega</h4>
+                        <p style={{ margin: '0', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                          <strong>Logradouro:</strong> {item.deliveryAddress.logradouro}, nº {item.deliveryAddress.numero}
+                        </p>
+                        <p style={{ margin: '0', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                          <strong>Bairro:</strong> {item.deliveryAddress.bairro}
+                        </p>
+                        {item.deliveryAddress.complemento && (
+                          <p style={{ margin: '0', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                            <strong>Complemento:</strong> {item.deliveryAddress.complemento}
+                          </p>
+                        )}
+                        <p style={{ margin: '0', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                          <strong>Distância Aproximada:</strong> {item.deliveryAddress.distance > 0 ? `${item.deliveryAddress.distance} km` : 'N/A'}
+                        </p>
+                        <a 
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.deliveryAddress.logradouro + ', ' + item.deliveryAddress.numero + ', ' + item.deliveryAddress.bairro + ', ' + item.deliveryAddress.cep)}`} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          style={{ display: 'inline-block', marginTop: '10px', backgroundColor: '#4285F4', color: 'white', padding: '5px 10px', borderRadius: '4px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.85rem' }}
+                        >
+                          🗺️ Abrir Rota no Maps
+                        </a>
+                      </div>
+                    )}
                     <h4 style={{ textAlign: 'center', margin: '5px 0', borderTop: '1px dashed #ccc', paddingTop: '10px' }}>
                       Itens: R${' '}
                       {(

@@ -33,11 +33,15 @@ import { getAnonymousUser } from '../../Hooks/useEnsureAnonymousUser.js';
 import BillFeedbackPopup from './BillFeedbackPopup';
 import BillSummaryPopup from './BillSummaryPopup';
 import { TRUE } from 'sass';
+import DeliveryAddressPopup from './DeliveryAddressPopup';
 
 const RequestModal = () => {
   const [currentUser, setCurrentUser] = React.useState('');
   const [userData, setUserData] = React.useState(null);
   const [backorder, setBackorder] = React.useState(null);
+  const [showDeliveryPopup, setShowDeliveryPopup] = React.useState(false);
+  const [showDeliveryRegistrationPrompt, setShowDeliveryRegistrationPrompt] = React.useState(false);
+  const [deliveryAddress, setDeliveryAddress] = React.useState(null);
 
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
@@ -456,6 +460,29 @@ const RequestModal = () => {
 
   const isProcessing = React.useRef(false); // Bloqueia múltiplas execuções
 
+  const handleDeliveryClick = () => {
+    if (userData?.name && userData.name !== 'anonimo' && userData.name !== 'anonymous') {
+      setShowDeliveryPopup(true);
+    } else {
+      setShowDeliveryRegistrationPrompt(true);
+    }
+  };
+
+  const handleRegisterForDelivery = async () => {
+    if (userData?.request) {
+      localStorage.setItem('backorder', JSON.stringify(userData.request));
+      try {
+        const userQuery = query(collection(db, 'user'), where('name', '==', 'anonymous'));
+        const querySnapshot = await getDocs(userQuery);
+        if (!querySnapshot.empty) {
+          const anonymousUserDoc = querySnapshot.docs[0];
+          await updateDoc(doc(db, 'user', anonymousUserDoc.id), { request: [] });
+        }
+      } catch (err) {}
+    }
+    logout();
+  };
+
   const sendRequestToKitchen = async (e) => {
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
@@ -539,6 +566,8 @@ const RequestModal = () => {
         done: true,
         // recipe: item.recipe ? item.recipe : {},
         orderDelivered: false,
+        paymentDone: deliveryAddress ? false : undefined,
+        deliveryAddress: deliveryAddress || null,
         request: data.request.map((item, idx) => ({
           ...item,
           sentToKitchen: true,
@@ -855,6 +884,8 @@ const RequestModal = () => {
             idUser: data.id,
             done: true,
             orderDelivered: false,
+            paymentDone: deliveryAddress ? false : undefined,
+            deliveryAddress: deliveryAddress || null,
             request: newItems.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
@@ -1110,6 +1141,26 @@ const RequestModal = () => {
           isSubmitting={isSubmitting}
         />
       )}
+      {showDeliveryRegistrationPrompt && (
+        <DefaultComumMessage
+          msg="A entrega só pode ser feita para clientes cadastrados. Cadastre-se agora para receber seu pedido em casa!"
+          onClose={() => setShowDeliveryRegistrationPrompt(false)}
+          onConfirm={handleRegisterForDelivery}
+          negativeResponse="Cancelar"
+          affirmativeResponse="Cadastrar"
+        />
+      )}
+      {showDeliveryPopup && (
+        <DeliveryAddressPopup 
+          customerName={userData?.name}
+          onClose={() => setShowDeliveryPopup(false)}
+          onSubmit={(address) => {
+            setDeliveryAddress(address);
+            setShowDeliveryPopup(false);
+            alert("Endereço confirmado! Clique em Fazer Pedido (Entrega) para enviar à cozinha.");
+          }}
+        />
+      )}
       {totenMessage && (
         <DefaultComumMessage msg="Acompanhe o seu pedido na Fila de pedidos que está na TV acima" />
       )}
@@ -1145,6 +1196,23 @@ const RequestModal = () => {
           requests={userData.request}
           isSubmitting={isSubmitting}
         />
+      )}
+
+      {(!stylePdv && global.hasClients && Number(global.packageTier) > 1 && !localStorage.getItem('tableNumber')) && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: '10%', marginTop: '10px' }}>
+          <button
+            className="call-waiter-btn"
+            style={{ 
+              width: '150px',
+              opacity: (isSubmitting || !userData || !userData.request || userData.request.length === 0) ? 0.7 : 1,
+              cursor: (isSubmitting || !userData || !userData.request || userData.request.length === 0) ? 'not-allowed' : 'pointer'
+            }}
+            onClick={handleDeliveryClick}
+            disabled={isSubmitting || !userData || !userData.request || userData.request.length === 0}
+          >
+            ENTREGA
+          </button>
+        </div>
       )}
 
       <p
@@ -1244,9 +1312,15 @@ const RequestModal = () => {
         <button
           disabled={isSubmitting || (isTableClient && !allRequestsReady)}
           className="send-request"
-          onClick={isTableClient ? () => setBillPopUpStep(1) : openRegisterPopup}
+          onClick={
+            deliveryAddress
+              ? sendOrderToKitchenOnly
+              : isTableClient
+                ? () => setBillPopUpStep(1)
+                : openRegisterPopup
+          }
         >
-          {isTableClient ? "Pedir a conta" : "Finalizar"}
+          {deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar"}
         </button>
       </div>
 
