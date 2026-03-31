@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { GlobalContext } from '../../GlobalContext.js';
 import '../../assets/styles/resultMessage.css'; // Reusing existing modal styles for overlay
+import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 
 const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
   const [cep, setCep] = useState('');
@@ -10,12 +12,17 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
   const [loadingCep, setLoadingCep] = useState(false);
   const [errorCep, setErrorCep] = useState('');
   const [calculatingDistance, setCalculatingDistance] = useState(false);
+  const [localidade, setLocalidade] = useState('');
+  const [uf, setUf] = useState('');
+  const [popupMsg, setPopupMsg] = useState('');
+  const [isError, setIsError] = useState(false);
 
-  // Simulating restaurant coordinates (can be replaced with real coordinates from settings)
-  // Let's use a standard origin for testing: 
-  const RESTAURANT_LAT = -23.55052; // Ex: Praça da Sé, SP
-  const RESTAURANT_LNG = -46.633309;
-  const MAX_DISTANCE_KM = 2; // Hardcoded requirement for now
+  const global = useContext(GlobalContext);
+  const maxDeliveryDistance = global?.maxDeliveryDistance !== undefined ? global.maxDeliveryDistance : 1;
+
+  // Establishment coordinates from global settings or fallback to defaults
+  const RESTAURANT_LAT = global?.establishmentCoords?.lat || -23.55052;
+  const RESTAURANT_LNG = global?.establishmentCoords?.lng || -46.633309;
 
   // Haversine formula to approximate distance between two lat/lon points
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -55,6 +62,8 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
         } else {
           setLogradouro(data.logradouro);
           setBairro(data.bairro);
+          setLocalidade(data.localidade);
+          setUf(data.uf);
           // Foco no numero
           document.getElementById('delivery-numero').focus();
         }
@@ -69,7 +78,7 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!logradouro || !numero || !bairro) {
-      alert("Por favor, preencha o CEP e o número do endereço.");
+      setPopupMsg("Por favor, preencha o CEP e o número do endereço.");
       return;
     }
 
@@ -77,8 +86,8 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
     
     try {
       // Free rate-limited geocoding via Nominatim
-      // Using generic search for the address
-      const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(logradouro + ', ' + numero + ', ' + bairro)}`;
+      // Using structured parameters (street, city, state, country) to ensure results are in the correct city
+      const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(logradouro + ', ' + numero)}&city=${encodeURIComponent(localidade)}&state=${encodeURIComponent(uf)}&country=Brasil&limit=1`;
       const response = await fetch(searchUrl, {
         headers: { 'User-Agent': 'bar-menu-delivery-app' }
       });
@@ -95,14 +104,16 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
         // Formating distance to 1 decimal place
         distance = Number(distance.toFixed(1));
 
-        if (distance > MAX_DISTANCE_KM) {
-          alert(`Infelizmente entregamos até no máximo ${MAX_DISTANCE_KM}km. Seu endereço está a ${distance}km de distância.`);
+        if (distance > maxDeliveryDistance) {
+          setPopupMsg(`Infelizmente entregamos até no máximo ${maxDeliveryDistance}km. Seu endereço está a ${distance}km de distância.`);
+          setIsError(true);
           isDistanceValid = false;
         }
       } else {
-        // Fallback se não encontrar o endereço exato, assumir 0 pra não travar o fluxo no ambiente de testes local
-        console.warn("Geocoding failed, assuming distance ok for testing.");
-        distance = 0;
+        // Se não encontrar o endereço, não permite prosseguir
+        setPopupMsg("Não conseguimos localizar seu endereço com precisão para validar a distância de entrega. Por favor, verifique o número e o bairro.");
+        setIsError(true);
+        isDistanceValid = false;
       }
 
       setCalculatingDistance(false);
@@ -123,7 +134,7 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
       setCalculatingDistance(false);
       console.error(e);
       // Fallback em caso de falha de rede da API de mapas
-      alert("Erro ao validar área de entrega. Tente novamente.");
+      setPopupMsg("Erro ao validar área de entrega. Tente novamente.");
     }
   };
 
@@ -202,6 +213,17 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
           </div>
         </form>
       </div>
+
+      {popupMsg && (
+        <DefaultComumMessage 
+          msg={popupMsg} 
+          onClose={() => {
+            setPopupMsg('');
+            if (isError) onClose();
+          }} 
+          negativeResponse={isError ? "Entrega Recusada" : "Verificar Endereço"}
+        />
+      )}
     </>
   );
 };

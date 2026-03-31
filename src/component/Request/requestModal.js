@@ -42,6 +42,7 @@ const RequestModal = () => {
   const [showDeliveryPopup, setShowDeliveryPopup] = React.useState(false);
   const [showDeliveryRegistrationPrompt, setShowDeliveryRegistrationPrompt] = React.useState(false);
   const [deliveryAddress, setDeliveryAddress] = React.useState(null);
+  const [showAddressConfirmedMsg, setShowAddressConfirmedMsg] = React.useState(false);
 
   const [item, setItem] = React.useState([]);
   const [modal, setModal] = React.useState(false);
@@ -1157,8 +1158,15 @@ const RequestModal = () => {
           onSubmit={(address) => {
             setDeliveryAddress(address);
             setShowDeliveryPopup(false);
-            alert("Endereço confirmado! Clique em Fazer Pedido (Entrega) para enviar à cozinha.");
+            setShowAddressConfirmedMsg(true);
           }}
+        />
+      )}
+      {showAddressConfirmedMsg && (
+        <DefaultComumMessage 
+          msg="Endereço confirmado! Clique em Fazer Pedido (Entrega) para enviar à cozinha." 
+          onConfirm={() => setShowAddressConfirmedMsg(false)}
+          affirmativeResponse="Continuar"
         />
       )}
       {totenMessage && (

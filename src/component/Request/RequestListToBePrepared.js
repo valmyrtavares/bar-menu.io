@@ -1498,7 +1498,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                           <strong>Distância Aproximada:</strong> {item.deliveryAddress.distance > 0 ? `${item.deliveryAddress.distance} km` : 'N/A'}
                         </p>
                         <a 
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.deliveryAddress.logradouro + ', ' + item.deliveryAddress.numero + ', ' + item.deliveryAddress.bairro + ', ' + item.deliveryAddress.cep)}`} 
+                          href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(global.establishmentCep || '')}&destination=${encodeURIComponent(item.deliveryAddress.logradouro + ', ' + item.deliveryAddress.numero + ', ' + item.deliveryAddress.bairro + ', ' + item.deliveryAddress.cep)}`} 
                           target="_blank" 
                           rel="noreferrer"
                           style={{ display: 'inline-block', marginTop: '10px', backgroundColor: '#4285F4', color: 'white', padding: '5px 10px', borderRadius: '4px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.85rem' }}

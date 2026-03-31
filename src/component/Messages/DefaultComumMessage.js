@@ -11,8 +11,8 @@ const DefaultComumMessage = ({
 }) => {
   return (
     <>
-      <div className="overlay"></div> {/* Overlay para o fundo escuro */}
-      <div className="default-comum-message-container">
+      <div className="overlay" style={{ zIndex: 10000 }}></div> {/* Overlay com z-index alto */}
+      <div className="default-comum-message-container" style={{ zIndex: 10001 }}>
         <h1>Mensagem importante</h1>
         <h3>{msg}</h3>
         <div className="container-button">
