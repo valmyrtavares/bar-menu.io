@@ -94,7 +94,7 @@ const RequestListToBePrepared = () => {
     const unsubscribe = fetchInDataChanges('requests', (data) => {
       // Filter: orders not delivered AND (has table OR is paid)
       let requestList = data.filter((item) =>
-        item.orderDelivered === false && (item.tableNumber || item.mesa || item.paymentDone)
+        item.orderDelivered === false && (item.tableNumber || item.mesa || item.paymentDone || item.deliveryAddress)
       );
       requestList = requestSorter(requestList);
 
@@ -134,7 +134,7 @@ const RequestListToBePrepared = () => {
 
   const fetchUserRequests = async () => {
     let requestList = await getBtnData('requests');
-    requestList = requestList.filter((item) => item.orderDelivered === false);
+    requestList = requestList.filter((item) => item.orderDelivered === false && (item.tableNumber || item.mesa || item.paymentDone || item.deliveryAddress));
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
   };
@@ -1003,6 +1003,7 @@ const RequestListToBePrepared = () => {
                       indexInRequest: item.indexInRequest,
                       clientName: request.name,
                       tableNumber: request.tableNumber || request.mesa,
+                      deliveryAddress: request.deliveryAddress || null,
                       orderDate: item.sentToKitchenTime || request.dateTime,
                     });
                   }
@@ -1030,7 +1031,11 @@ const RequestListToBePrepared = () => {
                       <p style={{ color: 'red', fontWeight: 'bold', fontSize: '1.2rem' }}>⚠️ ITEM CANCELADO PELO GARÇOM</p>
                     )}
                     <p><span>Cliente:</span> {firstNameClient(item.clientName)}</p>
-                    {item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>}
+                    {item.deliveryAddress ? (
+                      <p style={{ backgroundColor: 'red', color: 'white', padding: '5px', borderRadius: '5px', fontWeight: 'bold', display: 'inline-block' }}>📍 Mesa: ENTREGA</p>
+                    ) : (
+                      item.tableNumber && <p><span>Mesa:</span> {item.tableNumber}</p>
+                    )}
                     <p><span>Data:</span> {item.orderDate}</p>
                     <p style={{ fontWeight: 'bold', color: 'var(--title-font-color)' }}><span>Tempo:</span> {formattedTime}</p>
                   </div>

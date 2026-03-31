@@ -32,6 +32,9 @@ export const GlobalStorage = ({ children }) => {
   const [hasRawMaterial, setHasRawMaterial] = React.useState(false);
   const [hasFinancial, setHasFinancial] = React.useState(false);
   const [canConfigToten, setCanConfigToten] = React.useState(false);
+  const [maxDeliveryDistance, setMaxDeliveryDistance] = React.useState(1);
+  const [establishmentCep, setEstablishmentCep] = React.useState('');
+  const [establishmentCoords, setEstablishmentCoords] = React.useState(null);
   const [pdvMobileView, setPdvMobileView] = React.useState('menu'); // 'menu' ou 'orders'
 
   // Listen for global configuration changes
@@ -60,14 +63,28 @@ export const GlobalStorage = ({ children }) => {
         setHasRawMaterial(!!data.hasRawMaterial);
         setHasFinancial(!!data.hasFinancial);
         setCanConfigToten(!!data.canConfigToten);
-      } else {
-        // Se não existir, assume o básico por segurança
+      }
+    });
+
+    const unsubscribeDelivery = onSnapshot(doc(db, 'GlobalConfig', 'deliverySettings'), (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        if (data.maxDeliveryDistance !== undefined) {
+          setMaxDeliveryDistance(Number(data.maxDeliveryDistance));
+        }
+        if (data.establishmentCep !== undefined) {
+          setEstablishmentCep(data.establishmentCep);
+        }
+        if (data.establishmentCoords !== undefined) {
+          setEstablishmentCoords(data.establishmentCoords);
+        }
       }
     });
 
     return () => {
       unsubscribeNfc();
       unsubscribePackage();
+      unsubscribeDelivery();
     };
   }, []);
 
@@ -118,6 +135,9 @@ export const GlobalStorage = ({ children }) => {
         setPackageTier,
         pdvMobileView,
         setPdvMobileView,
+        maxDeliveryDistance,
+        establishmentCep,
+        establishmentCoords,
       }}
     >
       {children}
