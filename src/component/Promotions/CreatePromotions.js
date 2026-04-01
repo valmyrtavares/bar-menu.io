@@ -25,15 +25,19 @@ const CreatePromotions = () => {
     minimumValue: '',
     reusable: '',
     rules: '',
+    promotionalItemId: '',
+    promotionalItemName: '',
   });
 
   const [selectedPromotion, setSelectedPromotion] = useState('');
   const [promotions, setPromotions] = useState([]);
+  const [items, setItems] = useState([]);
   const [voucherValue, setVoucherValue] = useState(0);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   React.useEffect(() => {
     fetchPromotions();
+    fetchItems();
     fetchVoucherValue();
   }, []);
 
@@ -51,6 +55,11 @@ const CreatePromotions = () => {
     setPromotions(data);
   };
 
+  const fetchItems = async () => {
+    const data = await getBtnData('item');
+    setItems(data);
+  };
+
   React.useEffect(() => {
     if (selectedPromotion) {
       const promotion = promotions.find(
@@ -64,12 +73,29 @@ const CreatePromotions = () => {
         minimumValue: promotion.minimumValue,
         reusable: promotion.reusable,
         rules: promotion.rules,
+        promotionalItemId: promotion.promotionalItemId || '',
+        promotionalItemName: promotion.promotionalItemName || '',
       });
     }
   }, [selectedPromotion]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Prevent negative values for discount
+    if (name === 'discount' && value < 0) return;
+
+    // Special handling for promotional item select to save both ID and Name
+    if (name === 'promotionalItemId') {
+      const selectedItem = items.find(item => item.id === value);
+      setFormData({
+        ...formData,
+        promotionalItemId: value,
+        promotionalItemName: selectedItem ? selectedItem.title : '',
+      });
+      return;
+    }
+
     setFormData({
       ...formData,
       [name]: value,
@@ -98,6 +124,8 @@ const CreatePromotions = () => {
           minimumValue: '',
           reusable: '',
           rules: '',
+          promotionalItemId: '',
+          promotionalItemName: '',
         });
       } catch (error) {
         console.error('Erro ao excluir promoção: ', error);
@@ -146,6 +174,8 @@ const CreatePromotions = () => {
       minimumValue: '',
       reusable: '',
       rules: '',
+      promotionalItemId: '',
+      promotionalItemName: '',
     });
   };
 
@@ -179,16 +209,39 @@ const CreatePromotions = () => {
         </div>
         <div>
           <label title="O valor fixo que será subtraído do total do pedido.">
-            Desconto:
+            {formData.promotionalItemId ? 'Novo valor do produto com desconto:' : 'Desconto:'}
           </label>
           <input
-            type="text"
+            type="number"
             name="discount"
+            min="0"
+            step="0.01"
             value={formData.discount}
             onChange={handleChange}
-            title="O valor fixo que será subtraído do total do pedido."
+            title="O valor fixo que será subtraído do total ou o novo preço do item selecionado."
           />
         </div>
+
+        <div className={styles.orSeparator}>ou</div>
+
+        <div className={styles.promotionalItemField}>
+          <label title="Escolha um item específico para esta promoção. Se selecionado, o valor acima será o preço final deste item.">
+            Produto da Promoção:
+          </label>
+          <select
+            name="promotionalItemId"
+            value={formData.promotionalItemId}
+            onChange={handleChange}
+          >
+            <option value="">Nenhum (Desconto Global)</option>
+            {items && items.length > 0 && items.map((item, index) => (
+              <option key={index} value={item.id}>
+                {item.title} (R$ {item.price})
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className={styles.dateField}>
           <div>
             <label title="Define o período de validade. Se hoje não estiver entre essas datas, a promoção não aparecerá no PDV.">
@@ -273,7 +326,7 @@ const CreatePromotions = () => {
         </div>
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.button}>
-            {selectedPromotion ? 'Editar Promoção' : 'Criar Promoção'}
+            {selectedPromotion ? 'Salvar novas edições' : 'Criar Promoção'}
           </button>
           {selectedPromotion && (
             <button

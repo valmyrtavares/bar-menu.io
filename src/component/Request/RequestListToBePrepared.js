@@ -57,6 +57,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [categories, setCategories] = React.useState([]);
   const [promotions, setPromotions] = React.useState([]);
   const [selectedPromotion, setSelectedPromotion] = React.useState('');
+  const [activePromoIndex, setActivePromoIndex] = React.useState(null);
   const [benefitedClient, setBenefitedClient] = React.useState([]);
   const [messagePromotionPopup, setMessagePromotionPopup] =
     React.useState(false);
@@ -152,7 +153,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             }
           }
         }
-        fetchUserRequests();
+        console.log('Entregas atualizadas com sucesso');
       } catch (err) {
         console.error("Erro ao atualizar entregas", err);
       }
@@ -193,8 +194,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       });
     });
 
-    fetchData();
-
+    fetchData(); // NOVO: Garante que as promoções sejam carregadas ao montar o componente
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
@@ -383,11 +383,38 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         getBtnData('Promotions'),
         getBtnData('BenefitedCustomer'),
       ]);
-      const today = new Date();
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
       const promotionsFilter = promotionsData.filter((promotion) => {
-        const startDate = new Date(promotion.startDate);
-        const finalDate = new Date(promotion.finalDate);
-        return today >= startDate && today < finalDate;
+        if (!promotion?.startDate || !promotion?.finalDate || 
+            typeof promotion.startDate !== 'string' || typeof promotion.finalDate !== 'string') {
+          return false;
+        }
+
+        try {
+          const startParts = promotion.startDate.split('-');
+          const finalParts = promotion.finalDate.split('-');
+          
+          if (startParts.length !== 3 || finalParts.length !== 3) return false;
+
+          const startDate = new Date(
+            Number(startParts[0]),
+            Number(startParts[1]) - 1,
+            Number(startParts[2])
+          );
+          const finalDate = new Date(
+            Number(finalParts[0]),
+            Number(finalParts[1]) - 1,
+            Number(finalParts[2])
+          );
+
+          return today >= startDate && today <= finalDate;
+        } catch (e) {
+          console.error('Erro ao processar data da promoção:', e);
+          return false;
+        }
       });
 
       setPromotions(promotionsFilter);
@@ -822,12 +849,21 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
 
   // disparada quando o usuário seleciona uma promoção
   const handleSelectChange = async (e, item) => {
-    const index = Number(e.target.value);
-    const currentPromotion = promotions[index]; // Obtém a promoção selecionada
-    const { title, reusable, rules, discount, minimumValue } = currentPromotion; // Extrai os dados da promoção
+    const { value } = e.target;
+    
+    // GATILHO LIMPO: Reseta o select imediatamente para "Promoções" assim que é clicado.
+    // Isso garante que o evento onChange dispare sempre no próximo clique.
+    setSelectedPromotion(''); 
+    setActivePromoIndex(value); // Salva o índice em um estado separado para processamento
+    
+    if (!value) return; 
+    
     setCurrentRequest(item);
-
-    setSelectedPromotion(index);
+    
+    const currentPromotion = promotions[value];
+    if (!currentPromotion) return; // Segurança extra // Obtém a promoção selecionada
+    const { title, reusable, rules, discount, minimumValue, promotionalItemId, promotionalItemName } = currentPromotion; // Extrai os dados da promoção
+    setCurrentRequest(item);
     // Objeto para ser enviado pela primeira vez
     const benefitedClientObj = {
       name: item.name,
@@ -856,16 +892,34 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       if (minimumValue) {
         acumulativePurchase(item, benefitedClientObj, currentPromotion);
       } else {
-        setTextPromotion(
-          `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `,
-        );
+        // Validação de disponibilidade do item promocional se houver
+        if (promotionalItemId) {
+          try {
+            const itemPromo = await getOneItemColleciton('item', promotionalItemId);
+            if (!itemPromo || itemPromo.display === false) {
+              setTextPromotion(`Infelizmente o produto da promoção (${promotionalItemName}) está indisponível no momento.`);
+              setAddPromotion(false);
+              setMessagePromotionPopup(true);
+              setSelectedPromotion('');
+              return;
+            }
+          } catch (error) {
+            console.error("Erro ao verificar item da promoção", error);
+          }
+        }
+
+        const promoMsg = promotionalItemId 
+          ? `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name}, acrescentando o item ${promotionalItemName} por R$ ${discount || 0}. As regras são:${rules} `
+          : `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `;
+        
+        setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
           nomeDaPromocao: title,
           discount: currentPromotion.discount,
           listaDeProdutos: item.request.map((req) => req.name),
         });
-        setSelectedPromotion(''); // Limpa o select
+        // setSelectedPromotion(''); // REMOVIDO: Limpar apenas após confirmar no modal
         setBenefitedClientEdited(benefitedClientObj); //Guarda o objeto para ser enviado de forma global
         setOperation('add'); // Define a operação como adição
       }
@@ -886,7 +940,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
               (item) => item.nomeDaPromocao === title,
             )?.listaDeProdutos || [];
 
-          setSelectedPromotion('');
+          // setSelectedPromotion(''); // REMOVIDO
           setTextPromotion(
             `O cliente ${benefitedClientFinded.name
             } já usou a promoção ${title} na data ${item.dateTime
@@ -919,13 +973,13 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       listaDeProdutos: item.request.map((req) => req.name),
     });
 
-    setMessagePromotionPopup(true);
-    setAddPromotion(true); // Habilita o botão de continuar
-    setTextPromotion(
-      `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
-    );
+    const promoMsg = currentPromotion.promotionalItemId 
+      ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+      : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+    
+    setTextPromotion(promoMsg);
     setCurrentDiscount(currentPromotion.discount);
-    setSelectedPromotion('');
+    // setSelectedPromotion(''); // REMOVIDO
     setOperation('edit');
     setBenefitedClientEdited(benefitedClientFinded);
     if (currentPromotion.minimumValue) {
@@ -936,15 +990,42 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   };
 
   const addEditBenefitedClient = async () => {
+    const selectedPromo = promotions[activePromoIndex];
+    
     if (operation === 'add') {
-      const newFinalPriceDescounted = //calculate the new final price with discount
-        Number(currentRequest.finalPriceRequest) -
-        Number(benefitedClientEdited.benefitUsed[0].discount);
-      if (newFinalPriceDescounted < 0) {
-        currentRequest.finalPriceRequest = 0; //update the final price in firebase
+      let finalPriceRequest = Number(currentRequest.finalPriceRequest);
+      
+      if (selectedPromo?.promotionalItemId) {
+        // Lógica para Adicionar Item Promocional
+        try {
+          const itemPromo = await getOneItemColleciton('item', selectedPromo.promotionalItemId);
+          if (!currentRequest.request) currentRequest.request = [];
+          
+          // Define o próximo índice disponível
+          const nextIndex = currentRequest.request.length > 0 
+            ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
+            : 0;
+
+          const newPromoItem = {
+            ...itemPromo,
+            price: Number(selectedPromo.discount || 0),
+            promotional: true,
+            entregue: false,
+            deliveredByWaiter: false,
+            indexInRequest: nextIndex
+          };
+          
+          currentRequest.request.push(newPromoItem);
+          finalPriceRequest += Number(newPromoItem.price);
+        } catch (error) {
+          console.error("Erro ao adicionar item promocional", error);
+        }
       } else {
-        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        // Lógica de Desconto Global
+        finalPriceRequest -= Number(selectedPromo.discount || 0);
       }
+
+      currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
       if (benefitedClientEdited.score) {
         benefitedClientEdited.score = 0.1;
       }
@@ -971,16 +1052,39 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         benefitedClientEdited,
       );
       console.log('Document written with ID: ', docRef.id);
-      fetchData();
-      fetchUserRequests();
     } else if (operation === 'edit') {
-      const newFinalPriceDescounted =
-        Number(currentRequest.finalPriceRequest) - Number(currentDiscount);
-      if (newFinalPriceDescounted < 0) {
-        currentRequest.finalPriceRequest = 0; //update the final price in firebase
+      let finalPriceRequest = Number(currentRequest.finalPriceRequest);
+
+      if (selectedPromo?.promotionalItemId) {
+        // Lógica para Adicionar Item Promocional
+        try {
+          const itemPromo = await getOneItemColleciton('item', selectedPromo.promotionalItemId);
+          if (!currentRequest.request) currentRequest.request = [];
+          
+          const nextIndex = currentRequest.request.length > 0 
+            ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
+            : 0;
+
+          const newPromoItem = {
+            ...itemPromo,
+            price: Number(selectedPromo.discount || 0),
+            promotional: true,
+            entregue: false,
+            deliveredByWaiter: false,
+            indexInRequest: nextIndex
+          };
+          
+          currentRequest.request.push(newPromoItem);
+          finalPriceRequest += Number(newPromoItem.price);
+        } catch (error) {
+          console.error("Erro ao adicionar item promocional", error);
+        }
       } else {
-        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        // Lógica de Desconto Global
+        finalPriceRequest -= Number(selectedPromo.discount || 0);
       }
+
+      currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
 
       if (benefitedClientEdited.score) {
         benefitedClientEdited.score = 0.1;
@@ -1008,9 +1112,11 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
       console.log('Document updated with ID: ', benefitedClientEdited.id);
-      fetchData();
-      fetchUserRequests();
     }
+    
+    // NOVO: Limpar e fechar ao final da operação
+    setSelectedPromotion('');
+    setMessagePromotionPopup(false);
   };
 
   const acumulativePurchase = (item, benefitedClientObj, currentPromotion) => {
@@ -1024,16 +1130,18 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         //benefitedClientObj.score = 0.1;
         setMessagePromotionPopup(true);
         setAddPromotion(true);
-        setTextPromotion(
-          `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
-        );
+        const promoMsg = currentPromotion.promotionalItemId 
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+        
+        setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
           nomeDaPromocao: currentPromotion.title,
           discount: currentPromotion.discount,
           listaDeProdutos: item.request.map((req) => req.name),
         });
-        setSelectedPromotion('');
+        // setSelectedPromotion(''); // REMOVIDO
         setCurrentDiscount(currentPromotion.discount);
         setOperation('edit');
         setBenefitedClientEdited(benefitedClientObj);
@@ -1056,7 +1164,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
-      setSelectedPromotion('');
+      // setSelectedPromotion(''); // REMOVIDO
       if (benefitedClientObj.benefitUsed.length === 1) {
         addBenefitedClientWithNoDescount(benefitedClientObj, 'add');
       } else {
@@ -1075,10 +1183,11 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       //benefitedClientObj.score = 0.1;
       setMessagePromotionPopup(true);
       setAddPromotion(true);
-      setTextPromotion(
-        `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `,
-      );
-      setSelectedPromotion('');
+      const promoMsg = currentPromotion.promotionalItemId 
+        ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+        : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+      
+      setTextPromotion(promoMsg);
       setOperation('add');
       setBenefitedClientEdited(benefitedClientObj);
     } else {
@@ -1101,7 +1210,6 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         }. As regras são:${currentPromotion.rules} `,
       );
       setAddPromotion(false);
-      setSelectedPromotion('');
 
       console.log(benefitedClientObj);
       if (benefitedClientObj.benefitUsed.length === 1) {
@@ -1649,7 +1757,9 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                   {ShowDefaultMessage && selectedRequestId === item.id && (
                     <DefaultComumMessage
                       msg="Você está prestes a excluir esse pedido"
-                      onClose={closeModal}
+                      onClose={() => {
+                        setShowDefaultMessage(false);
+                      }}
                       onConfirm={() =>
                         handleDeleteRequest(selectedRequestId)
                       }

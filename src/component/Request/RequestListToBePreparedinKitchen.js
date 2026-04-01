@@ -621,7 +621,7 @@ const RequestListToBePrepared = () => {
   const handleSelectChange = async (e, item) => {
     const index = Number(e.target.value);
     const currentPromotion = promotions[index]; // Obtém a promoção selecionada
-    const { title, reusable, rules, discount, minimumValue } = currentPromotion; // Extrai os dados da promoção
+    const { title, reusable, rules, discount, minimumValue, promotionalItemId, promotionalItemName } = currentPromotion; // Extrai os dados da promoção
     setCurrentRequest(item);
 
     setSelectedPromotion(index);
@@ -653,9 +653,27 @@ const RequestListToBePrepared = () => {
       if (minimumValue) {
         acumulativePurchase(item, benefitedClientObj, currentPromotion);
       } else {
-        setTextPromotion(
-          `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `
-        );
+        // Validação de disponibilidade do item promocional se houver
+        if (promotionalItemId) {
+          try {
+            const itemPromo = await getOneItemColleciton('item', promotionalItemId);
+            if (!itemPromo || itemPromo.display === false) {
+              setTextPromotion(`Infelizmente o produto da promoção (${promotionalItemName}) está indisponível no momento.`);
+              setAddPromotion(false);
+              setMessagePromotionPopup(true);
+              setSelectedPromotion('');
+              return;
+            }
+          } catch (error) {
+            console.error("Erro ao verificar item da promoção", error);
+          }
+        }
+
+        const promoMsg = promotionalItemId 
+          ? `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name}, acrescentando o item ${promotionalItemName} por R$ ${discount || 0}. As regras são:${rules} `
+          : `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `;
+        
+        setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
           nomeDaPromocao: title,
@@ -716,11 +734,11 @@ const RequestListToBePrepared = () => {
       listaDeProdutos: item.request.map((req) => req.name),
     });
 
-    setMessagePromotionPopup(true);
-    setAddPromotion(true); // Habilita o botão de continuar
-    setTextPromotion(
-      `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
-    );
+    const promoMsg = currentPromotion.promotionalItemId 
+      ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+      : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+    
+    setTextPromotion(promoMsg);
     setCurrentDiscount(currentPromotion.discount);
     setSelectedPromotion('');
     setOperation('edit');
@@ -733,15 +751,41 @@ const RequestListToBePrepared = () => {
   };
 
   const addEditBenefitedClient = async () => {
+    const selectedPromo = promotions[selectedPromotion];
+    
     if (operation === 'add') {
-      const newFinalPriceDescounted = //calculate the new final price with discount
-        Number(currentRequest.finalPriceRequest) -
-        Number(benefitedClientEdited.benefitUsed[0].discount);
-      if (newFinalPriceDescounted < 0) {
-        currentRequest.finalPriceRequest = 0; //update the final price in firebase
+      let finalPriceRequest = Number(currentRequest.finalPriceRequest);
+      
+      if (selectedPromo?.promotionalItemId) {
+        // Lógica para Adicionar Item Promocional
+        try {
+          const itemPromo = await getOneItemColleciton('item', selectedPromo.promotionalItemId);
+          if (!currentRequest.request) currentRequest.request = [];
+          
+          const nextIndex = currentRequest.request.length > 0 
+            ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
+            : 0;
+
+          const newPromoItem = {
+            ...itemPromo,
+            price: Number(selectedPromo.discount || 0),
+            promotional: true,
+            entregue: false,
+            deliveredByWaiter: false,
+            indexInRequest: nextIndex
+          };
+          
+          currentRequest.request.push(newPromoItem);
+          finalPriceRequest += Number(newPromoItem.price);
+        } catch (error) {
+          console.error("Erro ao adicionar item promocional", error);
+        }
       } else {
-        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        // Lógica de Desconto Global
+        finalPriceRequest -= Number(benefitedClientEdited.benefitUsed[0].discount);
       }
+
+      currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
       if (benefitedClientEdited.score) {
         benefitedClientEdited.score = 0.1;
       }
@@ -768,16 +812,39 @@ const RequestListToBePrepared = () => {
         benefitedClientEdited
       );
       console.log('Document written with ID: ', docRef.id);
-      fetchData();
-      fetchUserRequests();
     } else if (operation === 'edit') {
-      const newFinalPriceDescounted =
-        Number(currentRequest.finalPriceRequest) - Number(currentDiscount);
-      if (newFinalPriceDescounted < 0) {
-        currentRequest.finalPriceRequest = 0; //update the final price in firebase
+      let finalPriceRequest = Number(currentRequest.finalPriceRequest);
+
+      if (selectedPromo?.promotionalItemId) {
+        // Lógica para Adicionar Item Promocional
+        try {
+          const itemPromo = await getOneItemColleciton('item', selectedPromo.promotionalItemId);
+          if (!currentRequest.request) currentRequest.request = [];
+          
+          const nextIndex = currentRequest.request.length > 0 
+            ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
+            : 0;
+
+          const newPromoItem = {
+            ...itemPromo,
+            price: Number(selectedPromo.discount || 0),
+            promotional: true,
+            entregue: false,
+            deliveredByWaiter: false,
+            indexInRequest: nextIndex
+          };
+          
+          currentRequest.request.push(newPromoItem);
+          finalPriceRequest += Number(newPromoItem.price);
+        } catch (error) {
+          console.error("Erro ao adicionar item promocional", error);
+        }
       } else {
-        currentRequest.finalPriceRequest = newFinalPriceDescounted; //update the final price in firebase
+        // Lógica de Desconto Global
+        finalPriceRequest -= Number(currentDiscount);
       }
+
+      currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
 
       if (benefitedClientEdited.score) {
         benefitedClientEdited.score = 0.1;
@@ -805,8 +872,6 @@ const RequestListToBePrepared = () => {
       const docRef = doc(db, 'BenefitedCustomer', benefitedClientEdited.id);
       await updateDoc(docRef, benefitedClientEdited);
       console.log('Document updated with ID: ', benefitedClientEdited.id);
-      fetchData();
-      fetchUserRequests();
     }
   };
 
@@ -821,9 +886,11 @@ const RequestListToBePrepared = () => {
         //benefitedClientObj.score = 0.1;
         setMessagePromotionPopup(true);
         setAddPromotion(true);
-        setTextPromotion(
-          `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
-        );
+        const promoMsg = currentPromotion.promotionalItemId 
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+        
+        setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
           date: item.dateTime,
           nomeDaPromocao: currentPromotion.title,
@@ -872,9 +939,11 @@ const RequestListToBePrepared = () => {
       //benefitedClientObj.score = 0.1;
       setMessagePromotionPopup(true);
       setAddPromotion(true);
-      setTextPromotion(
-        `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `
-      );
+      const promoMsg = currentPromotion.promotionalItemId 
+        ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
+        : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+      
+      setTextPromotion(promoMsg);
       setSelectedPromotion('');
       setOperation('add');
       setBenefitedClientEdited(benefitedClientObj);
