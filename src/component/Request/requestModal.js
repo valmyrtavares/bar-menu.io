@@ -719,37 +719,52 @@ const RequestModal = () => {
       if (pdv === true && global.pdvRequest) {
         if (isProcessing.current) return;
         isProcessing.current = true;
-        const data = await getOneItemColleciton('user', currentUserNew.id);
-        addRequestUser(data);
-        global.setPdvRequest(false);
-        setTimeout(() => {
+        try {
+          const data = await getOneItemColleciton('user', currentUserNew.id);
+          await addRequestUser(data);
+          global.setPdvRequest(false);
+        } catch (err) {
+          console.error('Erro no envio PDV:', err);
+        } finally {
           isProcessing.current = false;
-        }, 2000);
+        }
         return;
       } else if (isToten && isToten === true) {
         if (isProcessing.current) return;
         isProcessing.current = true;
-        addRequestUserToten(currentUserNew.id);
-        setTotenMessage(true);
-        setTimeout(() => {
+        try {
+          await addRequestUserToten(currentUserNew.id);
+          setTotenMessage(true);
+          // O Toten tem um tempo de espera visual antes de voltar ao início
+          await new Promise(resolve => setTimeout(resolve, 5000));
           setTotenMessage(false);
           navigate('/');
+        } catch (err) {
+          console.error('Erro no envio Toten:', err);
+        } finally {
           isProcessing.current = false;
-        }, 5000);
+        }
         return;
       } else if (warningMsg) {
         if (isProcessing.current) return;
+        if (isSubmitting) return;
+
         isProcessing.current = true;
-        const data = await getOneItemColleciton('user', currentUserNew.id);
-        if (data) {
-          if (isSubmitting) return;
-          setIsSubmitting(true);
-          addRequestUser(data);
-        }
-        setTimeout(() => {
+        setIsSubmitting(true);
+
+        try {
+          const data = await getOneItemColleciton('user', currentUserNew.id);
+          if (data) {
+            await addRequestUser(data);
+            // Fechamos o modal ANTES de liberar o botão, garantindo que o usuário não clique de novo
+            setWarningMsg(false);
+          }
+        } catch (err) {
+          console.error('Erro no envio Mobile:', err);
+        } finally {
           setIsSubmitting(false);
           isProcessing.current = false;
-        }, 2000);
+        }
       } else {
         setWarningMsg(true);
       }
