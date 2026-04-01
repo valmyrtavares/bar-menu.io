@@ -1132,8 +1132,12 @@ const RequestListToBePrepared = () => {
                       Pronto
                     </button>
                     <button
-                      disabled={item.entregue || item.cancelRequested}
+                      disabled={item.entregue || item.cancelRequested || !item.pronto}
                       className={item.entregue ? style.done : style.pendent}
+                      style={{ 
+                        opacity: (!item.pronto && !item.entregue) ? 0.5 : 1,
+                        cursor: (!item.pronto && !item.entregue) ? 'not-allowed' : 'pointer'
+                      }}
                       onClick={() => {
                         const duration = currentTime - parseDate(item.orderDate);
                         const formattedDurationStr = `tempo levado: ${formatDuration(duration)}`;
