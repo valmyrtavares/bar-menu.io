@@ -65,16 +65,12 @@ const RequestModal = () => {
   const [includeServiceCharge, setIncludeServiceCharge] = React.useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
   const [activeRequestDocId, setActiveRequestDocId] = React.useState(null);
-  const [promotions, setPromotions] = React.useState([]);
-  const [selectedPromotion, setSelectedPromotion] = React.useState('');
-  const [activePromoIndex, setActivePromoIndex] = React.useState(null);
-  const [messagePromotionPopup, setMessagePromotionPopup] = React.useState(false);
-  const [textPromotion, setTextPromotion] = React.useState('');
-  const [AddPromotion, setAddPromotion] = React.useState(false);
   const [benefitedClient, setBenefitedClient] = React.useState([]);
   const [benefitedClientEdited, setBenefitedClientEdited] = React.useState({});
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
+  const [manualTableNumber, setManualTableNumber] = React.useState('');
+  const [tableAssignedInThisSession, setTableAssignedInThisSession] = React.useState(false);
 
   const syncServiceChargeToFirestore = async (isEnabled) => {
     try {
@@ -347,32 +343,6 @@ const RequestModal = () => {
   }, [currentUser]);
 
   React.useEffect(() => {
-    const fetchPromos = async () => {
-      const promosData = await getBtnData('promotions');
-      const benefited = await getBtnData('BenefitedCustomer');
-      
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      const filteredPromos = promosData.filter((promotion) => {
-        if (!promotion.startDate || !promotion.finalDate) return false;
-        const startParts = promotion.startDate.split('-');
-        const finalParts = promotion.finalDate.split('-');
-        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-        const finalDate = new Date(finalParts[0], finalParts[1] - 1, finalParts[2]);
-        return today >= startDate && today <= finalDate;
-      });
-
-      setPromotions(filteredPromos);
-      setBenefitedClient(benefited);
-    };
-    
-    if (stylePdv) {
-      fetchPromos();
-    }
-  }, [stylePdv]);
-
-  React.useEffect(() => {
     setIsSubmitting(false); // Reabilita o botão quando a rota mudar
   }, [location]);
 
@@ -439,12 +409,6 @@ const RequestModal = () => {
         .map((item) => item.finalPrice || item.price || 0)
         .reduce((ac, el) => ac + el, 0);
 
-      // Aplica desconto acumulado se houver
-      const selectedPromo = promotions[selectedPromotion];
-      if (!selectedPromo?.promotionalItemId && (operation === 'edit' || operation === 'add')) {
-          finalPrice -= Number(selectedPromo?.discount || 0);
-      }
-
       setFinalPriceRequest(Number(finalPrice.toFixed(2)));
     }
   };
@@ -460,190 +424,6 @@ const RequestModal = () => {
       setItem(item);
       setModal(true);
     }
-  };
-
-  // Promoções Logic
-  const handleSelectChange = async (e) => {
-    const { value } = e.target;
-    
-    // GATILHO LIMPO: Reseta o select imediatamente para "Promoções" assim que é clicado.
-    // Isso garante que o evento onChange dispare sempre no próximo clique.
-    setSelectedPromotion(''); 
-    
-    if (!value) return; 
-    
-    const indexStr = Number(value);
-    const currentPromotion = promotions[indexStr];
-    if (!currentPromotion) return;
-    
-    const { title, reusable, rules, discount, minimumValue, promotionalItemId, promotionalItemName } = currentPromotion;
-    setActivePromoIndex(indexStr); // Garante que o índice numérico seja salvo
-
-    const benefitedClientObj = {
-      name: userData.name,
-      idUser: userData.id,
-      promotionTitle: [title],
-      dateTime: takeDataTime(),
-      currentFinalPriceRequest: finalPriceRequest,
-      benefitUsed: [],
-    };
-
-    const benefitedClientFinded = benefitedClient.find(
-      (client) => client.idUser === userData.id
-    );
-
-    if (!benefitedClientFinded) {
-      setMessagePromotionPopup(true);
-      setAddPromotion(true);
-      if (minimumValue) {
-        acumulativePurchase(benefitedClientObj, currentPromotion);
-      } else {
-        if (promotionalItemId) {
-          try {
-            const itemPromo = await getOneItemColleciton('item', promotionalItemId);
-            if (!itemPromo || itemPromo.display === false) {
-              setTextPromotion(`Infelizmente o produto da promoção (${promotionalItemName}) está indisponível no momento.`);
-              setAddPromotion(false);
-              setMessagePromotionPopup(true);
-              // setSelectedPromotion(''); // REMOVIDO
-              return;
-            }
-          } catch (error) {
-            console.error("Erro ao verificar item da promoção", error);
-          }
-        }
-
-        const promoMsg = promotionalItemId 
-          ? `Você está prestes a resgatar a promoção ${title} para o cliente ${userData.name}, acrescentando o item ${promotionalItemName} por R$ ${discount || 0}. As regras são:${rules} `
-          : `Você está prestes a resgatar a promoção ${title} para o cliente ${userData.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `;
-        
-        setTextPromotion(promoMsg);
-        benefitedClientObj.benefitUsed.push({
-          date: takeDataTime(),
-          nomeDaPromocao: title,
-          discount: discount,
-          listaDeProdutos: userData.request.map((req) => req.name),
-        });
-        setBenefitedClientEdited(benefitedClientObj);
-        setOperation('add');
-      }
-      return;
-    } else {
-      if (reusable === 'false') {
-        const promotionFinded = benefitedClientFinded.promotionTitle.find(
-          (item) => item === title
-        );
-        if (promotionFinded) {
-          setAddPromotion(false);
-          setMessagePromotionPopup(true);
-          // setSelectedPromotion(''); // REMOVIDO
-          setTextPromotion(`O cliente ${userData.name} já usou a promoção ${title}.`);
-          return;
-        }
-      }
-      redeemingBenefits(benefitedClientFinded, currentPromotion);
-    }
-  };
-
-  const redeemingBenefits = (benefitedClientFinded, currentPromotion) => {
-    if (currentPromotion.minimumValue) {
-      acumulativePurchase(benefitedClientFinded, currentPromotion);
-      return;
-    }
-    setAddPromotion(true);
-    
-    benefitedClientFinded.benefitUsed.push({
-      date: takeDataTime(),
-      nomeDaPromocao: currentPromotion.title,
-      discount: currentPromotion.discount,
-      listaDeProdutos: userData.request.map((req) => req.name),
-    });
-
-    const promoMsg = currentPromotion.promotionalItemId 
-      ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${userData.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
-      : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${userData.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
-    
-    setTextPromotion(promoMsg);
-    setCurrentDiscount(currentPromotion.discount);
-    setMessagePromotionPopup(true);
-    setOperation('edit');
-    setBenefitedClientEdited(benefitedClientFinded);
-  };
-
-  const acumulativePurchase = (benefitedClientObj, currentPromotion) => {
-    const currentScore = benefitedClientObj.score || 0;
-    const totalWithNew = currentScore + finalPriceRequest;
-
-    if (totalWithNew >= currentPromotion.minimumValue) {
-      setMessagePromotionPopup(true);
-      setAddPromotion(true);
-      const promoMsg = currentPromotion.promotionalItemId 
-        ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${userData.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
-        : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${userData.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
-      
-      setTextPromotion(promoMsg);
-      benefitedClientObj.benefitUsed.push({
-        date: takeDataTime(),
-        nomeDaPromocao: currentPromotion.title,
-        discount: currentPromotion.discount,
-        listaDeProdutos: userData.request.map((req) => req.name),
-      });
-      setBenefitedClientEdited(benefitedClientObj);
-      setOperation(benefitedClientObj.id ? 'edit' : 'add');
-    } else {
-      setMessagePromotionPopup(true);
-      setAddPromotion(false);
-      setTextPromotion(`O valor acumulado (${totalWithNew}) ainda é inferior ao mínimo (${currentPromotion.minimumValue}).`);
-      benefitedClientObj.score = totalWithNew;
-      addBenefitedClientWithNoDescount(benefitedClientObj, benefitedClientObj.id ? 'edit' : 'add');
-    }
-  };
-
-  const addBenefitedClientWithNoDescount = async (benefitedClientObj, action) => {
-    if (action === 'edit') {
-      await updateDoc(doc(db, 'BenefitedCustomer', benefitedClientObj.id), benefitedClientObj);
-    } else {
-      await addDoc(collection(db, 'BenefitedCustomer'), benefitedClientObj);
-    }
-  };
-
-  const applyPromotionToFirestore = async () => {
-    const selectedPromo = promotions[activePromoIndex];
-    const userDocRef = doc(db, 'user', currentUser);
-    
-    if (selectedPromo?.promotionalItemId) {
-      try {
-        const itemPromo = await getOneItemColleciton('item', selectedPromo.promotionalItemId);
-        const updatedRequest = [...userData.request];
-        const nextIndex = updatedRequest.length > 0 
-          ? Math.max(...updatedRequest.map(r => r.indexInRequest ?? 0)) + 1 
-          : 0;
-
-        const newPromoItem = {
-          ...itemPromo,
-          finalPrice: Number(selectedPromo.discount || 0),
-          promotional: true,
-          status: 'pendente',
-          indexInRequest: nextIndex,
-          sentToKitchen: false
-        };
-        
-        updatedRequest.push(newPromoItem);
-        await updateDoc(userDocRef, { request: updatedRequest });
-      } catch (error) {
-        console.error("Erro ao adicionar item promocional", error);
-      }
-    }
-
-    if (operation === 'add') {
-      await addDoc(collection(db, 'BenefitedCustomer'), benefitedClientEdited);
-    } else if (operation === 'edit') {
-      await updateDoc(doc(db, 'BenefitedCustomer', benefitedClientEdited.id), benefitedClientEdited);
-    }
-    
-    // NOVO: Limpar ao final da operação
-    setMessagePromotionPopup(false);
-    setSelectedPromotion('');
   };
 
   const openRegisterPopup = async () => {
@@ -823,7 +603,9 @@ const RequestModal = () => {
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
         countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
-        tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
+        tableNumber: global.orderBeingEdited 
+          ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) 
+          : (manualTableNumber || localStorage.getItem('tableNumber') || null),
       };
 
       setIsSubmitting(true);
@@ -960,7 +742,9 @@ const RequestModal = () => {
           idPayer: idPayerRef.current,
           dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
           countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
-          tableNumber: global.orderBeingEdited ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) : (localStorage.getItem('tableNumber') || null),
+          tableNumber: global.orderBeingEdited 
+            ? (global.orderBeingEdited.tableNumber || localStorage.getItem('tableNumber')) 
+            : (manualTableNumber || localStorage.getItem('tableNumber') || null),
         };
 
         localStorage.removeItem('backorder');
@@ -1036,7 +820,7 @@ const RequestModal = () => {
           .map((item) => item.finalPrice)
           .reduce((ac, el) => ac + el, 0);
 
-        const currentTable = localStorage.getItem('tableNumber');
+        const currentTable = manualTableNumber || localStorage.getItem('tableNumber');
         let orderAddedOrUpdated = false;
 
         // Tentar encontrar um pedido aberto para esta mesa e para ESTE usuário específico
@@ -1140,8 +924,12 @@ const RequestModal = () => {
             idPayer: idPayerRef.current,
             dateTime: takeDataTime(),
             countRequest: await countingRequest(),
-            tableNumber: currentTable || null,
+            tableNumber: manualTableNumber || currentTable || null,
           };
+          
+          if (manualTableNumber) {
+            setTableAssignedInThisSession(true);
+          }
 
           // Caso extratégico: se estamos vindo do PDV e o currentTable falhou na busca, mas sabemos o que estamos editando
           if (global.orderBeingEdited && !currentTable) {
@@ -1483,31 +1271,6 @@ const RequestModal = () => {
         )}
       </p>
 
-      {stylePdv && (
-        <div className="promotion-selection" style={{ margin: '15px 10%', textAlign: 'center' }}>
-          <select 
-            className="form-select" 
-            value={selectedPromotion} 
-            onChange={handleSelectChange}
-            style={{ padding: '8px', borderRadius: '5px', width: '100%', maxWidth: '400px', backgroundColor: 'var(--input-bg-color)', color: 'var(--main-font-color)', border: '1px solid var(--btn-color)' }}
-          >
-            <option value="">Aplicar Promoção...</option>
-            {promotions.map((promo, index) => (
-              <option key={index} value={index}>{promo.title}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {messagePromotionPopup && (
-        <MessagePromotions
-          message={textPromotion}
-          setClose={setMessagePromotionPopup}
-          onContinue={applyPromotionToFirestore}
-          AddPromotion={AddPromotion}
-        />
-      )}
-
       {isTableClient && (
         <div className="call-waiter-container" style={{ textAlign: 'center', marginBottom: '15px' }}>
           <button
@@ -1599,6 +1362,30 @@ const RequestModal = () => {
           {deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar"}
         </button>
       </div>
+
+      {stylePdv && !localStorage.getItem('tableNumber') && !tableAssignedInThisSession && (
+        <div style={{ margin: '15px 0', textAlign: 'center' }}>
+          <label htmlFor="manual-table" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+            Acrescente sua Mesa:
+          </label>
+          <input 
+            id="manual-table"
+            type="number" 
+            placeholder="Nº da Mesa"
+            value={manualTableNumber}
+            onChange={(e) => setManualTableNumber(e.target.value)}
+            style={{ 
+              padding: '10px', 
+              borderRadius: '5px', 
+              border: '1px solid var(--btn-color)', 
+              textAlign: 'center',
+              width: '100px',
+              backgroundColor: 'var(--input-bg-color)',
+              color: 'var(--main-font-color)'
+            }}
+          />
+        </div>
+      )}
 
       {/* Bill Popups Refactored */}
       {billPopUpStep === 1 && (
