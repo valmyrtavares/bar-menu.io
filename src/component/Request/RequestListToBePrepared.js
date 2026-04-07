@@ -1580,9 +1580,6 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       </p>
                     )}
                     <p>
-                      <span>Pedido</span>: {getFirstFourLetters(item.id, 4)} ;
-                    </p>
-                    <p>
                       <span>Ordenação</span>: {item.countRequest}
                     </p>
                     <p>
@@ -1798,8 +1795,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                         </div>
                       )}
 
-                      <p>{getFirstFourLetters(item.id, 4)}</p>
                       {item.category && (
+
                         <p className={style.category}>
                           Categoria {item.category}
                         </p>

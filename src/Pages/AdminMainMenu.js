@@ -181,7 +181,7 @@ const AdminMainMenu = ({ children }) => {
             <NavLink to="/admin/frontimage">Configurações do Terminal</NavLink>
             <NavLink to="/admin/styles">Marca e Estilo</NavLink>
             <a
-              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.29msbdxndlup"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -199,7 +199,7 @@ const AdminMainMenu = ({ children }) => {
         <section>
           <div className={admin.containerIcon}>
             <a
-              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.29msbdxndlup"
               target="_blank"
               rel="noopener noreferrer"
               title="Abrir documentação"
