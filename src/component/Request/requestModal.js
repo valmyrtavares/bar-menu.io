@@ -1417,7 +1417,7 @@ const RequestModal = () => {
       )}
       <div className="btnFinalRequest">
         <button
-          disabled={isSubmitting || (isTableClient && !allRequestsReady)}
+          disabled={isSubmitting || (!userData?.request || userData.request.length === 0) || (isTableClient && !allRequestsReady)}
           className="send-request"
           onClick={
             deliveryAddress
