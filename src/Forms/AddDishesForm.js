@@ -115,7 +115,7 @@ function AddDishesForm({
   function handleChange({ target }) {
     const { id, value, type, checked } = target;
     if (id === 'price') {
-      const formattedValue = value.split('.')[0];
+      const formattedValue = value;
       console.log(formattedValue);
       setForm({
         ...form,
@@ -430,7 +430,7 @@ function AddDishesForm({
               type="button"
               onClick={() => setShowPopupCostAndPrice(true)}
             >
-              Preço R$ {form.price},00
+              Preço R$ {form.price}
             </button>
             <button
               className="btn btn-success"

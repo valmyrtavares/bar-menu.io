@@ -240,7 +240,7 @@ const useFormValidation = (initialValue = '') => {
   const handleBlur = (e) => {
     const { id, value } = e.target;
     handleCpfCheck(value);
-    return value.split('.')[0];
+    return value;
   };
 
   return {

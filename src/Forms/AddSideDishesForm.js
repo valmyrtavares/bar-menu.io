@@ -376,7 +376,7 @@ function AddSideDishesForm({
           onClick={() => !isBasic && setShowPopupCostAndPrice(true)}
           style={{ cursor: isBasic ? 'default' : 'pointer' }}
         >
-          Preço R$ {form.price},00
+          Preço R$ {form.price}
         </button>
         <div className="sidedishes-btn-container ">
           <button className="btn btn-primary">Enviar</button>
