@@ -611,8 +611,59 @@ const RequestModal = () => {
       setIsSubmitting(true);
       if (userNewRequest) {
         const cleanedUserNewRequest = cleanObject(userNewRequest);
-        if (global.orderBeingEdited) {
-          const requestDocRef = doc(db, 'requests', global.orderBeingEdited.id);
+        
+        // Lógica de SESSÃO DE MESA: Se for cliente de mesa, tenta achar pedido aberto para mesclar
+        let existingRequestDocId = null;
+        if (isTableClient && !global.orderBeingEdited) {
+          try {
+            const q = query(
+              collection(db, 'requests'),
+              where('tableNumber', '==', cleanedUserNewRequest.tableNumber),
+              where('idUser', '==', cleanedUserNewRequest.idUser),
+              where('orderDelivered', '==', false)
+            );
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+              existingRequestDocId = querySnapshot.docs[0].id;
+            }
+          } catch (err) {
+            console.error('Erro ao buscar pedido existente para mesclagem:', err);
+          }
+        }
+
+        if (global.orderBeingEdited || existingRequestDocId) {
+          const targetId = global.orderBeingEdited ? global.orderBeingEdited.id : existingRequestDocId;
+          const requestDocRef = doc(db, 'requests', targetId);
+          
+          // Se for mesclagem (não edição explícita), precisamos somar os itens novos aos que já existem no documento
+          if (existingRequestDocId && !global.orderBeingEdited) {
+             const docSnap = await getDoc(requestDocRef);
+             const existingData = docSnap.data();
+             const mergedItems = [...(existingData.request || [])];
+             
+             // Identifica o próximo índice para os novos itens
+             const startIdx = mergedItems.length;
+             cleanedUserNewRequest.request.forEach((newItem, idx) => {
+                mergedItems.push({
+                   ...newItem,
+                   indexInRequest: startIdx + idx,
+                   parentRequestId: targetId
+                });
+             });
+             
+             cleanedUserNewRequest.request = mergedItems;
+             // Soma o preço dos novos itens ao total já existente no documento
+             cleanedUserNewRequest.finalPriceRequest = Number(existingData.finalPriceRequest || 0) + Number(finalPriceRequest || 0);
+             // Mantém countRequest e dateTime originais da sessão
+             cleanedUserNewRequest.countRequest = existingData.countRequest;
+             cleanedUserNewRequest.dateTime = existingData.dateTime;
+          }
+
+          if (existingRequestDocId && !global.orderBeingEdited) {
+            // Se estamos mesclando, não queremos sobrescrever campos que não devem mudar, 
+            // mas cleanedUserNewRequest já foi ajustado acima.
+          }
+
           await updateDoc(requestDocRef, cleanedUserNewRequest);
           global.setOrderBeingEdited(null);
           // Só limpa o tableNumber se estivermos explicitamente no modo PDV/Admin
@@ -621,11 +672,11 @@ const RequestModal = () => {
           }
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
-          if (global.orderBeingEdited.tableNumber) {
-            const updatedRequests = data.request.map((item, idx) => ({
+          if (cleanedUserNewRequest.tableNumber) {
+            const updatedRequests = cleanedUserNewRequest.request.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
-              parentRequestId: global.orderBeingEdited.id,
+              parentRequestId: targetId,
               indexInRequest: idx
             }));
             await updateDoc(userDocRef, { request: updatedRequests });
@@ -634,7 +685,7 @@ const RequestModal = () => {
           }
         } else {
           const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
-
+          
           // Se acabamos de criar o pedido, atualizamos os documentos com o ID real
           const finalItemsWithId = cleanedUserNewRequest.request.map(item => ({
             ...item,
@@ -644,7 +695,7 @@ const RequestModal = () => {
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
           if (cleanedUserNewRequest.tableNumber) {
-            const updatedRequests = data.request.map((item, idx) => ({
+            const updatedRequests = cleanedUserNewRequest.request.map((item, idx) => ({
               ...item,
               sentToKitchen: true,
               parentRequestId: docRef.id,
@@ -988,28 +1039,43 @@ const RequestModal = () => {
           where('orderDelivered', '==', false)
         );
         const querySnapshot = await getDocs(q);
+        const waiterCallData = {
+          active: true,
+          callerName:
+            userData.name === 'anonimo' || userData.name === 'anonymous'
+              ? userData.fantasyName
+              : userData.name,
+          tableNumber: currentTable,
+          timestamp: Date.now(),
+        };
 
         if (!querySnapshot.empty) {
           const openOrderDoc = querySnapshot.docs[0];
           const requestDocRef = doc(db, 'requests', openOrderDoc.id);
 
           await updateDoc(requestDocRef, {
-            waiterCall: {
-              active: true,
-              callerName:
-                userData.name === 'anonimo' || userData.name === 'anonymous'
-                  ? userData.fantasyName
-                  : userData.name,
-              tableNumber: currentTable,
-              timestamp: Date.now(),
-            },
+            waiterCall: waiterCallData,
           });
-
-          setWaiterCallActive(true);
-
         } else {
-          alert('Você precisa enviar um pedido antes de chamar o garçom.');
+          // Caso não exista pedido aberto, cria um pedido "vazio" apenas com o chamado
+          const newRequest = {
+            name:
+              userData.name === 'anonimo' || userData.name === 'anonymous'
+                ? userData.fantasyName
+                : userData.name,
+            idUser: userData.id,
+            done: true,
+            orderDelivered: false,
+            request: [],
+            finalPriceRequest: 0,
+            dateTime: takeDataTime(),
+            countRequest: await countingRequest(),
+            tableNumber: currentTable,
+            waiterCall: waiterCallData,
+          };
+          await addDoc(collection(db, 'requests'), newRequest);
         }
+        setWaiterCallActive(true);
       }
     } catch (error) {
       console.error('Erro ao chamar o garçom:', error);
@@ -1019,6 +1085,8 @@ const RequestModal = () => {
   };
 
   const duplicateDish = async (index) => {
+
+
     // Cria uma cópia do array original
     const updatedRequest = [...userData.request];
 
