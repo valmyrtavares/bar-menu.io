@@ -21,6 +21,7 @@ import CustomizePriceForm from './CustomizePriceForm';
 import RecipeDish from './recipeDishForm.js';
 import useFormValidation from '../Hooks/useFormValidation.js';
 import { GlobalContext } from '../GlobalContext.js';
+import { tooltips } from '../constants/tooltips.js';
 //import { cardClasses } from "@mui/material";
 
 function AddDishesForm({
@@ -386,6 +387,18 @@ function AddDishesForm({
           />
         )}
       </div>
+      <div className={style.helpIconHeader}>
+        <div className={style.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hi6g5k67uo8k"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+      </div>
       <Link to="/admin/admin">
         <Title mainTitle={mainTitle ? mainTitle : 'Adicione um prato'} />
       </Link>
@@ -397,9 +410,10 @@ function AddDishesForm({
           value={form.title}
           type="text"
           onChange={handleChange}
+          title={tooltips.addDishesForm.title}
         />
         <div className="my-3">
-          <label className="form-label">Categoria</label>
+          <label className="form-label" title={tooltips.addDishesForm.category}>Categoria</label>
           <select
             id="category"
             required
@@ -422,6 +436,7 @@ function AddDishesForm({
           value={form.comment}
           type="text"
           onChange={handleChange}
+          title={tooltips.addDishesForm.comment}
         />
         {hasRawMaterial ? (
           <div className={style.boxPrice}>
@@ -429,6 +444,7 @@ function AddDishesForm({
               className="btn btn-success"
               type="button"
               onClick={() => setShowPopupCostAndPrice(true)}
+              title={tooltips.addDishesForm.price}
             >
               Preço R$ {form.price}
             </button>
@@ -436,6 +452,7 @@ function AddDishesForm({
               className="btn btn-success"
               type="button"
               onClick={() => setShowPopupCustomizePrice(true)}
+              title={tooltips.addDishesForm.price}
             >
               Preço Customizado
             </button>
@@ -448,6 +465,7 @@ function AddDishesForm({
             value={form.price}
             type="number"
             onChange={handleChange}
+            title={tooltips.addDishesForm.price}
           />
         )}
         <Input
@@ -471,7 +489,7 @@ function AddDishesForm({
             onChange={handleChange}
           />
         </div>
-        <div className={style.uploadImage}>
+        <div className={style.uploadImage} title={tooltips.addDishesForm.image}>
           <label className="form-label">Carregar imagem</label>
           <input type="file" onChange={onfileChange} />
           <progress value={progress} max="100" />
@@ -487,7 +505,7 @@ function AddDishesForm({
             checked={form.carrossel}
             onChange={handleChange}
           />
-          <label className="form-check-label">
+          <label className="form-check-label" title={tooltips.addDishesForm.carrossel}>
             Adicionar item ao carrossel
           </label>
         </div>
@@ -516,7 +534,7 @@ function AddDishesForm({
         )}
       </div>
       <div className={style.sidedishesRecipeBtnContainer}>
-        <button onClick={openModalSideDishes}> Acompanhamentos</button>
+        <button onClick={openModalSideDishes} title={tooltips.addDishesForm.sideDishes}> Acompanhamentos</button>
         {hasRawMaterial && (
           <button onClick={openRecipeModal}> Receita</button>
         )}

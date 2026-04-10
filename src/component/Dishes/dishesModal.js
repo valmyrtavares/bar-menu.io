@@ -60,6 +60,7 @@ const DishesModal = ({ item, setModal }) => {
     }
   }, [item]);
 
+
   //load side dishes on  screen
   React.useEffect(() => {
     if (itemOnScreen) {
@@ -167,13 +168,20 @@ const DishesModal = ({ item, setModal }) => {
   };
 
   async function handleSubmit(event) {
-    event.preventDefault();
+    if (event && event.preventDefault) event.preventDefault();
     if (isSubmitting) return; // evita disparo duplo
     setIsSubmitting(true);
 
     if (!global.authorizated) {
       CheckLogin();
     }
+
+    if (!currentUser) {
+      setModal(false); 
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
@@ -208,16 +216,15 @@ const DishesModal = ({ item, setModal }) => {
       });
 
       // Redireciona o usuário para a página de requisições
+      setModal(false); // Fecha o modal após sucesso na gravação
 
       if (!pdv) {
         console.log('NÃO SOMOS UM PDV no handleSubmit ', pdv);
         navigate('/request', { state: { isAdminOrigin: false } });
         global.setPdvRequest(false);
-        return;
       } else {
         console.log(' SOMOS UM PDV no handleSubmit', pdv);
         global.setPdvRequest(true);
-        setModal(false);
         navigate('/admin/requestlist', { state: { isAdminOrigin: true } });
       }
     } catch (error) {

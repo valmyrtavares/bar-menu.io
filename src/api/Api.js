@@ -146,8 +146,8 @@ export function fetchInDataChanges(collectionName, onData) {
 
   const unsubscribe = onSnapshot(requestCollection, (snapshot) => {
     const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
       ...doc.data(),
+      id: doc.id,
     }));
     onData(data);
   });

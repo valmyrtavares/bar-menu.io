@@ -3,6 +3,7 @@ import admin from '../assets/styles/AdminMainMenu.module.scss';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 import { GlobalContext } from '../GlobalContext';
+import { initializeDatabase } from '../services/dbInitService';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
@@ -62,6 +63,18 @@ const AdminMainMenu = ({ children }) => {
     }
     setLogoutAdminPopup(true);
   };
+
+  const handleInitialSetup = async () => {
+    if (window.confirm('Deseja executar a inicialização padrão do banco de dados? Isso criará as coleções obrigatórias se elas não existirem.')) {
+      const response = await initializeDatabase();
+      if (response.success) {
+        alert('Sucesso:\n' + response.log.join('\n'));
+      } else {
+        alert('Erro ao inicializar: ' + response.error);
+      }
+    }
+  };
+
   return (
     <div>
       <div className={admin.WarningMessageContainer}>
@@ -180,6 +193,24 @@ const AdminMainMenu = ({ children }) => {
             <NavLink to="/admin/welcome">Saudação inicial</NavLink>
             <NavLink to="/admin/frontimage">Configurações do Terminal</NavLink>
             <NavLink to="/admin/styles">Marca e Estilo</NavLink>
+            
+            <button 
+              onClick={handleInitialSetup} 
+              style={{ 
+                backgroundColor: '#fff3cd', 
+                color: '#856404', 
+                border: '1px solid #ffeeba',
+                marginTop: '10px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                padding: '10px',
+                width: '100%',
+                fontSize: '14px'
+              }}
+            >
+              ⚙️ Setup Inicial (Banco Novo)
+            </button>
+
             <a
               href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.29msbdxndlup"
               target="_blank"

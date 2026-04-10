@@ -15,4 +15,13 @@ export const tooltips = {
       disponíveis no momento e os que estão disponíveis. Enfatizando que também nesse caso
       o título do botão alterna entre itens excluídos e itens habilitados`,
   },
+  addDishesForm: {
+    title: "Nome do prato que aparecerá no cardápio.",
+    category: "Grupo onde o prato será exibido para o cliente.",
+    comment: "Resumo dos ingredientes ou descrição rápida.",
+    price: "Valor de venda do produto.",
+    image: "Envie uma foto do seu prato direto do celular ou computador.",
+    sideDishes: "Gerencie itens extras que podem ser adicionados ao prato.",
+    carrossel: "Marque para destacar este prato no topo da página principal.",
+  },
 };

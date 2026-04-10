@@ -31,12 +31,13 @@ const EditFormButton = () => {
         getBtnData('item'),
         getBtnData('sideDishes'),
       ]);
+      console.log('Dados carregados:', { data, dataItem, sideDishes });
       const sortedDataItem = dataItem.sort((a, b) =>
-        a.title.localeCompare(b.title)
+        (a.title || '').localeCompare(b.title || '')
       );
-      const sortedData = data.sort((a, b) => a.title.localeCompare(b.title));
+      const sortedData = data.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
       const sortedSideDishes = sideDishes.sort((a, b) =>
-        a.sideDishes.localeCompare(b.sideDishes)
+        (a.sideDishes || '').localeCompare(b.sideDishes || '')
       );
       setMenuButton(sortedData);
       setDishes(sortedDataItem);
@@ -161,7 +162,7 @@ const EditFormButton = () => {
           />
         </div>
       )}
-      {menuButton && // Why manuButton again ???
+      {dishes &&
         id === 'dishes' &&
         dishes.map((item, index) => {
           return (

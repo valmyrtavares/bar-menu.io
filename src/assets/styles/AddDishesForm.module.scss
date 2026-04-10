@@ -27,6 +27,35 @@
     @include uploadImage;
 }
 
+.helpIconHeader {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 5px;
+    
+    .helpIconContainer {
+        a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background-color: #FCA311;
+            color: #14213D;
+            text-decoration: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(252, 163, 17, 0.2);
+    
+            &:hover {
+                background-color: #fff;
+                transform: scale(1.1);
+            }
+        }
+    }
+}
+
 .containerAddDishesForm{
     background-color:$bgColorForm;
     min-width:600px;

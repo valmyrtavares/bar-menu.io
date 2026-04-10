@@ -6,13 +6,12 @@ import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckUser } from '../Helpers/Helpers.js';
 import { GlobalContext } from '../GlobalContext.js';
-import {
-  useEnsureAnonymousUser,
-  getAnonymousUser,
-} from '../Hooks/useEnsureAnonymousUser.js';
+import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
 import { ensureImagesInCache } from '../util/imageCache.js';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { db } from '../config-firebase/firebase.js';
 
 const MainPictureMobileMenu = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -26,6 +25,7 @@ const MainPictureMobileMenu = () => {
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
   const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
+  const [isSubmittingQuick, setIsSubmittingQuick] = React.useState(false);
 
   const global = React.useContext(GlobalContext);
   useEnsureAnonymousUser();
@@ -114,9 +114,92 @@ const MainPictureMobileMenu = () => {
     }
   }, [dishesFiltered, showFilteredDishes]);
 
-  const preparedRequest = (item) => {
-    setItem(item);
-    setOpenModalDishes(true);
+  const preparedRequest = async (item) => {
+    if (item?.lowAmountRawMaterial) return;
+
+    // Detecção de prato simples
+    const hasNoSideDishes =
+      !item.sideDishesElementList || item.sideDishesElementList.length === 0;
+
+    const hasNoVariations =
+      !item.CustomizedPrice ||
+      (!Number(item.CustomizedPrice.firstPrice) &&
+        !Number(item.CustomizedPrice.secondPrice) &&
+        !Number(item.CustomizedPrice.thirdPrice));
+
+    if (hasNoSideDishes && hasNoVariations) {
+      await handleDirectOrder(item);
+    } else {
+      setItem(item);
+      setOpenModalDishes(true);
+    }
+  };
+
+  const handleDirectOrder = async (orderItemData) => {
+    if (isSubmittingQuick) return;
+    setIsSubmittingQuick(true);
+
+    try {
+      let currentUser = '';
+      if (localStorage.hasOwnProperty('userMenu')) {
+        const currentUserData = JSON.parse(localStorage.getItem('userMenu'));
+        currentUser = currentUserData.id;
+      }
+
+      if (!global.authorizated) {
+        CheckUser('userMenu', global.isToten, global.packageTier).then(path => {
+           if (!currentUser) {
+               navigate(path);
+           }
+        });
+      }
+
+      if (!currentUser) {
+        console.error('Usuário não identificado no localStorage');
+        return;
+      }
+
+      const orderItem = {
+        name: orderItemData.title,
+        id: orderItemData.id,
+        category: orderItemData.category,
+        recipeOpenCloseModal: false,
+        finalPrice: Number(orderItemData.price),
+        finalCost: orderItemData.costPriceObj?.cost || 0,
+        image: orderItemData.image,
+        recipe: orderItemData.recipe ? orderItemData.recipe : {},
+        sideDishes: [],
+        size: orderItemData.CustomizedPrice?.firstLabel || '',
+      };
+
+      const userDocRef = doc(db, 'user', currentUser);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const currentRequests = userDocSnap.data().request || [];
+        currentRequests.push(orderItem);
+        await updateDoc(userDocRef, {
+          request: currentRequests,
+        });
+      } else {
+        await setDoc(userDocRef, {
+          request: [orderItem],
+        });
+      }
+
+      const pdv = JSON.parse(localStorage.getItem('pdv') || 'false');
+      if (!pdv) {
+        navigate('/request', { state: { isAdminOrigin: false } });
+        global.setPdvRequest(false);
+      } else {
+        global.setPdvRequest(true);
+        navigate('/admin/requestlist', { state: { isAdminOrigin: true } });
+      }
+    } catch (error) {
+      console.error('Erro ao processar pedido direto (Mobile Menu):', error);
+    } finally {
+      setIsSubmittingQuick(false);
+    }
   };
 
   const logoutCustomer = async () => {

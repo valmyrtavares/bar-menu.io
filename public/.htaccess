@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Não reescreve o próprio index
+  RewriteRule ^index\.html$ - [L]
+
+  # Se não for arquivo nem diretório físico
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Redireciona tudo para o index
+  RewriteRule ^ /index.html [L]
+</IfModule>

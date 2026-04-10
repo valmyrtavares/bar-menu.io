@@ -40,10 +40,12 @@
     "deploy": "gh-pages -d docs",
     "start:main": "dotenv -e .env.main react-scripts start",
     "start:tropicalx": "dotenv -e .env.tropicalx react-scripts start",
+    "start:pastelaria": "dotenv -e .env.pastelaria react-scripts start",
     "clean": "rm -rf docs && mkdir docs",
     "build": "react-scripts build && npm run clean && mv build/* docs/",
     "build:main": "dotenv -e .env.main react-scripts build && npm run clean && mv build/* docs/",
     "build:tropicalx": "dotenv -e .env.tropicalx react-scripts build && npm run clean && mv build/* docs/",
+    "build:pastelaria": "dotenv -e .env.pastelaria react-scripts build && npm run clean && mv build/* docs/",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "proxy-server": "node proxyServer.js"
