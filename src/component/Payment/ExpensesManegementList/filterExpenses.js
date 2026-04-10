@@ -129,7 +129,7 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
         </div>
         <div
           className={style.inputGroup}
-          title="selecione o nome do tipo da depesa que quer verificar, esses
+          title="Selecione o nome do tipo da depesa que quer verificar, esses
         tipos são registrados pelo próprio administrador no botão abaixo de 'opção de cadastro'"
         >
           <label htmlFor="expenseName">Nome da despesa</label>

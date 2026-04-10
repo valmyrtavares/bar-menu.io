@@ -207,10 +207,11 @@ function AddButtonForm({
         </div>
         <Input
           id="image"
-          label="Image"
+          label="imagem do totem"
           value={form.image}
           type="text"
           onChange={handleChange}
+          title="Essa imagem só aparecerá no formato de Toten"
         />
         <div className={style.uploadImage}>
           <input type="file" onChange={onfileChange} />
