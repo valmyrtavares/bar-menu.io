@@ -7,6 +7,38 @@
     height: 80vh;      
     overflow-y: auto;       
     border:solid 1px black;
+
+    .helpIconHeader {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 20px;
+        margin-top: -30px; // Alinha com o botão X
+        margin-bottom: 10px;
+        
+        .helpIconContainer {
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 35px;
+                height: 35px;
+                background-color: #FCA311;
+                color: #14213D;
+                text-decoration: none;
+                border-radius: 50%;
+                font-size: 1.2rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 10px rgba(252, 163, 17, 0.2);
+        
+                &:hover {
+                    background-color: #fff;
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
     .wrapperInputs{
         padding:5% 5%;
         display:grid;

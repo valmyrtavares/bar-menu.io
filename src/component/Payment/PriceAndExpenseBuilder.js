@@ -5,6 +5,7 @@ import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
 import { calculateItemCost } from '../../Helpers/Helpers';
 import { updateCollection } from '../../api/Api';
+import { tooltips } from '../../constants/tooltips.js';
 
 const PriceAndExpenseBuilder = ({
   setShowPopupCostAndPrice, //close and open popup
@@ -17,6 +18,7 @@ const PriceAndExpenseBuilder = ({
   costProfitMarginCustomized,
   recipe,
   id,
+  hideHelpIcon,
 }) => {
   const [form, setForm] = React.useState({
     price: 0,
@@ -195,6 +197,20 @@ const PriceAndExpenseBuilder = ({
   return (
     <div className={style.container}>
       <div className={style.allInputsContainer}>
+        {!hideHelpIcon && (
+          <div className={style.helpIconHeader}>
+            <div className={style.helpIconContainer}>
+              <a
+                href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.dfeq79e0w14f#heading=h.puvs80k9k97o"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Abrir documentação"
+              >
+                <span>?</span>
+              </a>
+            </div>
+          </div>
+        )}
         {setShowPopupCostAndPrice && (
           <CloseBtn setClose={setShowPopupCostAndPrice} />
         )}
@@ -214,6 +230,7 @@ const PriceAndExpenseBuilder = ({
                 ? (e) => handleFatherBlur(e, labelPrice)
                 : handleBlur
             }
+            title={tooltips.priceBuilder.price}
           />
           <Input
             id="cost"
@@ -230,6 +247,7 @@ const PriceAndExpenseBuilder = ({
                 ? (e) => handleFatherBlur(e, labelPrice)
                 : handleBlur
             }
+            title={tooltips.priceBuilder.cost}
           />
           <Input
             id="percentage"
@@ -246,11 +264,17 @@ const PriceAndExpenseBuilder = ({
                 ? (e) => handleFatherBlur(e, labelPrice)
                 : handleBlur
             }
+            title={tooltips.priceBuilder.percentage}
           />
         </div>
         <div className={style.buttonCostContainer}>
           <div className={style.btnContainer}>
-            <button onClick={calculatedRecipeCost}>Calcular Custo</button>
+            <button
+              onClick={calculatedRecipeCost}
+              title={tooltips.priceBuilder.calculate}
+            >
+              Calcular Custo
+            </button>
           </div>
           {addPriceObj && (
             <div className={style.btnContainer}>
@@ -258,6 +282,7 @@ const PriceAndExpenseBuilder = ({
                 onClick={() => {
                   addPriceObj(form);
                 }}
+                title={tooltips.priceBuilder.send}
               >
                 Enviar
               </button>

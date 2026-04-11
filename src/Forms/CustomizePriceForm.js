@@ -4,6 +4,7 @@ import Input from '../component/Input.js';
 import Title from '../component/title.js';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';
 import { cardClasses } from '@mui/material';
+import { tooltips } from '../constants/tooltips.js';
 
 function CustomizePriceForm({
   setShowPopupCustomizePrice,
@@ -163,6 +164,18 @@ function CustomizePriceForm({
         </div>
       }
       <Title Preço mainTitle="Preço Customizado" />
+      <div className={style.helpIconHeader}>
+        <div className={style.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.dfeq79e0w14f"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+      </div>
 
       <div className="wrapperInputs">
         {
@@ -171,6 +184,7 @@ function CustomizePriceForm({
             labelPrice="firstPrice"
             handleFatherChange={handleChange}
             handleFatherBlur={handleFatherBlur}
+            hideHelpIcon={true}
           />
         }
         <Input
@@ -179,6 +193,7 @@ function CustomizePriceForm({
           value={formPrice.firstPrice.label}
           type="text"
           onChange={(e) => handleChange(e, 'firstPrice')}
+          title={tooltips.customizePriceForm.label}
         />
       </div>
       <div className="wrapperInputs">
@@ -188,6 +203,7 @@ function CustomizePriceForm({
             labelPrice="secondPrice"
             handleFatherChange={handleChange}
             handleFatherBlur={handleFatherBlur}
+            hideHelpIcon={true}
           />
         )}
         <Input
@@ -196,6 +212,7 @@ function CustomizePriceForm({
           label="Descrição do segundo preço"
           type="text"
           onChange={(e) => handleChange(e, 'secondPrice')}
+          title={tooltips.customizePriceForm.label}
         />
       </div>
       <div className="wrapperInputs">
@@ -205,6 +222,7 @@ function CustomizePriceForm({
             labelPrice="thirdPrice"
             handleFatherChange={handleChange}
             handleFatherBlur={handleFatherBlur}
+            hideHelpIcon={true}
           />
         )}
         <Input
@@ -213,6 +231,7 @@ function CustomizePriceForm({
           label="Descrição do terceiro preço"
           type="text"
           onChange={(e) => handleChange(e, 'thirdPrice')}
+          title={tooltips.customizePriceForm.label}
         />
       </div>
       <div className={style.formButtonSubmit}>

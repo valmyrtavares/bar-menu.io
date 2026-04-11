@@ -4,6 +4,43 @@
 
 .container{
     position:relative;
+
+    .helpIconHeader {
+        display: flex;
+        justify-content: space-between; // Espaço para o botão fechar se necessário
+        align-items: center;
+        padding: 10px 15px 0;
+        margin-bottom: 5px;
+        
+        // Se o ícone for o único, joga pra direita
+        &:only-child, &:first-child:last-child {
+            justify-content: flex-end;
+        }
+        
+        .helpIconContainer {
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                background-color: #FCA311;
+                color: #14213D;
+                text-decoration: none;
+                border-radius: 50%;
+                font-size: 1rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 10px rgba(252, 163, 17, 0.2);
+        
+                &:hover {
+                    background-color: #fff;
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
     .allInputsContainer{
         background:$bgColorForm;
         max-width: 700px;

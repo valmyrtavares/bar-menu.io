@@ -3,6 +3,7 @@ import { getBtnData } from '../api/Api.js';
 import Title from '../component/title.js';
 import style from '../assets/styles/includeSideDishesForm.module.scss';
 import Input from '../component/Input.js';
+import { tooltips } from '../constants/tooltips.js';
 
 function IncludeSideDishesForm({
   setShowPopupSideDisehs,
@@ -94,6 +95,18 @@ function IncludeSideDishesForm({
         <button onClick={() => setShowPopupSideDisehs(false)}>X</button>
       </div>
       <Title mainTitle="Formulário de acompanhamentos" />
+      <div className={style.helpIconHeader}>
+        <div className={style.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.dolmti5lsh34"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+      </div>
       {sideDishes && (
         <div className="my-3">
           <label>Selecione os acompanhamentos do prato</label>
@@ -105,6 +118,7 @@ function IncludeSideDishesForm({
               selectSideDishes(e);
               setForm({ ...form, sideDishesElement: e.target.value });
             }}
+            title={tooltips.includeSideDishesForm.select}
           >
             <option value="">Selecione </option>
             {sideDishes.map((item, index) => (
@@ -131,9 +145,12 @@ function IncludeSideDishesForm({
         value={maxLimitSideDishes}
         type="number"
         onChange={handleChange}
+        title={tooltips.includeSideDishesForm.limit}
       />
       <div className={style.formButtonSubmit}>
-        <button onClick={sendArrayList}>Adicionar </button>
+        <button onClick={sendArrayList} title={tooltips.includeSideDishesForm.add}>
+          Adicionar{' '}
+        </button>
       </div>
     </div>
   );

@@ -24,4 +24,19 @@ export const tooltips = {
     sideDishes: "Gerencie itens extras que podem ser adicionados ao prato.",
     carrossel: "Marque para destacar este prato no topo da página principal.",
   },
+  priceBuilder: {
+    price: "Preço final de venda para o cliente.",
+    cost: "Quanto custa para você produzir este item (insumos + mão de obra).",
+    percentage: "Margem de lucro desejada sobre o custo do produto.",
+    calculate: "Calcula automaticamente o custo baseado nos ingredientes cadastrados.",
+    send: "Salva as informações de preço e custo.",
+  },
+  customizePriceForm: {
+    label: "Nome identificador do preço (ex: Pequeno, Grande, Combo).",
+  },
+  includeSideDishesForm: {
+    select: "Selecione um ou mais acompanhamentos para oferecer com este prato.",
+    limit: "Limite máximo de acompanhamentos que o cliente pode escolher.",
+    add: "Confirma a seleção de acompanhamentos para este prato.",
+  },
 };
