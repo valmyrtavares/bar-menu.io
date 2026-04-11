@@ -158,11 +158,9 @@ function CustomizePriceForm({
 
   return (
     <div className={style.containerCustomePrice}>
-      {
-        <div className="close-btn">
-          <button onClick={close}>X</button>
-        </div>
-      }
+      <div className="close-btn">
+        <button onClick={close}>X</button>
+      </div>
       <Title Preço mainTitle="Preço Customizado" />
       <div className={style.helpIconHeader}>
         <div className={style.helpIconContainer}>
@@ -177,70 +175,97 @@ function CustomizePriceForm({
         </div>
       </div>
 
-      <div className="wrapperInputs">
-        {
-          <PriceAndExpenseBuilder
-            formPrice={formPrice}
-            labelPrice="firstPrice"
-            handleFatherChange={handleChange}
-            handleFatherBlur={handleFatherBlur}
-            hideHelpIcon={true}
-          />
-        }
-        <Input
-          id="label"
-          label="Descrição do primeiro preço"
-          value={formPrice.firstPrice.label}
-          type="text"
-          onChange={(e) => handleChange(e, 'firstPrice')}
-          title={tooltips.customizePriceForm.label}
-        />
+      <div className={style.priceSections}>
+        {/* Bloco 1 */}
+        <div className={style.priceCard}>
+          <div className={style.cardHeader}>
+            <span>Tamanho / Categoria 1</span>
+          </div>
+          <div className={style.cardBody}>
+            <div className={style.labelField}>
+              <Input
+                id="label"
+                label="Identificação (Ex: Pequeno, Individual...)"
+                value={formPrice.firstPrice.label}
+                type="text"
+                onChange={(e) => handleChange(e, 'firstPrice')}
+                title={tooltips.customizePriceForm.label}
+              />
+            </div>
+            <PriceAndExpenseBuilder
+              formPrice={formPrice}
+              labelPrice="firstPrice"
+              handleFatherChange={handleChange}
+              handleFatherBlur={handleFatherBlur}
+              hideHelpIcon={true}
+            />
+          </div>
+        </div>
+
+        {/* Bloco 2 */}
+        <div className={style.priceCard}>
+          <div className={style.cardHeader}>
+            <span>Tamanho / Categoria 2</span>
+          </div>
+          <div className={style.cardBody}>
+            <div className={style.labelField}>
+              <Input
+                id="label"
+                value={formPrice.secondPrice.label}
+                label="Identificação (Ex: Médio, Kids...)"
+                type="text"
+                onChange={(e) => handleChange(e, 'secondPrice')}
+                title={tooltips.customizePriceForm.label}
+              />
+            </div>
+            {showPopupCostPrice && (
+              <PriceAndExpenseBuilder
+                formPrice={formPrice}
+                labelPrice="secondPrice"
+                handleFatherChange={handleChange}
+                handleFatherBlur={handleFatherBlur}
+                hideHelpIcon={true}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Bloco 3 */}
+        <div className={style.priceCard}>
+          <div className={style.cardHeader}>
+            <span>Tamanho / Categoria 3</span>
+          </div>
+          <div className={style.cardBody}>
+            <div className={style.labelField}>
+              <Input
+                id="label"
+                value={formPrice.thirdPrice.label}
+                label="Identificação (Ex: Grande, Família...)"
+                type="text"
+                onChange={(e) => handleChange(e, 'thirdPrice')}
+                title={tooltips.customizePriceForm.label}
+              />
+            </div>
+            {showPopupCostPrice && (
+              <PriceAndExpenseBuilder
+                formPrice={formPrice}
+                labelPrice="thirdPrice"
+                handleFatherChange={handleChange}
+                handleFatherBlur={handleFatherBlur}
+                hideHelpIcon={true}
+              />
+            )}
+          </div>
+        </div>
       </div>
-      <div className="wrapperInputs">
-        {showPopupCostPrice && (
-          <PriceAndExpenseBuilder
-            formPrice={formPrice}
-            labelPrice="secondPrice"
-            handleFatherChange={handleChange}
-            handleFatherBlur={handleFatherBlur}
-            hideHelpIcon={true}
-          />
-        )}
-        <Input
-          id="label"
-          value={formPrice.secondPrice.label}
-          label="Descrição do segundo preço"
-          type="text"
-          onChange={(e) => handleChange(e, 'secondPrice')}
-          title={tooltips.customizePriceForm.label}
-        />
-      </div>
-      <div className="wrapperInputs">
-        {showPopupCostPrice && (
-          <PriceAndExpenseBuilder
-            formPrice={formPrice}
-            labelPrice="thirdPrice"
-            handleFatherChange={handleChange}
-            handleFatherBlur={handleFatherBlur}
-            hideHelpIcon={true}
-          />
-        )}
-        <Input
-          id="label"
-          value={formPrice.thirdPrice.label}
-          label="Descrição do terceiro preço"
-          type="text"
-          onChange={(e) => handleChange(e, 'thirdPrice')}
-          title={tooltips.customizePriceForm.label}
-        />
-      </div>
+
       <div className={style.formButtonSubmit}>
         <button
-          className="customizedPriceBtn"
+          className={style.submitBtn}
           type="button"
           onClick={() => onPriceChange(formPrice)}
         >
-          Enviar
+          Confirmar Preços
         </button>
       </div>
     </div>

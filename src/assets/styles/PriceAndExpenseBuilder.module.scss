@@ -1,71 +1,181 @@
-@import "variables.css";
-@import  "adminStyleReuse.module.scss";
+@import "./adminStyleReuse.module.scss";
 
+.builderContainer {
+    width: 100%;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
 
-.container{
-    position:relative;
+    // Estilo especial para quando o componente é usado como um POPUP INDEPENDENTE (Preço Único)
+    &.standalone {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1050; // Garantir que fique acima de outros popups
+        
+        width: 95%;
+        max-width: 450px;
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        border: none;
+
+        .standaloneHeader {
+            margin-bottom: 20px;
+            
+            :global(.containerTitle) {
+                margin: 0 !important;
+                h3 {
+                    font-size: 1.4rem !important;
+                    color: #14213D;
+                    text-align: center;
+                }
+            }
+        }
+
+        .standaloneClose {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+        }
+
+        .allInputsContainer {
+            .inputRow {
+                flex-direction: column; // No popup standalone, talvez vertical seja melhor ou manter horizontal compacto
+                gap: 15px;
+                
+                .field {
+                    :global(.mb-3) {
+                        label {
+                            font-size: 0.9rem !important;
+                            color: #14213D;
+                        }
+                    }
+                }
+            }
+
+            .actionsContainer {
+                justify-content: center;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #eee;
+
+                button {
+                    padding: 10px 25px;
+                    font-size: 1rem;
+                }
+            }
+        }
+    }
 
     .helpIconHeader {
         display: flex;
-        justify-content: space-between; // Espaço para o botão fechar se necessário
-        align-items: center;
-        padding: 10px 15px 0;
+        justify-content: flex-end;
         margin-bottom: 5px;
-        
-        // Se o ícone for o único, joga pra direita
-        &:only-child, &:first-child:last-child {
-            justify-content: flex-end;
-        }
         
         .helpIconContainer {
             a {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 30px;
-                height: 30px;
+                width: 24px;
+                height: 24px;
                 background-color: #FCA311;
                 color: #14213D;
                 text-decoration: none;
                 border-radius: 50%;
-                font-size: 1rem;
+                font-size: 0.8rem;
                 font-weight: bold;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 10px rgba(252, 163, 17, 0.2);
-        
+                
                 &:hover {
-                    background-color: #fff;
-                    transform: scale(1.1);
+                    background-color: #14213D;
+                    color: #FCA311;
                 }
             }
         }
     }
 
-    .allInputsContainer{
-        background:$bgColorForm;
-        max-width: 700px;
-        box-shadow: 6px 5px #8888889c;
+    .closeContainer {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: -15px;
+    }
+
+    .allInputsContainer {
+        padding: 0;
         
-        .inputContainer{
-            display:flex;
-            gap: 15px;
-            justify-content: space-around;
-            input{
-                max-width: 100px;
-            }
-        }
-        .buttonCostContainer{
-            margin-top: 20px;
-            display:flex;
-            justify-content: space-around;
+        .inputRow {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            margin-bottom: 12px;
             
-            .btnContainer{
-                @include containerButtonSubmit;
-               button{
-                @include btnSubmit
-               }
+            .field {
+                flex: 1;
+                min-width: 0; // Previne overflow
+
+                // Selecionar o label dentro do componente Input
+                :global(.mb-3) {
+                    margin-bottom: 0 !important;
+                    
+                    label {
+                        font-size: 0.8rem !important;
+                        font-weight: 600;
+                        color: #666;
+                        margin-bottom: 4px;
+                        display: block;
+                    }
+                    
+                    input {
+                        width: 100%;
+                        padding: 8px;
+                        font-size: 0.95rem !important;
+                        border-radius: 6px;
+                    }
+                }
             }
         }
 
+        .actionsContainer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+            margin-top: 10px;
+
+            button {
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+
+            .calcButton {
+                background-color: #e1e4e8;
+                color: #14213D;
+                border: 1px solid #ced4da;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+
+                &:hover {
+                    background-color: #d1d5da;
+                }
+            }
+
+            .sendButton {
+                background-color: #14213D;
+                color: #FCA311;
+                border: none;
+                padding: 6px 20px;
+                font-size: 0.85rem;
+
+                &:hover {
+                    background-color: #1d2d50;
+                }
+            }
+        }
     }
 }

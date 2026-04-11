@@ -1,5 +1,6 @@
 import React from 'react';
 import Input from '../Input';
+import Title from '../title'; // Importando o Titulo para o modo standalone
 import style from '../../assets/styles/PriceAndExpenseBuilder.module.scss';
 import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
@@ -26,17 +27,15 @@ const PriceAndExpenseBuilder = ({
     percentage: 0,
   });
 
+  const isStandalone = labelPrice === undefined;
+
   const handleChange = (e) => {
     const { id, value } = e.target;
-
-    // Atualiza o estado `form` com o novo valor do campo alterado.
     setForm((prevForm) => ({
       ...prevForm,
       [id]: value,
     }));
 
-    // Se `handleFatherChange` estiver disponível, chama a função passando o evento
-    // para atualizar `formPrice` no componente pai.
     if (handleFatherChange) {
       handleFatherChange({ target: { id, value } }, labelPrice);
     }
@@ -66,137 +65,86 @@ const PriceAndExpenseBuilder = ({
     }
   }, [objPriceCost]);
 
-  React.useEffect(() => {
-    if (labelPrice === undefined) {
-      document.querySelector(`.${style.allInputsContainer}`).style.cssText = `
-        background: #dad4d4;
-        max-width: 700px;
-        box-shadow: 6px 5px #8888889c;
-        position: fixed;
-        top: 31%;
-        left: 35%;
-        width: 86%;
-        padding: 1%;
-        border: solid 1px black;
-      `;
-    }
-    console.log('OBJETO DE RECEITA     ', recipe);
-  }, []);
-
   const handleBlur = (e) => {
     const { id, value } = e.target;
-
-    // Converte os valores de form para números para garantir que não sejam strings
     const cost = parseFloat(formPrice ? formPrice.cost : form.cost) || 0;
-    const percentage =
-      parseFloat(formPrice ? formPrice.percentage : form.percentage) || 0;
+    const percentage = parseFloat(formPrice ? formPrice.percentage : form.percentage) || 0;
     const price = parseFloat(formPrice ? formPrice.price : form.price) || 0;
 
-    // Cenário 1: Se preencher o custo e a porcentagem, calcula o preço
     if (id === 'percentage' && cost > 0) {
       const calculatedPrice = cost + (cost * percentage) / 100;
       setForm((prevForm) => ({
         ...prevForm,
-        price: calculatedPrice.toFixed(2), // Calcula o preço
+        price: calculatedPrice.toFixed(2),
       }));
     }
 
-    // Cenário 2: Se preencher o custo e o preço, calcula a porcentagem correta
     if (id === 'price' && cost > 0) {
       const calculatedPercentage = ((price - cost) / cost) * 100;
       setForm((prevForm) => ({
         ...prevForm,
-        percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta
+        percentage: calculatedPercentage.toFixed(2),
       }));
     }
 
-    // Mantém a lógica anterior para cálculo básico de porcentagem com base em preço e custo
     if (id === 'cost' || id === 'price') {
       if (price > 0 && cost > 0) {
         const calculatedPercentage = ((price - cost) / cost) * 100;
         setForm((prevForm) => ({
           ...prevForm,
-          percentage: calculatedPercentage.toFixed(2), // Calcula a porcentagem correta de lucro
+          percentage: calculatedPercentage.toFixed(2),
         }));
       }
     }
   };
+
   const calculatedRecipeCost = async () => {
     try {
-      // Verifica se recipe é um objeto vazio ou não existe
-      if (
-        !recipe ||
-        (typeof recipe === 'object' && Object.keys(recipe).length === 0)
-      ) {
-        alert(
-          'Esse produto não tem receita criada, por isso é impossível calcular o custo. '
-        );
+      if (!recipe || (typeof recipe === 'object' && Object.keys(recipe).length === 0)) {
+        alert('Esse produto não tem receita criada, por isso é impossível calcular o custo.');
         return;
       }
-      console.log('costProfitMarginCustomized', costProfitMarginCustomized);
 
-      // Se finalingridientsList for um objeto com 3 arrays dentro dele
-      if (
-        typeof recipe.finalingridientsList === 'object' &&
-        !Array.isArray(recipe.finalingridientsList)
-      ) {
+      if (typeof recipe.finalingridientsList === 'object' && !Array.isArray(recipe.finalingridientsList)) {
         const lists = Object.values(recipe.finalingridientsList);
-        const allEmpty = lists.every(
-          (arr) => Array.isArray(arr) && arr.length === 0
-        );
+        const allEmpty = lists.every((arr) => Array.isArray(arr) && arr.length === 0);
         if (allEmpty) {
-          alert(
-            'Esse produto não tem receita criada, por isso é impossível calcular o custo. Atualize a receita para que o custo possa ser preenchido corretamente pelo sistema.'
-          );
+          alert('Esse produto não tem receita criada, por isso é impossível calcular o custo. Atualize a receita para que o custo possa ser preenchido corretamente pelo sistema.');
           return;
         }
       }
 
       const response = await calculateItemCost(recipe);
-      console.log('Custo calculado:', response);
       if (response.default !== undefined) {
-        // Atualiza o campo específico costPriceObj.cost
-        await updateCollection('item', id, {
-          'costPriceObj.cost': response.default,
-        });
-        console.log('Custo padrão atualizado com sucesso no Firestore!');
-      } else if (
-        costProfitMarginCustomized &&
-        typeof costProfitMarginCustomized === 'object'
-      ) {
+        await updateCollection('item', id, { 'costPriceObj.cost': response.default });
+      } else if (costProfitMarginCustomized && typeof costProfitMarginCustomized === 'object') {
         const updates = {};
         const costMap = response;
         ['firstPrice', 'secondPrice', 'thirdPrice'].forEach((priceKey) => {
           const priceData = costProfitMarginCustomized[priceKey];
-
           if (priceData && priceData.label && costMap[priceData.label]) {
-            updates[`costProfitMarginCustomized.${priceKey}.cost`] =
-              costMap[priceData.label];
+            updates[`costProfitMarginCustomized.${priceKey}.cost`] = costMap[priceData.label];
           }
         });
-        console.log('Updates to be made:', updates);
         if (Object.keys(updates).length > 0) {
           await updateCollection('item', id, updates);
-          console.log(
-            'Custos por tamanho atualizados com sucesso no Firestore!'
-          );
-        } else {
-          console.warn('Nenhum campo para atualizar foi encontrado.');
         }
-      } else {
-        console.warn('formPrice está ausente ou malformado.');
       }
     } catch (error) {
-      console.error(
-        'Erro ao calcular ou atualizar o custo no Firestore:',
-        error
-      );
+      console.error('Erro ao calcular ou atualizar o custo no Firestore:', error);
     }
   };
 
   return (
-    <div className={style.container}>
+    <div className={`${style.builderContainer} ${isStandalone ? style.standalone : ''}`}>
       <div className={style.allInputsContainer}>
+        {/* Header no modo standalone */}
+        {isStandalone && (
+          <div className={style.standaloneHeader}>
+            <Title Preço mainTitle="Definição de Preço" />
+          </div>
+        )}
+
         {!hideHelpIcon && (
           <div className={style.helpIconHeader}>
             <div className={style.helpIconContainer}>
@@ -211,82 +159,68 @@ const PriceAndExpenseBuilder = ({
             </div>
           </div>
         )}
+        
         {setShowPopupCostAndPrice && (
-          <CloseBtn setClose={setShowPopupCostAndPrice} />
-        )}
-        <div className={style.inputContainer}>
-          <Input
-            id="price"
-            label="Preço"
-            value={form.price}
-            type="number"
-            onChange={
-              handleFatherChange
-                ? (e) => handleFatherChange(e, labelPrice)
-                : handleChange
-            }
-            onBlur={
-              handleFatherBlur
-                ? (e) => handleFatherBlur(e, labelPrice)
-                : handleBlur
-            }
-            title={tooltips.priceBuilder.price}
-          />
-          <Input
-            id="cost"
-            label="Custo"
-            value={form.cost}
-            type="number"
-            onChange={
-              handleFatherChange
-                ? (e) => handleFatherChange(e, labelPrice)
-                : handleChange
-            }
-            onBlur={
-              handleFatherBlur
-                ? (e) => handleFatherBlur(e, labelPrice)
-                : handleBlur
-            }
-            title={tooltips.priceBuilder.cost}
-          />
-          <Input
-            id="percentage"
-            label="Porcentagem"
-            value={form.percentage}
-            type="number"
-            onChange={
-              handleFatherChange
-                ? (e) => handleFatherChange(e, labelPrice)
-                : handleChange
-            }
-            onBlur={
-              handleFatherBlur
-                ? (e) => handleFatherBlur(e, labelPrice)
-                : handleBlur
-            }
-            title={tooltips.priceBuilder.percentage}
-          />
-        </div>
-        <div className={style.buttonCostContainer}>
-          <div className={style.btnContainer}>
-            <button
-              onClick={calculatedRecipeCost}
-              title={tooltips.priceBuilder.calculate}
-            >
-              Calcular Custo
-            </button>
+          <div className={isStandalone ? style.standaloneClose : style.closeContainer}>
+            <CloseBtn setClose={setShowPopupCostAndPrice} />
           </div>
+        )}
+
+        <div className={style.inputRow}>
+          <div className={style.field}>
+            <Input
+              id="price"
+              label="Preço R$"
+              value={form.price}
+              type="number"
+              onChange={handleFatherChange ? (e) => handleFatherChange(e, labelPrice) : handleChange}
+              onBlur={handleFatherBlur ? (e) => handleFatherBlur(e, labelPrice) : handleBlur}
+              title={tooltips.priceBuilder.price}
+            />
+          </div>
+          <div className={style.field}>
+            <Input
+              id="cost"
+              label="Custo R$"
+              value={form.cost}
+              type="number"
+              onChange={handleFatherChange ? (e) => handleFatherChange(e, labelPrice) : handleChange}
+              onBlur={handleFatherBlur ? (e) => handleFatherBlur(e, labelPrice) : handleBlur}
+              title={tooltips.priceBuilder.cost}
+            />
+          </div>
+          <div className={style.field}>
+            <Input
+              id="percentage"
+              label="Margem (%)"
+              value={form.percentage}
+              type="number"
+              onChange={handleFatherChange ? (e) => handleFatherChange(e, labelPrice) : handleChange}
+              onBlur={handleFatherBlur ? (e) => handleFatherBlur(e, labelPrice) : handleBlur}
+              title={tooltips.priceBuilder.percentage}
+            />
+          </div>
+        </div>
+
+        <div className={style.actionsContainer}>
+          <button
+            type="button"
+            className={style.calcButton}
+            onClick={calculatedRecipeCost}
+            title={tooltips.priceBuilder.calculate}
+          >
+            Calcular Custo
+          </button>
+          
           {addPriceObj && (
-            <div className={style.btnContainer}>
-              <button
-                onClick={() => {
-                  addPriceObj(form);
-                }}
-                title={tooltips.priceBuilder.send}
-              >
-                Enviar
-              </button>
-            </div>
+            <button
+              type="button"
+              className={style.sendButton}
+              onClick={() => addPriceObj(form)}
+              title={tooltips.priceBuilder.send}
+            >
+              Confirmar Preço
+            </button>
           )}
         </div>
       </div>
