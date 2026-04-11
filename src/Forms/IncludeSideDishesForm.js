@@ -107,9 +107,10 @@ function IncludeSideDishesForm({
           </a>
         </div>
       </div>
+      
       {sideDishes && (
-        <div className="my-3">
-          <label>Selecione os acompanhamentos do prato</label>
+        <div className={style.formGroup}>
+          <label htmlFor="sideDishesElement">Selecione os acompanhamentos do prato</label>
           <select
             id="sideDishesElement"
             value={form.sideDishesElement}
@@ -120,10 +121,9 @@ function IncludeSideDishesForm({
             }}
             title={tooltips.includeSideDishesForm.select}
           >
-            <option value="">Selecione </option>
+            <option value="">Selecione um item</option>
             {sideDishes.map((item, index) => (
               <option key={index} value={item.id}>
-                {' '}
                 {item.sideDishes}
               </option>
             ))}
@@ -131,25 +131,43 @@ function IncludeSideDishesForm({
         </div>
       )}
 
-      <div className="selected-dishes">
-        {selectedSideDishes.map((dish) => (
-          <div key={dish.id} className="selected-item">
-            <p>{dish.sideDishes}</p>
-            <button onClick={() => removeSideDish(dish.id)}>x</button>
-          </div>
-        ))}
+      <div className={style.selectedDishesContainer}>
+        <p className={style.selectionTitle}>Itens selecionados para este prato:</p>
+        <div className={style.selectedDishes}>
+          {selectedSideDishes.length > 0 ? (
+            selectedSideDishes.map((dish) => (
+              <div key={dish.id} className={style.selectedItem}>
+                <p>{dish.sideDishes}</p>
+                <button 
+                  type="button" 
+                  onClick={() => removeSideDish(dish.id)}
+                  title="Remover acompanhamento"
+                >
+                  &times;
+                </button>
+              </div>
+            ))
+          ) : (
+            <span style={{ fontSize: '0.9rem', color: '#999' }}>Nenhum acompanhamento selecionado</span>
+          )}
+        </div>
       </div>
-      <Input
-        id="limitSideDishes"
-        label="Quantidade máxima de acompanhamentos"
-        value={maxLimitSideDishes}
-        type="number"
-        onChange={handleChange}
-        title={tooltips.includeSideDishesForm.limit}
-      />
+
+      <div className={style.formGroup}>
+        <Input
+          id="limitSideDishes"
+          label="Quantidade máxima de acompanhamentos"
+          value={maxLimitSideDishes}
+          type="number"
+          onChange={handleChange}
+          title={tooltips.includeSideDishesForm.limit}
+          style={{ width: '100%', fontSize: '1rem' }}
+        />
+      </div>
+
       <div className={style.formButtonSubmit}>
         <button onClick={sendArrayList} title={tooltips.includeSideDishesForm.add}>
-          Adicionar{' '}
+          Confirmar Seleção
         </button>
       </div>
     </div>

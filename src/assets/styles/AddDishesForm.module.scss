@@ -93,12 +93,19 @@
         
         
     }
-    .containerNewSideDishes{
-        background-color: $bgColorForm;
+    .containerNewSideDishes {
         position: fixed;
-        top: 20%;
-        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.7);
-        border: 1px solid black;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.4); // Backdrop escuro suave
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: none;
+        border: none;
     }
     .formButtonSubmit {
         @include containerButtonSubmit;
