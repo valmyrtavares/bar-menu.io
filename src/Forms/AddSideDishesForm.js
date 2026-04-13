@@ -308,6 +308,18 @@ function AddSideDishesForm({
           objPriceCost={form.costPriceObj}
         />
       )}
+      <div className={style.helpIconHeader}>
+        <div className={style.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.ax0nn2e87w6r#heading=h.prfdtk2uskb2"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+      </div>
       <Link to="/admin/admin">
         <Title
           mainTitle={

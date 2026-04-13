@@ -39,4 +39,32 @@
                 font-size: 16px;
             }
     }
+    .helpIconHeader {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 10px;
+        padding-right: 15px;
+        margin-bottom: -15px;
+        
+        .helpIconContainer {
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 26px;
+                height: 26px;
+                background-color: #FCA311;
+                color: #14213D;
+                text-decoration: none;
+                border-radius: 50%;
+                font-size: 0.85rem;
+                font-weight: bold;
+                
+                &:hover {
+                    background-color: #14213D;
+                    color: #FCA311;
+                }
+            }
+        }
+    }
 }
