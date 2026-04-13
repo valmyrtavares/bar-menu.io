@@ -182,7 +182,7 @@ const RequestModal = () => {
     });
 
     return () => unsubscribe();
-  }, [isProcessingPayment, activeRequestDocId]);
+  }, [isProcessingPayment, activeRequestDocId, userData]);
 
   // Waiter Call Feature State
   const [waiterCallActive, setWaiterCallActive] = React.useState(false);
@@ -427,8 +427,8 @@ const RequestModal = () => {
   };
 
   const openRegisterPopup = async () => {
-    if (isToten && userData.name === 'anonymous') {
-      if (userData.request) {
+    if (isToten && userData?.name === 'anonymous') {
+      if (userData?.request) {
         // Salvar os pedidos do anonymous no localStorage antes de trocar o usuário
         localStorage.setItem('backorder', JSON.stringify(userData.request));
 
