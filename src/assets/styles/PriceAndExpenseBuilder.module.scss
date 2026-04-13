@@ -12,7 +12,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 1050; // Garantir que fique acima de outros popups
+        z-index: 2000; // Garantir que fique acima de outros popups (como o formulário de pratos)
         
         width: 95%;
         max-width: 450px;

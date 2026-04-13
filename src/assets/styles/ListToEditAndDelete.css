@@ -7,15 +7,21 @@
 
 .form-position {
     position: fixed;
-    top: 35px;
-    left: 18%;
-    background-color: var(--bg-color);
-   border:solid 3px var( --secundary-bg-color)
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    max-width: 750px;
+    max-height: 92vh;
+    overflow-y: auto;
+    z-index: 1500;
+    
+    background-color: #ffffff;
+    border: solid 2px var(--secundary-bg-color);
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    padding: 10px;
 }
 @media(max-width: 450px) {
-    .form-position {
-        position: absolute;
-        top: 100px;
-        left: 3%;
-    }
+
 }

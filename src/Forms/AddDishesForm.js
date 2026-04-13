@@ -366,13 +366,29 @@ function AddDishesForm({
           id={form.id}
         />
       )}
-      <div className="close-btn">
-        {setModalEditDishes ? (
-          <button onClick={() => setModalEditDishes(false)}>X</button>
-        ) : (
-          <div onClick={closeModal}>X</div>
+
+      {showPopupSideDishes && (
+        <div className={style.containerNewSideDishes}>
+          <IncludeSideDishesForm
+            setShowPopupSideDisehs={setShowPopupSideDisehs}
+            setNewSideDishesList={setNewSideDishesList}
+            newSideDishesList={newSideDishesList}
+            setMaxLimitSideDishes={setMaxLimitSideDishes}
+            maxLimitSideDishes={maxLimitSideDishes}
+          />
+        </div>
+      )}
+
+      <div className={style.customizePriceContainer}>
+        {showPopupCustomizePrice && (
+          <CustomizePriceForm
+            setShowPopupCustomizePrice={setShowPopupCustomizePrice}
+            onPriceChange={onPriceChange}
+            customizedPriceObj={costProfitMarginCustomized}
+          />
         )}
       </div>
+
       <div className={style.recipeModalContainer}>
         {recipeModal && (
           <RecipeDish
@@ -387,157 +403,187 @@ function AddDishesForm({
           />
         )}
       </div>
-      <div className={style.helpIconHeader}>
-        <div className={style.helpIconContainer}>
-          <a
-            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hi6g5k67uo8k"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Abrir documentação"
-          >
-            <span>?</span>
-          </a>
-        </div>
-      </div>
-      <Link to="/admin/admin">
-        <Title mainTitle={mainTitle ? mainTitle : 'Adicione um prato'} />
-      </Link>
-      <form onSubmit={handleSubmit} className="m-1">
-        <Input
-          id="title"
-          label="Titulo"
-          required
-          value={form.title}
-          type="text"
-          onChange={handleChange}
-          title={tooltips.addDishesForm.title}
-        />
-        <div className="my-3">
-          <label className="form-label" title={tooltips.addDishesForm.category}>Categoria</label>
-          <select
-            id="category"
-            required
-            value={form.category}
-            className="form-select"
-            onChange={handleChange}
-          >
-            {categories &&
-              categories.map((category, index) => (
-                <option key={index} value={category}>
-                  {category}
-                </option>
-              ))}
-          </select>
-        </div>
-        <Input
-          id="comment"
-          required
-          label="Comentário"
-          value={form.comment}
-          type="text"
-          onChange={handleChange}
-          title={tooltips.addDishesForm.comment}
-        />
-        {hasRawMaterial ? (
-          <div className={style.boxPrice}>
-            <button
-              className="btn btn-success"
-              type="button"
-              onClick={() => setShowPopupCostAndPrice(true)}
-              title={tooltips.addDishesForm.price}
-            >
-              Preço R$ {form.price}
-            </button>
-            <button
-              className="btn btn-success"
-              type="button"
-              onClick={() => setShowPopupCustomizePrice(true)}
-              title={tooltips.addDishesForm.price}
-            >
-              Preço Customizado
-            </button>
+
+      <div className={style.formPageContent}>
+        <div className={style.formHeader}>
+          <div className={style.helpIconHeader}>
+            <div className={style.helpIconContainer}>
+              <a
+                href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hi6g5k67uo8k"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Abrir documentação"
+              >
+                <span>?</span>
+              </a>
+            </div>
           </div>
-        ) : (
-          <Input
-            id="price"
-            label="Preço R$"
-            required
-            value={form.price}
-            type="number"
-            onChange={handleChange}
-            title={tooltips.addDishesForm.price}
-          />
-        )}
-        <Input
-          id="image"
-          label="Link da imagem"
-          value={form.image}
-          type="text"
-          onChange={handleChange}
-        />
-        <div className={style.hiddenInput}>
-          <Input
-            id="sideDishesElementList"
-            value={form.sideDishesElementList}
-            type="hidden"
-            onChange={handleChange}
-          />
-          <Input
-            id="maxLimitSideDishes"
-            value={form.maxLimitSideDishes}
-            type="hidden"
-            onChange={handleChange}
-          />
+          <Link to="/admin/admin">
+            <Title mainTitle={mainTitle ? mainTitle : 'Adicione um prato'} />
+          </Link>
         </div>
-        <div className={style.uploadImage} title={tooltips.addDishesForm.image}>
-          <label className="form-label">Carregar imagem</label>
-          <input type="file" onChange={onfileChange} />
-          <progress value={progress} max="100" />
-          {url && (
-            <img className="image-preview" src={url} alt="Uploaded file" />
+
+        <form onSubmit={handleSubmit} className={style.mainFormBody}>
+          {/* Seção 1: Identificação */}
+          <section className={style.formSection}>
+            <div className={style.sectionTitle}>ℹ️ Informações Básicas</div>
+            <div className={style.inputGroup}>
+              <Input
+                id="title"
+                label="Título do Prato"
+                placeholder="Ex: Picanha na Chapa"
+                required
+                value={form.title}
+                type="text"
+                onChange={handleChange}
+                title={tooltips.addDishesForm.title}
+              />
+            </div>
+            
+            <div className={style.inputGroup}>
+              <label className={style.label} title={tooltips.addDishesForm.category}>Categoria do Menu</label>
+              <select
+                id="category"
+                required
+                value={form.category}
+                className={style.select}
+                onChange={handleChange}
+              >
+                {categories &&
+                  categories.map((category, index) => (
+                    <option key={index} value={category}>
+                      {category}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className={style.inputGroup}>
+              <Input
+                id="comment"
+                required
+                label="Comentário / Descrição Curta"
+                placeholder="Ex: Acompanha arroz e fritas"
+                value={form.comment}
+                type="text"
+                onChange={handleChange}
+                title={tooltips.addDishesForm.comment}
+              />
+            </div>
+          </section>
+
+          {/* Seção 2: Estratégia de Preço */}
+          <section className={style.formSection}>
+            <div className={style.sectionTitle}>💰 Precificação e Custos</div>
+            {hasRawMaterial ? (
+              <div className={style.pricingOptions}>
+                <div className={style.priceBadge} onClick={() => setShowPopupCostAndPrice(true)}>
+                   <span className={style.badgeLabel}>Preço Único</span>
+                   <span className={style.badgeValue}>R$ {form.price}</span>
+                   <span className={style.editHint}>Clique para editar</span>
+                </div>
+                
+                <div className={style.priceBadge} onClick={() => setShowPopupCustomizePrice(true)}>
+                   <span className={style.badgeLabel}>Preços Customizados</span>
+                   <span className={style.badgeValue}>Vários Tamanhos</span>
+                   <span className={style.editHint}>Clique para configurar</span>
+                </div>
+              </div>
+            ) : (
+              <div className={style.inputGroup}>
+                <Input
+                  id="price"
+                  label="Preço de Venda (R$)"
+                  required
+                  value={form.price}
+                  type="number"
+                  onChange={handleChange}
+                  title={tooltips.addDishesForm.price}
+                />
+              </div>
+            )}
+          </section>
+
+          {/* Seção 3: Imagem e Visibilidade */}
+          <section className={style.formSection}>
+            <div className={style.sectionTitle}>📸 Mídia e Visibilidade</div>
+            
+            <div className={style.imageUploadContainer}>
+              <div className={style.uploadHeader}>
+                <label className={style.label}>Capa do Prato</label>
+                <input type="file" id="fileInput" className={style.fileInput} onChange={onfileChange} />
+                <label htmlFor="fileInput" className={style.uploadBtn}>
+                  {progress > 0 && progress < 100 ? `Enviando ${progress.toFixed(0)}%` : 'Selecionar Imagem'}
+                </label>
+              </div>
+
+              {progress > 0 && progress < 100 && (
+                <div className={style.progressBarContainer}>
+                   <div className={style.progressBar} style={{ width: `${progress}%` }} />
+                </div>
+              )}
+
+              <div className={style.imagePreviewArea}>
+                {url || form.image ? (
+                  <div className={style.previewWrapper}>
+                    <img className={style.previewImg} src={url || form.image} alt="Dish preview" />
+                    <span className={style.previewHint}>Imagem Atual</span>
+                  </div>
+                ) : (
+                  <div className={style.noImage}>Sem imagem carregada</div>
+                )}
+                
+                <div className={style.inputGroupInline}>
+                  <Input
+                    id="image"
+                    label="Ou cole o link da imagem"
+                    value={form.image}
+                    type="text"
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={style.visibilityToggle}>
+              <div className={style.checkWrapper}>
+                <input
+                  className={style.checkbox}
+                  id="carrossel"
+                  type="checkbox"
+                  checked={form.carrossel}
+                  onChange={handleChange}
+                />
+                <label htmlFor="carrossel" title={tooltips.addDishesForm.carrossel}>
+                  Destacar este item no Carrossel da Página Principal
+                </label>
+              </div>
+            </div>
+          </section>
+
+          {/* Botão Salvar Principal */}
+          <div className={style.formButtonSubmit}>
+            <button type="submit">Salvar Alterações do Prato</button>
+          </div>
+        </form>
+
+        {/* Barra de Ações Rápidas Inferior */}
+        <div className={style.bottomActionBar}>
+          <button className={style.actionBtn} type="button" onClick={openModalSideDishes} title={tooltips.addDishesForm.sideDishes}>
+            🍱 Acompanhamentos
+          </button>
+          {hasRawMaterial && (
+            <button className={style.actionBtn} type="button" onClick={openRecipeModal}>
+              📖 Receita Detalhada
+            </button>
           )}
         </div>
-        <div className={style.checkInput}>
-          <input
-            className="form-check-input"
-            id="carrossel"
-            type="checkbox"
-            checked={form.carrossel}
-            onChange={handleChange}
-          />
-          <label className="form-check-label" title={tooltips.addDishesForm.carrossel}>
-            Adicionar item ao carrossel
-          </label>
+
+        {/* Inputs Escondidos */}
+        <div className={style.hiddenFields}>
+           <input type="hidden" value={form.sideDishesElementList} />
+           <input type="hidden" value={form.maxLimitSideDishes} />
         </div>
-        <div className={style.formButtonSubmit}>
-          <button>Enviar</button>
-        </div>
-      </form>
-      {showPopupSideDishes && (
-        <div className={style.containerNewSideDishes}>
-          <IncludeSideDishesForm
-            setShowPopupSideDisehs={setShowPopupSideDisehs}
-            setNewSideDishesList={setNewSideDishesList}
-            newSideDishesList={newSideDishesList}
-            setMaxLimitSideDishes={setMaxLimitSideDishes}
-            maxLimitSideDishes={maxLimitSideDishes}
-          />
-        </div>
-      )}
-      <div className="external-container-customize-price">
-        {showPopupCustomizePrice && (
-          <CustomizePriceForm
-            setShowPopupCustomizePrice={setShowPopupCustomizePrice}
-            onPriceChange={onPriceChange}
-            customizedPriceObj={costProfitMarginCustomized}
-          />
-        )}
-      </div>
-      <div className={style.sidedishesRecipeBtnContainer}>
-        <button onClick={openModalSideDishes} title={tooltips.addDishesForm.sideDishes}> Acompanhamentos</button>
-        {hasRawMaterial && (
-          <button onClick={openRecipeModal}> Receita</button>
-        )}
       </div>
     </div>
   );
