@@ -102,7 +102,7 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
                 <div className="customer">
                   <p>
                     <span>Valor Total R$ </span>{' '}
-                    {item.finalPriceRequest.toLocaleString('pt-BR', {
+                    {(item.finalPriceRequest || 0).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -121,7 +121,7 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
                           <p>{dishe.name}</p>
                           <p>
                             R${' '}
-                            {dishe.finalPrice.toLocaleString('pt-BR', {
+                            {(dishe.finalPrice || 0).toLocaleString('pt-BR', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
