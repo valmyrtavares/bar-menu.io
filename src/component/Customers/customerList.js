@@ -97,15 +97,28 @@ const CustomerList = () => {
           placeholder="Busque pelo nome "
         />
       </div>
+      <div className={clients.headerContainer}>
+        <div className={clients.helpIconContainer}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.4kp1o8aw6chf"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+        <Link to="/admin/admin">
+          <Title mainTitle="Lista de Clientes" />
+        </Link>
+      </div>
+
       <div className={clients.buttonTitleContainer}>
         {customerList && customerList.length > 0 && (
           <h5>
             <span>{customerList.length}</span> Clientes
           </h5>
         )}
-        <Link to="/admin/admin">
-          <Title mainTitle="Lista de Clientes" />
-        </Link>
         <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
       </div>
       <table striped bordered hover>
