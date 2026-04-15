@@ -72,6 +72,9 @@ const RequestModal = () => {
   const [manualTableNumber, setManualTableNumber] = React.useState('');
   const [tableAssignedInThisSession, setTableAssignedInThisSession] = React.useState(false);
 
+  // NOVO: Ref para salvar requisições localmente durante o longo processo no Toten (Resistente à perda de localStorage)
+  const frozenRequestsForTotenCheckout = React.useRef(null);
+
   const syncServiceChargeToFirestore = async (isEnabled) => {
     try {
       const currentTable = localStorage.getItem('tableNumber');
@@ -429,7 +432,8 @@ const RequestModal = () => {
   const openRegisterPopup = async () => {
     if (isToten && userData?.name === 'anonymous') {
       if (userData?.request) {
-        // Salvar os pedidos do anonymous no localStorage antes de trocar o usuário
+        // Salvar os pedidos do anonymous na Ref da memória (Mais seguro) e no localStorage (Fallback)
+        frozenRequestsForTotenCheckout.current = userData.request;
         localStorage.setItem('backorder', JSON.stringify(userData.request));
 
         try {
@@ -479,6 +483,7 @@ const RequestModal = () => {
 
   const handleRegisterForDelivery = async () => {
     if (userData?.request) {
+      frozenRequestsForTotenCheckout.current = userData.request;
       localStorage.setItem('backorder', JSON.stringify(userData.request));
       try {
         const userQuery = query(collection(db, 'user'), where('name', '==', 'anonymous'));
@@ -745,7 +750,13 @@ const RequestModal = () => {
         const data = await getOneItemColleciton('user', id);
         // ... rest of the function (condensed for tool usage)
         const storedRequests = localStorage.getItem('backorder');
-        const previousRequests = storedRequests ? JSON.parse(storedRequests) : [];
+        
+        let previousRequests = [];
+        if (frozenRequestsForTotenCheckout.current && frozenRequestsForTotenCheckout.current.length > 0) {
+          previousRequests = frozenRequestsForTotenCheckout.current;
+        } else if (storedRequests) {
+          previousRequests = JSON.parse(storedRequests);
+        }
 
         const userNewRequest = {
           name:

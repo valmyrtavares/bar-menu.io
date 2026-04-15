@@ -1818,7 +1818,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       </div>
                     </div>
                     <div className={style.imageButton}>
-                      <img src={item.image} alt="123" />
+                      <img 
+                        src={item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg'} 
+                        alt="Imagem do Pedido" 
+                      />
                       <button
                         onClick={() =>
                           setRecipeModal({ openModal: true, id: item.id })
