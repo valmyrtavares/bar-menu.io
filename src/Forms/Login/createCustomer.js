@@ -373,11 +373,11 @@ const CreateCustomer = () => {
           setPopupName={setPopupName}
         />
       )}
-      {welcome && welcome.salute && welcome.gift && (
+      {welcome && (welcome.welcomeMessage || welcome.rewardDescription) && (
         <main>
-          {welcome.salute && welcome.gift && <h1>Seja bem vindo</h1>}
-          {welcome.salute && <p>{welcome.salute}</p>}
-          {welcome.gift && <p>{welcome.gift}</p>}
+          <h1>Seja bem vindo</h1>
+          {welcome.welcomeMessage && <p>{welcome.welcomeMessage}</p>}
+          {welcome.rewardDescription && <p>{welcome.rewardDescription}</p>}
         </main>
       )}
       {global.packageTier !== 1 && (

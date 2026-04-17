@@ -1,21 +1,20 @@
 import React from 'react';
-import '../assets/styles/WelcomeSaluteForm.css';
+import style from '../assets/styles/WelcomeSaluteForm.module.scss';
 import Title from '../component/title.js';
 import { db } from '../config-firebase/firebase.js';
-import { getFirestore, setDoc, doc } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { setDoc, doc } from 'firebase/firestore';
+import { Link, useNavigate } from 'react-router-dom';
 
 function WelcomeSaluteForm() {
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
-    gift: '',
-    salute: '',
+    welcomeMessage: '',
+    rewardDescription: '',
   });
 
   function handleChange({ target }) {
     const { id, value } = target;
-    setForm({ ...form, [id]: value, [id]: value });
+    setForm({ ...form, [id]: value });
   }
 
   const handleSubmit = async (event) => {
@@ -33,41 +32,48 @@ function WelcomeSaluteForm() {
   };
 
   return (
-    <div className="container mt-5 p-3 bg-body-tertiar">
+    <div className={style.containerWelcomeSalute}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.24804x2kn895"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <Link to="/admin/admin">
-        <Title mainTitle="Saudação inicial" />
+        <Title mainTitle="Saudação Inicial e Brinde" />
       </Link>
-      <Title title="Crie um novo Usuário e senha" />
+      <Title title="Configurações de Boas-Vindas" />
       <form onSubmit={handleSubmit} className="m-1">
-        <div className="container-textArea">
+        <div className={style.containerTextArea}>
           <div>
-            <label>Crie uma saudação para a tela inicial do seu Menu</label>
+            <label>Mensagem de Saudação</label>
             <textarea
-              id="gift"
-              className="text-area"
-              value={form.gift}
+              id="welcomeMessage"
+              className={style.textArea}
+              value={form.welcomeMessage}
               onChange={handleChange}
-            >
-              Saudação
-            </textarea>
+              placeholder="Ex: Seja bem-vindo ao nosso restaurante!"
+              title="Esta mensagem aparecerá no topo da tela de login/cadastro para todos os clientes."
+            />
           </div>
           <div>
-            <label>
-              Descreva aqui o brinde que vai oferecer ao seu cliente por se
-              cadastrar
-            </label>
+            <label>Descrição do Brinde (Incentivo ao Cadastro)</label>
             <textarea
-              id="salute"
-              className="text-area"
-              value={form.salute}
+              id="rewardDescription"
+              className={style.textArea}
+              value={form.rewardDescription}
               onChange={handleChange}
-            >
-              Saudação
-            </textarea>
+              placeholder="Ex: Faça seu cadastro agora e ganhe uma sobremesa grátis!"
+              title="Use este campo para oferecer um presente ao cliente em troca dos dados dele. Isso aumenta muito a taxa de cadastro."
+            />
           </div>
         </div>
 
-        <button className="btn btn-primary">Enviar</button>
+        <button className="btn btn-primary">Salvar Configurações</button>
       </form>
     </div>
   );
