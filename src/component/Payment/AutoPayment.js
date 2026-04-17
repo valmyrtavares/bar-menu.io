@@ -28,6 +28,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
   const [paymentData, setPaymentData] = useState(null);
   const cpfRef = React.useRef('');
 
+  const getTerminalId = () => {
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '01' : '02';
+  };
+
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
 
@@ -148,7 +152,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: getTerminalId(),
           },
           message: {
             command: 'PAYMENT',
@@ -196,7 +200,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
           receiver: {
             companyId: '003738',
             storeId: '0001',
-            terminalId: '02',
+            terminalId: getTerminalId(),
           },
         }),
       });

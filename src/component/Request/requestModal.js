@@ -75,6 +75,27 @@ const RequestModal = () => {
   // NOVO: Ref para salvar requisições localmente durante o longo processo no Toten (Resistente à perda de localStorage)
   const frozenRequestsForTotenCheckout = React.useRef(null);
 
+  const calculateSafeTotemPrice = () => {
+    let itemsToCalculate = [];
+    if (frozenRequestsForTotenCheckout.current && frozenRequestsForTotenCheckout.current.length > 0) {
+      itemsToCalculate = frozenRequestsForTotenCheckout.current;
+    } else {
+      const stored = localStorage.getItem('backorder');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.length > 0) itemsToCalculate = parsed;
+        } catch (e) { }
+      }
+    }
+    
+    if (itemsToCalculate.length > 0) {
+      const price = itemsToCalculate.reduce((acc, el) => acc + (el.finalPrice || el.price || 0), 0);
+      return Number(price.toFixed(2));
+    }
+    return finalPriceRequest;
+  };
+
   const syncServiceChargeToFirestore = async (isEnabled) => {
     try {
       const currentTable = localStorage.getItem('tableNumber');
@@ -256,18 +277,6 @@ const RequestModal = () => {
   React.useEffect(() => {
     if (userData && Array.isArray(userData.request)) {
       // Mudança aqui: Verificação de que userData existe e que request é um array
-
-      if (localStorage.hasOwnProperty('backorder')) {
-        const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
-        if (orderStoraged && orderStoraged.length > 0) {
-          if (userData.request && userData.request.length > 0) {
-            orderStoraged.forEach((element) => {
-              userData.request.push(element);
-            });
-          }
-        }
-        console.log('order Storaged   ', orderStoraged);
-      }
       requestFinalPrice(userData);
       if (userData.request.length > 0) {
         setDisabledBtn(false);
@@ -326,9 +335,7 @@ const RequestModal = () => {
   React.useEffect(() => {
     let unsubscribe;
     if (currentUser) {
-      if (backorder) {
-        updateingNewCustomer(backorder);
-      }
+      updateingNewCustomer();
       const userDocRef = doc(db, 'user', currentUser);
       unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
         const data = userDocSnap.data();
@@ -800,7 +807,7 @@ const RequestModal = () => {
             sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
             indexInRequest: idx
           })),
-          finalPriceRequest: finalPriceRequest,
+          finalPriceRequest: previousRequests.length > 0 ? Number(previousRequests.reduce((acc, el) => acc + (el.finalPrice || el.price || 0), 0).toFixed(2)) : finalPriceRequest,
           idPayer: idPayerRef.current,
           dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
           countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
@@ -1299,7 +1306,7 @@ const RequestModal = () => {
           <AutoPayment
             onChoose={onChoose}
             setIdPayer={(value) => (idPayerRef.current = value)}
-            price={finalPriceRequest}
+            price={calculateSafeTotemPrice()}
             setAutoPayment={setAutoPayment}
           />
         </div>
