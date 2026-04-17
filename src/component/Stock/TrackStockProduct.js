@@ -142,6 +142,16 @@ const TrackStockProduct = () => {
 
   return (
     <div className={style.containerTrackStockproduct}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.9i08uzpmnp27"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       {showEditForm && (
         <EditFormStockProduct
           fetchStock={fetchStock}

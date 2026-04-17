@@ -404,6 +404,16 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   return (
     <div className={edit.popupOverlay}>
       <div className={edit.containerEditStock}>
+        <div className={edit.containerIcon}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.ya28pgiijere"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
         <div className={edit.closeBtnRow}>
           <button
             className={edit.closeBtn}
@@ -430,6 +440,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
+              title="O volume total disponível do produto no estoque atualmente."
             />
           </div>
 
@@ -443,6 +454,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
+              title="O valor total investido no volume que está em estoque."
             />
           </div>
 
@@ -456,6 +468,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
+              title="Limite mínimo de estoque. Abaixo disso, o sistema emitirá um alerta de reposição."
             />
           </div>
           <div className={edit.fieldWrapper}>
@@ -468,6 +481,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               type="text"
               onChange={handleChange}
               onBlur={updateCost}
+              title="Volume crítico. Quando o estoque atingir este nível, os pratos que usam esta matéria-prima serão desativados no menu."
             />
           </div>
         </div>
@@ -482,6 +496,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             rows={3}
             placeholder="Adicione uma observação sobre os motivos da sua edição"
             onBlur={updateNoteEdit}
+            title="Espaço para registrar o motivo deste ajuste manual (ex: perda, contagem de estoque, etc.)."
           />
         </div>
 

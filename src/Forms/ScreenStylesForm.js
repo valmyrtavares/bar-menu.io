@@ -97,6 +97,17 @@ function ScreenStylesForm() {
 
   return (
     <>
+    <div className={style.containerStyles}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.16fhsjgyzul2"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <Link to="/admin/admin">
         <Title mainTitle="Marca e Estilo" />
       </Link>
@@ -108,92 +119,101 @@ function ScreenStylesForm() {
             label="Carregar nova logomarca"
             type="file"
             onChange={onfileChange}
+            title="Carregue a imagem da sua marca. Ela aparecerá no topo do seu site e terminal."
           />
           <progress className="w-100" value={progress} max="100" />
           {(url || global.image) && (
             <div className="mt-2 text-center">
-              <img 
-                className="image-preview" 
-                src={url || global.image} 
-                alt="Logo Atual" 
+              <img
+                className="image-preview"
+                src={url || global.image}
+                alt="Logo Atual"
                 style={{ maxHeight: '100px', objectFit: 'contain' }}
               />
             </div>
           )}
         </div>
-        
+
         <form onSubmit={handleSubmit}>
-        <Input
-          id="btnColor"
-          label="Cor dos botões"
-          value={form.btnColor}
-          type="color"
-          onChange={handleChange}
-        />
-        <Input
-          id="bgColor"
-          label="Cor de Fundo geral"
-          value={form.bgColor}
-          type="color"
-          onChange={handleChange}
-        />
-        <Input
-          id="secundaryBgColor"
-          label="Cor de Fundo secundário"
-          value={form.secundaryBgColor}
-          type="color"
-          onChange={handleChange}
-        />
-        <Input
-          id="fontColor"
-          label="Cor de Texto"
-          value={form.fontColor}
-          type="color"
-          onChange={handleChange}
-        />
-        <Input
-          id="titleFontColor"
-          label="Cor dos Títulos"
-          value={form.titleFontColor}
-          type="color"
-          onChange={handleChange}
-        />
-        <div className="my-3">
-          <label className="form-label">Fontes de Títulos</label>
-          <select
-            id="titleFont"
-            value={form.titleFont}
-            className="form-select"
+          <Input
+            id="btnColor"
+            label="Cor dos botões"
+            value={form.btnColor}
+            type="color"
             onChange={handleChange}
-          >
-            <option disabled value="">
-              Selecione sua fonte
-            </option>
-            <option value="Arial">Arial</option>
-            <option value="impact">Impact</option>
-            <option value="sans serif ">Snas Serif</option>
-          </select>
-        </div>
-        <div className="my-3">
-          <label className="form-label">Fontes de Textos</label>
-          <select
-            id="textFont"
-            value={form.textFont}
-            className="form-select"
+            title="Defina a cor principal de ação. Recomendamos usar uma cor vibrante do seu logotipo para manter a identidade visual."
+          />
+          <Input
+            id="bgColor"
+            label="Cor de Fundo geral"
+            value={form.bgColor}
+            type="color"
             onChange={handleChange}
-          >
-            <option disabled value="">
-              Selecione sua fonte
-            </option>
-            <option value="impact">Impact</option>
-            <option value="Arial">Arial</option>
-            <option value="sans serif ">Snas Serif</option>
-          </select>
-        </div>
-        <div className={style.formButtonSubmit}>
-          <button type="submit">Salve suas modificações</button>
-        </div>
-      </form>
+            title="A cor base que preencherá o fundo das suas páginas."
+          />
+          <Input
+            id="secundaryBgColor"
+            label="Cor de Fundo secundário"
+            value={form.secundaryBgColor}
+            type="color"
+            onChange={handleChange}
+            title="Cor usada em áreas específicas, como cards de produtos, para criar contraste."
+          />
+          <Input
+            id="fontColor"
+            label="Cor de Texto"
+            value={form.fontColor}
+            type="color"
+            onChange={handleChange}
+            title="A cor principal para descrições e informações. Garanta que tenha boa leitura sobre o fundo escolhido."
+          />
+          <Input
+            id="titleFontColor"
+            label="Cor dos Títulos"
+            value={form.titleFontColor}
+            type="color"
+            onChange={handleChange}
+            title="Destaque seus nomes de pratos e seções com uma cor diferenciada."
+          />
+          <div className="my-3">
+            <label className="form-label">Fontes de Títulos</label>
+            <select
+              id="titleFont"
+              value={form.titleFont}
+              className="form-select"
+              onChange={handleChange}
+              title="Escolha o estilo das letras para seus títulos grandes."
+            >
+              <option disabled value="">
+                Selecione sua fonte
+              </option>
+              <option value="Arial">Arial</option>
+              <option value="impact">Impact</option>
+              <option value="sans serif ">Snas Serif</option>
+            </select>
+          </div>
+          <div className="my-3">
+            <label className="form-label">Fontes de Textos</label>
+            <select
+              id="textFont"
+              value={form.textFont}
+              className="form-select"
+              onChange={handleChange}
+              title="Escolha o estilo das letras para as descrições dos pratos."
+            >
+              <option disabled value="">
+                Selecione sua fonte
+              </option>
+              <option value="impact">Impact</option>
+              <option value="Arial">Arial</option>
+              <option value="sans serif ">Snas Serif</option>
+            </select>
+          </div>
+          <div className={style.formButtonSubmit}>
+            <button type="submit">Salve suas modificações</button>
+          </div>
+        </form>
+      </div>
     </div>
     </>
   );

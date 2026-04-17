@@ -13,21 +13,47 @@ const AdjustmentRecords = ({
 
   return (
     <div className={log.containderAdjustmentRecords}>
+      <div className={log.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.3z2eh6xgiwvv"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <CloseBtn setClose={setShowAdjustmentRecords} />
       <h1>Lista de Ocorrencias do {title}</h1>;
       <div className={log.containderAdjustmentRecordsTable}>
         <table striped bordered hover>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Entrada do produto</th>
-              <th>Saida</th>
-              <th>Categoria</th>
-              <th>Vol Anterior</th>
-              <th>Investimento anterior</th>
-              <th>Volume Atual</th>
-              <th>Investimento Atual</th>
-              <th>Anotações ou Embalagens</th>
+              <th title="Data em que o registro foi realizado.">Data</th>
+              <th title="Quantidade de produto que entrou no estoque nesta operação.">
+                Entrada do produto
+              </th>
+              <th title="Quantidade de produto que saiu do estoque (venda, perda ou ajuste).">
+                Saida
+              </th>
+              <th title="O tipo de movimentação (Entrada, Saída, Ajuste, Edição, etc.).">
+                Categoria
+              </th>
+              <th title="O volume que existia no estoque antes desta movimentação.">
+                Vol Anterior
+              </th>
+              <th title="O valor (R$) total investido no estoque deste produto antes da movimentação.">
+                Investimento anterior
+              </th>
+              <th title="O volume resultante no estoque após a movimentação.">
+                Volume Atual
+              </th>
+              <th title="O valor (R$) total investido no estoque após a entrada ou saída.">
+                Investimento Atual
+              </th>
+              <th title="Notas detalhadas sobre o motivo da edição ou a quantidade de embalagens envolvidas.">
+                Anotações ou Embalagens
+              </th>
             </tr>
           </thead>
           <tbody>
