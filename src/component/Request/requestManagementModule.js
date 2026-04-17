@@ -356,6 +356,16 @@ const RequestManagementModule = () => {
 
   return (
     <div className={style.managementRequests}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.ok1dey5qz4gy"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <div className={style.containerPopup}>
         {showAccountingManagementPopup && (
           <AccountingManagementPopup
@@ -379,6 +389,7 @@ const RequestManagementModule = () => {
             value={form.startDate}
             type="date"
             onChange={handleChange}
+            title="Selecione a data inicial para filtrar o relatório de vendas."
           />
         </div>
         <div>
@@ -389,6 +400,7 @@ const RequestManagementModule = () => {
             value={form.endDate}
             type="date"
             onChange={handleChange}
+            title="Selecione a data final para visualizar o desempenho das vendas neste período."
           />
         </div>
       </div>

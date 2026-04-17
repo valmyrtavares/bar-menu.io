@@ -4,7 +4,7 @@ import {
   fetchingByQuery,
   getOneItemColleciton,
 } from '../../api/Api.js';
-import '../../assets/styles/requestManagementModule.module.scss';
+import style from '../../assets/styles/requestManagementModule.module.scss';
 import Input from '../Input.js';
 import { Link } from 'react-router-dom';
 import Title from '../title.js';
@@ -209,11 +209,21 @@ const RequestManagementModule = () => {
   };
 
   return (
-    <div className="management-requests">
+    <div className={style.managementRequests}>
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hya4mf75hf6l"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
       <Link to="/admin/admin">
         <Title mainTitle="Fechamentos de Caixa" />
       </Link>
-      <div className="container-date">
+      <div className={style.containerDate}>
         <div>
           <Input
             id="startDate"
@@ -222,6 +232,7 @@ const RequestManagementModule = () => {
             value={form.startDate}
             type="date"
             onChange={handleChange}
+            title="Selecione a data inicial para conferir o fluxo de caixa solicitado."
           />
         </div>
 
@@ -233,6 +244,7 @@ const RequestManagementModule = () => {
             value={form.endDate}
             type="date"
             onChange={handleChange}
+            title="Selecione a data final para consolidar os valores de fechamento."
           />
         </div>
       </div>

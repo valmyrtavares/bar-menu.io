@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 //import { cardClasses } from "@mui/material";
 import useLocalStorage from '../Hooks/useLocalStorage.js';
 
+import styleTerminal from '../assets/styles/FormFrontImage.module.scss';
+
 const FormFrontImage = () => {
   const global = React.useContext(GlobalContext);
   const [publicStatement, setPublicStatement] = useLocalStorage(
@@ -180,134 +182,138 @@ const FormFrontImage = () => {
 
   return (
     <>
-      <Link to="/admin/admin">
-        <Title mainTitle="Configurações do Terminal" />
-      </Link>
+      <div className={styleTerminal.containerTerminal}>
+        <div className={styleTerminal.containerIcon}>
+          <a
+            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.9fo5528fuwwz"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir documentação"
+          >
+            <span>?</span>
+          </a>
+        </div>
+        <Link to="/admin/admin">
+          <Title mainTitle="Configurações do Terminal" />
+        </Link>
 
-      <div className="p-1">
-        <p className="text-secondary mb-4">
-          Defina como este computador deve se comportar no sistema. 
-          As opções marcadas abaixo afetam apenas este terminal (exceto a emissão de notas).
-        </p>
+        <div className="p-1">
+          <p className="text-secondary mb-4">
+            Defina como este computador deve se comportar no sistema. 
+            As opções marcadas abaixo afetam apenas este terminal (exceto a emissão de notas).
+          </p>
 
-      {global.canConfigToten && (
+        {global.canConfigToten && (
+          <div className="form-check my-1">
+            <input
+              className="form-check-input"
+              id="carrossel"
+              type="checkbox"
+              checked={publicStatement}
+              onChange={changePublicStatement}
+              title="Autoatendimento. Geralmente usado com Auto Pagamento para liquidar a venda. Se o pagamento falhar, o Toten ainda serve como menu de pré-venda, dando autonomia ao cliente que não quer usar o celular."
+            />
+            <label className="form-check-label">
+              <b>Toten</b>: Manter selecionado para entrar no modo Toten que
+              fará que o cliente seja deslogado logo após o envio do pedido e o
+              sistema retornará para a tela inicial.
+            </label>
+          </div>
+        )}
+
         <div className="form-check my-1">
           <input
             className="form-check-input"
-            id="carrossel"
+            id="autoPaymentMachineOn"
             type="checkbox"
-            checked={publicStatement}
-            onChange={changePublicStatement}
+            checked={autoPaymentMachineOn}
+            onChange={changeAutoPayment}
+            title="Habilita a máquina de cartões. Essencial para concluir a venda no Toten. Estão separados para que, se a máquina falhar, o Toten ainda funcione como mostruário e pré-venda."
           />
           <label className="form-check-label">
-            <b>Toten</b>: Manter selecionado para entrar no modo Toten que
-            faráque o cliente seja deslogado logo após o envio do pedido e o
-            sistema retornará para a tela inicial.
+            <b>Auto Pagamento</b>: Manter clicado para usar a máquina de auto
+            pagamento
           </label>
         </div>
-      )}
 
-      {/*} <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="modePicture"
-          type="checkbox"
-          checked={modePictureMobilePhone}
-          onChange={changeModePicture}
-        />
-        <label className="form-check-label">
-          Para acionar o modo de imagem de celular, mantenha selecionado. node
-          os botões serão substituidos por imagens.
-        </label>
-      </div>*/}
-
-      <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="autoPaymentMachineOn"
-          type="checkbox"
-          checked={autoPaymentMachineOn}
-          onChange={changeAutoPayment}
-        />
-        <label className="form-check-label">
-          <b>Auto Pagamento</b>: Manter clicado para usar a maquina de auto
-          pagamento
-        </label>
-      </div>
-
-      <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="pdv"
-          type="checkbox"
-          checked={pdv}
-          onChange={changeModePdv}
-        />
-        <label className="form-check-label">
-          <b>PDV</b>: Manter clicado para entrar no modo PDV (Ponto de Venda)
-          que habilita a tela para uso em caixas de restaurantes.
-        </label>
-      </div>
-
-      <div className="form-check my-1">
-        <input
-          className="form-check-input"
-          id="automaticFiscalIssuance"
-          type="checkbox"
-          checked={global.enableAutoNfce}
-          onChange={changeAutomaticFiscalIssuance}
-        />
-        <label className="form-check-label">
-          <b>Emissão de Notas Automática</b>: Quando selecionado, o sistema emite
-          automaticamente a NFC-e após a confirmação do pagamento.
-        </label>
-      </div>
-
-      {global.hasClients && (
-        <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
-          <h5 className="mb-3">Configurações de Entrega</h5>
-          <div className="form-check my-2 d-flex align-items-center">
-            <label className="form-check-label flex-grow-1">
-              <b>CEP do Estabelecimento</b> (Origem da rota):
-            </label>
-            <input
-              type="text"
-              className="form-control form-control-sm ms-2"
-              style={{ width: '110px', padding: '2px 5px', height: 'auto' }}
-              value={localCep}
-              onChange={(e) => handleCepChange(e.target.value)}
-              placeholder="00000-000"
-              maxLength={9}
-            />
-          </div>
-
-          <div className="form-check my-2 d-flex align-items-center">
-            <label className="form-check-label flex-grow-1">
-              <b>Distancia máxima</b> permitida para entrega:
-            </label>
-            <input
-              type="number"
-              className="form-control form-control-sm ms-2"
-              style={{ width: '60px', padding: '2px 5px', height: 'auto' }}
-              value={localDistance}
-              onChange={(e) => setLocalDistance(e.target.value)}
-              min="0"
-              step="0.1"
-            />
-            <span className="ms-1 form-check-label">Km</span>
-          </div>
-
-          <div className="mt-3 d-flex justify-content-end">
-            <button 
-              className="btn btn-primary btn-sm"
-              onClick={saveDeliverySettings}
-              disabled={isSavingDelivery}
-            >
-              {isSavingDelivery ? 'Salvando...' : 'Salvar Configurações de Entrega'}
-            </button>
-          </div>
+        <div className="form-check my-1">
+          <input
+            className="form-check-input"
+            id="pdv"
+            type="checkbox"
+            checked={pdv}
+            onChange={changeModePdv}
+            title="Ativa o modo Ponto de Venda, habilitando funções avançadas de caixa e gestão de pedidos para a equipe do restaurante."
+          />
+          <label className="form-check-label">
+            <b>PDV</b>: Manter clicado para entrar no modo PDV (Ponto de Venda)
+            que habilita a tela para uso em caixas de restaurantes.
+          </label>
         </div>
-      )}
+
+        <div className="form-check my-1">
+          <input
+            className="form-check-input"
+            id="automaticFiscalIssuance"
+            type="checkbox"
+            checked={global.enableAutoNfce}
+            onChange={changeAutomaticFiscalIssuance}
+            title="Configuração GLOBAL: Quando ativado, o sistema emitirá a NFC-e (Cupom Fiscal) instantaneamente após cada pagamento confirmado."
+          />
+          <label className="form-check-label">
+            <b>Emissão de Notas Automática</b>: Quando selecionado, o sistema emite
+            automaticamente a NFC-e após a confirmação do pagamento.
+          </label>
+        </div>
+
+        {global.hasClients && (
+          <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+            <h5 className="mb-3">Configurações de Entrega</h5>
+            <div className="form-check my-2 d-flex align-items-center">
+              <label className="form-check-label flex-grow-1">
+                <b>CEP do Estabelecimento</b> (Origem da rota):
+              </label>
+              <input
+                type="text"
+                className="form-control form-control-sm ms-2"
+                style={{ width: '110px', padding: '2px 5px', height: 'auto' }}
+                value={localCep}
+                onChange={(e) => handleCepChange(e.target.value)}
+                placeholder="00000-000"
+                maxLength={9}
+                title="CEP de origem do restaurante. Essencial para o cálculo correto de rotas e custos de entrega."
+              />
+            </div>
+
+            <div className="form-check my-2 d-flex align-items-center">
+              <label className="form-check-label flex-grow-1">
+                <b>Distancia máxima</b> permitida para entrega:
+              </label>
+              <input
+                type="number"
+                className="form-control form-control-sm ms-2"
+                style={{ width: '60px', padding: '2px 5px', height: 'auto' }}
+                value={localDistance}
+                onChange={(e) => setLocalDistance(e.target.value)}
+                min="0"
+                step="0.1"
+                title="O raio máximo de entrega permitido em quilômetros. Pedidos fora desta distância serão bloqueados pelo sistema."
+              />
+              <span className="ms-1 form-check-label">Km</span>
+            </div>
+
+            <div className="mt-3 d-flex justify-content-end">
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={saveDeliverySettings}
+                disabled={isSavingDelivery}
+              >
+                {isSavingDelivery ? 'Salvando...' : 'Salvar Configurações de Entrega'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
     </>
   );
