@@ -12,7 +12,7 @@ const PedidoButton = React.memo(({ navigate }) => {
         navigate(); // Chamamos a navegação aqui para ver se dispara corretamente
       }}
     >
-      Seus Pedidos
+      Seus_Pedidos
     </button>
   );
 });

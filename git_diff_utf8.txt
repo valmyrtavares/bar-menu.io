@@ -1,0 +1,119 @@
+﻿commit 18356188417fbbed8c8128638cc19f41e60bcba6
+Author: valmyrtavaes <valmyrtavares71@gmail.com>
+Date:   Fri Apr 17 16:50:21 2026 -0300
+
+    feat: Bug regading pay one and take two
+
+diff --git a/src/component/Payment/AutoPayment.js b/src/component/Payment/AutoPayment.js
+index 483946b..15922f1 100644
+--- a/src/component/Payment/AutoPayment.js
++++ b/src/component/Payment/AutoPayment.js
+@@ -28,6 +28,10 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
+   const [paymentData, setPaymentData] = useState(null);
+   const cpfRef = React.useRef('');
+ 
++  const getTerminalId = () => {
++    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '01' : '02';
++  };
++
+   React.useEffect(() => {
+     if (!correlationId) return; // evita montar antes do submit
+ 
+@@ -148,7 +152,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
+           receiver: {
+             companyId: '003738',
+             storeId: '0001',
+-            terminalId: '02',
++            terminalId: getTerminalId(),
+           },
+           message: {
+             command: 'PAYMENT',
+@@ -196,7 +200,7 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
+           receiver: {
+             companyId: '003738',
+             storeId: '0001',
+-            terminalId: '02',
++            terminalId: getTerminalId(),
+           },
+         }),
+       });
+diff --git a/src/component/Request/requestModal.js b/src/component/Request/requestModal.js
+index d59ac13..d7fd92c 100644
+--- a/src/component/Request/requestModal.js
++++ b/src/component/Request/requestModal.js
+@@ -75,6 +75,27 @@ const RequestModal = () => {
+   // NOVO: Ref para salvar requisi├º├Áes localmente durante o longo processo no Toten (Resistente ├á perda de localStorage)
+   const frozenRequestsForTotenCheckout = React.useRef(null);
+ 
++  const calculateSafeTotemPrice = () => {
++    let itemsToCalculate = [];
++    if (frozenRequestsForTotenCheckout.current && frozenRequestsForTotenCheckout.current.length > 0) {
++      itemsToCalculate = frozenRequestsForTotenCheckout.current;
++    } else {
++      const stored = localStorage.getItem('backorder');
++      if (stored) {
++        try {
++          const parsed = JSON.parse(stored);
++          if (parsed && parsed.length > 0) itemsToCalculate = parsed;
++        } catch (e) { }
++      }
++    }
++    
++    if (itemsToCalculate.length > 0) {
++      const price = itemsToCalculate.reduce((acc, el) => acc + (el.finalPrice || el.price || 0), 0);
++      return Number(price.toFixed(2));
++    }
++    return finalPriceRequest;
++  };
++
+   const syncServiceChargeToFirestore = async (isEnabled) => {
+     try {
+       const currentTable = localStorage.getItem('tableNumber');
+@@ -256,18 +277,6 @@ const RequestModal = () => {
+   React.useEffect(() => {
+     if (userData && Array.isArray(userData.request)) {
+       // Mudan├ºa aqui: Verifica├º├úo de que userData existe e que request ├® um array
+-
+-      if (localStorage.hasOwnProperty('backorder')) {
+-        const orderStoraged = JSON.parse(localStorage.getItem('backorder'));
+-        if (orderStoraged && orderStoraged.length > 0) {
+-          if (userData.request && userData.request.length > 0) {
+-            orderStoraged.forEach((element) => {
+-              userData.request.push(element);
+-            });
+-          }
+-        }
+-        console.log('order Storaged   ', orderStoraged);
+-      }
+       requestFinalPrice(userData);
+       if (userData.request.length > 0) {
+         setDisabledBtn(false);
+@@ -326,9 +335,7 @@ const RequestModal = () => {
+   React.useEffect(() => {
+     let unsubscribe;
+     if (currentUser) {
+-      if (backorder) {
+-        updateingNewCustomer(backorder);
+-      }
++      updateingNewCustomer();
+       const userDocRef = doc(db, 'user', currentUser);
+       unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
+         const data = userDocSnap.data();
+@@ -800,7 +807,7 @@ const RequestModal = () => {
+             sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
+             indexInRequest: idx
+           })),
+-          finalPriceRequest: finalPriceRequest,
++          finalPriceRequest: previousRequests.length > 0 ? Number(previousRequests.reduce((acc, el) => acc + (el.finalPrice || el.price || 0), 0).toFixed(2)) : finalPriceRequest,
+           idPayer: idPayerRef.current,
+           dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
+           countRequest: global.orderBeingEdited ? global.orderBeingEdited.countRequest : await countingRequest(),
+@@ -1299,7 +1306,7 @@ const RequestModal = () => {
+           <AutoPayment
+             onChoose={onChoose}
+             setIdPayer={(value) => (idPayerRef.current = value)}
+-            price={finalPriceRequest}
++            price={calculateSafeTotemPrice()}
+             setAutoPayment={setAutoPayment}
+           />
+         </div>
