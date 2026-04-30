@@ -526,6 +526,7 @@ const RequestModal = () => {
         isProcessing.current = true;
         try {
           await addRequestUserToten(currentUserNew.id);
+          setAutoPayment(false);
           setTotenMessage(true);
           // O Toten tem um tempo de espera visual antes de voltar ao início
           await new Promise(resolve => setTimeout(resolve, 5000));
@@ -533,6 +534,7 @@ const RequestModal = () => {
           navigate('/');
         } catch (err) {
           console.error('Erro no envio Toten:', err);
+          setAutoPayment(false);
         } finally {
           isProcessing.current = false;
         }
@@ -1162,7 +1164,6 @@ const RequestModal = () => {
         cpfForInvoice = cpf;
         paymentTransactionData = paymentData;
         sendRequestToKitchen();
-        setAutoPayment(false);
       }
     }
   };
@@ -1308,6 +1309,7 @@ const RequestModal = () => {
             setIdPayer={(value) => (idPayerRef.current = value)}
             price={calculateSafeTotemPrice()}
             setAutoPayment={setAutoPayment}
+            isSubmitting={isSubmitting}
           />
         </div>
       )}

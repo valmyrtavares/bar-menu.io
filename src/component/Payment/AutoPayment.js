@@ -15,7 +15,7 @@ const paymentOptions = [
   { label: 'VR - Crédito ', value: 'VR_CREDIT' },
 ];
 
-const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
+const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment, isSubmitting }) => {
   const [selected, setSelected] = useState('');
   const [warningCashPaymentMessage, setWarningCashPaymentMessage] =
     useState(false);
@@ -239,8 +239,11 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment }) => {
             </label>
           ))}
         </div>
-        {loading && (
+        {loading && !isSubmitting && (
           <DefaultComumMessage msg="Efetue o pagamento na máquina de cartão ao lado" />
+        )}
+        {isSubmitting && (
+          <DefaultComumMessage msg="Pagamento aprovado! Processando o seu pedido..." />
         )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         <button
