@@ -5,12 +5,32 @@
         display: flex;
         justify-content: center;
         margin: 10px 0;
+        gap: 15px;
 
         input {
-            width: 60%;
+            width: 40%;
             border-radius: 10px;
             min-height: 40px;
             border: none;
+            padding: 0 15px;
+        }
+
+        .monthSelect {
+            width: 20%;
+            border-radius: 10px;
+            min-height: 40px;
+            border: none;
+            padding: 0 10px;
+            cursor: pointer;
+            background-color: white;
+            font-family: inherit;
+            color: #14213D;
+            font-weight: 500;
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 5px rgba(252, 163, 17, 0.5);
+            }
         }
     }
 

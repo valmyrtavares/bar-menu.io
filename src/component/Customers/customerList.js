@@ -10,6 +10,7 @@ import Title from '../title';
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
   const [customer, setCustomer] = React.useState('');
+  const [selectedMonth, setSelectedMonth] = React.useState('');
   const [originalCustomerList, setOriginalCustomerList] = React.useState([]);
   const [oneClient, setOneClient] = React.useState({});
   const [showPopup, setShowPopup] = React.useState(false);
@@ -55,27 +56,46 @@ const CustomerList = () => {
     }
   };
 
+  const applyFilters = (searchValue, monthValue) => {
+    let filtered = originalCustomerList;
+
+    if (searchValue) {
+      filtered = filtered.filter((item) => {
+        const nameMatch =
+          item.name && item.name.toLowerCase().includes(searchValue);
+        const cpfMatch =
+          item.cpf && item.cpf.toLowerCase().includes(searchValue);
+        const phoneMatch =
+          item.phone && item.phone.toLowerCase().includes(searchValue);
+        const birthdayMatch =
+          item.birthday && item.birthday.toLowerCase().includes(searchValue);
+
+        return nameMatch || cpfMatch || phoneMatch || birthdayMatch;
+      });
+    }
+
+    if (monthValue) {
+      filtered = filtered.filter((item) => {
+        if (!item.birthday) return false;
+        // Normaliza barras para hífens para garantir que o padrão -MM- funcione em ambos os formatos
+        const normalizedBirthday = item.birthday.replace(/\//g, '-');
+        return normalizedBirthday.includes(`-${monthValue}-`);
+      });
+    }
+
+    setCustomerList(filtered);
+  };
+
   const handleChange = ({ target }) => {
     const searchValue = target.value.toLowerCase();
     setCustomer(searchValue);
+    applyFilters(searchValue, selectedMonth);
+  };
 
-    if (searchValue === '') {
-      setCustomerList(originalCustomerList);
-    } else {
-      const filtered = originalCustomerList.filter((customer) => {
-        const nameMatch =
-          customer.name && customer.name.toLowerCase().includes(searchValue);
-        const cpfMatch =
-          customer.cpf && customer.cpf.toLowerCase().includes(searchValue);
-        const birthdayMatch =
-          customer.birthday &&
-          customer.birthday.toLowerCase().includes(searchValue);
-
-        return nameMatch || cpfMatch || birthdayMatch;
-      });
-
-      setCustomerList(filtered);
-    }
+  const handleMonthChange = ({ target }) => {
+    const monthValue = target.value;
+    setSelectedMonth(monthValue);
+    applyFilters(customer, monthValue);
   };
 
   const eachCustomer = (client) => {
@@ -94,8 +114,27 @@ const CustomerList = () => {
           type="text"
           value={customer}
           onChange={handleChange}
-          placeholder="Busque pelo nome "
+          placeholder="Busque por nome, CPF ou telefone"
         />
+        <select
+          value={selectedMonth}
+          onChange={handleMonthChange}
+          className={clients.monthSelect}
+        >
+          <option value="">Aniversariantes do Mês</option>
+          <option value="01">Janeiro</option>
+          <option value="02">Fevereiro</option>
+          <option value="03">Março</option>
+          <option value="04">Abril</option>
+          <option value="05">Maio</option>
+          <option value="06">Junho</option>
+          <option value="07">Julho</option>
+          <option value="08">Agosto</option>
+          <option value="09">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
+        </select>
       </div>
       <div className={clients.headerContainer}>
         <div className={clients.helpIconContainer}>
