@@ -42,7 +42,9 @@ const WarningMessage = ({
     navigate('/create-customer');
   };
   return (
-    <div className={styles.containerWarningMessage}>
+    <>
+      <div className={styles.overlay}></div>
+      <div className={styles.containerWarningMessage}>
       {dealingAnonymousCusomter ? (
         <div>
           {' '}
@@ -76,7 +78,8 @@ const WarningMessage = ({
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 export default WarningMessage;

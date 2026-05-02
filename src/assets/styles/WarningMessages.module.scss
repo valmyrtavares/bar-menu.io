@@ -1,14 +1,28 @@
 
 @import './adminStyleReuse.module.scss';
 
-.containerWarningMessage {
-   background-color: $bg-admin-default;
-    border:solid 3px yellow;
-    padding:10px;
-    margin:10px 10%;    
+.overlay {
     position: fixed;
-      top: 300px;
-    .containerBtn{
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.containerWarningMessage {
+    background-color: $bg-admin-default;
+    border: solid 3px yellow;
+    padding: 10px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    max-width: 600px;
+    width: 90%;
+    .containerBtn {
         display:flex;
          justify-content  : space-around;
          button{   
