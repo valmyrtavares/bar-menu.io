@@ -287,18 +287,18 @@ const CreatePromotions = () => {
         </div>
 
         <div>
-          <label title="Define se um cliente pode usar a promoção mais de uma vez (leia mais abaixo).">
-            Reuso:
+          <label title="Define se um cliente pode usar a promoção mais de uma vez.">
+            Permitir reuso?
           </label>
           <select
             name="reusable"
             value={formData.reusable}
             onChange={handleChange}
-            title="Define se um cliente pode usar a promoção mais de uma vez (leia mais abaixo)."
+            title="Define se um cliente pode usar a promoção mais de uma vez."
           >
-            <option value="">Reuso</option>
-            <option value="true">Reusable</option>
-            <option value="false">Not Reusable</option>
+            <option value="">Selecione...</option>
+            <option value="true">Sim, pode ser usada várias vezes</option>
+            <option value="false">Não, uso único por cliente</option>
           </select>
         </div>
         <div>
