@@ -73,6 +73,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [showFinalizarMessage, setShowFinalizarMessage] = React.useState(false);
   const [selectedItemToFinalize, setSelectedItemToFinalize] = React.useState(null);
 
+  const [showPaymentBlockedPopup, setShowPaymentBlockedPopup] = React.useState(false);
+
   // NOVO: Estado para armazenar os chamados do garçom pendentes
   const [pendingWaiterCalls, setPendingWaiterCalls] = React.useState([]);
   const [pendingPaymentCalls, setPendingPaymentCalls] = React.useState([]);
@@ -1544,9 +1546,21 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           onConfirm={() => confirmFinalizarPedido()}
         />
       )}
+      {showPaymentBlockedPopup && (
+        <DefaultComumMessage
+          msg="O pagamento só pode ser efetuado depois que todos os itens forem entregues e o cliente pedir a conta."
+          onClose={() => setShowPaymentBlockedPopup(false)}
+          onConfirm={() => setShowPaymentBlockedPopup(false)}
+          affirmativeResponse="Entendi"
+          negativeResponse=""
+        />
+      )}
       {requestsDoneList &&
         requestsDoneList.map((item, itemIndex) => {
           const { status, color } = getStatusAndColor(item); // 👈 aqui
+          const isPosPagamento = !!item.tableNumber;
+          const hasWaiterCalledAndConfirmed = item.paymentCall && item.paymentCall.active === false;
+          const isPaymentDisabled = isPosPagamento && !hasWaiterCalledAndConfirmed;
           return (
             <div
               className={style.containerRequestListToBePrepared}
@@ -1668,6 +1682,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     <PaymentMethod
                       item={item}
                       onPaymentMethodChange={handlePaymentMethodChange}
+                      isPaymentDisabled={isPaymentDisabled}
+                      onPaymentBlocked={() => setShowPaymentBlockedPopup(true)}
                     />
                     {global.packageTier !== 1 && (
                       <div className={style.promotionSelect}>
@@ -1708,9 +1724,17 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       </button>
                     )}
                     <button
-                      disabled={!item.paymentMethod || global.orderBeingEdited?.id === item.id}
+                      disabled={global.orderBeingEdited?.id === item.id || (!isPaymentDisabled && !item.paymentMethod)}
                       className={item.paymentDone ? style.done : style.pendent}
-                      onClick={() => changeStatusPaid(item)}
+                      onClick={(e) => {
+                        if (isPaymentDisabled) {
+                          e.preventDefault();
+                          setShowPaymentBlockedPopup(true);
+                          return;
+                        }
+                        changeStatusPaid(item);
+                      }}
+                      style={isPaymentDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                     >
                       Pago
                     </button>

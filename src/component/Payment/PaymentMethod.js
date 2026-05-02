@@ -2,7 +2,7 @@ import React from 'react';
 import '../../assets/styles/PaymentMethod.css';
 import { cardClasses } from '@mui/material';
 
-const PaymentMethod = ({ onPaymentMethodChange, item }) => {
+const PaymentMethod = ({ onPaymentMethodChange, item, isPaymentDisabled, onPaymentBlocked }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     React.useState('cash');
 
@@ -25,8 +25,20 @@ const PaymentMethod = ({ onPaymentMethodChange, item }) => {
     onPaymentMethodChange(value, item);
   };
 
+  const handleWrapperClick = (e) => {
+    if (isPaymentDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onPaymentBlocked) onPaymentBlocked();
+    }
+  };
+
   return (
-    <div className="paymentMethod-container">
+    <div 
+      className="paymentMethod-container" 
+      onClickCapture={handleWrapperClick}
+      style={isPaymentDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+    >
       <div>
         <input
           className="form-check-input"
