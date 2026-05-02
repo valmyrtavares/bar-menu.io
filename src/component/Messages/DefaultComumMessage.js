@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import '../../assets/styles/resultMessage.css';
 
 const DefaultComumMessage = ({
@@ -9,9 +10,9 @@ const DefaultComumMessage = ({
   negativeResponse,
   affirmativeResponse,
 }) => {
-  return (
+  const modalContent = (
     <>
-      <div className="overlay" style={{ zIndex: 10000 }}></div> {/* Overlay com z-index alto */}
+      <div className="overlay" style={{ zIndex: 10000 }}></div>
       <div className="default-comum-message-container" style={{ zIndex: 10001 }}>
         <h1>Mensagem importante</h1>
         <h3>{msg}</h3>
@@ -35,5 +36,7 @@ const DefaultComumMessage = ({
       </div>
     </>
   );
+
+  return createPortal(modalContent, document.body);
 };
 export default DefaultComumMessage;
