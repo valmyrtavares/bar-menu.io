@@ -1336,6 +1336,11 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       });
 
       global.setPdvRequest(true);
+
+      // Transição automática para o Menu em modo mobile
+      if (window.innerWidth < 1000) {
+        global.setPdvMobileView('menu');
+      }
     } catch (error) {
       console.error('Error starting order edit:', error);
       alert('Houve um erro ao tentar editar o pedido. Tente novamente.');
