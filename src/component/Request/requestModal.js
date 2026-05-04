@@ -35,8 +35,9 @@ import BillSummaryPopup from './BillSummaryPopup';
 import { TRUE } from 'sass';
 import DeliveryAddressPopup from './DeliveryAddressPopup';
 import MessagePromotions from '../Promotions/MessagePromotions';
+import Loading from '../Messages/Loading.js';
 
-const RequestModal = () => {
+const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   const [currentUser, setCurrentUser] = React.useState('');
   const [userData, setUserData] = React.useState(null);
   const [backorder, setBackorder] = React.useState(null);
@@ -69,7 +70,6 @@ const RequestModal = () => {
   const [benefitedClientEdited, setBenefitedClientEdited] = React.useState({});
   const [operation, setOperation] = React.useState('');
   const [currentDiscount, setCurrentDiscount] = React.useState(0);
-  const [manualTableNumber, setManualTableNumber] = React.useState('');
   const [tableAssignedInThisSession, setTableAssignedInThisSession] = React.useState(false);
 
   // NOVO: Ref para salvar requisições localmente durante o longo processo no Toten (Resistente à perda de localStorage)
@@ -738,9 +738,12 @@ const RequestModal = () => {
       }
 
       if (pdv && global.pdvRequest) {
-        navigate('/admin/requestlist');
+        setManualTableNumber('');
+        localStorage.removeItem('userMenu');
+        global.setAuthorizated(false);
         global.setPdvRequest(false);
         global.setPdvMobileView('orders');
+        navigate('/admin/requestlist');
       } else {
         navigate('/orderqueue');
       }
@@ -1041,6 +1044,10 @@ const RequestModal = () => {
       isProcessing.current = false;
       setIsSubmitting(false);
       if (pdv && global.pdvRequest) {
+        setManualTableNumber('');
+        localStorage.removeItem('userMenu');
+        global.setAuthorizated(false);
+        global.setPdvRequest(false);
         global.setPdvMobileView('orders');
       }
     }
@@ -1240,6 +1247,7 @@ const RequestModal = () => {
     <section
       className={`container-modal-request ${stylePdv ? 'pdv-change' : ''}`}
     >
+      {isSubmitting && <Loading />}
       {global.orderBeingEdited && (
         <div style={{ backgroundColor: '#ff9800', padding: '10px', textAlign: 'center', fontWeight: 'bold', color: 'white', borderRadius: '5px', marginBottom: '10px' }}>
           Você está editando o pedido #{global.orderBeingEdited.countRequest}
@@ -1447,7 +1455,7 @@ const RequestModal = () => {
                 : openRegisterPopup
           }
         >
-          {deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar"}
+          {isSubmitting ? "ENVIANDO..." : (deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar")}
         </button>
       </div>
 
@@ -1462,6 +1470,7 @@ const RequestModal = () => {
             placeholder="Nº da Mesa"
             value={manualTableNumber}
             onChange={(e) => setManualTableNumber(e.target.value)}
+            disabled={!userData || (!userData.name && !userData.fantasyName)}
             style={{ 
               padding: '10px', 
               borderRadius: '5px', 
@@ -1469,7 +1478,9 @@ const RequestModal = () => {
               textAlign: 'center',
               width: '100px',
               backgroundColor: 'var(--input-bg-color)',
-              color: 'var(--main-font-color)'
+              color: 'var(--main-font-color)',
+              opacity: (!userData || (!userData.name && !userData.fantasyName)) ? 0.5 : 1,
+              cursor: (!userData || (!userData.name && !userData.fantasyName)) ? 'not-allowed' : 'text'
             }}
           />
         </div>

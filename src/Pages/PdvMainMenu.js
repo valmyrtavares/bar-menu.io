@@ -20,7 +20,7 @@ import {
 import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { onSnapshot } from 'firebase/firestore';
 
-function PdvMainMenu() {
+function PdvMainMenu({ manualTableNumber, setManualTableNumber }) {
   // const [displayForm, setDisplayForm] = React.useState(false);
   const [dishes, setDishes] = React.useState([]);
   const [menuButton, setMenuButton] = React.useState([]);
@@ -168,7 +168,12 @@ function PdvMainMenu() {
       <button onClick={showPopup} className={style.toggleMenuBtn}>
         {global.pdvRequest ? 'Fechar tela' : 'Ver pedidos'}
       </button>
-      {global.pdvRequest && <RequestModal />}
+      {global.pdvRequest && (
+        <RequestModal 
+          manualTableNumber={manualTableNumber} 
+          setManualTableNumber={setManualTableNumber} 
+        />
+      )}
       <div className="WarningMessage-container">
         {logoutAdminPopup && (
           <WarningMessage

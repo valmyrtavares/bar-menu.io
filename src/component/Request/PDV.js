@@ -15,6 +15,8 @@ const PDV = () => {
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1000);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   
+  const [manualTableNumber, setManualTableNumber] = React.useState('');
+  
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1000);
     window.addEventListener('resize', handleResize);
@@ -54,7 +56,12 @@ const PDV = () => {
 
       <div className={`${style.pdvContainer} ${isMobile ? style.mobileMode : ''} ${isMobile && global.pdvMobileView === 'orders' ? style.showOrders : ''}`}>
         <div className={`${style.viewSection} ${isMobile && global.pdvMobileView === 'orders' && !isTransitioning ? style.hide : ''}`}>
-          {(!isMobile || global.pdvMobileView === 'menu' || isTransitioning) && <PdvMainMenu />}
+          {(!isMobile || global.pdvMobileView === 'menu' || isTransitioning) && (
+            <PdvMainMenu 
+              manualTableNumber={manualTableNumber} 
+              setManualTableNumber={setManualTableNumber} 
+            />
+          )}
         </div>
         <div className={`${style.viewSection} ${isMobile && global.pdvMobileView === 'menu' && !isTransitioning ? style.hide : ''}`}>
           {(!isMobile || global.pdvMobileView === 'orders' || isTransitioning) && <SellsPoint />}
