@@ -77,6 +77,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [selectedItemToFinalize, setSelectedItemToFinalize] = React.useState(null);
 
   const [showPaymentBlockedPopup, setShowPaymentBlockedPopup] = React.useState(false);
+  const [selectedItemToPay, setSelectedItemToPay] = React.useState(null);
 
   // NOVO: Estado para armazenar os chamados do garçom pendentes
   const [pendingWaiterCalls, setPendingWaiterCalls] = React.useState([]);
@@ -518,6 +519,23 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       }
     } catch (error) {
       console.error('Erro ao atualizar finalPriceRequest:', error);
+    }
+  };
+
+  const unlockPayment = async (item) => {
+    if (!item) return;
+    try {
+      const docRef = doc(db, 'requests', item.id);
+      // Simula o chamado de pagamento sendo atendido pelo garçom, desbloqueando o fluxo
+      await updateDoc(docRef, {
+        'paymentCall.active': false,
+        'paymentCall.tableNumber': item.tableNumber || '',
+        'paymentCall.callerName': item.name || 'Cliente'
+      });
+      setShowPaymentBlockedPopup(false);
+      setSelectedItemToPay(null);
+    } catch (err) {
+      console.error("Erro ao desbloquear pagamento:", err);
     }
   };
 
@@ -1579,10 +1597,13 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       {showPaymentBlockedPopup && (
         <DefaultComumMessage
           msg="O pagamento só pode ser efetuado depois que todos os itens forem entregues e o cliente pedir a conta."
-          onClose={() => setShowPaymentBlockedPopup(false)}
-          onConfirm={() => setShowPaymentBlockedPopup(false)}
+          onConfirm={() => {
+            setShowPaymentBlockedPopup(false);
+            setSelectedItemToPay(null);
+          }}
+          onClose={() => unlockPayment(selectedItemToPay)}
           affirmativeResponse="Entendi"
-          negativeResponse=""
+          negativeResponse="Efetuar o pagamento assim mesmo"
         />
       )}
       {requestsDoneList &&
@@ -1713,7 +1734,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       item={item}
                       onPaymentMethodChange={handlePaymentMethodChange}
                       isPaymentDisabled={isPaymentDisabled}
-                      onPaymentBlocked={() => setShowPaymentBlockedPopup(true)}
+                      onPaymentBlocked={() => {
+                        setSelectedItemToPay(item);
+                        setShowPaymentBlockedPopup(true);
+                      }}
                     />
                     {global.packageTier !== 1 && (
                       <div className={style.promotionSelect}>
@@ -1759,6 +1783,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                       onClick={(e) => {
                         if (isPaymentDisabled) {
                           e.preventDefault();
+                          setSelectedItemToPay(item);
                           setShowPaymentBlockedPopup(true);
                           return;
                         }
