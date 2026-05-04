@@ -148,13 +148,88 @@ h3 {
 
 .pdv-change {
     background-color: white !important;
+    color: #333 !important;
     min-width: 147%;
+    padding: 20px;
+    min-height: auto !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pdv-change * {
+    color: #333 !important;
+}
+
+.pdv-change .no-request {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #666 !important;
+}
+
+.pdv-change h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.pdv-change .current-client {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.pdv-change .individual-dishes {
+    max-width: 95%;
+    margin: 5px auto;
+    padding: 5px;
+    column-gap: 10px;
+}
+
+.pdv-change .individual-dishes h2 {
+    font-size: 0.9rem;
+}
+
+.pdv-change .dishes-price {
+    font-size: 0.9rem;
+}
+
+/* Container para botões lado a lado no PDV */
+.pdv-footer-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    width: 90%;
+    margin: 20px auto 0 auto;
+}
+
+.pdv-footer-actions .btnFinalRequest {
+    flex: 1;
+    margin: 0;
+}
+
+.pdv-footer-actions .btnFinalRequest button {
+    width: 100%;
+    margin: 0;
+    padding: 8px 5px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    white-space: nowrap;
 }
 
 @media (max-width: 768px) {
     .pdv-change {
         min-width: 100%;
         max-width: 100vw;
+        padding: 10px;
+    }
+    
+    .pdv-footer-actions {
+        width: 100%;
+        gap: 5px;
+    }
+    
+    .pdv-footer-actions .btnFinalRequest button {
+        font-size: 0.8rem;
+        padding: 10px 2px;
     }
 }
 

@@ -1427,41 +1427,43 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       ) : (
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
-      <div className="btnFinalRequest">
-        <button className="keep-shopping" onClick={handleRoute}>
-          Continue Comprando
-        </button>
-      </div>
-      {isTableClient && (
-        <div className="btnFinalRequest" style={{ marginTop: '10px', marginBottom: '10px' }}>
-          <button
-            disabled={isSubmitting || !userData || (userData.request && userData.request.filter(item => !item.sentToKitchen).length === 0)}
-            className="send-request"
-            onClick={sendOrderToKitchenOnly}
-          >
-            {isSubmitting ? "ENVIANDO..." : "Enviar pedido"}
+      <div className={stylePdv ? 'pdv-footer-actions' : ''}>
+        <div className="btnFinalRequest">
+          <button className="keep-shopping" onClick={handleRoute}>
+            Continue Comprando
           </button>
         </div>
-      )}
-      <div className="btnFinalRequest">
-        <button
-          disabled={isSubmitting || (!userData?.request || userData.request.length === 0) || (isTableClient && !allRequestsReady)}
-          className="send-request"
-          onClick={
-            deliveryAddress
-              ? sendOrderToKitchenOnly
-              : isTableClient
-                ? () => setBillPopUpStep(1)
-                : openRegisterPopup
-          }
-        >
-          {isSubmitting ? "ENVIANDO..." : (deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar")}
-        </button>
+        {isTableClient && (
+          <div className="btnFinalRequest" style={stylePdv ? {} : { marginTop: '10px', marginBottom: '10px' }}>
+            <button
+              disabled={isSubmitting || !userData || (userData.request && userData.request.filter(item => !item.sentToKitchen).length === 0)}
+              className="send-request"
+              onClick={sendOrderToKitchenOnly}
+            >
+              {isSubmitting ? "ENVIANDO..." : "Enviar pedido"}
+            </button>
+          </div>
+        )}
+        <div className="btnFinalRequest">
+          <button
+            disabled={isSubmitting || (!userData?.request || userData.request.length === 0) || (isTableClient && !allRequestsReady)}
+            className="send-request"
+            onClick={
+              deliveryAddress
+                ? sendOrderToKitchenOnly
+                : isTableClient
+                  ? () => setBillPopUpStep(1)
+                  : openRegisterPopup
+            }
+          >
+            {isSubmitting ? "ENVIANDO..." : (deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar")}
+          </button>
+        </div>
       </div>
 
       {stylePdv && !localStorage.getItem('tableNumber') && !tableAssignedInThisSession && (
         <div style={{ margin: '15px 0', textAlign: 'center' }}>
-          <label htmlFor="manual-table" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+          <label htmlFor="manual-table" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: stylePdv ? '0.9rem' : 'inherit' }}>
             Acrescente sua Mesa:
           </label>
           <input 
@@ -1472,13 +1474,14 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
             onChange={(e) => setManualTableNumber(e.target.value)}
             disabled={!userData || (!userData.name && !userData.fantasyName)}
             style={{ 
-              padding: '10px', 
+              padding: stylePdv ? '6px' : '10px', 
               borderRadius: '5px', 
               border: '1px solid var(--btn-color)', 
               textAlign: 'center',
               width: '100px',
-              backgroundColor: 'var(--input-bg-color)',
-              color: 'var(--main-font-color)',
+              backgroundColor: 'white',
+              color: '#333',
+              fontSize: stylePdv ? '0.9rem' : 'inherit',
               opacity: (!userData || (!userData.name && !userData.fantasyName)) ? 0.5 : 1,
               cursor: (!userData || (!userData.name && !userData.fantasyName)) ? 'not-allowed' : 'text'
             }}
