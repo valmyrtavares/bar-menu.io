@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
 import { issueAutoNfce } from '../../services/fiscalService';
 import { db } from '../../config-firebase/firebase.js';
@@ -1431,7 +1432,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   return (
     <div>
       {/* OVERLAY EXCLUSIVO DOS CHAMADOS DE GARÇOM E PAGAMENTO - CENTRALIZADO E COM FUNDO ESCURO */}
-      {(pendingWaiterCalls.length > 0 || pendingPaymentCalls.length > 0) && (
+      {(pendingWaiterCalls.length > 0 || pendingPaymentCalls.length > 0) && createPortal(
         <div style={{
           position: 'fixed',
           top: 0,
@@ -1444,7 +1445,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          gap: '15px'
+          gap: '15px',
+          padding: '20px'
         }}>
           {/* Chamados de Mesa */}
           {pendingWaiterCalls.map((callReq) => (
@@ -1456,7 +1458,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
               boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
               display: 'flex',
               flexDirection: 'column',
-              minWidth: '350px',
+              width: '100%',
+              maxWidth: '400px',
               textAlign: 'center'
             }}>
               <h3 style={{ margin: '0 0 15px 0', fontSize: '1.5rem' }}>⚠️ Chamado de Mesa</h3>
@@ -1501,7 +1504,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
               boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
               display: 'flex',
               flexDirection: 'column',
-              minWidth: '350px',
+              width: '100%',
+              maxWidth: '400px',
               textAlign: 'center'
             }}>
               <h3 style={{ margin: '0 0 15px 0', fontSize: '1.5rem' }}>💰 Solicitação de Pagamento</h3>
@@ -1535,7 +1539,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
               </button>
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
 
       <Link to="/admin/admin">
