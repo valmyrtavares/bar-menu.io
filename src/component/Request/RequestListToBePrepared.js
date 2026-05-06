@@ -26,7 +26,7 @@ import {
   isOrderFullyFinished,
 } from '../../Helpers/Helpers.js';
 import RecipeModal from './RecipeModal';
-import alertSound from '../../audio/duelosteve.mp3';
+
 
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { GlobalContext } from '../../GlobalContext';
@@ -47,7 +47,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [requestsDoneList, setRequestDoneList] = React.useState([]);
   const [selectedRequestId, setSelectedRequestId] = React.useState(null);
   const [colorStatusRequest, setColorStatusRequest] = React.useState('red');
-  const prevToDeliverCount = React.useRef(0);
+
   const global = React.useContext(GlobalContext);
   const navigate = useNavigate();
   const [recipeModal, setRecipeModal] = React.useState({
@@ -208,19 +208,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
     };
   }, []);
 
-  // NOVO: Efeito para emitir som quando um novo pedido fica pronto na cozinha
-  React.useEffect(() => {
-    const currentToDeliverCount = requestsDoneList.reduce((acc, item) => {
-      const hasToDeliver = item.request && item.request.some((req) => req.entregue && !req.deliveredByWaiter);
-      return hasToDeliver ? acc + 1 : acc;
-    }, 0);
 
-    if (currentToDeliverCount > prevToDeliverCount.current) {
-      const audio = new Audio(alertSound);
-      audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required.", e));
-    }
-    prevToDeliverCount.current = currentToDeliverCount;
-  }, [requestsDoneList]);
 
   // toda vez que a lista mudar, garante que o estado tenha as chaves corretas
 
