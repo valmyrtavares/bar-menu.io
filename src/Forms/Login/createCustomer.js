@@ -22,7 +22,12 @@ const CreateCustomer = () => {
   const [pdv, setPdv] = React.useState(false);
   const anonymousClient = React.useRef(null);
   const [cpfModal, setCpfModal] = React.useState(true);
-  const [popupName, setPopupName] = React.useState(true);
+  const [popupName, setPopupName] = React.useState(() => {
+    if (localStorage.getItem('backorder') && !localStorage.getItem('noFantasyName')) {
+      return false;
+    }
+    return true;
+  });
   const [errorPopup, setErrorPopup] = React.useState(false);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
@@ -111,7 +116,18 @@ const CreateCustomer = () => {
             birthday: '77',
             email: 'anonimo@anonimo.com',
           }
-        : form;
+        : { ...form };
+
+    let backorder = [];
+    if (localStorage.getItem('backorder')) {
+      try {
+        backorder = JSON.parse(localStorage.getItem('backorder'));
+      } catch (e) {
+        console.error('Error parsing backorder:', e);
+      }
+    }
+    formToSubmit.request = backorder;
+
     if (error.birthday || error.phone || error.cpf) {
       setErrorPopup(true);
     } else {
@@ -124,6 +140,8 @@ const CreateCustomer = () => {
             name: formToSubmit.name,
           };
           localStorage.setItem('userMenu', JSON.stringify(currentUser));
+          localStorage.removeItem('backorder');
+          localStorage.removeItem('noFantasyName');
           setForm({
             name: '',
             phone: '',
@@ -133,11 +151,15 @@ const CreateCustomer = () => {
         })
         .then(() => {
           if (!pdv) {
-            const table = localStorage.getItem('tableNumber');
-            if (table) {
-              navigate(`/${table}`);
+            if (backorder && backorder.length > 0) {
+              navigate('/request');
             } else {
-              navigate('/');
+              const table = localStorage.getItem('tableNumber');
+              if (table) {
+                navigate(`/${table}`);
+              } else {
+                navigate('/');
+              }
             }
           } else {
             navigate('/admin/requestlist');
@@ -163,6 +185,13 @@ const CreateCustomer = () => {
 
   function handleAnonymousSubmit(name) {
     // event.preventDefault();
+    let backorder = [];
+    if (localStorage.getItem('backorder')) {
+      try {
+        backorder = JSON.parse(localStorage.getItem('backorder'));
+      } catch (e) {}
+    }
+
     // Define dados default e envia para o Firestore
     const formWithDefaults = {
       fantasyName: '',
@@ -170,6 +199,7 @@ const CreateCustomer = () => {
       phone: '777',
       birthday: '77',
       email: 'anonimo@anonimo.com',
+      request: backorder
     };
     if (name) {
       formWithDefaults.fantasyName = name;
@@ -183,6 +213,8 @@ const CreateCustomer = () => {
           name: formWithDefaults.fantasyName,
         };
         localStorage.setItem('userMenu', JSON.stringify(currentUser));
+        localStorage.removeItem('backorder');
+        localStorage.removeItem('noFantasyName');
         setForm({
           name: '',
           phone: '',
@@ -193,11 +225,15 @@ const CreateCustomer = () => {
       })
       .then(() => {
         if (!pdv) {
-          const table = localStorage.getItem('tableNumber');
-          if (table) {
-            navigate(`/${table}`);
+          if (backorder && backorder.length > 0) {
+            navigate('/request');
           } else {
-            navigate('/');
+            const table = localStorage.getItem('tableNumber');
+            if (table) {
+              navigate(`/${table}`);
+            } else {
+              navigate('/');
+            }
           }
         } else {
           navigate('/admin/requestlist');

@@ -37,6 +37,7 @@ const WarningMessage = ({
 
   const newCustomerRegistration = () => {
     localStorage.setItem('backorder', JSON.stringify(requests));
+    localStorage.removeItem('noFantasyName');
     localStorage.removeItem('userMenu');
     global.setAuthorizated(false);
     navigate('/create-customer');

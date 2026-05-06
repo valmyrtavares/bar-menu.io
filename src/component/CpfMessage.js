@@ -16,7 +16,23 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal, pdv }) => {
     };
     localStorage.setItem('userMenu', JSON.stringify(currentUser));
     if (!pdv) {
-      navigate('/');
+      let backorder = [];
+      if (localStorage.getItem('backorder')) {
+        try {
+          backorder = JSON.parse(localStorage.getItem('backorder'));
+        } catch (e) {}
+      }
+      
+      if (backorder && backorder.length > 0) {
+        navigate('/request');
+      } else {
+        const table = localStorage.getItem('tableNumber');
+        if (table) {
+          navigate(`/${table}`);
+        } else {
+          navigate('/');
+        }
+      }
     } else {
       navigate('/admin/requestlist');
     }

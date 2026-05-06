@@ -335,7 +335,9 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   React.useEffect(() => {
     let unsubscribe;
     if (currentUser) {
-      updateingNewCustomer();
+      if (backorder && backorder.length > 0) {
+        updateingNewCustomer(backorder);
+      }
       const userDocRef = doc(db, 'user', currentUser);
       unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
         const data = userDocSnap.data();
@@ -384,6 +386,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
 
   const updateingNewCustomer = async (data) => {
     try {
+      if (!data || data.length === 0) return;
       const userDocRef = doc(db, 'user', currentUser);
       const userDocSnap = await getDoc(userDocRef);
 
@@ -403,11 +406,12 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       } else {
         // Se o documento do usuário não existir, cria o documento com o array request
         await setDoc(userDocRef, {
-          request: [data],
+          request: [...data],
         });
       }
       fetchUser();
       localStorage.removeItem('backorder');
+      setBackorder(null);
     } catch (error) {
       console.log(error);
     }
