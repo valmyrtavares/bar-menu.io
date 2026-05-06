@@ -141,7 +141,7 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
   return (
     <>
       <div className="overlay" onClick={onClose}></div>
-      <div className="default-comum-message-container" style={{ zIndex: 9999, padding: '20px', width: '90%', maxWidth: '500px', backgroundColor: '#fff', borderRadius: '10px' }}>
+      <div className="default-comum-message-container" style={{ zIndex: 10001, padding: '20px', width: '90%', maxWidth: '500px', backgroundColor: '#fff', borderRadius: '10px' }}>
         <h2 style={{ textAlign: 'center', marginBottom: '15px' }}>{customerName}, onde entregaremos seu pedido?</h2>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
