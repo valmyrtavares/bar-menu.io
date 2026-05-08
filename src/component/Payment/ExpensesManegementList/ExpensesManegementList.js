@@ -54,7 +54,6 @@ const ExpensesManegementList = () => {
     React.useState(false);
   const [openSumaryPopup, setOpenSumaryPopup] = React.useState(false);
   const [oneExpense, setOneExpense] = React.useState(null);
-  const [changeTable, setChangeTable] = React.useState(false);
 
   React.useEffect(() => {
     fetchExpensesData();
@@ -196,60 +195,7 @@ const ExpensesManegementList = () => {
     );
   };
 
-  const bringExpenseItemsSelected = async (form) => {
-    let data = originalItemList.filter(
-      (item) => item.idProduct === form.idRawMaterial
-    );
-
-    if (
-      (form.initialDate && !form.finalDate) ||
-      (!form.initialDate && form.finalDate)
-    ) {
-      alert(
-        'Preencha **ambas** as datas de início e fim ou **nenhuma** delas.'
-      );
-      return;
-    }
-
-    // Verifica se initialDate e finalDate estão presentes e válidas
-    if (form.initialDate && form.finalDate) {
-      const initial = new Date(form.initialDate);
-      const final = new Date(form.finalDate);
-
-      // Ajusta a data final para incluir o último dia completo
-      final.setHours(23, 59, 59, 999);
-
-      data = data.filter((item) => {
-        const paymentDate = new Date(item.paymentDate);
-        return paymentDate >= initial && paymentDate <= final;
-      });
-    }
-
-    // Atualiza a tabela com os dados filtrados
-    setChangeTable(true);
-    if (data.length > 0) {
-      setItemList(data);
-    } else {
-      setItemList([]);
-      filterRef.current?.clearForm();
-    }
-
-    return;
-  };
-
   const filterExpenseList = (form) => {
-    if (
-      form.idRawMaterial &&
-      !form.expenseName &&
-      !form.supplier &&
-      !form.invoice
-    ) {
-      bringExpenseItemsSelected(form);
-      return;
-    }
-    if (changeTable) {
-      setChangeTable(false);
-    }
     const hasFilters =
       form.expenseName?.trim() ||
       form.rawMaterial?.trim() ||
@@ -294,7 +240,7 @@ const ExpensesManegementList = () => {
 
     const normalize = (str) => str?.toLowerCase().replace(/\s+/g, ' ').trim();
 
-    const { initialDate, finalDate, expenseName, supplier, invoice } = form;
+    const { initialDate, finalDate, expenseName, supplier, invoice, idRawMaterial } = form;
 
     // Começa com todos os itens
     let filteredItems = [...originalExpensesList];
@@ -328,19 +274,20 @@ const ExpensesManegementList = () => {
       });
     }
 
+    if (idRawMaterial) {
+      filteredItems = filteredItems.filter((expense) => {
+        if (!expense.items || !Array.isArray(expense.items)) return false;
+        return expense.items.some((item) => item.idProduct === idRawMaterial);
+      });
+    }
+
     return filteredItems;
 
     // Ou: setFilteredExpenses(filteredItems);
   };
 
   const cleanFilter = () => {
-    if (!changeTable) {
-      setExpensesList(originalExpensesList);
-    } else {
-      setItemList(sortedData(originalItemList));
-      setChangeTable(false);
-      setExpensesList(originalExpensesList);
-    }
+    setExpensesList(originalExpensesList);
   };
 
   const openLoadSumaryPopup = (item) => {
@@ -457,25 +404,15 @@ const ExpensesManegementList = () => {
         title="Todas as depesas feitas das mais recentes para as mais antigas. 
         Use os filtros acima para selecionar um grupo especifico"
       >
-        {changeTable ? (
-          <Table
-            title="Lista de Matérias-Primas"
-            data={itemList}
-            columns={Itemscolumns}
-            onEdit={editContent}
-            onDelete={deleteExpenses}
-          />
-        ) : (
-          <Table
-            title="Lista de Despesas"
-            data={expensesList}
-            columns={Expensescolumns}
-            onEdit={editContent}
-            onDelete={deleteExpenses}
-            eventClick={openLoadSumaryPopup}
-            labelEventClick="Ver Itens"
-          />
-        )}
+        <Table
+          title="Lista de Despesas"
+          data={expensesList}
+          columns={Expensescolumns}
+          onEdit={editContent}
+          onDelete={deleteExpenses}
+          eventClick={openLoadSumaryPopup}
+          labelEventClick="Ver Itens"
+        />
       </div>
     </div>
   );

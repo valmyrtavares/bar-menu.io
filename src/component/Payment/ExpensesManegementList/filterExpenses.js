@@ -66,7 +66,7 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
     const { name, value } = e.target;
 
     if (name === 'rawMaterial') {
-      const selectedProduct = productList.find((p) => p.idProduct === value);
+      const selectedProduct = productList.find((p) => p.id === value);
       setForm((prev) => ({
         ...prev,
         rawMaterial: selectedProduct ? selectedProduct.name : '',

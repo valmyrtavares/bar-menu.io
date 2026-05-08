@@ -4,6 +4,7 @@ import style from '../../assets/styles/TrackStockProduct.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
+import StockMovementPopup from './StockMovementPopup';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../../Helpers/Helpers';
 //import { useAlertMinimumAmount } from '../../Hooks/useAlertMinimumAmount'
@@ -30,6 +31,7 @@ const TrackStockProduct = () => {
   const [subTitle, setSubTitle] = React.useState('Matéria Prima');
   const [changeSubTitle, setChangeSubTitle] = React.useState(true);
   const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
+  const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
   const { setWarningLowRawMaterial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -159,6 +161,9 @@ const TrackStockProduct = () => {
           setShowEditForm={setShowEditForm}
         />
       )}
+      {showStockMovementPopup && (
+        <StockMovementPopup onClose={() => setShowStockMovementPopup(false)} />
+      )}
       <div className={style.containerAdjustmentScreen}>
         {showAdjustmentRecords && (
           <AdjustmentRecords
@@ -172,6 +177,9 @@ const TrackStockProduct = () => {
         <Title mainTitle="Estoque" />
       </Link>
       <div className={style.containerBtnView}>
+        <button onClick={() => setShowStockMovementPopup(true)}>
+          Movimentação de Estoque
+        </button>
         <h2>{subTitle}</h2>
         <button
           onClick={changeProductView}
