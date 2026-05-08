@@ -228,7 +228,7 @@ const AccountingManagementPopup = ({
     <div className="accounting-management-popup-container">
       <CloseBtn setClose={setShowAccountingManagementPopup} />
       {costPrice?.costPriceObj ? (
-        <table striped bordered hover>
+        <table>
           <thead>
             <tr>
               <th>Produto</th>

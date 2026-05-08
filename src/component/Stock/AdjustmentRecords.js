@@ -26,7 +26,7 @@ const AdjustmentRecords = ({
       <CloseBtn setClose={setShowAdjustmentRecords} />
       <h1>Lista de Ocorrencias do {title}</h1>;
       <div className={log.containderAdjustmentRecordsTable}>
-        <table striped bordered hover>
+        <table>
           <thead>
             <tr>
               <th title="Data em que o registro foi realizado.">Data</th>

@@ -160,7 +160,7 @@ const CustomerList = () => {
         )}
         <button onClick={deleteAnonymousCustomer}>Excluir Anonimos</button>
       </div>
-      <table striped bordered hover>
+      <table>
         <thead>
           <tr>
             <th>Nome</th>
