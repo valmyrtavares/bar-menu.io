@@ -16,20 +16,10 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
         <main>
           <div className={style.detailsWrapper}>
             <p>
-              Nome da Despesa<span>: {oneExpense.name}</span>
+              Data de Pagamento<span>: {oneExpense.paymentDate}</span>
             </p>
             <p>
-              Categoria<span>: {oneExpense.category}</span>
-            </p>
-            <p>
-              {' '}
-              Confirmação<span>: {oneExpense.confirmation}</span>
-            </p>
-            <p>
-              Data de Pagamento<span>: {oneExpense.dueDate}</span>
-            </p>
-            <p>
-              Despesa Paga em <span>: {oneExpense.paymentDate}</span>
+              Número da nota<span>: {oneExpense.account}</span>
             </p>
             <p>
               Valor Total<span>: {oneExpense.value}</span>
@@ -66,26 +56,6 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
                   <p>
                     Quantdade de volumes
                     <span> {item.amount}</span>
-                  </p>
-                  <p>
-                    Volume Total
-                    <span>
-                      {' '}
-                      {item.totalVolume}
-                      {item.unitOfMeasurement}
-                    </span>
-                  </p>
-                  <p>
-                    Volume Anterior
-                    <span>
-                      {' '}
-                      {item.currentAmountProduct}
-                      {item.unitOfMeasurement}
-                    </span>
-                  </p>
-                  <p>
-                    Informações adicionais
-                    <span> {item.adjustmentExpenseNote}</span>
                   </p>
                 </div>
               ))}
