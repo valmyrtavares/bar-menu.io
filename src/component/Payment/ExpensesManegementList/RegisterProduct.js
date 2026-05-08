@@ -63,6 +63,7 @@ const RegisterProduct = ({ setShowPopup }) => {
     setForm({
       name: item.name,
       unitOfMeasurement: item.unitOfMeasurement,
+      operationSupplies: item.operationSupplies || false,
     });
   };
 
@@ -157,6 +158,7 @@ const RegisterProduct = ({ setShowPopup }) => {
             ...stockData,
             product: form.name,
             unitOfMeasurement: form.unitOfMeasurement,
+            operationSupplies: form.operationSupplies || false,
           };
 
           await updateDoc(stockRef, updatedData);
@@ -179,6 +181,7 @@ const RegisterProduct = ({ setShowPopup }) => {
             ...sideDishesData,
             sideDishes: form.name,
             unitOfMeasurement: form.unitOfMeasurement,
+            operationSupplies: form.operationSupplies || false,
           };
 
           // Atualizar os campos em `sideDishes`

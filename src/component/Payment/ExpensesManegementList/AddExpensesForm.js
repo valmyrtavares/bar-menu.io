@@ -578,6 +578,21 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
       console.log('Produto selecionado:', selectedProduct);
 
+      const currentItem = {
+        product: selectedProduct.name,
+        idProduct: selectedProduct.idProduct
+          ? selectedProduct.idProduct
+          : selectedProduct.id, // Define o ID do produto
+        amount: Number(form.amount),
+        CostPerUnit: Number(form.CostPerUnit),
+        totalCost: Number(form.totalCost),
+        unitOfMeasurement: form.unitOfMeasurement,
+        totalVolume: Number(form.totalVolume),
+        volumePerUnit: Number(form.volumePerUnit),
+        minimumAmount: Number(form.minimumAmount),
+        operationSupplies: selectedProduct.operationSupplies || false,
+      };
+
       setItem((prevForm) => ({
         ...prevForm,
         idProduct: selectedProduct.idProduct
