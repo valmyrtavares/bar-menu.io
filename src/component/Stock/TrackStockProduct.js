@@ -5,6 +5,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
 import StockMovementPopup from './StockMovementPopup';
+import AuditingPopup from './AuditingPopup';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../../Helpers/Helpers';
 //import { useAlertMinimumAmount } from '../../Hooks/useAlertMinimumAmount'
@@ -32,6 +33,14 @@ const TrackStockProduct = () => {
   const [changeSubTitle, setChangeSubTitle] = React.useState(true);
   const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
   const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
+  const [showAuditingPopup, setShowAuditingPopup] = React.useState(false);
+
+  const handleActionSelect = (e) => {
+    const value = e.target.value;
+    if (value === 'movement') setShowStockMovementPopup(true);
+    if (value === 'audit') setShowAuditingPopup(true);
+    e.target.value = ''; // reset the select
+  };
   const { setWarningLowRawMaterial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -164,6 +173,12 @@ const TrackStockProduct = () => {
       {showStockMovementPopup && (
         <StockMovementPopup onClose={() => setShowStockMovementPopup(false)} />
       )}
+      {showAuditingPopup && (
+        <AuditingPopup 
+          onClose={() => setShowAuditingPopup(false)} 
+          fetchStock={fetchStock}
+        />
+      )}
       <div className={style.containerAdjustmentScreen}>
         {showAdjustmentRecords && (
           <AdjustmentRecords
@@ -177,9 +192,11 @@ const TrackStockProduct = () => {
         <Title mainTitle="Estoque" />
       </Link>
       <div className={style.containerBtnView}>
-        <button onClick={() => setShowStockMovementPopup(true)}>
-          Movimentação de Estoque
-        </button>
+        <select onChange={handleActionSelect} defaultValue="">
+          <option value="" disabled hidden>Ações de Estoque</option>
+          <option value="movement">Movimentação de Estoque</option>
+          <option value="audit">Auditoria</option>
+        </select>
         <h2>{subTitle}</h2>
         <button
           onClick={changeProductView}
