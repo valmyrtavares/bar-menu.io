@@ -33,6 +33,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     React.useState('');
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     getBtnData('item')
@@ -173,52 +174,26 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     const { id, value } = e.target;
 
     if (id === 'totalVolume' || id === 'totalCost') {
-      let totalCost = obj.totalCost;
-      let totalVolume = obj.totalVolume;
-      let newCostPerUnit = 0;
-      if (id === 'totalCost') {
-        totalCost = Number(value);
-        setStockProductObj({
-          ...stockProductObj,
-          totalCost: totalCost,
-        });
-      }
-      if (id === 'totalVolume') {
-        totalVolume = Number(value);
-        setStockProductObj({
-          ...stockProductObj,
-          totalVolume: totalVolume,
-        });
+      const newVolumeValue = id === 'totalVolume' ? Number(value) : Number(stockProductObj.totalVolume);
+      let newTotalCostValue = id === 'totalCost' ? Number(value) : Number(stockProductObj.totalCost);
+
+      // Lógica de proporção solicitada: Se mudar o volume, o custo segue a proporção original
+      if (id === 'totalVolume' && obj.totalVolume > 0) {
+        const unitPriceOriginal = Number(obj.totalCost) / Number(obj.totalVolume);
+        newTotalCostValue = Number((newVolumeValue * unitPriceOriginal).toFixed(2));
       }
 
-      let newUnit = 0;
-      //  const newVolume = Number(value);
-      // const newCost = totalCost * (newVolume / obj.totalVolume);
+      const newUnit = Number(obj.volumePerUnit) > 0 ? newVolumeValue / Number(obj.volumePerUnit) : 0;
+      const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : 0;
 
-      if (stockProductObj.totalCost > 0 && stockProductObj.totalVolume > 0) {
-        newUnit =
-          Number(stockProductObj.totalVolume) / Number(obj.volumePerUnit);
-        newCostPerUnit =
-          Number(stockProductObj.totalCost) /
-          Number(stockProductObj.totalVolume);
-        setStockProductObj({
-          ...stockProductObj,
-          amount: Number(newUnit).toFixed(2),
-          CostPerUnit: Number(newCostPerUnit.toFixed(2)),
-        });
-      }
+      setStockProductObj((prev) => ({
+        ...prev,
+        totalVolume: newVolumeValue,
+        totalCost: newTotalCostValue,
+        amount: Number(newUnit.toFixed(2)),
+        CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+      }));
     }
-    //  else {
-    //   const newCost = Number(value);
-    //   const currentVolume = Number(stockProductObj.totalVolume);
-    //   const newCostPerUnit = currentVolume !== 0 ? newCost / currentVolume : 0;
-
-    //   setStockProductObj({
-    //     ...stockProductObj,
-    //     totalCost: newCost,
-    //     costPerUnit: Number(newCostPerUnit.toFixed(4)),
-    //   });
-    // }
   };
 
   const handleChange = (e) => {
@@ -241,6 +216,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       alert('Todos os campos de edição são obrigatórios.');
       return;
     }
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
     console.log('Pratos que foram alterados:', updatedDishes);
@@ -270,6 +248,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       setShowEditForm(false);
     } catch (error) {
       console.error('Erro ao atualizar o documento:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -509,8 +489,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         </div>
 
         <div className={edit.btnRow}>
-          <button className={edit.addBtn} type="button" onClick={addItem}>
-            Adicionar
+          <button className={edit.addBtn} type="button" onClick={addItem} disabled={isSubmitting}>
+            {isSubmitting ? 'Enviando...' : 'Adicionar'}
           </button>
         </div>
       </div>

@@ -195,7 +195,6 @@ const TrackStockProduct = () => {
               <th>Produto</th>
               <th>Custo de Estoque</th>
               <th>Estoque em volume</th>
-              <th>Quantidade de embalagens</th>
               <th>Editar</th>
               <th>Excluir</th>
             </tr>
@@ -233,9 +232,7 @@ const TrackStockProduct = () => {
                       onClose={() => setShowWarningDeltePopup(false)}
                     />
                   )}
-                  <td>{Number(item.amount).toFixed(2)}</td>
                   <td
-                    title={tooltips.trackStockProduct.btnEdit}
                     style={{ cursor: 'pointer' }}
                     onClick={() => editStockItem(item)}
                   >
