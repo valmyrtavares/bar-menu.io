@@ -289,6 +289,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
             : itemFinded.totalVolume || 0
         );
 
+        // Recalculate and update the CostPerUnit using the new Weighted Average
+        if (currentItem.totalVolume > 0) {
+          currentItem.CostPerUnit = Number((currentItem.totalCost / currentItem.totalVolume).toFixed(2));
+        } else {
+          currentItem.CostPerUnit = 0;
+        }
+
         // Inicializa ou adiciona ao UsageHistory
         currentItem.UsageHistory = itemFinded.UsageHistory || [];
         currentItem.operationSupplies =
