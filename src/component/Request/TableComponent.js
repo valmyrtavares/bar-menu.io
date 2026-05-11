@@ -53,6 +53,10 @@ const TableComponent = ({ filteredCompleteRequests }) => {
               <td>{totalInScreen.vr}</td>
             </tr>
             <tr>
+              <td>VR_TOTEN</td>
+              <td>{totalInScreen.vrtoten}</td>
+            </tr>
+            <tr>
               <td>Total Bruto</td>
               <td>{totalInScreen.grossdiscount}</td>
             </tr>
@@ -155,6 +159,8 @@ const TableComponent = ({ filteredCompleteRequests }) => {
             acc.cash += price;
           } else if (paymentMethod === 'pix' || paymentMethod === 'PIX') {
             acc.pix += price;
+          } else if (paymentMethod === 'VR_DEBIT') {
+            acc.vrtoten += price;
           }
         });
 
@@ -166,6 +172,7 @@ const TableComponent = ({ filteredCompleteRequests }) => {
         credit: 0,
         cash: 0,
         vr: 0,
+        vrtoten: 0,
         pix: 0,
         discount: 0,
         grossdiscount: 0,
