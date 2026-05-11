@@ -76,6 +76,21 @@ const FinancialSummary = () => {
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [refreshData, setRefreshData] = useState(false);
+  const [menuItems, setMenuItems] = useState([]);
+  const [startDateRank, setStartDateRank] = useState(() => {
+    const d = new Date();
+    // Use local time to avoid timezone offset issues pushing to previous day
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  });
+  const [endDateRank, setEndDateRank] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -86,9 +101,14 @@ const FinancialSummary = () => {
       setRevenue(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const unsubItems = onSnapshot(collection(db, 'item'), (snapshot) => {
+      setMenuItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     return () => {
       unsubExpenses();
       unsubRevenue();
+      unsubItems();
     };
   }, []);
 
@@ -396,6 +416,39 @@ const FinancialSummary = () => {
     });
     return Object.values(groups).sort((a, b) => b.estimated - a.estimated);
   }, [filteredData.monthExpenses]);
+
+  const productRankingList = useMemo(() => {
+    const rankingMap = {};
+    // Initialize all active menu items with 0 sales
+    menuItems.forEach(item => {
+      if (item.title) {
+        rankingMap[item.title] = 0;
+      }
+    });
+
+    const sDate = startDateRank ? new Date(`${startDateRank}T00:00:00`) : new Date('2000-01-01');
+    const eDate = endDateRank ? new Date(`${endDateRank}T23:59:59`) : new Date('2100-01-01');
+
+    revenue.forEach(rev => {
+      const d = parseDate(rev.dateTime);
+      if (d && d >= sDate && d <= eDate) {
+        (rev.request || []).forEach(reqItem => {
+          const name = reqItem.product || reqItem.name;
+          const qty = Number(reqItem.amount || reqItem.quantity || 1);
+          if (name && qty > 0) {
+            // Only count if it's currently in the menu (this excludes deleted products)
+            if (rankingMap.hasOwnProperty(name)) {
+              rankingMap[name] += qty;
+            }
+          }
+        });
+      }
+    });
+
+    return Object.entries(rankingMap)
+      .map(([name, sold]) => ({ name, sold }))
+      .sort((a, b) => b.sold - a.sold);
+  }, [revenue, menuItems, startDateRank, endDateRank]);
 
   const CustomTooltipContent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -759,6 +812,63 @@ const FinancialSummary = () => {
           </div>
         </div>
       )}
+
+      {/* NOVO RANKING DE PRODUTOS COMPLETO */}
+      <div className={style.summaryGrid} style={{ marginTop: '30px', marginBottom: '30px' }}>
+        <div className={style.tableSection}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+            <h3 style={{ margin: 0 }}>🏆 Ranking Completo de Vendas</h3>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Inicial</label>
+                <input 
+                  type="date" 
+                  value={startDateRank} 
+                  onChange={(e) => setStartDateRank(e.target.value)}
+                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Final</label>
+                <input 
+                  type="date" 
+                  value={endDateRank} 
+                  onChange={(e) => setEndDateRank(e.target.value)}
+                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <table style={{ marginTop: '15px' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
+                <th style={{ textAlign: 'left' }}>Nome do Produto</th>
+                <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productRankingList.map((prod, index) => (
+                <tr key={index} style={{ backgroundColor: prod.sold === 0 ? '#ffe6e6' : 'inherit' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{index + 1}º</td>
+                  <td>{prod.name}</td>
+                  <td style={{ textAlign: 'center', fontWeight: 'bold', color: prod.sold === 0 ? '#ff4d4d' : 'inherit' }}>
+                    {prod.sold}
+                  </td>
+                </tr>
+              ))}
+              {productRankingList.length === 0 && (
+                <tr>
+                  <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
+                    Nenhum produto encontrado no cardápio atual.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {showEditPopup && (
         <div className={style.editOverlay}>
