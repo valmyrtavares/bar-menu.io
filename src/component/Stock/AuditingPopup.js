@@ -11,6 +11,8 @@ import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
 
 const AuditingPopup = ({ onClose, fetchStock }) => {
   const [stockItems, setStockItems] = useState([]);
+  const [allItems, setAllItems] = useState([]);
+  const [showSupplies, setShowSupplies] = useState(false);
   const [originalItems, setOriginalItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +40,11 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         });
 
         setOriginalItems(initialOriginals);
-        setStockItems(itemsWithEditedVolume);
+        setAllItems(itemsWithEditedVolume);
+        
+        // Initial filter: show MP Direta (operationSupplies === false)
+        const initialVisible = itemsWithEditedVolume.filter(item => item.operationSupplies === false);
+        setStockItems(initialVisible);
         
         exportToExcel(itemsWithEditedVolume);
       } catch (err) {
@@ -66,16 +72,30 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   };
 
   const handleVolumeChange = (id, value) => {
+    // Update both lists to keep them in sync
+    setAllItems(prev => prev.map(item => {
+      if (item.id === id) return { ...item, editedVolume: value };
+      return item;
+    }));
     setStockItems(prev => prev.map(item => {
-      if (item.id === id) {
-        return { ...item, editedVolume: value };
-      }
+      if (item.id === id) return { ...item, editedVolume: value };
       return item;
     }));
   };
 
+  const toggleProductView = () => {
+    const nextShowSupplies = !showSupplies;
+    setShowSupplies(nextShowSupplies);
+    
+    // Filter based on the new state
+    // operationSupplies === true -> MP Indireta (Insumo)
+    // operationSupplies === false -> MP Direta (Matéria Prima)
+    const filtered = allItems.filter(item => item.operationSupplies === nextShowSupplies);
+    setStockItems(filtered);
+  };
+
   const hasUnsavedChanges = () => {
-    return stockItems.some(item => item.editedVolume !== '');
+    return allItems.some(item => item.editedVolume !== '');
   };
 
   const handleClose = () => {
@@ -209,7 +229,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const handleSave = async () => {
     if (isSubmitting) return;
 
-    const itemsToUpdate = stockItems.filter(item => item.editedVolume !== '' && !isNaN(item.editedVolume));
+    const itemsToUpdate = allItems.filter(item => item.editedVolume !== '' && !isNaN(item.editedVolume));
     if (itemsToUpdate.length === 0) {
       alert("Nenhuma alteração de volume válida foi detectada.");
       return;
@@ -317,6 +337,17 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
         <div className={styleEdit.titleRow}>
           <h2>Auditoria de Estoque</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', margin: '15px 0' }}>
+            <button 
+              className={styleEdit.addBtn} 
+              onClick={toggleProductView}
+            >
+              {showSupplies ? 'Mostrar MPs Diretas' : 'Mostrar MPs Indiretas'}
+            </button>
+            <span style={{ fontWeight: 'bold', color: '#14213D' }}>
+              {showSupplies ? 'Visualizando: Insumos (Indiretos)' : 'Visualizando: Matéria Prima (Direta)'}
+            </span>
+          </div>
           <p style={{ marginTop: '10px' }}>O arquivo Excel foi baixado para facilitar a contagem física.</p>
         </div>
 
@@ -344,7 +375,6 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                     <td>
                       <input
                         type="number"
-                        style={{ width: '80px', padding: '5px' }}
                         value={item.editedVolume}
                         onChange={(e) => handleVolumeChange(item.id, e.target.value)}
                         placeholder="Novo vol."

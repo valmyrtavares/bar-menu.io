@@ -1,5 +1,13 @@
 @import './adminStyleReuse.module.scss';
 
+.addBtn {
+    @include btnAdmin;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+
 .popupOverlay {
     position: fixed;
     top: 0;
@@ -117,14 +125,6 @@
             width: 100%;
             display: flex;
             justify-content: center;
-
-            .addBtn {
-                @include btnAdmin;
-
-                &:hover {
-                    background-color: #0056b3;
-                }
-            }
         }
     }
 }

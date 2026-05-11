@@ -33,7 +33,22 @@
         }
     }
     .tableStockContainer{
-        @include tableContainer
+        @include tableContainer;
+
+        table {
+            input {
+                width: 80px;
+                padding: 6px 4px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                outline: none;
+                font-family: inherit;
+
+                &:focus {
+                    border-color: #FCA311;
+                }
+            }
+        }
     }
 
         .containerBtnView {
@@ -51,6 +66,11 @@
     
             button {
                 @include btnAdmin;
+            }
+
+            select, input {
+                padding: 6px 4px;
+                border-radius: 6px;
             }
         }
    
