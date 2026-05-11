@@ -794,14 +794,19 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
               type="text"
               onChange={handleItemChange}
             />
-            <button type="button" onClick={addItem}>
-              Adicionar
-            </button>
           </fieldset>
         )}
-        <button disabled={isSubmitting}>
-          {isSubmitting ? 'Enviando...' : 'Enviar'}
-        </button>
+
+        <div className={style.containerSubmitButtons}>
+          {showItemsDetailsForm && (
+            <button type="button" onClick={addItem} className={style.btnAddItem}>
+              Adicionar
+            </button>
+          )}
+          <button disabled={isSubmitting} className={style.btnSubmit}>
+            {isSubmitting ? 'Enviando...' : 'Enviar'}
+          </button>
+        </div>
       </form>
 
       {/* {showPopupNote && (

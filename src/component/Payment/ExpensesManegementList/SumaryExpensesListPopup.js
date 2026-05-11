@@ -43,7 +43,7 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
                   </p>
                   <p>
                     Custo Total
-                    <span> {Number(item.totalCost).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span> {Number(item.amount * item.CostPerUnit).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </p>
                   <p>
                     Volume por unidade
