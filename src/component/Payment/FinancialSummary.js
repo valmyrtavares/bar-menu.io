@@ -397,24 +397,23 @@ const FinancialSummary = () => {
     setViewMode('monthly');
   }, [selectedMonth, selectedYear]);
 
-  const groupedExpenses = useMemo(() => {
-    const groups = {};
-    filteredData.monthExpenses.forEach(exp => {
-      const key = `${exp.name}-${exp.category}`;
-      if (!groups[key]) {
-        groups[key] = { 
-          name: exp.name, 
-          category: exp.category, 
-          estimated: 0, 
-          paid: 0,
-          pending: false 
-        };
+  const detailedExpensesList = useMemo(() => {
+    const isPending = (exp) => !exp.paymentDate || !exp.confirmation || Number(exp.confirmation) === 0;
+    return [...filteredData.monthExpenses].sort((a, b) => {
+      // First, sort by pending vs paid (pending first)
+      const aPending = isPending(a);
+      const bPending = isPending(b);
+      if (aPending && !bPending) return -1;
+      if (!aPending && bPending) return 1;
+
+      // Then sort by due date
+      const dDueA = parseDate(a.dueDate);
+      const dDueB = parseDate(b.dueDate);
+      if (dDueA && dDueB) {
+        return dDueA - dDueB;
       }
-      groups[key].estimated += Number(exp.value) || 0;
-      groups[key].paid += Number(exp.confirmation) || 0;
-      if (!exp.paymentDate) groups[key].pending = true;
+      return 0;
     });
-    return Object.values(groups).sort((a, b) => b.estimated - a.estimated);
   }, [filteredData.monthExpenses]);
 
   const productRankingList = useMemo(() => {
@@ -706,37 +705,65 @@ const FinancialSummary = () => {
       </div>
 
       {viewMode === 'monthly' && (
-        <>
-          <div className={style.summaryGrid}>
-            <div className={style.tableSection}>
-              <h3>Detalhamento de Saídas</h3>
-              <table>
+        <div style={{ marginTop: '30px', marginBottom: '30px', width: '100%' }}>
+          <div className={style.tableSection}>
+            <h3>Detalhamento de Saídas</h3>
+            <table>
                 <thead>
                   <tr>
                     <th>Descrição</th>
                     <th>Tipo</th>
+                    <th>Vencimento</th>
+                    <th>Pagamento</th>
                     <th>Estimado</th>
                     <th>Pago</th>
                     <th>Status</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {groupedExpenses.map((group, i) => (
-                    <tr key={i}>
-                      <td>{group.name}</td>
-                      <td>{group.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
-                      <td>R$ {group.estimated.toFixed(2)}</td>
-                      <td>R$ {group.paid.toFixed(2)}</td>
-                      <td className={group.pending ? style.pending : style.paidStatus}>
-                        {group.pending ? 'Pendente' : 'Pago'}
-                      </td>
-                    </tr>
-                  ))}
+                  {detailedExpensesList.map((exp, i) => {
+                    const isPending = !exp.paymentDate || !exp.confirmation || Number(exp.confirmation) === 0;
+                    const formatData = (dStr) => dStr ? (dStr.includes('-') ? dStr.split('-').reverse().join('/') : dStr) : '-';
+                    return (
+                      <tr key={i}>
+                        <td>{exp.name}</td>
+                        <td>{exp.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
+                        <td>{formatData(exp.dueDate)}</td>
+                        <td>{formatData(exp.paymentDate)}</td>
+                        <td>R$ {(Number(exp.value) || 0).toFixed(2)}</td>
+                        <td>R$ {(Number(exp.confirmation) || 0).toFixed(2)}</td>
+                        <td className={isPending ? style.pending : style.paidStatus}>
+                          {isPending ? 'Pendente' : 'Pago'}
+                        </td>
+                        <td>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDotClick(exp);
+                            }}
+                            style={{
+                              backgroundColor: isPending ? '#00ff88' : '#FCA311',
+                              color: isPending ? '#14213D' : '#fff',
+                              border: 'none',
+                              padding: '5px 10px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontWeight: 'bold',
+                              fontSize: '0.8rem',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {isPending ? '💳 Pagar Conta' : '✏️ Editar'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </div>
-        </>
       )}
 
       {viewMode === 'monthly' && (

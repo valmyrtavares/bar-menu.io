@@ -234,7 +234,7 @@ const TrackStockProduct = () => {
                   }
                 >
                   <td onClick={() => usageHistory(item)} style={{ cursor: 'pointer' }} title="Ver Histórico de Custos e Ocorrências">
-                    {item.product} <span style={{ marginLeft: '8px', fontSize: '1.1rem' }}>🔍</span>
+                    {item.product} {item.unitOfMeasurement} <span style={{ marginLeft: '8px', fontSize: '1.1rem' }}>🔍</span>
                   </td>
                   <td>R$ {Number(item.totalCost).toFixed(2)}</td>
                   <td>

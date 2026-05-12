@@ -367,7 +367,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
               <tbody>
                 {stockItems.map(item => (
                   <tr key={item.id}>
-                    <td>{item.product}</td>
+                    <td>{item.product} {item.unitOfMeasurement}</td>
                     <td>R$ {Number(item.totalCost).toFixed(2)}</td>
                     <td>
                       {Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}
