@@ -4,21 +4,83 @@ import { isEmptyObject } from '../Helpers/Helpers';
 
 const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
     const [ingredientsSimple, setIngredientsSimple] = React.useState([]);
-    const [ingredientsBySize, setIngredientsBySize] = React.useState({});
-    // --- ATO 1: Inicialização ---
+    const [ingredientsBySize, setIngredientsBySize] = React.useState({
+        firstPrice: [],
+        secondPrice: [],
+        thirdPrice: []
+    });
+
+    // --- ATO 1: Inicialização e Migração ---
     React.useEffect(() => {
-        if (recipe) {
-            if (Array.isArray(recipe.FinalingridientsList)) {
-                setIngredientsSimple(recipe.FinalingridientsList);
-            } else if (recipe.FinalingridientsList) {
-                setIngredientsBySize(recipe.FinalingridientsList);
+        if (recipe && recipe.FinalingridientsList) {
+            const data = recipe.FinalingridientsList;
+
+            if (Array.isArray(data)) {
+                setIngredientsSimple(data);
             } else {
-                // Caso de receita vazia/nova
-                setIngredientsSimple([]);
-                setIngredientsBySize({});
+                // Lógica de Migração / Mapeamento
+                const newBySize = {
+                    firstPrice: [],
+                    secondPrice: [],
+                    thirdPrice: []
+                };
+
+                // 1. Tentar carregar chaves fixas (novo padrão)
+                if (data.firstPrice) newBySize.firstPrice = data.firstPrice;
+                if (data.secondPrice) newBySize.secondPrice = data.secondPrice;
+                if (data.thirdPrice) newBySize.thirdPrice = data.thirdPrice;
+
+                // 2. Heurística e Migração de Chaves Antigas
+                const oldKeys = Object.keys(data).filter(k => k !== 'firstPrice' && k !== 'secondPrice' && k !== 'thirdPrice');
+
+                if (oldKeys.length > 0) {
+                    // Primeiro, tentar casar pelo nome exato (caso o nome não tenha mudado)
+                    const labelMap = {
+                        [customizedPriceObj?.firstLabel]: 'firstPrice',
+                        [customizedPriceObj?.secondLabel]: 'secondPrice',
+                        [customizedPriceObj?.thirdLabel]: 'thirdPrice'
+                    };
+                    
+                    const unmappedOldKeys = [];
+                    oldKeys.forEach(oldKey => {
+                        const targetFixedKey = labelMap[oldKey];
+                        if (targetFixedKey && newBySize[targetFixedKey].length === 0) {
+                            newBySize[targetFixedKey] = data[oldKey];
+                            console.log(`Migrando receita (match exato) de "${oldKey}" para "${targetFixedKey}"`);
+                        } else {
+                            unmappedOldKeys.push(oldKey);
+                        }
+                    });
+
+                    // Se sobraram chaves antigas (porque o nome foi alterado e não bateu),
+                    // vamos preencher os slots vazios na ordem
+                    if (unmappedOldKeys.length > 0) {
+                        const availableSlots = ['firstPrice', 'secondPrice', 'thirdPrice'].filter(
+                            k => newBySize[k].length === 0 && customizedPriceObj?.[k.replace('Price', 'Label')]
+                        );
+                        
+                        unmappedOldKeys.forEach((oldKey, index) => {
+                            if (index < availableSlots.length) {
+                                const targetFixedKey = availableSlots[index];
+                                newBySize[targetFixedKey] = data[oldKey];
+                                console.log(`Migrando receita (forçado/recuperado) de "${oldKey}" para "${targetFixedKey}"`);
+                            }
+                        });
+                    }
+                }
+
+                setIngredientsBySize(newBySize);
             }
+        } else {
+            // Caso de receita vazia/nova
+            setIngredientsSimple([]);
+            setIngredientsBySize({
+                firstPrice: [],
+                secondPrice: [],
+                thirdPrice: []
+            });
         }
-    }, [recipe]);
+    }, [recipe, customizedPriceObj]);
     // --- ATO 2: Atualização pelo Estoque ---
     React.useEffect(() => {
         reloadCurrentRecipesValue();
@@ -61,53 +123,55 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
             }
         } else {
             const updatedBySize = {};
-            let hasChanges = false;
-            Object.entries(ingredientsBySize).forEach(([sizeLabel, ingredientList]) => {
-                updatedBySize[sizeLabel] = ingredientList.map((ingredient) => {
+            Object.entries(ingredientsBySize).forEach(([sizeKey, ingredientList]) => {
+                updatedBySize[sizeKey] = ingredientList.map((ingredient) => {
                     const updateData = getUpdatedCostData(ingredient);
                     return { ...ingredient, ...updateData };
                 });
             });
-            setIngredientsBySize(updatedBySize);
+            if (JSON.stringify(updatedBySize) !== JSON.stringify(ingredientsBySize)) {
+                setIngredientsBySize(updatedBySize);
+            }
         }
     };
     // --- ATO 3: Ação (Adicionar/Remover) ---
-    const addIngredient = (ingredient, size) => {
+    const addIngredient = (ingredient, sizeKey) => {
         if (!isEmptyObject(customizedPriceObj)) {
+            // sizeKey deve ser 'firstPrice', 'secondPrice' ou 'thirdPrice'
             setIngredientsBySize((prev) => ({
                 ...prev,
-                [size]: [...(prev[size] || []), ingredient],
+                [sizeKey]: [...(prev[sizeKey] || []), ingredient],
             }));
         } else {
             setIngredientsSimple((prev) => [...prev, ingredient]);
         }
     };
-    const removeItem = (sizeOrIndex, index) => {
+    const removeItem = (sizeKeyOrIndex, index) => {
         if (!isEmptyObject(customizedPriceObj) && index !== undefined) {
             setIngredientsBySize((prev) => ({
                 ...prev,
-                [sizeOrIndex]: prev[sizeOrIndex]?.filter((_, i) => i !== index),
+                [sizeKeyOrIndex]: prev[sizeKeyOrIndex]?.filter((_, i) => i !== index),
             }));
         } else {
-            // Se for simples, sizeOrIndex é o indice
-            const updatedList = ingredientsSimple.filter((_, i) => i !== sizeOrIndex);
+            // Se for simples, sizeKeyOrIndex é o indice
+            const updatedList = ingredientsSimple.filter((_, i) => i !== sizeKeyOrIndex);
             setIngredientsSimple(updatedList);
         }
     };
     // --- ATO 4: O Veredito (Cálculos) ---
-    const calculateItemCost = (ingredientsListTarget, label) => {
-        // Se passar label, calcula baseada no objeto ingredientsBySize (que deve ser passado ou acessado via state se quisermos internalizar)
+    const calculateItemCost = (ingredientsListTarget, sizeKey) => {
+        // Se passar sizeKey, calcula baseada no objeto ingredientsBySize (que deve ser passado ou acessado via state se quisermos internalizar)
         // Para simplificar e manter puro, vamos usar o state interno se não passado argumento
 
         let targetList = ingredientsListTarget;
 
         // Se o targetList não for passado, tentamos deduzir pelo state interno (flexibilidade)
         if (!targetList) {
-            if (label) targetList = ingredientsBySize[label];
+            if (sizeKey) targetList = ingredientsBySize[sizeKey];
             else targetList = ingredientsSimple;
-        } else if (label && !Array.isArray(targetList)) {
-            // Se foi passado o objeto cheio e um label
-            targetList = targetList[label];
+        } else if (sizeKey && !Array.isArray(targetList)) {
+            // Se foi passado o objeto cheio e um sizeKey
+            targetList = targetList[sizeKey];
         }
         if (!Array.isArray(targetList)) return 0;
         const total = targetList.reduce((sum, item) => {

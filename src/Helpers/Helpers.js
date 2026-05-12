@@ -104,15 +104,21 @@ export async function checkUnavaiableRawMaterial(id) {
     }
 
     //
-    // 7) Cenário 2 → Recipe é OBJETO com 3 arrays
-    //
+    // 7) Cenário 2 → Recipe é OBJETO com múltiplos arrays
     else if (typeof updatedRecipe === 'object' && updatedRecipe !== null) {
       const labels = data.CustomizedPrice;
-      if (!labels) continue;
+      
+      // Tentar chaves fixas (Novo Padrão)
+      processIngredientsArray(updatedRecipe.firstPrice, isUnavailable);
+      processIngredientsArray(updatedRecipe.secondPrice, isUnavailable);
+      processIngredientsArray(updatedRecipe.thirdPrice, isUnavailable);
 
-      processIngredientsArray(updatedRecipe[labels.firstLabel], isUnavailable);
-      processIngredientsArray(updatedRecipe[labels.secondLabel], isUnavailable);
-      processIngredientsArray(updatedRecipe[labels.thirdLabel], isUnavailable);
+      // Tentar chaves por labels (Padrão Antigo / Compatibilidade)
+      if (labels) {
+        processIngredientsArray(updatedRecipe[labels.firstLabel], isUnavailable);
+        processIngredientsArray(updatedRecipe[labels.secondLabel], isUnavailable);
+        processIngredientsArray(updatedRecipe[labels.thirdLabel], isUnavailable);
+      }
     }
     //Aqui temos o problema a ser pensado depois de que o isUnavailable pode estar em uma das receitas desse grupo de 3 arrays
     //
@@ -142,15 +148,23 @@ export async function checkUnavaiableRawMaterial(id) {
         // Receita de array único
         stillUnavailable = checkStillUnavailable(updatedRecipe) === true;
       } else {
-        // Receita com 3 arrays
+        // Receita com múltiplos arrays
         const labels = data.CustomizedPrice;
 
-        const r1 = checkStillUnavailable(updatedRecipe[labels.firstLabel]);
-        const r2 = checkStillUnavailable(updatedRecipe[labels.secondLabel]);
-        const r3 = checkStillUnavailable(updatedRecipe[labels.thirdLabel]);
+        const results = [
+          checkStillUnavailable(updatedRecipe.firstPrice),
+          checkStillUnavailable(updatedRecipe.secondPrice),
+          checkStillUnavailable(updatedRecipe.thirdPrice),
+        ];
+
+        if (labels) {
+          results.push(checkStillUnavailable(updatedRecipe[labels.firstLabel]));
+          results.push(checkStillUnavailable(updatedRecipe[labels.secondLabel]));
+          results.push(checkStillUnavailable(updatedRecipe[labels.thirdLabel]));
+        }
 
         // Se QUALQUER grupo retornar true → prato fora do cardápio
-        stillUnavailable = [r1, r2, r3].includes(true);
+        stillUnavailable = results.includes(true);
       }
 
       // Define o status final do prato

@@ -174,16 +174,28 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
   }, [showPopupNote]);
 
   const addItem = () => {
-    if (item.product !== '') {
-      setItem({
-        ...item,
-        totalVolume: item.volumePerUnit * item.amount,
-      });
-
-      setItemArrayList((prevArrayList) => [...prevArrayList, item]);
-    } else {
+    if (item.product === '') {
       alert('Produto não foi selecionado. Por favor, selecione o produto.');
+      return;
     }
+
+    if (Number(item.amount) <= 0 || Number(item.CostPerUnit) <= 0) {
+      alert('A quantidade e o custo por unidade devem ser maiores que zero para evitar falhas no cálculo de custos do sistema.');
+      return;
+    }
+
+    if (Number(item.volumePerUnit) <= 0 && item.operationSupplies === false) {
+      alert('O volume por embalagem deve ser maior que zero para compor o estoque da matéria prima.');
+      return;
+    }
+
+    setItem({
+      ...item,
+      totalVolume: item.volumePerUnit * item.amount,
+    });
+
+    setItemArrayList((prevArrayList) => [...prevArrayList, item]);
+    
     console.log('total ', total);
     setItem({
       product: '',

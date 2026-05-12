@@ -105,8 +105,8 @@ const PriceAndExpenseBuilder = ({
         return;
       }
 
-      if (typeof recipe.finalingridientsList === 'object' && !Array.isArray(recipe.finalingridientsList)) {
-        const lists = Object.values(recipe.finalingridientsList);
+      if (typeof recipe.FinalingridientsList === 'object' && !Array.isArray(recipe.FinalingridientsList)) {
+        const lists = Object.values(recipe.FinalingridientsList);
         const allEmpty = lists.every((arr) => Array.isArray(arr) && arr.length === 0);
         if (allEmpty) {
           alert('Esse produto não tem receita criada, por isso é impossível calcular o custo. Atualize a receita para que o custo possa ser preenchido corretamente pelo sistema.');

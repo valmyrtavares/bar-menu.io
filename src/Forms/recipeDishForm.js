@@ -148,6 +148,14 @@ const RecipeDish = ({
     }
   };
 
+  const extractLabelSizesWithKeys = () => {
+    return [
+      { key: 'firstPrice', label: customizedPriceObj.firstLabel },
+      { key: 'secondPrice', label: customizedPriceObj.secondLabel },
+      { key: 'thirdPrice', label: customizedPriceObj.thirdLabel },
+    ].filter(item => item.label); // Só mostra se tiver label
+  };
+
   const sendRecipe = () => {
     // Lógica original de setRecipe
     if (!isEmptyObject(customizedPriceObj)) {
@@ -157,22 +165,11 @@ const RecipeDish = ({
       });
       // NOVO: Calcular e enviar custos customizados
       const costsUpdate = {};
-      const LabelSize = ['firstPrice', 'secondPrice', 'thirdPrice'];
+      const PriceKeys = ['firstPrice', 'secondPrice', 'thirdPrice'];
 
-      LabelSize.forEach((priceKey) => {
-        // Encontra o label correspondente a essa chave (ex: firstPrice -> "Pequeno")
-        // Como o costProfitMarginCustomized pode vir null na primeira vez, usamos o customizedPriceObj
-        // Mas a lógica confiável está no ingredientsBySize que usa os LABELS como chave.
-
-        // Vamos pegar o label correto do objeto original de preço
-        let label = '';
-        if (priceKey === 'firstPrice') label = customizedPriceObj.firstLabel;
-        if (priceKey === 'secondPrice') label = customizedPriceObj.secondLabel;
-        if (priceKey === 'thirdPrice') label = customizedPriceObj.thirdLabel;
-        if (label) {
-          const cost = calculateItemCost(ingredientsBySize, label);
-          costsUpdate[priceKey] = { cost };
-        }
+      PriceKeys.forEach((priceKey) => {
+        const cost = calculateItemCost(ingredientsBySize, priceKey);
+        costsUpdate[priceKey] = { cost };
       });
 
       if (onCustomCostUpdate) onCustomCostUpdate(costsUpdate);
@@ -189,14 +186,14 @@ const RecipeDish = ({
   };
 
   // No componente visual
-  const handleAddIngredient = (size) => {
+  const handleAddIngredient = (sizeKey) => {
     if (!ingridients.name || !ingridients.amount) {
       alert(
         'Todos os campos precisam ser preenchidos para que a receita funcione. Por favor, preencha o tipo da matéria-prima e a quantidade.',
       );
       return;
     }
-    addIngredient(ingridients, size); // Chama o do hook
+    addIngredient(ingridients, sizeKey); // Chama o do hook usando a chave fixa
     setIngridients({ name: '', amount: '', unitOfMeasurement: '' }); // Limpa UI
   };
 
@@ -237,7 +234,7 @@ const RecipeDish = ({
               onChange={handleChange}
             />
 
-            <button type="button" onClick={handleAddIngredient}>
+            <button type="button" onClick={() => handleAddIngredient()}>
               Adicione
             </button>
           </div>
@@ -307,10 +304,10 @@ const RecipeDish = ({
           </div>
         </div>
       ) : (
-        extractLabelSizes() &&
-        extractLabelSizes().length > 0 &&
-        extractLabelSizes().map((label) => (
-          <div className={style.recipeDisContainer}>
+        extractLabelSizesWithKeys() &&
+        extractLabelSizesWithKeys().length > 0 &&
+        extractLabelSizesWithKeys().map(({ key, label }) => (
+          <div className={style.recipeDisContainer} key={key}>
             <div className={style.ingridients}>
               {label}
               <select
@@ -340,7 +337,7 @@ const RecipeDish = ({
                 onChange={handleChange}
               />
 
-              <button type="button" onClick={() => handleAddIngredient(label)}>
+              <button type="button" onClick={() => handleAddIngredient(key)}>
                 Adicione
               </button>
             </div>
@@ -357,7 +354,7 @@ const RecipeDish = ({
                 </thead>
                 <tbody>
                   {ingredientsBySize &&
-                    ingredientsBySize[label]?.map((item, index) => {
+                    ingredientsBySize[key]?.map((item, index) => {
                       const itemData = grabSpecificItemInStock(item.name);
 
                       return (
@@ -396,7 +393,7 @@ const RecipeDish = ({
                           <td
                             className="items"
                             style={{ cursor: 'pointer' }}
-                            onClick={() => removeItem(label, index)}
+                            onClick={() => removeItem(key, index)}
                           >
                             x
                           </td>
@@ -407,7 +404,7 @@ const RecipeDish = ({
               </table>
               <h2>
                 Custo do produto ({label}): R${' '}
-                {calculateItemCost(ingredientsBySize, label)}
+                {calculateItemCost(ingredientsBySize, key)}
               </h2>
             </div>
           </div>
