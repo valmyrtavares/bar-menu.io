@@ -178,3 +178,63 @@ $bgColorForm: #dad4d4;
             }
         }
 }
+
+@mixin btnBack {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #14213D;
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    z-index: 10;
+
+    &:hover {
+        transform: scale(1.1);
+        background: #f8f9fa;
+        color: #FCA311;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    svg {
+        stroke: currentColor;
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@mixin containerHelp {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+
+    a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+
+        span {
+            font-size: 2rem;
+            color: #FCA311;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}

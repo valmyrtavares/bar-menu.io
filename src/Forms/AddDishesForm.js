@@ -406,18 +406,21 @@ function AddDishesForm({
 
       <div className={style.formPageContent}>
         <div className={style.formHeader}>
-          <div className={style.helpIconHeader}>
-            <div className={style.helpIconContainer}>
-              <a
-                href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hi6g5k67uo8k"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Abrir documentação"
-              >
-                <span>?</span>
-              </a>
-            </div>
+          <div className={style.helpIconContainer}>
+            <a
+              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.hi6g5k67uo8k"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Abrir documentação"
+            >
+              <span>?</span>
+            </a>
           </div>
+          <Link to="/admin/admin" className={style.btnBack} title="Sair do Módulo">
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </Link>
           <Link to="/admin/admin">
             <Title mainTitle={mainTitle ? mainTitle : 'Adicione um prato'} />
           </Link>

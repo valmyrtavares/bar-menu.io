@@ -1,7 +1,12 @@
 @import 'variables';
 @import './adminStyleReuse.module.scss';
 
+.btnBack {
+    @include btnBack;
+}
+
 .container-request-list {
+    position: relative;
     width: 90%;
     margin: 10px 5%;
     background: white;

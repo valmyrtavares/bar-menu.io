@@ -1,4 +1,11 @@
+@import './adminStyleReuse.module.scss';
+
 .container {
+    position: relative;
+    
+    .btnBack {
+        @include btnBack;
+    }
   padding: 40px 20px;
   max-width: 1000px;
   margin: 0 auto;

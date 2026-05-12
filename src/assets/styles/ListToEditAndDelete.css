@@ -1,5 +1,33 @@
 @import "variables";
 
+.btnBack {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 45px;
+    height: 45px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transition: all 0.3s ease;
+    text-decoration: none;
+
+    svg {
+        width: 24px;
+        height: 24px;
+        stroke: #FCA311;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+}
+
 .title-dishes {
     color: black;
     font-size: 17px;

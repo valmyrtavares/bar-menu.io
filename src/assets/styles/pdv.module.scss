@@ -1,9 +1,15 @@
+@import "./adminStyleReuse.module.scss";
+
 .mainWrapper {
     width: 100%;
     overflow-x: hidden;
     position: relative;
     background-color: var(--page-bg-color);
     min-height: 100vh;
+
+    .btnBack {
+        @include btnBack;
+    }
 }
 
 .fixedHeader {
@@ -13,6 +19,9 @@
     background-color: var(--page-bg-color);
     padding-bottom: 5px;
     border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .viewToggle {
         text-align: center;

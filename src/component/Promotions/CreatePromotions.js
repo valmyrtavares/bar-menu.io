@@ -191,6 +191,11 @@ const CreatePromotions = () => {
           <span>?</span>
         </a>
       </div>
+      <Link to="/admin/admin" className={styles.btnBack} title="Sair do Módulo">
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </Link>
       <form onSubmit={handleSubmit} className={styles.promotionForm}>
         <Link to="/admin/admin">
           <Title mainTitle="Promoções"></Title>

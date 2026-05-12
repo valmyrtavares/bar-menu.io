@@ -55,7 +55,22 @@ export default function CostOperations() {
 
   return (
     <div className={`${style.containerOperationCostRegister} p-4`}>
-      <Link to="/admin/admin">
+      <div className={style.containerIcon}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
+      </div>
+      <Link to="/admin/admin" className={style.btnBack} title="Sair do Módulo">
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </Link>
+      <Link to="/admin/admin" style={{ textDecoration: 'none' }}>
         <Title mainTitle="Gerenciar Operações de Custo" />
       </Link>
 

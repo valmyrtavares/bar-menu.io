@@ -308,18 +308,21 @@ function AddSideDishesForm({
           objPriceCost={form.costPriceObj}
         />
       )}
-      <div className={style.helpIconHeader}>
-        <div className={style.helpIconContainer}>
-          <a
-            href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.ax0nn2e87w6r#heading=h.prfdtk2uskb2"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Abrir documentação"
-          >
-            <span>?</span>
-          </a>
-        </div>
+      <div className={style.helpIconContainer}>
+        <a
+          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.ax0nn2e87w6r#heading=h.prfdtk2uskb2"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir documentação"
+        >
+          <span>?</span>
+        </a>
       </div>
+      <Link to="/admin/admin" className={style.btnBack} title="Sair do Módulo">
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </Link>
       <Link to="/admin/admin">
         <Title
           mainTitle={

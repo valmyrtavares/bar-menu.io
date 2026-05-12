@@ -1,3 +1,5 @@
+@import './adminStyleReuse.module.scss';
+
 .container {
   padding: 30px;
   background-color: #0d0d0d;
@@ -57,26 +59,15 @@
   }
 }
 
-.helpIconContainer {
-  a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 35px;
-    height: 35px;
-    background-color: #FCA311;
-    color: #14213D;
-    text-decoration: none;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(252, 163, 17, 0.2);
+.btnBack {
+  @include btnBack;
+}
 
-    &:hover {
-      background-color: #fff;
-      transform: scale(1.1);
-    }
+.helpIconContainer {
+  @include containerHelp;
+  position: static; // Reset position since containerHelp handles it or we're in a flex row
+  a {
+    // Keep existing hover/size if needed, but containerHelp should handle it
   }
 }
 

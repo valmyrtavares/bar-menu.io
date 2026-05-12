@@ -1,9 +1,18 @@
 @import "./adminStyleReuse.module.scss";
 
 .containerOperationCostRegister{
-    .btn{
-    @include btnAdmin;
-    margin-bottom:20px;
+    position: relative;
+    .btn {
+        @include btnAdmin;
+        margin-bottom: 20px;
+    }
+
+    .btnBack {
+        @include btnBack;
+    }
+
+    .containerIcon {
+        @include containerHelp;
     }
     table{
         @include tableadmin;

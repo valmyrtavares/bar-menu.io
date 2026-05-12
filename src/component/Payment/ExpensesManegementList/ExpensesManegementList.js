@@ -302,16 +302,16 @@ const ExpensesManegementList = () => {
           href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.lastl0sptfl5#heading=h.ft9y0s2jnma8"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            textDecoration: 'none',
-          }}
           title="Abrir documentação"
         >
           <span>?</span>
         </a>
       </div>
+      <Link to="/admin/admin" className={expenses.btnBack} title="Sair do Módulo">
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </Link>
       {showWarningDeletePopup && (
         <DefaultComumMessage
           msg={`Você está prestes a excluir ${excludeExpense.name ? excludeExpense.name : excludeExpense.product

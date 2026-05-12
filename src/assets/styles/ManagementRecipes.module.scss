@@ -52,31 +52,10 @@
     }
 
     .containerIcon {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 10;
+        @include containerHelp;
+    }
 
-        a {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-
-            span {
-                font-size: 2rem;
-                color: #ff9800;
-                font-weight: bold;
-                cursor: pointer;
-                padding: 0.5rem;
-                border-radius: 50%;
-                background: #fff;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                width: 50px;
-                height: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
+    .btnBack {
+        @include btnBack;
     }
 }

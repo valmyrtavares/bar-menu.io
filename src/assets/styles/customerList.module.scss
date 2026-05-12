@@ -44,32 +44,13 @@
         padding-top: 10px;
 
         .helpIconContainer {
+            @include containerHelp;
             position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            transform: none; // Reset transformation
+        }
 
-            a {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 28px;
-                height: 28px;
-                background-color: #FCA311;
-                color: #14213D;
-                text-decoration: none;
-                border-radius: 50%;
-                font-size: 0.9rem;
-                font-weight: bold;
-                transition: all 0.3s ease;
-                
-                &:hover {
-                    background-color: #14213D;
-                    color: #FCA311;
-                    transform: scale(1.1);
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                }
-            }
+        .btnBack {
+            @include btnBack;
         }
 
         /* Enforce title centering */
