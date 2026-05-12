@@ -243,7 +243,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     );
   };
 
-  const handleStock = async (itemsStock, account = '000', paymentDate) => {
+  const handleStock = async (originalItemsStock, account = '000', paymentDate) => {
+    // Clone array to prevent mutating the items going to the expenses list
+    const itemsStock = JSON.parse(JSON.stringify(originalItemsStock));
     console.log('objeto recebido   ', itemsStock);
 
     const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
@@ -278,6 +280,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         const pack = Number(itemFinded.amount) + Number(currentItem.amount);
         const volume = currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
+        
+        currentItem.amount = pack; // Ensure the stock total amount is updated
         currentItem.totalCost += Number(
           currentItem.currentAmountProduct
             ? previousCost
