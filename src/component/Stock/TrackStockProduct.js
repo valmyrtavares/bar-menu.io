@@ -26,13 +26,10 @@ const TrackStockProduct = () => {
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
-  const [tootleTooggleOfProducts, setToogleTypeOfProducts] =
-    React.useState(true);
   const [showDeleted, setShowDeleted] = React.useState(false);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
   const [subTitle, setSubTitle] = React.useState('Matéria Prima');
-  const [changeSubTitle, setChangeSubTitle] = React.useState(true);
   const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
   const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
   const [showDishMovementPopup, setShowDishMovementPopup] = React.useState(false);
@@ -130,8 +127,8 @@ const TrackStockProduct = () => {
   const toggleDeletedProducts = () => {
     const nextShowDeleted = !showDeleted;
     nextShowDeleted
-      ? setSubTitle('Itens Excluídos')
-      : setSubTitle('Itens Habilitados');
+      ? setSubTitle('Matéria Prima (Excluídas)')
+      : setSubTitle('Matéria Prima');
     const filtered = allStockItems.filter(
       (item) =>
         item.operationSupplies === false && //true = insumo false = matéria prima
@@ -142,19 +139,6 @@ const TrackStockProduct = () => {
 
     setStock(filtered);
     setShowDeleted(nextShowDeleted);
-  };
-
-  const changeProductView = () => {
-    setChangeSubTitle((prev) => !prev);
-    changeSubTitle
-      ? setSubTitle('Todas MPs Indiretas')
-      : setSubTitle('Todas as MPs Diretas');
-    setToogleTypeOfProducts((prev) => !prev);
-    const filtered = allStockItems.filter(
-      (item) => item.operationSupplies === tootleTooggleOfProducts
-    );
-
-    setStock(filtered);
   };
 
   return (
@@ -222,12 +206,6 @@ const TrackStockProduct = () => {
           <option value="audit">Auditoria</option>
         </select>
         <h2>{subTitle}</h2>
-        <button
-          onClick={changeProductView}
-          title={tooltips.trackStockProduct.rawMaterialBtn}
-        >
-          MP indireta / MP direta
-        </button>
       </div>
       <div className={style.tableStockContainer}>
         <table>

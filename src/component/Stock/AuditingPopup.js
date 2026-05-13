@@ -12,7 +12,6 @@ import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
 const AuditingPopup = ({ onClose, fetchStock }) => {
   const [stockItems, setStockItems] = useState([]);
   const [allItems, setAllItems] = useState([]);
-  const [showSupplies, setShowSupplies] = useState(false);
   const [originalItems, setOriginalItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,8 +28,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         setDishes(dishesData || []);
 
         const sorted = (stockData || []).sort((a, b) => a.product.localeCompare(b.product));
+        // Filter out operationSupplies === true (Insumos) and deleted items
         const filtered = sorted.filter(
-          (item) => item.activityStatus === undefined || item.activityStatus === false
+          (item) => item.operationSupplies === false && (item.activityStatus === undefined || item.activityStatus === false)
         );
 
         const initialOriginals = {};
@@ -41,10 +41,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
         setOriginalItems(initialOriginals);
         setAllItems(itemsWithEditedVolume);
-        
-        // Initial filter: show MP Direta (operationSupplies === false)
-        const initialVisible = itemsWithEditedVolume.filter(item => item.operationSupplies === false);
-        setStockItems(initialVisible);
+        setStockItems(itemsWithEditedVolume);
         
         exportToExcel(itemsWithEditedVolume);
       } catch (err) {
@@ -83,16 +80,6 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     }));
   };
 
-  const toggleProductView = () => {
-    const nextShowSupplies = !showSupplies;
-    setShowSupplies(nextShowSupplies);
-    
-    // Filter based on the new state
-    // operationSupplies === true -> MP Indireta (Insumo)
-    // operationSupplies === false -> MP Direta (Matéria Prima)
-    const filtered = allItems.filter(item => item.operationSupplies === nextShowSupplies);
-    setStockItems(filtered);
-  };
 
   const hasUnsavedChanges = () => {
     return allItems.some(item => item.editedVolume !== '');
@@ -337,17 +324,6 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
         <div className={styleEdit.titleRow}>
           <h2>Auditoria de Estoque</h2>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', margin: '15px 0' }}>
-            <button 
-              className={styleEdit.addBtn} 
-              onClick={toggleProductView}
-            >
-              {showSupplies ? 'Mostrar MPs Diretas' : 'Mostrar MPs Indiretas'}
-            </button>
-            <span style={{ fontWeight: 'bold', color: '#14213D' }}>
-              {showSupplies ? 'Visualizando: Insumos (Indiretos)' : 'Visualizando: Matéria Prima (Direta)'}
-            </span>
-          </div>
           <p style={{ marginTop: '10px' }}>O arquivo Excel foi baixado para facilitar a contagem física.</p>
         </div>
 
