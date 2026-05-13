@@ -5,6 +5,7 @@ import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
 import AdjustmentRecords from './AdjustmentRecords';
 import StockMovementPopup from './StockMovementPopup';
+import DishStockMovementPopup from './DishStockMovementPopup';
 import AuditingPopup from './AuditingPopup';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../../Helpers/Helpers';
@@ -33,11 +34,13 @@ const TrackStockProduct = () => {
   const [changeSubTitle, setChangeSubTitle] = React.useState(true);
   const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
   const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
+  const [showDishMovementPopup, setShowDishMovementPopup] = React.useState(false);
   const [showAuditingPopup, setShowAuditingPopup] = React.useState(false);
 
   const handleActionSelect = (e) => {
     const value = e.target.value;
     if (value === 'movement') setShowStockMovementPopup(true);
+    if (value === 'dishMovement') setShowDishMovementPopup(true);
     if (value === 'audit') setShowAuditingPopup(true);
     e.target.value = ''; // reset the select
   };
@@ -178,6 +181,9 @@ const TrackStockProduct = () => {
       {showStockMovementPopup && (
         <StockMovementPopup onClose={() => setShowStockMovementPopup(false)} />
       )}
+      {showDishMovementPopup && (
+        <DishStockMovementPopup onClose={() => setShowDishMovementPopup(false)} />
+      )}
       {showAuditingPopup && (
         <AuditingPopup 
           onClose={() => setShowAuditingPopup(false)} 
@@ -200,6 +206,7 @@ const TrackStockProduct = () => {
         <select onChange={handleActionSelect} defaultValue="">
           <option value="" disabled hidden>Ações de Estoque</option>
           <option value="movement">Movimentação de Estoque</option>
+          <option value="dishMovement">Movimentação por pratos</option>
           <option value="audit">Auditoria</option>
         </select>
         <h2>{subTitle}</h2>
