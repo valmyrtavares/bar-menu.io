@@ -21,7 +21,7 @@
 
     .formProduct {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
         padding: 10px;
 
@@ -84,19 +84,21 @@
     }
 
     button {
-    @include btnAdmin
+        @include btnAdmin;
+        padding: 10px 20px;
+        height: auto;
     }
 
     fieldset {
         border: 2px solid #ccc;
-        padding: 10px;
+        padding: 15px;
         margin-bottom: 15px;
-        border-radius: 5px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        justify-content: space-around;
+        border-radius: 8px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+        gap: 10px;
         align-items: end;
+        background-color: #fcfcfc;
 
         legend {
             text-align: center;
@@ -105,30 +107,34 @@
         }
         .selectform {
             display: flex;
-            justify-content: start;
-            align-items: end;
-            margin-bottom: 1rem;
-            max-width: 50px;
+            flex-direction: column;
+            margin-bottom: 0;
+            width: 100%;
+            min-width: 0;
             select {
-                min-height: 60px;
-                border: none;
-                font-size: 21px;
-                max-width: 115px
+                min-height: 45px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+                width: 100%;
             }
 
         }
 
         label {
-            font-size: 16px !important;
+            font-size: 13px !important;
             display: block;
             padding: 0;
-            width: 116px;
+            width: 100%;
+            margin-bottom: 4px;
         }
 
         div {
-            max-width: 50px;
+            width: 100%;
+            min-width: 0;
             input{
-                max-width:115px
+                width: 100%;
+                min-height: 45px;
             }
         }
 

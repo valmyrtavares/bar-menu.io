@@ -1,0 +1,226 @@
+@import "./adminStyleReuse.module.scss";
+
+.containerAddStockEntry {
+    width: auto; // Let it shrink
+    height: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: $bg-admin-default;
+    padding: 35px;
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow-y: auto;
+    z-index: 100;
+    border-radius: 16px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        h1 { margin: 0; font-size: 1.8rem; color: #14213D; text-transform: uppercase; letter-spacing: 1px; }
+    }
+
+    .topFields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-bottom: 25px;
+        align-items: flex-end;
+        justify-content: flex-start; // Don't force center if we want natural width
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            width: auto;
+            
+            label {
+                font-size: 14px;
+                font-weight: 700;
+                color: #14213D;
+                margin-bottom: 8px;
+            }
+
+            select, input {
+                height: 44px;
+                padding: 10px 14px;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                background-color: white;
+                font-size: 15px;
+                box-sizing: border-box;
+                width: 250px; // Default width for top fields
+            }
+        }
+
+        .providerField {
+            select { width: 350px; } // Specific width for Fornecedor
+        }
+
+        .smallField {
+            input { width: 140px; } // Specific width for small numeric fields
+            div { margin-bottom: 0 !important; }
+        }
+
+        .fullWidth {
+            width: 100%;
+            margin-top: 10px;
+            input { width: 100%; max-width: 800px; } // Limit Comprovante width
+            div { margin-bottom: 0 !important; }
+        }
+    }
+
+    .readOnlyInput {
+        background-color: #f1f3f5 !important;
+        cursor: not-allowed;
+    }
+
+    .itemsFieldset {
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        padding: 40px 25px 25px 25px;
+        margin-bottom: 30px;
+        background-color: #ffffff;
+        position: relative;
+        width: fit-content; // Fieldset should shrink to fit its content
+        margin-left: auto;
+        margin-right: auto;
+
+        legend {
+            float: none;
+            width: auto;
+            margin: 0;
+            padding: 0 25px;
+            font-weight: 800;
+            color: #14213D;
+            font-size: 1.1rem;
+            background: #ffffff;
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .itemsGrid {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            justify-content: flex-start;
+
+            .field {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 0;
+
+                label {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #495057;
+                    margin-bottom: 4px;
+                    white-space: nowrap;
+                }
+
+                select, input {
+                    height: 44px;
+                    padding: 8px 12px;
+                    border: 1px solid #ced4da;
+                    border-radius: 6px;
+                    background-color: white;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                    margin: 0;
+                }
+            }
+
+            .productField {
+                select { width: 400px; } // Product select width
+            }
+
+            .numberField {
+                input { width: 110px; } // Number inputs width
+                div { margin-bottom: 0 !important; }
+            }
+
+            .addItemBtn {
+                @include btnAdmin;
+                height: 44px;
+                padding: 0 30px;
+                background-color: #FCA311;
+                color: #14213D;
+                font-weight: 800;
+                border: none;
+                margin: 0;
+                &:hover { background-color: #14213D; color: white; }
+            }
+        }
+    }
+
+    .tableContainer {
+        @include tableContainer;
+        margin-bottom: 40px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        overflow-x: auto;
+        width: 100%;
+
+        table {
+            width: auto;
+            min-width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+            
+            thead th { 
+                padding: 15px 12px;
+                text-align: left;
+                font-size: 1.1rem;
+                border-bottom: 2px solid #f1f3f5;
+                color: #14213D;
+            }
+            
+            tbody td {
+                padding: 15px 12px;
+                border-bottom: 1px solid #f1f3f5;
+                font-size: 14px;
+            }
+
+            .deleteIcon { 
+                color: #e03131; 
+                cursor: pointer; 
+                text-align: center;
+                font-weight: bold;
+                font-size: 1.1rem;
+                &:hover { transform: scale(1.2); }
+            }
+        }
+    }
+
+    .footer {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 10px;
+        .submitBtn {
+            @include btnAdmin;
+            min-width: 400px;
+            height: 55px;
+            font-size: 1.2rem;
+            background-color: #14213D;
+            color: white;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(20, 33, 61, 0.2);
+            &:hover { background-color: #FCA311; color: #14213D; transform: translateY(-2px); }
+        }
+    }
+}
+
+// Ensure responsiveness without forcing large widths
+@media (max-width: 1100px) {
+    .containerAddStockEntry {
+        width: 95vw;
+        .topFields, .itemsGrid {
+            justify-content: center;
+        }
+    }
+}

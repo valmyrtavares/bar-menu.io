@@ -131,7 +131,7 @@ const FinancialSummary = () => {
       const dDue = parseDate(exp.dueDate);
       const inPay = dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear;
       const inDue = dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear;
-      return inPay || inDue;
+      return (inPay || inDue) && exp.entryType !== 'stock';
     });
 
     const monthRevenue = revenue.filter(rev => {
@@ -167,7 +167,7 @@ const FinancialSummary = () => {
         });
         const monthExpenses = expenses.filter(exp => {
           const dPay = parseDate(exp.paymentDate);
-          return dPay && dPay.getMonth() === m && dPay.getFullYear() === y && exp.confirmation;
+          return dPay && dPay.getMonth() === m && dPay.getFullYear() === y && exp.confirmation && exp.entryType !== 'stock';
         });
 
         const profitValue = monthRevenue.reduce((acc, rev) => {
@@ -214,7 +214,7 @@ const FinancialSummary = () => {
         const monthFixed = expenses
           .filter(exp => {
             const dDue = parseDate(exp.dueDate);
-            return exp.category === 'fixed' && dDue && dDue.getMonth() === m && dDue.getFullYear() === y;
+            return exp.category === 'fixed' && dDue && dDue.getMonth() === m && dDue.getFullYear() === y && exp.entryType !== 'stock';
           })
           .reduce((acc, exp) => acc + (Number(exp.value) || 0), 0);
 
@@ -253,7 +253,7 @@ const FinancialSummary = () => {
     const totalEstimatedFixed = monthExpenses
       .filter(exp => {
         const dDue = parseDate(exp.dueDate);
-        return exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear;
+        return exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear && exp.entryType !== 'stock';
       })
       .reduce((acc, exp) => acc + (Number(exp.value) || 0), 0);
 
@@ -285,7 +285,7 @@ const FinancialSummary = () => {
 
     monthExpenses.forEach(exp => {
       const dDue = parseDate(exp.dueDate);
-      if (exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear) {
+      if (exp.category === 'fixed' && dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear && exp.entryType !== 'stock') {
         const dayIdx = dDue.getDate() - 1;
         if (dailyData[dayIdx]) {
           dailyData[dayIdx].dueFixedList.push(exp);
@@ -328,7 +328,7 @@ const FinancialSummary = () => {
     const totalPaidFixed = monthExpenses
       .filter(exp => {
         const dPay = parseDate(exp.paymentDate);
-        return exp.category === 'fixed' && dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear;
+        return exp.category === 'fixed' && dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear && exp.entryType !== 'stock';
       })
       .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
     

@@ -12,7 +12,7 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
     <div className={style.overlay}>
       <div className={style.containerSumaryExpenses}>
         <CloseBtn setClose={setOpenSumaryPopup} />
-        <h1>Despesa Completa</h1>
+        <h1>{oneExpense.entryType === 'stock' ? 'Entrada de estoque' : 'Despesa Completa'}</h1>
         <main>
           <div className={style.detailsWrapper}>
             <p>

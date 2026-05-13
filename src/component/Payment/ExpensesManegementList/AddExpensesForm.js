@@ -18,7 +18,7 @@ import { getBtnData, addItemToCollection } from '../../../api/Api';
 import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 
-const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
+const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType }) => {
   const global = React.useContext(GlobalContext);
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
@@ -35,6 +35,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     items: [],
     numberOfTimes: 1,
     paymentProof: '',
+    entryType: forcedEntryType || 'expense',
+    category: forcedEntryType === 'stock' ? 'variable' : '',
+    name: forcedEntryType === 'stock' ? 'Entrada de Estoque' : '',
   });
 
   const [item, setItem] = React.useState({
@@ -51,7 +54,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     operationSupplies: false,
     unitOfMeasurement: '',
   });
-  const [showItemsDetailsForm, setShowItemsDetailsForm] = React.useState(false);
+  const [showItemsDetailsForm, setShowItemsDetailsForm] = React.useState(forcedEntryType === 'stock');
   const [itemArrayList, setItemArrayList] = React.useState([]);
   const [productList, setProductList] = React.useState(null);
   const [providerList, setProviderList] = React.useState(null);
@@ -71,7 +74,15 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       ]);
 
       if (dataProduct && dataProduct.length > 0) {
-        setProductList(sortedData(dataProduct));
+        let filteredProducts = dataProduct;
+        if (forcedEntryType === 'stock') {
+          // Only Raw Material (Direta) - include items where operationSupplies is false, undefined or null
+          filteredProducts = dataProduct.filter(p => p.operationSupplies === false || p.operationSupplies === undefined || p.operationSupplies === null);
+        } else {
+          // Only Supplies (Indireta)
+          filteredProducts = dataProduct.filter(p => p.operationSupplies === true);
+        }
+        setProductList(sortedData(filteredProducts));
       }
       if (dataExpenses && dataExpenses.length > 0) {
         setExpensesList(sortedData(dataExpenses));
@@ -81,7 +92,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       }
     };
     fetchRegisterLists();
-  }, []);
+  }, [forcedEntryType]);
 
   const sortedData = (list) => {
     return list.sort((a, b) => a.name.localeCompare(b.name));
@@ -123,6 +134,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
         items: obj.items || [],
         numberOfTimes: obj.numberOfTimes || 1,
         paymentProof: obj.paymentProof || '',
+        entryType: obj.entryType || 'expense',
       });
 
       if (obj.items && obj.items.length > 0) {
@@ -504,7 +516,12 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           handleWarningCleanup(data, enrichedItems);
         }
 
-        await saveExpense({ ...form, items: enrichedItems });
+        await saveExpense({ 
+          ...form, 
+          items: enrichedItems,
+          // Ensure dueDate is set for stock entries if missing
+          dueDate: forcedEntryType === 'stock' ? form.paymentDate : form.dueDate
+        });
       }
 
       setRefreshData((prev) => !prev);
@@ -580,6 +597,11 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
     }));
   };
 
+  const setEntryType = (type) => {
+    if (forcedEntryType) return; // Don't override if forced
+    setForm(prev => ({ ...prev, entryType: type }));
+  };
+
   const toggleFormItemsByExpenseType = (id, value) => {
     if (id === 'name') {
       const selectedExpense = expensesList.filter(
@@ -587,8 +609,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       );
       if (selectedExpense[0].multiply === 'composto') {
         setShowItemsDetailsForm(true);
+        setEntryType('stock');
       } else {
         setShowItemsDetailsForm(false);
+        setEntryType('expense');
       }
     }
   };
@@ -669,21 +693,25 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
       <form onSubmit={handleSubmit} className="m-1">
         <div className={style.formProduct}>
           {/* Row 1: Name, Category, Provider */}
-          <div className={style.selectform}>
-            <select id="name" required value={form.expenseId} onChange={handleChange} onFocus={handleFocus}>
-              <option value="">Selecione uma despesa</option>
-              {expensesList && expensesList.map((expense, index) => (
-                <option key={index} value={String(expense.humanId)}>{expense.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className={style.selectform}>
-            <select id="category" value={form.category} required onChange={handleChange}>
-              <option value="" disabled hidden>Tipo de custo</option>
-              <option value="fixed">Fixo</option>
-              <option value="variable">Variável</option>
-            </select>
-          </div>
+          {forcedEntryType !== 'stock' && (
+            <>
+              <div className={style.selectform}>
+                <select id="name" required value={form.expenseId} onChange={handleChange} onFocus={handleFocus}>
+                  <option value="">Selecione uma despesa</option>
+                  {expensesList && expensesList.map((expense, index) => (
+                    <option key={index} value={String(expense.humanId)}>{expense.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={style.selectform}>
+                <select id="category" value={form.category} required onChange={handleChange}>
+                  <option value="" disabled hidden>Tipo de custo</option>
+                  <option value="fixed">Fixo</option>
+                  <option value="variable">Variável</option>
+                </select>
+              </div>
+            </>
+          )}
           <div className={style.selectform}>
             <select id="provider" required onChange={handleChange} value={form.provider}>
               <option value="">Fornecedor</option>
@@ -694,28 +722,43 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj }) => {
           </div>
 
           {/* Row 2: Value, DueDate, NumberOfTimes */}
-          <Input id="value" required label="Valor" value={form.value} type="number" onChange={handleChange} />
-          <Input id="dueDate" required label="Vencimento" value={form.dueDate} type="date" onChange={handleChange} />
-          <Input id="numberOfTimes" label="Parcelas" value={form.numberOfTimes} type="number" onChange={handleChange} />
+          <Input 
+            id="value" 
+            required 
+            label="Valor" 
+            value={form.value} 
+            type="number" 
+            onChange={handleChange} 
+            readOnly={forcedEntryType === 'stock'}
+            style={forcedEntryType === 'stock' ? { backgroundColor: '#f0f0f0', cursor: 'not-allowed' } : {}}
+          />
+          {forcedEntryType !== 'stock' && (
+            <Input id="dueDate" required label="Vencimento" value={form.dueDate} type="date" onChange={handleChange} />
+          )}
+          {forcedEntryType !== 'stock' && (
+            <Input id="numberOfTimes" label="Parcelas" value={form.numberOfTimes} type="number" onChange={handleChange} />
+          )}
 
           {/* Row 3: Account, PaymentDate, Confirmation */}
           <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} />
           <Input 
             id="paymentDate" 
-            required={form.category !== 'fixed'} 
+            required={form.category !== 'fixed' || forcedEntryType === 'stock'} 
             label="Data Pagamento" 
             value={form.paymentDate} 
             type="date" 
             onChange={handleChange} 
           />
-          <Input 
-            id="confirmation" 
-            required={form.category !== 'fixed'} 
-            label="Confirmação" 
-            value={form.confirmation} 
-            type="number" 
-            onChange={handleChange} 
-          />
+          {forcedEntryType !== 'stock' && (
+            <Input 
+              id="confirmation" 
+              required={form.category !== 'fixed'} 
+              label="Confirmação" 
+              value={form.confirmation} 
+              type="number" 
+              onChange={handleChange} 
+            />
+          )}
 
           {/* Row 4: PaymentProof */}
           <div className={style.paymentProofRow}>

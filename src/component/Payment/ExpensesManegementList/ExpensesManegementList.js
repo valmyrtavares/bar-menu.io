@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import React from 'react';
 import expenses from '../../../assets/styles/ExpensesManegementList.module.scss';
-//import adminStyle from '../../../assets/styles/adminStyleReuse.module.css';
 import { getBtnData, deleteData, updateCollection } from '../../../api/Api';
 import AddExpensesForm from './AddExpensesForm.js';
 import RegisterProvider from './RegisterProvider.js';
@@ -13,7 +12,6 @@ import { Link } from 'react-router-dom';
 import Title from '../../title.js';
 import FilterExpenses from './filterExpenses.js';
 import Table from '../../Table.js';
-import { tab } from '@testing-library/user-event/dist/tab.js';
 
 const Expensescolumns = [
   { nomeDaColuna: 'Tipo de despesa', valorDaColuna: 'name' },
@@ -66,15 +64,20 @@ const ExpensesManegementList = () => {
   const fetchExpensesData = async () => {
     try {
       const expensesData = await getBtnData('outgoing');
-
       const outgoingList = Array.isArray(expensesData) ? expensesData : [];
 
       const mergedItems = outgoingList.flatMap((expense) =>
         Array.isArray(expense.items) ? expense.items : []
       );
 
-      setExpensesList(sortedData(outgoingList));
-      setOriginalExpensesList(sortedData(outgoingList));
+      // Map names for Stock entries
+      const mappedList = outgoingList.map(exp => ({
+        ...exp,
+        name: exp.entryType === 'stock' ? 'Entrada de estoque' : exp.name
+      }));
+
+      setExpensesList(sortedData(mappedList));
+      setOriginalExpensesList(sortedData(mappedList));
       setItemList(sortedData(mergedItems));
       setOriginalItemList(sortedData(mergedItems));
     } catch (error) {
@@ -106,13 +109,8 @@ const ExpensesManegementList = () => {
       setShowWarningDeltePopup(false);
 
       if (Array.isArray(item.items) || item.name) {
-        // Primeiro tipo de exclusão
         deleteData('outgoing', item.id);
       } else {
-        // Segundo tipo de exclusão
-        // deleteData('expenseItems', item.id);
-
-        // Agora vamos remover o item correspondente da coleção 'outgoing'
         const targetExpense = expensesList.find(
           (expense) => expense.expenseId === item.expenseId
         );
@@ -121,18 +119,13 @@ const ExpensesManegementList = () => {
           const filteredItems = targetExpense.items.filter(
             (i) => i.idProduct !== item.idProduct
           );
-
-          // Atualiza o documento no Firestore com os items filtrados
           const updatedExpense = {
             ...targetExpense,
             items: filteredItems,
           };
-
-          // Chama a função para atualizar o documento na coleção 'outgoing'
           await updateCollection('outgoing', targetExpense.id, updatedExpense);
         }
       }
-
       setRefreshData((prev) => !prev);
     }
   };
@@ -141,76 +134,20 @@ const ExpensesManegementList = () => {
     setShowExpensesPopup(true);
     setObj(null);
   };
-  // const registerProduct = () => {
-  //   setShowProductRegisterPopup(true);
-  // };
-  // const addRegisterProvider = () => {
-  //   console.log('Registrou');
-  //   setShowProviderRegisterPopup(true);
-  // };
 
   const handleRegisterChange = (e) => {
     const value = e.target.value;
-
-    if (value === 'product') {
-      setShowProductRegisterPopup(true);
-    } else if (value === 'provider') {
-      setShowProviderRegisterPopup(true);
-    } else if (value === 'expenses') {
-      setShowExpensesRegisterPopup(true);
-    }
-
-    // Opcional: resetar o select após a ação
+    if (value === 'product') setShowProductRegisterPopup(true);
+    else if (value === 'provider') setShowProviderRegisterPopup(true);
+    else if (value === 'expenses') setShowExpensesRegisterPopup(true);
     e.target.value = '';
   };
 
-  const totalExpensesValue = () => {
-    if (!expensesList || expensesList.length === 0) {
-      return null;
-    }
-    //let totals = { paid: 0, estimate: 0 };
-
-    const result = expensesList.reduce(
-      (totals, item) => {
-        totals.estimate += Number(item.value);
-        totals.paid += Number(item.confirmation);
-        return totals;
-      },
-      { paid: 0, estimate: 0 } // valor inicial do acumulador
-    );
-
-    return (
-      <tr className={expenses.totals}>
-        <td>Total Estimado = </td> {/* Primeira coluna vazia */}
-        <td>{Number(result.estimate).toFixed(2)}</td>{' '}
-        {/* Segunda coluna com o total */}
-        <td colSpan={2}></td>{' '}
-        {/* Três colunas vazias (Data de Vencimento, Categoria, Data do Pagamento) */}
-        <td>Total Pago = </td>
-        <td>{Number(result.paid).toFixed(2)}</td>{' '}
-        {/* Sexta coluna com o total */}
-        <td colSpan={2}></td>{' '}
-        {/* Últimas duas colunas (Editar, Excluir) vazias */}
-      </tr>
-    );
-  };
-
   const filterExpenseList = (form) => {
-    const hasFilters =
-      form.expenseName?.trim() ||
-      form.rawMaterial?.trim() ||
-      form.supplier?.trim();
-
+    const hasFilters = form.expenseName?.trim() || form.rawMaterial?.trim() || form.supplier?.trim() || form.invoice?.trim();
     const hasDates = form.initialDate?.trim() && form.finalDate?.trim();
 
-    // Verificar se mais de um campo de filtro foi preenchido
-    const filterFields = [
-      form.expenseName?.trim(),
-      form.supplier?.trim(),
-      form.rawMaterial?.trim(),
-      form.invoice?.trim(),
-    ];
-
+    const filterFields = [form.expenseName?.trim(), form.supplier?.trim(), form.rawMaterial?.trim(), form.invoice?.trim()];
     const filledCount = filterFields.filter(Boolean).length;
 
     if (filledCount > 1) {
@@ -220,9 +157,7 @@ const ExpensesManegementList = () => {
     }
 
     if (hasFilters && !hasDates) {
-      alert(
-        'Para pesquisar por nome, matéria-prima ou fornecedor, as datas de filtro precisam estar preenchidas.'
-      );
+      alert('Para pesquisar por nome, matéria-prima ou fornecedor, as datas de filtro precisam estar preenchidas.');
       filterRef.current?.clearForm();
       return false;
     }
@@ -237,58 +172,30 @@ const ExpensesManegementList = () => {
 
   const grabSelectedItems = (form) => {
     if (!expensesList || expensesList.length === 0) return [];
-
     const normalize = (str) => str?.toLowerCase().replace(/\s+/g, ' ').trim();
-
     const { initialDate, finalDate, expenseName, supplier, invoice, idRawMaterial } = form;
 
-    // Começa com todos os itens
     let filteredItems = [...originalExpensesList];
 
-    // Filtro obrigatório: entre datas
     if (initialDate && finalDate) {
-      filteredItems = filteredItems.filter((expense) => {
-        return expense.dueDate >= initialDate && expense.dueDate <= finalDate;
-      });
+      filteredItems = filteredItems.filter((expense) => expense.dueDate >= initialDate && expense.dueDate <= finalDate);
     }
-
-    // Filtro opcional: nome da despesa
     if (expenseName?.trim()) {
-      filteredItems = filteredItems.filter((expense) => {
-        return normalize(expense.name) === normalize(expenseName);
-      });
+      filteredItems = filteredItems.filter((expense) => normalize(expense.name) === normalize(expenseName));
     }
-
-    // Filtro opcional: nota fiscal
     if (invoice?.trim()) {
-      filteredItems = filteredItems.filter((expense) => {
-        return normalize(expense.account) === normalize(invoice);
-      });
+      filteredItems = filteredItems.filter((expense) => normalize(expense.account) === normalize(invoice));
     }
-
-    // Filtro opcional: fornecedor
-
     if (supplier?.trim()) {
-      filteredItems = filteredItems.filter((expense) => {
-        return normalize(expense.provider) === normalize(supplier);
-      });
+      filteredItems = filteredItems.filter((expense) => normalize(expense.provider) === normalize(supplier));
     }
-
     if (idRawMaterial) {
-      filteredItems = filteredItems.filter((expense) => {
-        if (!expense.items || !Array.isArray(expense.items)) return false;
-        return expense.items.some((item) => item.idProduct === idRawMaterial);
-      });
+      filteredItems = filteredItems.filter((expense) => expense.items?.some((item) => item.idProduct === idRawMaterial));
     }
-
     return filteredItems;
-
-    // Ou: setFilteredExpenses(filteredItems);
   };
 
-  const cleanFilter = () => {
-    setExpensesList(originalExpensesList);
-  };
+  const cleanFilter = () => setExpensesList(originalExpensesList);
 
   const openLoadSumaryPopup = (item) => {
     setOpenSumaryPopup(true);
@@ -298,112 +205,48 @@ const ExpensesManegementList = () => {
   return (
     <div className={expenses.customerListContainer}>
       <div className={expenses.containerIcon}>
-        <a
-          href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.lastl0sptfl5#heading=h.ft9y0s2jnma8"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Abrir documentação"
-        >
+        <a href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.lastl0sptfl5#heading=h.ft9y0s2jnma8" target="_blank" rel="noopener noreferrer">
           <span>?</span>
         </a>
       </div>
-      <Link to="/admin/admin" className={expenses.btnBack} title="Sair do Módulo">
+      <Link to="/admin/admin" className={expenses.btnBack}>
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
       </Link>
+      
       {showWarningDeletePopup && (
         <DefaultComumMessage
-          msg={`Você está prestes a excluir ${excludeExpense.name ? excludeExpense.name : excludeExpense.product
-            }. Tem certeza?`}
+          msg={`Você está prestes a excluir ${excludeExpense.name ? excludeExpense.name : excludeExpense.product}. Tem certeza?`}
           item={excludeExpense}
           onConfirm={deleteExpenses}
           onClose={() => setShowWarningDeltePopup(false)}
         />
       )}
-      <div className="containerAddExpenses">
-        {showExpensesRegisterPopup && (
-          <RegisterExpenses
-            setShowPopup={setShowExpensesRegisterPopup}
-            obj={obj}
-          />
-        )}
+
+      {showExpensesRegisterPopup && <RegisterExpenses setShowPopup={setShowExpensesRegisterPopup} obj={obj} />}
+      {showProviderRegisterPopup && <RegisterProvider setShowPopup={setShowProviderRegisterPopup} obj={obj} />}
+      {showProductRegistePopup && <RegisterProduct setShowPopup={setShowProductRegisterPopup} obj={obj} />}
+      {showExpensesPopup && <AddExpensesForm setShowPopup={setShowExpensesPopup} setRefreshData={setRefreshData} obj={obj} />}
+      {openSumaryPopup && <SumaryExpensesListPopup setOpenSumaryPopup={setOpenSumaryPopup} oneExpense={oneExpense} />}
+
+      <div className={expenses.titleTable}>
+        <Link to="/admin/admin"><Title mainTitle="Despesas"></Title></Link>
       </div>
-      <div className="container-add-expenses">
-        {showProviderRegisterPopup && (
-          <RegisterProvider
-            setShowPopup={setShowProviderRegisterPopup}
-            obj={obj}
-          />
-        )}
-      </div>
-      <div className="containerAddExpenses">
-        {showProductRegistePopup && (
-          <RegisterProduct
-            setShowPopup={setShowProductRegisterPopup}
-            obj={obj}
-          />
-        )}
-      </div>
-      <div className="container-add-provider">
-        {showExpensesPopup && (
-          <AddExpensesForm
-            setShowPopup={setShowExpensesPopup}
-            setRefreshData={setRefreshData}
-            obj={obj}
-          />
-        )}
-      </div>
-      {openSumaryPopup && (
-        <SumaryExpensesListPopup
-          setOpenSumaryPopup={setOpenSumaryPopup}
-          oneExpense={oneExpense}
-        />
-      )}
-      <div
-        className={expenses.titleTable}
-        title="Essa é uma tela para que o administrador registre todas as despesas,
-      e tenha controle dos gastos, que depois serão usados junto com os lucros, 
-      para o controle do negócio"
-      >
-        <Link to="/admin/admin">
-          <Title mainTitle="Despesas"></Title>
-        </Link>
-      </div>
-      <FilterExpenses
-        ref={filterRef}
-        filterExpenseList={filterExpenseList}
-        cleanFilter={cleanFilter}
-      />
+
+      <FilterExpenses ref={filterRef} filterExpenseList={filterExpenseList} cleanFilter={cleanFilter} />
 
       <div className={expenses.btnAdd}>
-        <button
-          onClick={addNewExpense}
-          title="Clique nesse botão para abrir o popup de registro de uma
-        nova receita"
-        >
-          Adicione Despesa
-        </button>{' '}
-        <select
-          id="register"
-          onChange={handleRegisterChange}
-          defaultValue=""
-          title="Essa tela abre janelas para o cadastro de despesas, de produtos e de fornecedores.
-           Selecione uma das opções para ver como funciona."
-        >
-          <option value="" disabled>
-            Selecione uma opção de cadastro
-          </option>
+        <button onClick={addNewExpense}>Adicione Despesa</button>
+        <select id="register" onChange={handleRegisterChange} defaultValue="">
+          <option value="" disabled>Selecione uma opção de cadastro</option>
           <option value="product">Cadastrar Produtos</option>
           <option value="provider">Cadastrar Fornecedores</option>
           <option value="expenses">Cadastrar Despesas</option>
         </select>
       </div>
-      <div
-        className={expenses.containerExpensesManegementTable}
-        title="Todas as depesas feitas das mais recentes para as mais antigas. 
-        Use os filtros acima para selecionar um grupo especifico"
-      >
+
+      <div className={expenses.containerExpensesManegementTable}>
         <Table
           title="Lista de Despesas"
           data={expensesList}

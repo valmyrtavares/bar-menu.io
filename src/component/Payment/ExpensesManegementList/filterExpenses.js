@@ -142,6 +142,7 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
             className={style.input}
           >
             <option value="">Selecione Despesas</option>
+            <option value="Entrada de estoque">Entrada de estoque</option>
             {expensesList.map((expense) => (
               <option key={expense.id} value={expense.name}>
                 {expense.name}
