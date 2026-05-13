@@ -132,6 +132,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
       // 1. Update Stock
       await handleStock(itemArrayList, form.account, form.paymentDate);
       
+      const updatedStockData = await getBtnData('stock');
+      handleWarningCleanup(updatedStockData, itemArrayList);
+      
       // 2. Save to Outgoing
       const finalData = { ...form, dueDate: form.paymentDate }; // Sync dueDate for DB
       await addDoc(collection(db, 'outgoing'), finalData);
@@ -143,6 +146,23 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleWarningCleanup = (data, itemsStock) => {
+    const stored = JSON.parse(localStorage.getItem('warningAmountMessage')) || [];
+    data.forEach((item) => {
+      const match = itemsStock.find((i) => i.idProduct === item.idProduct);
+      if (match && item.totalVolume > item.minimumAmount) {
+        const msgIndex = stored.findIndex(
+          (msg) => typeof msg === 'string' && msg.includes(`produto ${item.product}`)
+        );
+        if (msgIndex !== -1) {
+          stored[msgIndex] = ''; // clear specific product warning
+        }
+      }
+    });
+    localStorage.setItem('warningAmountMessage', JSON.stringify(stored));
+    global.setWarningLowRawMaterial(stored);
   };
 
   // Reusing existing handleStock logic (simplified for clarity here)
@@ -169,7 +189,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
           }]
         };
         await updateDoc(doc(db, 'stock', itemFinded.id), updateData);
-        await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(itemFinded.id);
+        setLoadingAvailableMenuDishes(res || false);
       } else {
         const newRecord = {
           ...currentItem,
@@ -180,7 +202,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
           }]
         };
         const newDoc = await addDoc(collection(db, 'stock'), newRecord);
-        await checkUnavaiableRawMaterial(newDoc.id);
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(newDoc.id);
+        setLoadingAvailableMenuDishes(res || false);
       }
     }
   };
