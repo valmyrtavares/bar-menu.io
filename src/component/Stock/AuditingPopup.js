@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { getBtnData } from '../../api/Api';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
@@ -16,6 +16,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dishes, setDishes] = useState([]);
+  const [showSummaryScreen, setShowSummaryScreen] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -36,7 +37,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         const initialOriginals = {};
         const itemsWithEditedVolume = filtered.map(item => {
           initialOriginals[item.id] = { ...item };
-          return { ...item, editedVolume: '' }; // empty means no change yet
+          return { ...item, correctionValue: '' }; // empty means no change yet
         });
 
         setOriginalItems(initialOriginals);
@@ -71,18 +72,17 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const handleVolumeChange = (id, value) => {
     // Update both lists to keep them in sync
     setAllItems(prev => prev.map(item => {
-      if (item.id === id) return { ...item, editedVolume: value };
+      if (item.id === id) return { ...item, correctionValue: value };
       return item;
     }));
     setStockItems(prev => prev.map(item => {
-      if (item.id === id) return { ...item, editedVolume: value };
+      if (item.id === id) return { ...item, correctionValue: value };
       return item;
     }));
   };
 
-
   const hasUnsavedChanges = () => {
-    return allItems.some(item => item.editedVolume !== '');
+    return allItems.some(item => item.correctionValue !== '');
   };
 
   const handleClose = () => {
@@ -91,6 +91,15 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       if (!confirmClose) return;
     }
     onClose();
+  };
+
+  const handleNext = () => {
+    const itemsToUpdate = allItems.filter(item => item.correctionValue !== '' && !isNaN(item.correctionValue));
+    if (itemsToUpdate.length === 0) {
+      alert("Nenhuma alteração de volume válida foi detectada.");
+      return;
+    }
+    setShowSummaryScreen(true);
   };
 
   const updateRecipesinDishesAndSideDishes = (stockProduct, allDishes) => {
@@ -213,36 +222,37 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     };
   };
 
-  const handleSave = async () => {
+  const handleConfirmAndSave = async (summaryItems, totalLossValue, fullDate, paymentDate) => {
     if (isSubmitting) return;
-
-    const itemsToUpdate = allItems.filter(item => item.editedVolume !== '' && !isNaN(item.editedVolume));
-    if (itemsToUpdate.length === 0) {
-      alert("Nenhuma alteração de volume válida foi detectada.");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       let allUpdatedDishes = [];
 
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, '0');
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const year = today.getFullYear();
-      const paymentDate = `${day}/${month}/${year}`;
+      // Create history record
+      const inventoryRecord = {
+        date: fullDate,
+        timestamp: Date.now(),
+        totalLossValue,
+        items: summaryItems.map(item => ({
+          product: item.product,
+          unit: item.unitOfMeasurement,
+          previousVolume: item.originalVolume,
+          previousCost: item.originalCost,
+          currentVolume: item.newVolume,
+          currentCost: item.newCost,
+          lossVolume: item.lossVolume,
+          lossValue: item.lossValue,
+          correction: item.correction
+        }))
+      };
 
-      for (const item of itemsToUpdate) {
+      await addDoc(collection(db, 'inventoryHistory'), inventoryRecord);
+
+      for (const item of summaryItems) {
         const original = originalItems[item.id];
-        const newVolumeValue = Number(item.editedVolume);
-
-        let newTotalCostValue = Number(original.totalCost);
-        // Lógica de proporção: Se mudar o volume, o custo segue a proporção original
-        if (original.totalVolume > 0) {
-          const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);
-          newTotalCostValue = Number((newVolumeValue * unitPriceOriginal).toFixed(2));
-        }
+        const newVolumeValue = item.newVolume;
+        const newTotalCostValue = item.newCost;
 
         const newUnit = Number(original.volumePerUnit) > 0 ? newVolumeValue / Number(original.volumePerUnit) : 0;
         const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : 0;
@@ -311,9 +321,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     }
   };
 
-  return (
-    <div className={styleEdit.popupOverlay}>
-      <div className={styleEdit.containerEditStock} style={{ maxWidth: '900px' }}>
+  const renderMainScreen = () => {
+    return (
+      <div className={styleEdit.containerEditStock} style={{ maxWidth: '1000px' }}>
         <div className={styleEdit.closeBtnRow}>
           <button className={styleEdit.closeBtn} type="button" onClick={handleClose}>
             X
@@ -335,29 +345,48 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
               <thead>
                 <tr>
                   <th>Produto</th>
+                  <th>Volume Atual</th>
+                  <th>Correção</th>
+                  <th>Novo Volume</th>
                   <th>Custo Atual</th>
-                  <th>Volume Atual no Sistema</th>
-                  <th>Estoque Corrigido</th>
+                  <th>Novo Custo</th>
                 </tr>
               </thead>
               <tbody>
-                {stockItems.map(item => (
-                  <tr key={item.id}>
-                    <td>{item.product} {item.unitOfMeasurement}</td>
-                    <td>R$ {Number(item.totalCost).toFixed(2)}</td>
-                    <td>
-                      {Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={item.editedVolume}
-                        onChange={(e) => handleVolumeChange(item.id, e.target.value)}
-                        placeholder="Novo vol."
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {stockItems.map(item => {
+                  const correction = Number(item.correctionValue);
+                  const hasCorrection = item.correctionValue !== '' && !isNaN(correction);
+                  const newVolume = hasCorrection ? Number(item.totalVolume) + correction : Number(item.totalVolume);
+                  
+                  let newCost = Number(item.totalCost);
+                  if (hasCorrection && item.totalVolume > 0) {
+                    const unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
+                    newCost = newVolume * unitPriceOriginal;
+                  }
+
+                  return (
+                    <tr key={item.id}>
+                      <td>{item.product}</td>
+                      <td>{Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                      <td>
+                        <input
+                          type="number"
+                          value={item.correctionValue}
+                          onChange={(e) => handleVolumeChange(item.id, e.target.value)}
+                          placeholder="Ex: -5"
+                          style={{ width: '80px', padding: '5px' }}
+                        />
+                      </td>
+                      <td style={{ fontWeight: hasCorrection ? 'bold' : 'normal', color: hasCorrection ? '#007bff' : 'inherit' }}>
+                        {newVolume.toFixed(2)} {item.unitOfMeasurement}
+                      </td>
+                      <td>R$ {Number(item.totalCost).toFixed(2)}</td>
+                      <td style={{ fontWeight: hasCorrection ? 'bold' : 'normal', color: hasCorrection ? '#007bff' : 'inherit' }}>
+                        R$ {newCost.toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -367,13 +396,123 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
           <button 
             className={styleEdit.addBtn} 
             type="button" 
-            onClick={handleSave} 
+            onClick={handleNext} 
             disabled={isSubmitting || loading}
           >
             {isSubmitting ? 'Enviando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>
+    );
+  };
+
+  const renderSummaryScreen = () => {
+    const itemsToUpdate = allItems.filter(item => item.correctionValue !== '' && !isNaN(item.correctionValue));
+    let totalLossValue = 0;
+
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const paymentDate = `${day}/${month}/${year}`;
+    const fullDate = `${paymentDate} ${hours}:${minutes}`;
+
+    const summaryItems = itemsToUpdate.map(item => {
+      const original = originalItems[item.id];
+      const correction = Number(item.correctionValue);
+      const newVolume = Number(original.totalVolume) + correction;
+      let newCost = Number(original.totalCost);
+      if (original.totalVolume > 0) {
+         const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);
+         newCost = newVolume * unitPriceOriginal;
+      }
+
+      const lossVolume = correction < 0 ? Math.abs(correction) : 0;
+      const lossValue = newCost < original.totalCost ? original.totalCost - newCost : 0;
+
+      totalLossValue += lossValue;
+
+      return {
+         ...original,
+         originalVolume: original.totalVolume,
+         originalCost: original.totalCost,
+         newVolume,
+         newCost,
+         lossVolume,
+         lossValue,
+         correction
+      };
+    });
+
+    return (
+      <div className={styleEdit.containerEditStock} style={{ maxWidth: '1000px' }}>
+        <div className={styleEdit.titleRow}>
+          <h2>Inventário feito no dia {fullDate}</h2>
+        </div>
+        <div className={styleTrack.tableStockContainer} style={{ maxHeight: '400px', overflowY: 'auto', marginTop: '20px' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome do item</th>
+                <th>Valor anterior</th>
+                <th>Volume anterior</th>
+                <th>Valor atual</th>
+                <th>Volume atual</th>
+                <th>Perda de MP</th>
+                <th>Perda de MT (R$)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summaryItems.map(item => (
+                <tr key={item.id}>
+                  <td>{item.product}</td>
+                  <td>R$ {Number(item.originalCost).toFixed(2)}</td>
+                  <td>{Number(item.originalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                  <td>R$ {Number(item.newCost).toFixed(2)}</td>
+                  <td>{Number(item.newVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                  <td style={{ color: item.lossVolume > 0 ? 'red' : 'inherit' }}>
+                    {item.lossVolume > 0 ? `${item.lossVolume.toFixed(2)} ${item.unitOfMeasurement}` : '-'}
+                  </td>
+                  <td style={{ color: item.lossValue > 0 ? 'red' : 'inherit' }}>
+                    {item.lossValue > 0 ? `R$ ${item.lossValue.toFixed(2)}` : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ marginTop: '20px', fontWeight: 'bold', fontSize: '18px', textAlign: 'right', paddingRight: '20px' }}>
+          Perda total em dinheiro: R$ {totalLossValue.toFixed(2)}
+        </div>
+        <div className={styleEdit.btnRow} style={{ justifyContent: 'space-between', marginTop: '20px' }}>
+           <button 
+             className={styleEdit.closeBtn} 
+             style={{ position: 'relative', top: 0, right: 0 }} 
+             type="button" 
+             onClick={() => setShowSummaryScreen(false)}
+             disabled={isSubmitting}
+           >
+             Voltar para edição
+           </button>
+           <button 
+             className={styleEdit.addBtn} 
+             type="button" 
+             onClick={() => handleConfirmAndSave(summaryItems, totalLossValue, fullDate, paymentDate)} 
+             disabled={isSubmitting}
+           >
+             {isSubmitting ? 'Enviando...' : 'Confirmar e Salvar'}
+           </button>
+        </div>
+        {isSubmitting && <UpdateMenuMessage />}
+      </div>
+    );
+  };
+
+  return (
+    <div className={styleEdit.popupOverlay}>
+      {showSummaryScreen ? renderSummaryScreen() : renderMainScreen()}
     </div>
   );
 };
