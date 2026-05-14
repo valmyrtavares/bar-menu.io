@@ -8,6 +8,7 @@ import StockMovementPopup from './StockMovementPopup';
 import DishStockMovementPopup from './DishStockMovementPopup';
 import AuditingPopup from './AuditingPopup';
 import AddStockEntryForm from './AddStockEntryForm';
+import InventoryHistoryPopup from './InventoryHistoryPopup';
 import { Link } from 'react-router-dom';
 import { alertMinimunAmount } from '../../Helpers/Helpers';
 //import { useAlertMinimumAmount } from '../../Hooks/useAlertMinimumAmount'
@@ -35,6 +36,7 @@ const TrackStockProduct = () => {
   const [showDishMovementPopup, setShowDishMovementPopup] = React.useState(false);
   const [showAuditingPopup, setShowAuditingPopup] = React.useState(false);
   const [showAddStockEntryForm, setShowAddStockEntryForm] = React.useState(false);
+  const [showInventoryHistoryPopup, setShowInventoryHistoryPopup] = React.useState(false);
 
   const handleActionSelect = (e) => {
     const value = e.target.value;
@@ -42,6 +44,7 @@ const TrackStockProduct = () => {
     if (value === 'dishMovement') setShowDishMovementPopup(true);
     if (value === 'audit') setShowAuditingPopup(true);
     if (value === 'addStock') setShowAddStockEntryForm(true);
+    if (value === 'inventoryHistory') setShowInventoryHistoryPopup(true);
     e.target.value = ''; // reset the select
   };
   const { setWarningLowRawMaterial } = React.useContext(GlobalContext);
@@ -185,6 +188,9 @@ const TrackStockProduct = () => {
           />
         </div>
       )}
+      {showInventoryHistoryPopup && (
+        <InventoryHistoryPopup onClose={() => setShowInventoryHistoryPopup(false)} />
+      )}
       <div className={style.containerAdjustmentScreen}>
         {showAdjustmentRecords && (
           <AdjustmentRecords
@@ -204,6 +210,7 @@ const TrackStockProduct = () => {
           <option value="dishMovement">Movimentação por pratos</option>
           <option value="addStock">Nova Entrada</option>
           <option value="audit">Auditoria</option>
+          <option value="inventoryHistory">Histórico de inventários</option>
         </select>
         <h2>{subTitle}</h2>
       </div>
