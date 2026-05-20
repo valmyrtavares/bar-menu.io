@@ -783,6 +783,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   };
 
   const updatingStockAndMenu = async (itemFinded, currentItem) => {
+    if (!itemFinded) {
+      console.warn(`[STOCK] updatingStockAndMenu ignorado: "${currentItem.product}" não possui registro de estoque correspondente.`);
+      return;
+    }
     if (currentItem.totalVolume < itemFinded.minimumAmount) {
       if (!hasWarningForProduct(currentItem.product)) {
         console.log(`Aviso já registrado para ${currentItem.product}`);
