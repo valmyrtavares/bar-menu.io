@@ -96,6 +96,15 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
       let distance = 0;
       let isDistanceValid = true;
 
+      // Se não encontrou com o número, tenta buscar apenas pela rua
+      if (!data || data.length === 0) {
+        const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(logradouro)}&city=${encodeURIComponent(localidade)}&state=${encodeURIComponent(uf)}&country=Brasil&limit=1`;
+        const fallbackResponse = await fetch(fallbackUrl, {
+          headers: { 'User-Agent': 'bar-menu-delivery-app' }
+        });
+        data = await fallbackResponse.json();
+      }
+
       if (data && data.length > 0) {
         const targetLat = parseFloat(data[0].lat);
         const targetLng = parseFloat(data[0].lon);
@@ -110,7 +119,7 @@ const DeliveryAddressPopup = ({ customerName, onClose, onSubmit }) => {
           isDistanceValid = false;
         }
       } else {
-        // Se não encontrar o endereço, não permite prosseguir
+        // Se não encontrar o endereço nem com o fallback, não permite prosseguir
         setPopupMsg("Não conseguimos localizar seu endereço com precisão para validar a distância de entrega. Por favor, verifique o número e o bairro.");
         setIsError(true);
         isDistanceValid = false;
