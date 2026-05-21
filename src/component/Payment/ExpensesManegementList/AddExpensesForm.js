@@ -399,7 +399,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
     previousVolume,
     previousCost,
     totalCost,
-    totalVolume
+    totalVolume,
+    orderNumber = ''
   ) => {
     const stockEventRegistration = {
       date: paymentDate,
@@ -414,6 +415,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
       previousCost: previousCost,
       ContentsInStock: totalVolume ? totalVolume : 0,
       totalResourceInvested: totalCost,
+      orderNumber: orderNumber,
     };
     return stockEventRegistration;
   };

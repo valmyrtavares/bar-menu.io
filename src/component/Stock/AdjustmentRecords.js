@@ -82,6 +82,9 @@ const AdjustmentRecords = ({
               <th title="Quantidade de produto que saiu do estoque (venda, perda ou ajuste).">
                 Saida
               </th>
+              <th title="Número do pedido vinculado à saída, se houver.">
+                Pedido
+              </th>
               <th title="O tipo de movimentação (Entrada, Saída, Ajuste, Edição, etc.).">
                 Categoria
               </th>
@@ -124,6 +127,9 @@ const AdjustmentRecords = ({
                       {item.inputProduct} {item.unit}
                     </td>
                     <td>{item?.outputProduct}</td>
+                    <td style={{ fontWeight: item?.orderNumber ? 'bold' : 'normal' }}>
+                      {item?.orderNumber || '-'}
+                    </td>
                     <td>{item.category}</td>
                     <td>
                       {safeNum(item.previousVolume).toFixed(2)} {item.unit}

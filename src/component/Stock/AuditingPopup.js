@@ -205,7 +205,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     });
   };
 
-  const stockHistoryList = (item, account, paymentDate, pack, cost, unit, volume, previousVolume, previousCost, totalCost, totalVolume) => {
+  const stockHistoryList = (item, account, paymentDate, pack, cost, unit, volume, previousVolume, previousCost, totalCost, totalVolume, orderNumber = '') => {
     return {
       date: paymentDate,
       outputProduct: 0,
@@ -219,6 +219,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       previousCost: previousCost,
       ContentsInStock: totalVolume,
       totalResourceInvested: totalCost,
+      orderNumber: orderNumber,
     };
   };
 

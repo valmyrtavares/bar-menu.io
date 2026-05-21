@@ -151,7 +151,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     previousVolume,
     previousCost,
     totalCost,
-    totalVolume
+    totalVolume,
+    orderNumber = ''
   ) => {
     const stockEventRegistration = {
       date: paymentDate,
@@ -166,6 +167,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       previousCost: previousCost,
       ContentsInStock: totalVolume,
       totalResourceInvested: totalCost,
+      orderNumber: orderNumber,
     };
     return stockEventRegistration;
   };

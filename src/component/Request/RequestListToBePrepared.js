@@ -592,9 +592,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
 
     const dateTime = item.dateTime;
     const { request } = item;
+    const orderNumber = item.countRequest || '';
 
     if (request && request.length > 0) {
-      await updateSideDihesInStock(request, dateTime, ObjPadrao);
+      await updateSideDihesInStock(request, dateTime, ObjPadrao, orderNumber);
     }
 
     for (let i = 0; i < request.length; i++) {
@@ -623,7 +624,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
           ObjPadrao.CostPerUnit = ingredient.portionCost;
           const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime);
+          await handleStock(arrayParams, account, dateTime, orderNumber);
         }
       } else {
         for (let i = 0; i < FinalingridientsList.length; i++) {
@@ -633,13 +634,13 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement || '';
           ObjPadrao.CostPerUnit = ingredient.portionCost;
           const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime);
+          await handleStock(arrayParams, account, dateTime, orderNumber);
         }
       }
     }
   };
 
-  const updateSideDihesInStock = async (request, dateTime, ObjPadrao) => {
+  const updateSideDihesInStock = async (request, dateTime, ObjPadrao, orderNumber = '') => {
     if (!request || !Array.isArray(request) || request.length === 0) return;
 
     for (let i = 0; i < request.length; i++) {
@@ -657,7 +658,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
           ObjPadrao.unitOfMeasurement = sideDish.unit || '';
           ObjPadrao.CostPerUnit = sideDish.portionCost;
           const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime);
+          await handleStock(arrayParams, account, dateTime, orderNumber);
         }
       }
     }
@@ -679,6 +680,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
     itemsStock,
     account = 'Editado',
     paymentDate = null,
+    orderNumber = '',
   ) => {
     if (!Array.isArray(itemsStock)) {
       itemsStock = [itemsStock];
@@ -754,6 +756,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             previousCost,
             currentItem.totalCost,
             currentItem.totalVolume,
+            orderNumber,
           ),
         );
         console.log('item atual atualizado   ', currentItem);
@@ -773,6 +776,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             0,
             currentItem.totalCost,
             currentItem.totalVolume,
+            orderNumber,
           ),
         ];
         currentItem = cleanObject(currentItem);
@@ -863,6 +867,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
     previousCost,
     totalCost,
     totalVolume,
+    orderNumber = '',
   ) => {
     const stockEventRegistration = {
       date: paymentDate,
@@ -876,6 +881,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       previousCost: previousCost,
       ContentsInStock: totalVolume,
       totalResourceInvested: Number(totalCost).toFixed(2),
+      orderNumber: orderNumber,
     };
     return stockEventRegistration;
   };
