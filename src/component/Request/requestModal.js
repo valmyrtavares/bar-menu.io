@@ -597,8 +597,55 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
     return obj; // Retorna o valor se não for objeto
   };
 
+  const calculateHistoricalCostsForItems = async (itemsArray, parentId = null) => {
+      const allDishes = await getBtnData('item');
+      const allSideDishes = await getBtnData('sideDishes');
+      return itemsArray.map((item, idx) => {
+         let itemHistoricalCost = 0;
+         if (item.sideDishes && item.sideDishes.length > 0) {
+            item.sideDishes.forEach(sidedish => {
+               const sd = allSideDishes.find(s => s.sideDishes === sidedish.name);
+               if (sd) {
+                  if (!sd.isBasic && sd.costPriceObj && Number(sd.costPriceObj.cost) <= Number(sd.price)) {
+                     itemHistoricalCost += Number(sd.costPriceObj.cost);
+                  }
+               }
+            });
+         }
+         let selectedDish = allDishes.find(d => d.id === item.id);
+         if (!selectedDish) {
+            selectedDish = allDishes.find(d => d.title.trim().toLowerCase() === item.name.trim().toLowerCase());
+         }
+         if (selectedDish) {
+             const { costProfitMarginCustomized = {}, costPriceObj = {} } = selectedDish;
+             if (!item.size || item.size === '') {
+                 itemHistoricalCost += Number(costPriceObj.cost || 0);
+             } else {
+                 const currentCostData = Object.values(costProfitMarginCustomized || {}).find(priceObj => priceObj.label === item.size);
+                 if (currentCostData) {
+                     itemHistoricalCost += Number(currentCostData.cost || 0);
+                 }
+             }
+         }
+         const FinalMainprice = Number(item.finalPrice) || 0;
+         const itemHistoricalProfit = FinalMainprice - itemHistoricalCost;
+         return {
+            ...item,
+            sentToKitchen: true,
+            sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
+            parentRequestId: parentId,
+            indexInRequest: idx,
+            historicalCost: itemHistoricalCost,
+            historicalProfit: itemHistoricalProfit
+         };
+      });
+  };
+
   const addRequestUser = async (data) => {
     try {
+      const parentIdForItems = global.orderBeingEdited ? global.orderBeingEdited.id : null;
+      const requestWithHistory = await calculateHistoricalCostsForItems(data.request, parentIdForItems);
+
       const userNewRequest = {
         name:
           data.name === 'anonimo' || data.name === 'anonymous'
@@ -610,13 +657,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
         orderDelivered: false,
         paymentDone: deliveryAddress ? false : undefined,
         deliveryAddress: deliveryAddress || null,
-        request: data.request.map((item, idx) => ({
-          ...item,
-          sentToKitchen: true,
-          sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
-          parentRequestId: global.orderBeingEdited ? global.orderBeingEdited.id : null,
-          indexInRequest: idx
-        })),
+        request: requestWithHistory,
         finalPriceRequest: finalPriceRequest,
         idPayer: idPayerRef.current,
         dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),
@@ -774,6 +815,8 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
           previousRequests = JSON.parse(storedRequests);
         }
 
+        const requestWithHistory = await calculateHistoricalCostsForItems(previousRequests, null);
+
         const userNewRequest = {
           name:
             data.name === 'anonimo' || data.name === 'anonymous'
@@ -810,12 +853,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
             shopReceipt: paymentTransactionData.shopReceipt,
           } : null,
           orderDelivered: false,
-          request: previousRequests.map((item, idx) => ({
-            ...item,
-            sentToKitchen: true,
-            sentToKitchenTime: item.sentToKitchenTime || takeDataTime(),
-            indexInRequest: idx
-          })),
+          request: requestWithHistory,
           finalPriceRequest: previousRequests.length > 0 ? Number(previousRequests.reduce((acc, el) => acc + (el.finalPrice || el.price || 0), 0).toFixed(2)) : finalPriceRequest,
           idPayer: idPayerRef.current,
           dateTime: global.orderBeingEdited ? global.orderBeingEdited.dateTime : takeDataTime(),

@@ -207,30 +207,36 @@ const RequestManagementModule = () => {
         let sideDishesCost = 0;
         let sideDishesProfit = 0;
 
-        // Calcula custos e lucros dos acompanhamentos
-        if (item.sideDishes && item.sideDishes.length > 0) {
-          const sideDishesResults = item.sideDishes.map((sidedish) =>
-            fetchSideDishesGlobalCost(sidedish.name)
+        if (item.historicalCost !== undefined) {
+          sideDishesCost = Number(item.historicalCost);
+          // O profit no productMap usa o sideDishesCost, então não precisamos setar sideDishesProfit aqui, mas se precisar:
+          sideDishesProfit = item.historicalProfit !== undefined ? Number(item.historicalProfit) : 0;
+        } else {
+          // Calcula custos e lucros dos acompanhamentos
+          if (item.sideDishes && item.sideDishes.length > 0) {
+            const sideDishesResults = item.sideDishes.map((sidedish) =>
+              fetchSideDishesGlobalCost(sidedish.name)
+            );
+
+            sideDishesResults.forEach((result) => {
+              if (result) {
+                sideDishesCost += result.cost;
+                sideDishesProfit += result.profit;
+              }
+            });
+          }
+
+          // Obtém dados do prato principal
+          const mainDishData = fetchDishesGlobalCost(
+            item.id,
+            item.size,
+            item.name
           );
-
-          sideDishesResults.forEach((result) => {
-            if (result) {
-              sideDishesCost += result.cost;
-              sideDishesProfit += result.profit;
-            }
-          });
-        }
-
-        // Obtém dados do prato principal
-        const mainDishData = fetchDishesGlobalCost(
-          item.id,
-          item.size,
-          item.name
-        );
-        if (mainDishData) {
-          const { cost = 0, price = 0 } = mainDishData;
-          sideDishesCost += Number(cost);
-          sideDishesProfit += Number(price) - Number(cost);
+          if (mainDishData) {
+            const { cost = 0, price = 0 } = mainDishData;
+            sideDishesCost += Number(cost);
+            sideDishesProfit += Number(price) - Number(cost);
+          }
         }
 
         const { name, finalPrice, paymentMethod, finalCost } = item;
