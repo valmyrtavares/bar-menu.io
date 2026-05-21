@@ -181,12 +181,113 @@ const RegisterProduct = ({ setShowPopup }) => {
             ...sideDishesData,
             sideDishes: form.name,
             unitOfMeasurement: form.unitOfMeasurement,
+            unit: form.unitOfMeasurement,
             operationSupplies: form.operationSupplies || false,
           };
 
           // Atualizar os campos em `sideDishes`
           await updateDoc(sideDishesRef, updateData);
           console.log(`SideDishes item updated successfully: ${docSnap.id}`);
+        }
+      }
+
+      // Atualizar receitas e acompanhamentos dentro da coleção 'item'
+      const itemsSnapshot = await getDocs(collection(db, 'item'));
+
+      if (!itemsSnapshot.empty) {
+        for (const docSnap of itemsSnapshot.docs) {
+          const itemData = docSnap.data();
+          let needsUpdate = false;
+          let updatedItemData = { ...itemData };
+
+          // 1. Atualizar receitas simples (array FinalingridientsList)
+          if (
+            updatedItemData.recipe &&
+            Array.isArray(updatedItemData.recipe.FinalingridientsList)
+          ) {
+            const newList = updatedItemData.recipe.FinalingridientsList.map(
+              (ing) => {
+                if (ing.name === oldName) {
+                  needsUpdate = true;
+                  return {
+                    ...ing,
+                    name: form.name,
+                    unitOfMeasurement: form.unitOfMeasurement,
+                  };
+                }
+                return ing;
+              }
+            );
+            updatedItemData.recipe.FinalingridientsList = newList;
+          }
+          // 2. Atualizar receitas customizadas (objeto com arrays por tamanho)
+          else if (
+            updatedItemData.recipe &&
+            updatedItemData.recipe.FinalingridientsList &&
+            typeof updatedItemData.recipe.FinalingridientsList === 'object'
+          ) {
+            Object.keys(updatedItemData.recipe.FinalingridientsList).forEach(
+              (key) => {
+                if (
+                  Array.isArray(
+                    updatedItemData.recipe.FinalingridientsList[key]
+                  )
+                ) {
+                  const newList = updatedItemData.recipe.FinalingridientsList[
+                    key
+                  ].map((ing) => {
+                    if (ing.name === oldName) {
+                      needsUpdate = true;
+                      return {
+                        ...ing,
+                        name: form.name,
+                        unitOfMeasurement: form.unitOfMeasurement,
+                      };
+                    }
+                    return ing;
+                  });
+                  updatedItemData.recipe.FinalingridientsList[key] = newList;
+                }
+              }
+            );
+          }
+
+          // 3. Atualizar acompanhamentos atrelados (sideDishesElementList)
+          if (Array.isArray(updatedItemData.sideDishesElementList)) {
+            const newSideDishesList = updatedItemData.sideDishesElementList.map(
+              (sd) => {
+                if (typeof sd === 'string' && sd === oldName) {
+                  needsUpdate = true;
+                  return form.name;
+                } else if (typeof sd === 'object' && sd !== null) {
+                  if (sd.sideDishes === oldName) {
+                    needsUpdate = true;
+                    return {
+                      ...sd,
+                      sideDishes: form.name,
+                      unit: form.unitOfMeasurement,
+                    };
+                  }
+                  if (sd.name === oldName) {
+                    needsUpdate = true;
+                    return {
+                      ...sd,
+                      name: form.name,
+                      unit: form.unitOfMeasurement,
+                    };
+                  }
+                }
+                return sd;
+              }
+            );
+            updatedItemData.sideDishesElementList = newSideDishesList;
+          }
+
+          if (needsUpdate) {
+            const itemRef = doc(db, 'item', docSnap.id);
+            await updateDoc(itemRef, updatedItemData);
+            console.log(`Item recipe/sideDish updated successfully: ${docSnap.id}`);
+          }
         }
       }
 
