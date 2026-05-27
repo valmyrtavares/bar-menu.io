@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getBtnData, deleteData, getOneItemColleciton } from '../../api/Api.js';
+import { getBtnData, deleteData, getOneItemColleciton, logStockUsage } from '../../api/Api.js';
 import { issueAutoNfce } from '../../services/fiscalService';
 import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod';
@@ -741,46 +741,46 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         }
 
         // Inicializa ou adiciona ao UsageHistory
-        currentItem.UsageHistory = itemFinded.UsageHistory || [];
-
-        currentItem.UsageHistory.push(
-          stockHistoryList(
-            itemFinded,
-            account,
-            paymentDate,
-            pack,
-            cost,
-            unit,
-            volume,
-            previousVolume,
-            previousCost,
-            currentItem.totalCost,
-            currentItem.totalVolume,
-            orderNumber,
-          ),
+        const logEvent = stockHistoryList(
+          itemFinded,
+          account,
+          paymentDate,
+          pack,
+          cost,
+          unit,
+          volume,
+          previousVolume,
+          previousCost,
+          currentItem.totalCost,
+          currentItem.totalVolume,
+          orderNumber,
         );
+
         console.log('item atual atualizado   ', currentItem);
         currentItem = cleanObject(currentItem);
+        delete currentItem.UsageHistory;
 
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        await logStockUsage(itemFinded.id, logEvent);
         await updatingStockAndMenu(itemFinded, currentItem);
       } else {
         // Cria um novo registro para o item no banco de dados
-        currentItem.UsageHistory = [
-          stockHistoryList(
-            currentItem,
-            account,
-            paymentDate,
-            0,
-            currentItem.totalCost,
-            currentItem.totalVolume,
-            orderNumber,
-          ),
-        ];
+        const logEvent = stockHistoryList(
+          currentItem,
+          account,
+          paymentDate,
+          0,
+          currentItem.totalCost,
+          currentItem.totalVolume,
+          orderNumber,
+        );
         currentItem = cleanObject(currentItem);
-        await addDoc(collection(db, 'stock'), currentItem);
+        delete currentItem.UsageHistory;
+        
+        const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
+        await logStockUsage(newDocRef.id, logEvent);
         await updatingStockAndMenu(itemFinded, currentItem); //update warnings and menu after update stock
       }
     }

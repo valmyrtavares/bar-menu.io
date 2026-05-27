@@ -13,7 +13,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { db } from '../../../config-firebase/firebase.js';
-import { getBtnData, addItemToCollection } from '../../../api/Api';
+import { getBtnData, addItemToCollection, logStockUsage } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
@@ -324,33 +324,32 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           currentItem.CostPerUnit = 0;
         }
 
-        // Inicializa ou adiciona ao UsageHistory
-        currentItem.UsageHistory = itemFinded.UsageHistory || [];
+        // Remove UsageHistory local se existir
+        delete currentItem.UsageHistory;
         currentItem.operationSupplies =
           'operationSupplies' in itemsStock[i]
             ? itemsStock[i].operationSupplies
             : false;
-        currentItem.UsageHistory.push(
-          stockHistoryList(
-            itemFinded,
-            account,
-            adjustmentExpenseNote,
-            paymentDate,
-            pack,
-            cost,
-            unit,
-            volume,
-            previousVolume,
-            previousCost,
-            currentItem.totalCost,
-            currentItem.totalVolume
-          )
+        const logEvent = stockHistoryList(
+          itemFinded,
+          account,
+          adjustmentExpenseNote,
+          paymentDate,
+          pack,
+          cost,
+          unit,
+          volume,
+          previousVolume,
+          previousCost,
+          currentItem.totalCost,
+          currentItem.totalVolume
         );
         console.log('Item atual  ', currentItem);
 
         // Atualiza o registro no banco de dados
         const docRef = doc(db, 'stock', itemFinded.id);
         await updateDoc(docRef, currentItem);
+        await logStockUsage(itemFinded.id, logEvent);
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(itemFinded.id);
         setLoadingAvailableMenuDishes(res);
@@ -364,23 +363,24 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         const unit = currentItem.unitOfMeasurement;
 
         // Cria um novo registro para o item no banco de dados
-        currentItem.UsageHistory = [
-          stockHistoryList(
-            currentItem,
-            account,
-            adjustmentExpenseNote,
-            paymentDate,
-            pack,
-            cost,
-            unit,
-            volume,
-            constpreviousVolume,
-            previousCost,
-            currentItem.totalCost,
-            currentItem.totalVolume
-          ),
-        ];
+        const logEvent = stockHistoryList(
+          currentItem,
+          account,
+          adjustmentExpenseNote,
+          paymentDate,
+          pack,
+          cost,
+          unit,
+          volume,
+          constpreviousVolume,
+          previousCost,
+          currentItem.totalCost,
+          currentItem.totalVolume
+        );
+        delete currentItem.UsageHistory;
+        
         const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
+        await logStockUsage(newDocRef.id, logEvent);
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(newDocRef.id);
         setLoadingAvailableMenuDishes(res);

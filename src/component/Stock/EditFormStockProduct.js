@@ -2,7 +2,7 @@ import React from 'react';
 import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
-import { getBtnData } from '../../api/Api';
+import { getBtnData, logStockUsage } from '../../api/Api';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
@@ -99,42 +99,43 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         }
 
         // Inicializa ou adiciona ao UsageHistory
-        currentItem.UsageHistory = itemFinded.UsageHistory || [];
-
-        currentItem.UsageHistory.push(
-          stockHistoryList(
-            itemFinded,
-            account,
-            paymentDate,
-            noteReasonsEditingProduct,
-            pack,
-            cost,
-            unit,
-            volume,
-            previousVolume,
-            previousCost,
-            currentItem.totalCost,
-            currentItem.totalVolume
-          )
+        const logEvent = stockHistoryList(
+          itemFinded,
+          account,
+          paymentDate,
+          noteReasonsEditingProduct,
+          pack,
+          cost,
+          unit,
+          volume,
+          previousVolume,
+          previousCost,
+          currentItem.totalCost,
+          currentItem.totalVolume
         );
         console.log('Item atual  ', currentItem);
+        delete currentItem.UsageHistory;
+        
+        await logStockUsage(itemFinded.id, logEvent);
 
         // Atualiza o registro no banco de dados
         // const docRef = doc(db, 'stock', itemFinded.id);
         // await updateDoc(docRef, currentItem);
       } else {
         // Cria um novo registro para o item no banco de dados
-        currentItem.UsageHistory = [
-          stockHistoryList(
-            currentItem,
-            account,
-            paymentDate,
-            0,
-            currentItem.totalCost,
-            currentItem.totalVolume
-          ),
-        ];
-        // await addDoc(collection(db, 'stock'), currentItem);
+        const logEvent = stockHistoryList(
+          currentItem,
+          account,
+          paymentDate,
+          0,
+          currentItem.totalCost,
+          currentItem.totalVolume
+        );
+        delete currentItem.UsageHistory;
+        
+        // Se este fosse ativado:
+        // const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
+        // await logStockUsage(newDocRef.id, logEvent);
       }
     }
   };

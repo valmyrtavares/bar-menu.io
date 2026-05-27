@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBtnData, updateOrCreateKeyInDocument } from '../../api/Api';
+import { getBtnData, updateOrCreateKeyInDocument, fetchStockUsageLogs, logStockUsage } from '../../api/Api';
 import style from '../../assets/styles/TrackStockProduct.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
@@ -19,6 +19,8 @@ import { GlobalContext } from '../../GlobalContext';
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
   const [allStockItems, setAllStockItems] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [migrationLoadingId, setMigrationLoadingId] = React.useState(null);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
   const [excludeStockItem, setExcludeStockItem] = React.useState('');
@@ -121,9 +123,16 @@ const TrackStockProduct = () => {
     setShowEditForm(true);
   };
 
-  const usageHistory = (item) => {
+  const usageHistory = async (item) => {
     setTitle(item.product);
-    setEventLogData(item.UsageHistory);
+    const logs = await fetchStockUsageLogs(item.id);
+    
+    let mergedLogs = [...(logs || [])];
+    if (item.UsageHistory && item.UsageHistory.length > 0) {
+      mergedLogs = [...mergedLogs, ...item.UsageHistory];
+    }
+    
+    setEventLogData(mergedLogs);
     setShowAdjustmentRecords(true);
   };
 
@@ -142,6 +151,35 @@ const TrackStockProduct = () => {
 
     setStock(filtered);
     setShowDeleted(nextShowDeleted);
+  };
+
+  const handleMigrateSingleItem = async (item) => {
+    const confirm = window.confirm(`Deseja migrar o histórico de uso de ${item.product} para a nova estrutura?`);
+    if (!confirm) return;
+
+    setMigrationLoadingId(item.id);
+    try {
+      if (item.UsageHistory && item.UsageHistory.length > 0) {
+        console.log(`Migrando ${item.UsageHistory.length} logs de ${item.product}...`);
+        
+        for (const log of item.UsageHistory) {
+          await logStockUsage(item.id, { ...log, productName: item.product });
+        }
+        
+        delete item.UsageHistory;
+        const { doc, updateDoc, deleteField } = await import('firebase/firestore');
+        const { db } = await import('../../config-firebase/firebase.js');
+        const docRef = doc(db, 'stock', item.id);
+        await updateDoc(docRef, { UsageHistory: deleteField() });
+      }
+      alert(`Migração de ${item.product} concluída com sucesso!`);
+      fetchStock();
+    } catch (error) {
+      console.error("Erro na migração", error);
+      alert("Erro ao migrar dados.");
+    } finally {
+      setMigrationLoadingId(null);
+    }
   };
 
   const totalStockValue = React.useMemo(() => {
@@ -225,6 +263,7 @@ const TrackStockProduct = () => {
           <strong>R$ {totalStockValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
         </div>
       </div>
+
       <div className={style.tableStockContainer}>
         <table>
           <thead>
@@ -253,8 +292,17 @@ const TrackStockProduct = () => {
                       : style.warning
                   }
                 >
-                  <td onClick={() => usageHistory(item)} style={{ cursor: 'pointer' }} title="Ver Histórico de Custos e Ocorrências">
-                    {item.product} {item.unitOfMeasurement} <span style={{ marginLeft: '8px', fontSize: '1.1rem' }}>🔍</span>
+                  <td onClick={() => usageHistory(item)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }} title="Ver Histórico de Custos e Ocorrências">
+                    <span>{item.product} {item.unitOfMeasurement}</span> <span style={{ fontSize: '1.1rem' }}>🔍</span>
+                    {item.UsageHistory && item.UsageHistory.length > 0 && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleMigrateSingleItem(item); }}
+                        disabled={migrationLoadingId === item.id}
+                        style={{ padding: '2px 8px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        {migrationLoadingId === item.id ? 'Migrando...' : 'Migrar Logs'}
+                      </button>
+                    )}
                   </td>
                   <td>R$ {Number(item.totalCost).toFixed(2)}</td>
                   <td>

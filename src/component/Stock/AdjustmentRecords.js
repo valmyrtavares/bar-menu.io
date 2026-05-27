@@ -18,10 +18,18 @@ const AdjustmentRecords = ({
     let data = [...eventLogData].reverse();
 
     if (filter === 'Entrada de MP') {
-      data = data.filter(item => Number(item.inputProduct) > 0);
+      data = data.filter(item => {
+        const valRaw = item.inputProduct ?? item.entrada ?? 0;
+        const val = Math.abs(Number(String(valRaw).replace(',', '.')));
+        return val > 0 && !isNaN(val);
+      });
       data = data.slice(0, 10);
     } else if (filter === 'Saída de MP') {
-      data = data.filter(item => Number(item.outputProduct) > 0);
+      data = data.filter(item => {
+        const valRaw = item.outputProduct ?? item.saida ?? 0;
+        const val = Math.abs(Number(String(valRaw).replace(',', '.')));
+        return val > 0 && !isNaN(val);
+      });
       data = data.slice(0, 100);
     } else if (filter === 'Edição de MP') {
       data = data.filter(item => item.category === 'Editado' || item.category === 'Auditoria' || item.adjustmentExpenseNote || item.noteReasonsEditingProduct);
@@ -124,9 +132,9 @@ const AdjustmentRecords = ({
                   <tr key={index}>
                     <td>{item.date}</td>
                     <td>
-                      {item.inputProduct} {item.unit}
+                      {item.inputProduct ?? item.entrada ?? 0} {item.unit}
                     </td>
-                    <td>{item?.outputProduct}</td>
+                    <td>{item.outputProduct ?? item.saida ?? 0}</td>
                     <td style={{ fontWeight: item?.orderNumber ? 'bold' : 'normal' }}>
                       {item?.orderNumber || '-'}
                     </td>

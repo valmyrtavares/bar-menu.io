@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { getBtnData } from '../../api/Api';
+import { getBtnData, logStockUsage } from '../../api/Api';
 import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
@@ -273,22 +273,21 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         const volume = 0;
         const unit = updatedProduct.unitOfMeasurement;
 
-        updatedProduct.UsageHistory = original.UsageHistory || [];
-        updatedProduct.UsageHistory.push(
-          stockHistoryList(
-            original,
-            'Auditoria',
-            paymentDate,
-            pack,
-            cost,
-            unit,
-            volume,
-            previousVolume,
-            previousCost,
-            updatedProduct.totalCost,
-            updatedProduct.totalVolume
-          )
+        const logEvent = stockHistoryList(
+          original,
+          'Auditoria',
+          paymentDate,
+          pack,
+          cost,
+          unit,
+          volume,
+          previousVolume,
+          previousCost,
+          updatedProduct.totalCost,
+          updatedProduct.totalVolume
         );
+
+        delete updatedProduct.UsageHistory;
 
         // Update Dishes locally
         const dishesToUpdateForThisItem = updateRecipesinDishesAndSideDishes(updatedProduct, dishes);
@@ -297,6 +296,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         // Update Firestore Stock
         const docRef = doc(db, 'stock', updatedProduct.id);
         await updateDoc(docRef, updatedProduct);
+        await logStockUsage(updatedProduct.id, logEvent);
 
         // Check availability
         await checkUnavaiableRawMaterial(updatedProduct.id);

@@ -445,3 +445,59 @@ export async function getPaginatedData(
     throw error;
   }
 }
+
+/**
+ * Registra um evento de uso/histórico para um item do estoque em uma coleção separada.
+ *
+ * @param {string} stockId - ID do item no estoque.
+ * @param {object} logEntry - Dados do log (date, inputProduct, cost, etc).
+ */
+export async function logStockUsage(stockId, logEntry) {
+  try {
+    const logsRef = collection(db, 'stockUsageLogs');
+    await import('firebase/firestore').then((mod) =>
+      mod.addDoc(logsRef, {
+        stockId,
+        timestamp: new Date().toISOString(),
+        ...logEntry
+      })
+    );
+  } catch (error) {
+    console.error('Erro ao registrar log de estoque:', error);
+  }
+}
+
+/**
+ * Busca o histórico de logs de um item de estoque específico.
+ *
+ * @param {string} stockId - ID do item no estoque.
+ * @param {number} limitCount - Número máximo de logs a retornar.
+ */
+export async function fetchStockUsageLogs(stockId) {
+  try {
+    const logsRef = collection(db, 'stockUsageLogs');
+    // Busca logs específicos deste stockId (sem orderBy no Firebase para não exigir index composto imediato)
+    const q = query(
+      logsRef,
+      where('stockId', '==', stockId)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    let logs = [];
+    querySnapshot.forEach((docSnap) => {
+      logs.push({ ...docSnap.data(), id: docSnap.id });
+    });
+    
+    // Ordena localmente pela data ou timestamp
+    logs.sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return timeB - timeA; // Descendente (mais recentes primeiro)
+    });
+
+    return logs;
+  } catch (error) {
+    console.error('Erro ao buscar logs de estoque:', error);
+    return [];
+  }
+}

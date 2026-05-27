@@ -4,7 +4,7 @@ import style from '../../assets/styles/AddStockEntryForm.module.scss';
 import CloseBtn from '../closeBtn';
 import { db } from '../../config-firebase/firebase.js';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { getBtnData, addItemToCollection } from '../../api/Api';
+import { getBtnData, addItemToCollection, logStockUsage } from '../../api/Api';
 import { GlobalContext } from '../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage.js';
@@ -182,26 +182,26 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
           totalCost,
           totalVolume,
           CostPerUnit: costPerUnit,
-          UsageHistory: [...(itemFinded.UsageHistory || []), {
-            date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
-            package: pack, unit: currentItem.unitOfMeasurement, ContentsInStock: totalVolume,
-            totalResourceInvested: totalCost, category: account
-          }]
         };
         await updateDoc(doc(db, 'stock', itemFinded.id), updateData);
+        await logStockUsage(itemFinded.id, {
+          date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
+          package: pack, unit: currentItem.unitOfMeasurement, ContentsInStock: totalVolume,
+          totalResourceInvested: totalCost, category: account
+        });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(itemFinded.id);
         setLoadingAvailableMenuDishes(res || false);
       } else {
         const newRecord = {
           ...currentItem,
-          UsageHistory: [{
-            date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
-            package: currentItem.amount, unit: currentItem.unitOfMeasurement, ContentsInStock: currentItem.totalVolume,
-            totalResourceInvested: currentItem.totalCost, category: account
-          }]
         };
         const newDoc = await addDoc(collection(db, 'stock'), newRecord);
+        await logStockUsage(newDoc.id, {
+          date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
+          package: currentItem.amount, unit: currentItem.unitOfMeasurement, ContentsInStock: currentItem.totalVolume,
+          totalResourceInvested: currentItem.totalCost, category: account
+        });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(newDoc.id);
         setLoadingAvailableMenuDishes(res || false);

@@ -1,6 +1,6 @@
 import React from 'react';
 import style from '../../assets/styles/StockMovementPopup.module.scss';
-import { getBtnData } from '../../api/Api';
+import { getBtnData, fetchStockUsageLogs } from '../../api/Api';
 
 const StockMovementPopup = ({ onClose }) => {
   const [stockList, setStockList] = React.useState([]);
@@ -65,7 +65,7 @@ const StockMovementPopup = ({ onClose }) => {
     return new Date(dateStr);
   };
 
-  const handleFilter = () => {
+  const handleFilter = async () => {
     if (!selectedProductId || !startDate || !endDate) {
       alert('Por favor, preencha todos os filtros.');
       return;
@@ -79,8 +79,10 @@ const StockMovementPopup = ({ onClose }) => {
       return;
     }
 
-    if (!selectedProduct.UsageHistory || !Array.isArray(selectedProduct.UsageHistory)) {
-      console.warn('Este produto não possui histórico (UsageHistory):', selectedProduct.product);
+    const logs = await fetchStockUsageLogs(selectedProductId);
+
+    if (!logs || !Array.isArray(logs) || logs.length === 0) {
+      console.warn('Este produto não possui histórico:', selectedProduct.product);
       setResult({ value: 0, unit: selectedProduct.unitOfMeasurement || '' });
       return;
     }
@@ -97,9 +99,9 @@ const StockMovementPopup = ({ onClose }) => {
 
     console.log(`Filtrando de ${start.toLocaleDateString()} até ${end.toLocaleDateString()}`);
     console.log(`Item: ${selectedProduct.product}, Tipo: ${movementType}`);
-    console.log(`Histórico total: ${selectedProduct.UsageHistory.length} eventos`);
+    console.log(`Histórico total: ${logs.length} eventos`);
 
-    selectedProduct.UsageHistory.forEach((event) => {
+    logs.forEach((event) => {
       const eventDate = parseDate(event.date);
       if (eventDate >= start && eventDate <= end) {
         // Tentar buscar por múltiplos nomes de campos possíveis
