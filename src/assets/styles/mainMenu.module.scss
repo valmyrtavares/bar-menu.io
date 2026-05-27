@@ -76,6 +76,25 @@
                 }
                 
             }
+
+        .orderBtn {
+            background-color: var(--btn-color);
+            color: var(--title-font-color);
+            border: 2px solid var(--title-font-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-family: var(--title-font);
+            width: fit-content;
+            justify-self: center;
+            
+            &:active {
+                transform: scale(0.95);
+            }
+        }
     }
 }
 

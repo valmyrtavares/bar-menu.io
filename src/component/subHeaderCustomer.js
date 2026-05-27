@@ -8,11 +8,12 @@ const PedidoButton = React.memo(({ navigate }) => {
 
   return (
     <button
+      className={style.orderBtn}
       onClick={() => {
         navigate(); // Chamamos a navegação aqui para ver se dispara corretamente
       }}
     >
-      Seus Pedidos
+      VEJA O SEUS PEDIDOS
     </button>
   );
 });
