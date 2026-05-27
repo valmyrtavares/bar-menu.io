@@ -144,6 +144,11 @@ const TrackStockProduct = () => {
     setShowDeleted(nextShowDeleted);
   };
 
+  const totalStockValue = React.useMemo(() => {
+    if (!stock) return 0;
+    return stock.reduce((acc, item) => acc + (Number(item.totalCost) || 0), 0);
+  }, [stock]);
+
   return (
     <div className={style.containerTrackStockproduct}>
       <div className={style.containerIcon}>
@@ -204,15 +209,21 @@ const TrackStockProduct = () => {
         <Title mainTitle="Estoque" />
       </Link>
       <div className={style.containerBtnView}>
-        <select onChange={handleActionSelect} defaultValue="">
-          <option value="" disabled hidden>Ações de Estoque</option>
-          <option value="movement">Movimentação de Estoque</option>
-          <option value="dishMovement">Movimentação por pratos</option>
-          <option value="addStock">Nova Entrada</option>
-          <option value="audit">Auditoria</option>
-          <option value="inventoryHistory">Histórico de inventários</option>
-        </select>
+        <div className={style.leftControls}>
+          <select onChange={handleActionSelect} defaultValue="">
+            <option value="" disabled hidden>Ações de Estoque</option>
+            <option value="movement">Movimentação de Estoque</option>
+            <option value="dishMovement">Movimentação por pratos</option>
+            <option value="addStock">Nova Entrada</option>
+            <option value="audit">Auditoria</option>
+            <option value="inventoryHistory">Histórico de inventários</option>
+          </select>
+        </div>
         <h2>{subTitle}</h2>
+        <div className={style.stockValueHighlight}>
+          <span>Valor total em estoque:</span>
+          <strong>R$ {totalStockValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+        </div>
       </div>
       <div className={style.tableStockContainer}>
         <table>
