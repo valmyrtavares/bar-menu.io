@@ -1,86 +1,195 @@
-@import  "./variables";
-
-.order-queue-container .title-btn-container{
-    display:grid;
-    grid-template-columns: 8fr 46px;
-    justify-content: space-between;
-}
-.order-queue-container .title-btn-container a{
-    color:var(--title-font-color);
-    font-size: 22px;;
-}
-
-.order-queue-container .title-btn-container h1{
-text-align: center;
-font-family: var(--title-font);
-color: var(--title-font-color);
-font-size:33px;
+.order-queue-container {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
-.order-queue-container .list-columns h3{
-    font-size:23px;
-    margin:0px;
+.order-queue-container .title-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 10px;
 }
 
-.order-queue-container .list-columns .horizont-line-queue {
-    display:flex; 
-    justify-content: space-around;
-    padding: 5px;
-    margin-bottom: 3px;
-   
-}
-.order-queue-container .list-columns .horizont-line-queue p{
-    font-size: 20px;    
+.order-queue-container .title-btn-container a {
+    color: #000000;
+    font-size: 22px;
+    position: absolute;
+    right: 20px;
+    text-decoration: none;
+    font-weight: bold;
 }
 
-.order-queue-container p{
+.order-queue-container .title-btn-container h1 {
     text-align: center;
-    font-family: var(--text-font);
-    color:var(--font-color);
-    font-size:15px;
-}
-@media (min-width: 600px) {
-    .order-queue-container p{    
-        font-size:20px;   
-    }
-    .order-queue-container .title-btn-container h1 {
-        font-size:42px
-    }
+    color: #000000;
+    font-size: 42px;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -1px;
 }
 
-.order-queue-container .horizont-line-queue p{
-    margin-bottom: 0;
+.order-queue-container > p {
+    text-align: center;
+    color: #666666;
+    font-size: 20px;
+    margin-bottom: 40px;
+    font-weight: 500;
 }
-.order-queue-container .horizont-line-queue span{
-    font-weight: bold;
-}
-.order-queue-container span{
-    font-weight: bold;
-}
-.order-queue-container .list-columns{
-    display:grid;
+
+.order-queue-container .list-columns {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 9px;   
-}
-.order-queue-container .list-columns .date{
-    margin-bottom: 0;
-}
-
-.order-queue-container .list-columns .border-red{
-    border: solid 2px red;
-    margin: 5px;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.order-queue-container .list-columns .border-green{
-    border: solid 2px green;
-    margin: 5px;
+.order-queue-container .list-columns > div {
+    background: #f9f9f9;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
+.order-queue-container .list-columns h3 {
+    font-size: 32px;
+    margin: 0 0 20px 0;
+    text-align: center;
+    font-weight: 700;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eaeaea;
+}
+
+.order-queue-container .list-columns > div:first-child h3 {
+    color: #eab308; /* Yellow/Orange for preparing */
+}
+
+.order-queue-container .list-columns > div:last-child h3 {
+    color: #22c55e; /* Green for ready */
+}
+
+.order-queue-container .horizont-line-queue {
+    display: flex;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border-left: 6px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-queue-container .horizont-line-queue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+}
+
+.order-queue-container .border-red .horizont-line-queue {
+    border-left-color: #eab308;
+}
+
+.order-queue-container .border-green .horizont-line-queue {
+    border-left-color: #22c55e;
+}
+
+.order-queue-container .horizont-line-queue p {
+    font-weight: 600;
+    margin: 0;
+    color: #111111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Ready Popup - replacing TrasitionPopup */
+.ready-popup-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border: 8px solid #22c55e;
+    color: #22c55e;
+    padding: 60px 100px;
+    border-radius: 40px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+    z-index: 3000;
+    text-align: center;
+    animation: popupAttention 4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: none;
+}
+
+.ready-popup-overlay h1 {
+    font-size: 80px;
+    margin: 0;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+}
+
+.ready-popup-overlay h2 {
+    font-size: 30px;
+    margin: 10px 0 0 0;
+    color: #666;
+    font-weight: 500;
+}
+
+@keyframes popupAttention {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    10% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    15% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    85% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    90% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+}
+
+/* Finalized Animation */
+.finalized-name-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    font-weight: 900;
+    color: #22c55e;
+    z-index: 2500;
+    pointer-events: none;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: growAndFade 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes growAndFade {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+    }
+}
 
 /* ********************* SOM **************************** */
-
 .sound-activation-container {
-    background-color: var(--btn-color);
+    background-color: #000000;
     color: white;
     padding: 10px;
     margin: 10px 0;
@@ -94,7 +203,7 @@ font-size:33px;
 
 .sound-activation-container button {
     background-color: white;
-    color: var(--btn-color);
+    color: #000000;
     border: none;
     padding: 5px 15px;
     border-radius: 5px;

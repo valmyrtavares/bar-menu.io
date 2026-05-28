@@ -162,15 +162,52 @@ const TrackStockProduct = () => {
       if (item.UsageHistory && item.UsageHistory.length > 0) {
         console.log(`Migrando ${item.UsageHistory.length} logs de ${item.product}...`);
         
+        const { writeBatch, doc, collection, deleteField, query, where, getDocs } = await import('firebase/firestore');
+        const { db } = await import('../../config-firebase/firebase.js');
+
+        let batch = writeBatch(db);
+        let operationCount = 0;
+
+        // PROTEÇÃO: Deleta logs parciais caso uma migração anterior tenha sido interrompida (F5)
+        const logsRef = collection(db, 'stockUsageLogs');
+        const q = query(logsRef, where('stockId', '==', item.id));
+        const snapshot = await getDocs(q);
+        
+        for (const docSnap of snapshot.docs) {
+          batch.delete(docSnap.ref);
+          operationCount++;
+          if (operationCount >= 450) {
+            await batch.commit();
+            batch = writeBatch(db);
+            operationCount = 0;
+          }
+        }
+
         for (const log of item.UsageHistory) {
-          await logStockUsage(item.id, { ...log, productName: item.product });
+          const newLogRef = doc(collection(db, 'stockUsageLogs'));
+          batch.set(newLogRef, {
+            stockId: item.id,
+            timestamp: new Date().toISOString(),
+            ...log,
+            productName: item.product
+          });
+          
+          operationCount++;
+          
+          // O Firestore permite no máximo 500 operações por batch
+          if (operationCount === 450) {
+            await batch.commit();
+            batch = writeBatch(db);
+            operationCount = 0;
+          }
         }
         
-        delete item.UsageHistory;
-        const { doc, updateDoc, deleteField } = await import('firebase/firestore');
-        const { db } = await import('../../config-firebase/firebase.js');
+        // Remove a UsageHistory do item no banco
         const docRef = doc(db, 'stock', item.id);
-        await updateDoc(docRef, { UsageHistory: deleteField() });
+        batch.update(docRef, { UsageHistory: deleteField() });
+        
+        await batch.commit();
+        delete item.UsageHistory;
       }
       alert(`Migração de ${item.product} concluída com sucesso!`);
       fetchStock();
