@@ -7,6 +7,7 @@ import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
 const InventoryHistoryPopup = ({ onClose }) => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInventory, setSelectedInventory] = useState(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -32,7 +33,8 @@ const InventoryHistoryPopup = ({ onClose }) => {
             fullId: doc.id,
             date: docData.date,
             timestamp: docData.timestamp || 0,
-            difference: difference
+            difference: difference,
+            items: docData.items || []
           });
         });
 
@@ -60,8 +62,10 @@ const InventoryHistoryPopup = ({ onClose }) => {
         </div>
 
         <div className={styleEdit.titleRow}>
-          <h2>Histórico de Inventários</h2>
-          <p style={{ marginTop: '10px' }}>Consulta de inventários salvos anteriormente.</p>
+          <h2>{selectedInventory ? `Detalhes do Inventário ${selectedInventory.id}` : 'Histórico de Inventários'}</h2>
+          <p style={{ marginTop: '10px' }}>
+            {selectedInventory ? `Data: ${selectedInventory.date}` : 'Consulta de inventários salvos anteriormente. Clique na linha para detalhes.'}
+          </p>
         </div>
 
         <div className={styleTrack.tableStockContainer} style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -69,6 +73,43 @@ const InventoryHistoryPopup = ({ onClose }) => {
             <p>Carregando histórico...</p>
           ) : historyItems.length === 0 ? (
             <p>Nenhum histórico encontrado.</p>
+          ) : selectedInventory ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Antes</th>
+                  <th>Depois</th>
+                  <th>Dif. Volume</th>
+                  <th>Dif. Dinheiro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedInventory.items.length === 0 && (
+                   <tr><td colSpan="5" style={{textAlign: 'center'}}>Sem detalhes de itens para este inventário.</td></tr>
+                )}
+                {selectedInventory.items.map((prod, idx) => {
+                  const difVol = Number(prod.currentVolume) - Number(prod.previousVolume);
+                  const difCost = Number(prod.currentCost) - Number(prod.previousCost);
+                  
+                  const isNegative = difCost < 0;
+                  const isPositive = difCost > 0;
+                  const color = isNegative ? 'red' : isPositive ? '#007bff' : 'inherit';
+                  
+                  return (
+                    <tr key={idx}>
+                      <td>{prod.product}</td>
+                      <td>{Number(prod.previousVolume).toFixed(2)} {prod.unit}</td>
+                      <td>{Number(prod.currentVolume).toFixed(2)} {prod.unit}</td>
+                      <td>{difVol > 0 ? '+' : ''}{difVol.toFixed(2)} {prod.unit}</td>
+                      <td style={{ color: color, fontWeight: 'bold' }}>
+                        {difCost > 0 ? '+' : ''}R$ {difCost.toFixed(2).replace('.', ',')}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           ) : (
             <table>
               <thead>
@@ -90,7 +131,12 @@ const InventoryHistoryPopup = ({ onClose }) => {
                   const prefix = isNegative ? '- ' : isPositive ? '+ ' : '';
 
                   return (
-                    <tr key={item.fullId}>
+                    <tr 
+                      key={item.fullId}
+                      onClick={() => setSelectedInventory(item)}
+                      style={{ cursor: 'pointer' }}
+                      title="Clique para ver detalhes"
+                    >
                       <td style={{ fontWeight: 'bold' }}>{item.id}</td>
                       <td>{item.date}</td>
                       <td style={{ color: color, fontWeight: 'bold' }}>
@@ -104,7 +150,17 @@ const InventoryHistoryPopup = ({ onClose }) => {
           )}
         </div>
 
-        <div className={styleEdit.btnRow} style={{ justifyContent: 'center', marginTop: '20px' }}>
+        <div className={styleEdit.btnRow} style={{ justifyContent: 'center', marginTop: '20px', gap: '10px' }}>
+           {selectedInventory && (
+             <button 
+               className={styleEdit.closeBtn} 
+               style={{ position: 'relative', top: 0, right: 0, backgroundColor: '#6c757d', color: '#fff' }} 
+               type="button" 
+               onClick={() => setSelectedInventory(null)}
+             >
+               Voltar
+             </button>
+           )}
            <button 
              className={styleEdit.closeBtn} 
              style={{ position: 'relative', top: 0, right: 0 }} 
