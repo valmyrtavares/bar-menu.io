@@ -2,6 +2,99 @@ import React, { useState, useMemo } from 'react';
 import log from '../../assets/styles/AdjustmentRecords.module.scss';
 import CloseBtn from '../closeBtn';
 
+const getLogTimestamp = (item, useTimestampFirst = false) => {
+  if (!item) return 0;
+
+  const parseAnyDate = (val) => {
+    if (!val) return null;
+    
+    // 1. Instância do objeto Date
+    if (val instanceof Date) {
+      return val.getTime();
+    }
+    
+    // 2. Timestamp do Firestore (objeto com seconds)
+    if (typeof val === 'object' && val.seconds !== undefined) {
+      return val.seconds * 1000 + (val.nanoseconds ? val.nanoseconds / 1000000 : 0);
+    }
+    
+    // 3. Número (timestamp Unix de milissegundos)
+    if (typeof val === 'number') {
+      return val;
+    }
+    
+    // 4. String formatada
+    if (typeof val === 'string') {
+      let str = val.trim();
+      if (!str) return null;
+      
+      // Se for formato ISO string válido
+      if (str.includes('T') && !isNaN(Date.parse(str))) {
+        return new Date(str).getTime();
+      }
+      
+      let hour = 0;
+      let minute = 0;
+      let second = 0;
+      
+      // Expressão regular para capturar e remover a hora (ex: "28/05/2026 - 15:30" ou "28/05/2026 15:30:00")
+      const timeRegex = /(?:\s+|-\s+)(\d{2}):(\d{2})(?::(\d{2}))?/;
+      const timeMatch = str.match(timeRegex);
+      if (timeMatch) {
+        hour = parseInt(timeMatch[1], 10) || 0;
+        minute = parseInt(timeMatch[2], 10) || 0;
+        second = parseInt(timeMatch[3], 10) || 0;
+        str = str.replace(timeMatch[0], '').trim();
+      }
+      
+      // Separadores comuns de data (/ ou -)
+      const separators = ['/', '-'];
+      for (const sep of separators) {
+        if (str.includes(sep)) {
+          const parts = str.split(sep);
+          if (parts.length === 3) {
+            // Se o ano estiver no início (YYYY-MM-DD)
+            if (parts[0].length === 4) {
+              const year = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10) - 1;
+              const day = parseInt(parts[2], 10);
+              const d = new Date(year, month, day, hour, minute, second);
+              if (!isNaN(d.getTime())) return d.getTime();
+            } else {
+              // Se o dia estiver no início (DD-MM-YYYY ou DD/MM/YYYY)
+              const day = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10) - 1;
+              const year = parseInt(parts[2], 10);
+              const d = new Date(year, month, day, hour, minute, second);
+              if (!isNaN(d.getTime())) return d.getTime();
+            }
+          }
+        }
+      }
+      
+      // Fallback para parse padrão de data
+      const fallback = Date.parse(val);
+      if (!isNaN(fallback)) return fallback;
+    }
+    
+    return null;
+  };
+
+  const timeFromTimestamp = parseAnyDate(item.timestamp);
+  const timeFromDate = parseAnyDate(item.date);
+
+  if (useTimestampFirst) {
+    if (timeFromTimestamp !== null) return timeFromTimestamp;
+    if (timeFromDate !== null) return timeFromDate;
+  } else {
+    if (timeFromDate !== null) return timeFromDate;
+    if (timeFromTimestamp !== null) return timeFromTimestamp;
+  }
+
+  return 0;
+};
+
+
 const AdjustmentRecords = ({
   eventLogData,
   setShowAdjustmentRecords,
@@ -14,8 +107,22 @@ const AdjustmentRecords = ({
   const filteredData = useMemo(() => {
     if (!eventLogData) return [];
     
-    // Mostra os mais recentes primeiro
-    let data = [...eventLogData].reverse();
+    // Ordena os registros de forma consistente:
+    // 1. Pelo dia/hora real do evento (campo 'date')
+    // 2. Se as datas forem idênticas (ou se uma delas não tiver 'date'), usa o 'timestamp' como critério de desempate.
+    let data = [...eventLogData].sort((a, b) => {
+      const dateA = getLogTimestamp(a, false); // Prioriza 'date'
+      const dateB = getLogTimestamp(b, false); // Prioriza 'date'
+      
+      if (dateA !== dateB) {
+        return dateB - dateA; // Decrescente (mais recente primeiro)
+      }
+      
+      // Se empatar na data, usa o timestamp preciso como tie-breaker
+      const tsA = getLogTimestamp(a, true); // Prioriza 'timestamp'
+      const tsB = getLogTimestamp(b, true); // Prioriza 'timestamp'
+      return tsB - tsA; // Decrescente (mais recente primeiro)
+    });
 
     if (filter === 'Entrada de MP') {
       data = data.filter(item => {
