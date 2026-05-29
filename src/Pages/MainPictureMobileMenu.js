@@ -9,8 +9,9 @@ import { GlobalContext } from '../GlobalContext.js';
 import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
-import { ensureImagesInCache } from '../util/imageCache.js';
+import { ensureImagesInCache, nativePreloadImages } from '../util/imageCache.js';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+
 import { db } from '../config-firebase/firebase.js';
 
 const MainPictureMobileMenu = () => {
@@ -24,7 +25,6 @@ const MainPictureMobileMenu = () => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
-  const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
   const [isSubmittingQuick, setIsSubmittingQuick] = React.useState(false);
 
   const global = React.useContext(GlobalContext);
@@ -60,6 +60,9 @@ const MainPictureMobileMenu = () => {
         }
         setDishes(dataItem);
         setIsLoading(false);
+        if (Array.isArray(dataItem) && Array.isArray(data)) {
+          nativePreloadImages([...data, ...dataItem]);
+        }
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -72,9 +75,23 @@ const MainPictureMobileMenu = () => {
     return <img src={src} alt="" />;
   };
 
-  const DishItemImage = ({ item, onImageLoad }) => {
+  const DishItemImage = ({ item }) => {
     const src = useCachedImage(item.id, item.image, 'thumb');
-    return <img src={src} alt="" onLoad={onImageLoad} onError={onImageLoad} />;
+    const [imageLoaded, setImageLoaded] = React.useState(false);
+
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '120px' }}>
+        {!imageLoaded && <div className={style.skeleton} />}
+        <img
+          src={src}
+          alt=""
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
+          className={imageLoaded ? style.loadedImg : style.loadingImg}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+    );
   };
 
   React.useEffect(() => {
@@ -87,32 +104,18 @@ const MainPictureMobileMenu = () => {
     if (!dishes || dishes.length === 0) return;
 
     setCategorySelected(title);
-    setShowFilteredDishes(false);
+    setShowFilteredDishes(true); // Sempre visível para evitar congelamentos
 
     const filtered =
       parent !== 'bestSellers'
         ? dishes.filter((item) => item.category === parent)
         : dishes.filter((item) => item.carrossel === true);
 
-    await ensureImagesInCache(filtered, 'thumb');
+    // Garante que o IndexedDB seja carregado em background, mas não bloqueia a UI
+    ensureImagesInCache(filtered, 'thumb');
 
-    setLoadedImagesCount(0);
     setDishesFiltered(filtered);
-    // showFilteredDishes(true) será chamado pelo useEffect de carregamento
   };
-
-  React.useEffect(() => {
-    if (dishesFiltered.length > 0 && loadedImagesCount >= dishesFiltered.length) {
-      setShowFilteredDishes(true);
-    }
-  }, [loadedImagesCount, dishesFiltered]);
-
-  React.useEffect(() => {
-    if (dishesFiltered.length > 0 && !showFilteredDishes) {
-      const timer = setTimeout(() => setShowFilteredDishes(true), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [dishesFiltered, showFilteredDishes]);
 
   const preparedRequest = async (item) => {
     if (item?.lowAmountRawMaterial) return;
@@ -297,7 +300,6 @@ const MainPictureMobileMenu = () => {
                       <div className={style.image}>
                         <DishItemImage 
                           item={item} 
-                          onImageLoad={() => setLoadedImagesCount(prev => prev + 1)} 
                         />
                       </div>
                     </div>

@@ -142,3 +142,20 @@ export async function ensureImagesInCache(items, type = 'thumb') {
 
   await Promise.all(promises);
 }
+
+/**
+ * Realiza o pré-carregamento nativo no navegador (imune a CORS)
+ * Baixa as imagens em segundo plano e as insere no cache HTTP do navegador.
+ */
+export function nativePreloadImages(items) {
+  if (!items || items.length === 0) return;
+  console.log(`🚀 [Preloader] Iniciando pré-carregamento nativo no navegador para ${items.length} itens...`);
+  
+  items.forEach((item) => {
+    if (item.image) {
+      const img = new Image();
+      img.src = item.image;
+    }
+  });
+}
+

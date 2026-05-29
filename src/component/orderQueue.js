@@ -51,7 +51,7 @@ const OrderQueue = () => {
     // Identificando o item movido (do waitingLine para doneLine)
     const movedItem = prevWaitingLine.current.find(
       (item) => !waitingLine.some((waitingItem) => waitingItem.id === item.id) &&
-                doneLine.some((doneItem) => doneItem.id === item.id)
+        doneLine.some((doneItem) => doneItem.id === item.id)
     );
 
     if (movedItem) {
@@ -65,7 +65,7 @@ const OrderQueue = () => {
     // Identificando o item finalizado (saiu do doneLine e não voltou para waitingLine)
     const finishedItem = prevDoneLine.current.find(
       (item) => !doneLine.some((doneItem) => doneItem.id === item.id) &&
-                !waitingLine.some((waitItem) => waitItem.id === item.id)
+        !waitingLine.some((waitItem) => waitItem.id === item.id)
     );
 
     if (finishedItem) {
@@ -144,3 +144,5 @@ const OrderQueue = () => {
   );
 };
 export default OrderQueue;
+
+//Precisamos

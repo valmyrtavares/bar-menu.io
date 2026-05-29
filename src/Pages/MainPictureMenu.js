@@ -11,6 +11,8 @@ import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnon
 import WarningMessage from '../component/WarningMessages.js';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config-firebase/firebase.js';
+import { nativePreloadImages } from '../util/imageCache.js';
+
 
 const CategoryItemImage = ({ item }) => {
   const src = item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg';
@@ -28,7 +30,6 @@ const MainPictureMenu = () => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [nameClient, setNameClient] = React.useState('');
   const [showFilteredDishes, setShowFilteredDishes] = React.useState(true);
-  const [loadedImagesCount, setLoadedImagesCount] = React.useState(0);
   const [isNestedCategory, setIsNestedCategory] = React.useState(false);
   const [isSubmittingQuick, setIsSubmittingQuick] = React.useState(false);
 
@@ -69,6 +70,9 @@ const MainPictureMenu = () => {
         }
         setDishes(dataItem);
         setIsLoading(false);
+        if (Array.isArray(dataItem) && Array.isArray(data)) {
+          nativePreloadImages([...data, ...dataItem]);
+        }
       } catch (error) {
         console.error('Erro fetching data', error);
       }
@@ -88,7 +92,7 @@ const MainPictureMenu = () => {
     if (!dishes || dishes.length === 0) return;
  
     setCategorySelected(title); // ⚡ Feedback INSTANTÂNEO na tela
-    setShowFilteredDishes(false); // Esconde a grade para carregar em lote
+    setShowFilteredDishes(true); // Sempre visível para evitar travamentos
  
     const filtered =
       parent !== 'bestSellers'
@@ -96,7 +100,6 @@ const MainPictureMenu = () => {
         : dishes.filter((item) => item.carrossel === true);
  
     if (filtered.length === 0) {
-      setShowFilteredDishes(true);
       if (global.isToten) {
         const hasSubcategories = menuButton.some((btn) => btn.category === parent);
         if (hasSubcategories) {
@@ -105,34 +108,8 @@ const MainPictureMenu = () => {
       }
     }
  
-    // Removido o bloqueio de cache manual via fetch (que estava dando erro de CORS)
-    // O useEffect abaixo, baseado em carregamento real do DOM (onImageLoad), dará conta do recado!
- 
-    setLoadedImagesCount(0); // Reseta contador de carregamento real (DOM)
     setDishesFiltered(filtered);
-    // setShowFilteredDishes(true); // Removido! O useEffect abaixo cuidará disso quando todas carregarem no DOM
   };
-
-  // ✅ Revela a grade APENAS quando todas as imagens (DOM) terminarem de decodificar
-  React.useEffect(() => {
-    if (dishesFiltered.length > 0 && loadedImagesCount >= dishesFiltered.length) {
-      setShowFilteredDishes(true);
-    }
-  }, [loadedImagesCount, dishesFiltered]);
-
-  // Fail-safe: Se demorar mais de 2s, mostra o que tiver
-  React.useEffect(() => {
-    if (dishesFiltered.length > 0 && !showFilteredDishes) {
-      const timer = setTimeout(() => setShowFilteredDishes(true), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [dishesFiltered, showFilteredDishes]);
-
-  React.useEffect(() => {
-    if (dishes.length > 0) {
-      chooseCategory('bestSellers', 'OS MAIS VENDIDOS');
-    }
-  }, [dishes]);
 
   const preparedRequest = async (item) => {
     if (item?.lowAmountRawMaterial) return;
@@ -314,7 +291,6 @@ const MainPictureMenu = () => {
                     item={item}
                     index={index}
                     preparedRequest={preparedRequest}
-                    onImageLoad={() => setLoadedImagesCount((prev) => prev + 1)}
                   />
                 ))}
             </div>
