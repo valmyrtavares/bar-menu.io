@@ -10,8 +10,10 @@ import {
   getDocs,
   updateDoc,
   doc,
+  setDoc,
 } from 'firebase/firestore';
-import { db } from '../config-firebase/firebase.js';
+import { db, auth } from '../config-firebase/firebase.js';
+import { signInAnonymously } from 'firebase/auth';
 import * as XLSX from 'xlsx';
 
 export const isEmptyObject = (obj) => {
@@ -371,18 +373,34 @@ export const logToAnounimousInToten = (setNameClient) => {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       if (currentUserNew) {
         setNameClient(currentUserNew.name);
-        global.setId(currentUserNew.name);
+        if (typeof global !== 'undefined' && global.setId) {
+          global.setId(currentUserNew.name);
+        }
       }
     } else {
-      addDoc(collection(db, 'user'), noCustomer).then((docRef) => {
-        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-        console.log('Document written with ID: ', docRef.id);
-        setNameClient('anonimo');
-        localStorage.setItem(
-          'userMenu',
-          JSON.stringify({ id: docRef.id, name: 'anonimo' }),
-        );
-      });
+      const executeTotenAuth = async () => {
+        try {
+          let currentUser = auth.currentUser;
+          if (!currentUser) {
+            const userCredential = await signInAnonymously(auth);
+            currentUser = userCredential.user;
+          }
+          const uid = currentUser.uid;
+          await setDoc(doc(db, 'user', uid), noCustomer);
+          if (typeof global !== 'undefined' && global.setId) {
+            global.setId(uid);
+          }
+          console.log('Toten document written with UID: ', uid);
+          setNameClient('anonimo');
+          localStorage.setItem(
+            'userMenu',
+            JSON.stringify({ id: uid, name: 'anonimo', migratedToAuth: true }),
+          );
+        } catch (e) {
+          console.error("Erro no login anônimo Toten no Helpers:", e);
+        }
+      };
+      executeTotenAuth();
     }
   }
 };

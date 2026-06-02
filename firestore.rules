@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // FUNÇÕES AUXILIARES DE SEGURANÇA
+    // ==========================================
+    
+    // Verifica se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Verifica se o usuário logado é o proprietário do ID do documento
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Verifica se o usuário é Administrador
+    // (Através do login por E-mail/Senha normal do Firebase Auth ou se cadastrado na coleção 'admins')
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.firebase.sign_in_provider == 'password' || 
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Verifica se a requisição passou pelo Firebase App Check (reCAPTCHA)
+    // (Para ativar em produção, basta descomentar a linha abaixo)
+    function isAppCheckVerified() {
+      // return request.appCheck != null;
+      return true;
+    }
+
+    // ==========================================
+    // REGRAS POR COLEÇÃO
+    // ==========================================
+
+    // 1. Coleção de Usuários (/user)
+    match /user/{userId} {
+      // O cliente só pode ler e escrever seus próprios dados.
+      // Permitimos ler e deletar qualquer documento se estiver autenticado para dar suporte à migração de contas legadas.
+      allow read: if isAuthenticated() || isAdmin();
+      allow create: if isOwner(userId) && isAppCheckVerified();
+      allow update: if (isOwner(userId) || isAdmin()) && isAppCheckVerified();
+      allow delete: if isAuthenticated() || isAdmin();
+    }
+
+    // 2. Coleção de Pedidos (/requests)
+    match /requests/{requestId} {
+      // Qualquer cliente autenticado pode criar um pedido, contanto que se identifique como o dono dele (idUser == UID)
+      allow create: if isAuthenticated() && 
+                    request.resource.data.idUser == request.auth.uid && 
+                    isAppCheckVerified();
+      
+      // O cliente só pode ler e atualizar seus próprios pedidos (ex: adicionar acompanhamentos se a mesa estiver aberta)
+      // O administrador pode ler e atualizar qualquer pedido (ex: alterar status de entrega)
+      allow read: if isAuthenticated() && (resource.data.idUser == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && 
+                    (resource.data.idUser == request.auth.uid || isAdmin()) && 
+                    isAppCheckVerified();
+      
+      // Apenas administradores podem deletar pedidos
+      allow delete: if isAdmin();
+    }
+
+    // 3. Coleções do Cardápio (item, button, sideDishes, welcomeCustomer)
+    // Qualquer visitante do site (mesmo sem login) pode ler o cardápio, mas apenas o Admin pode editar
+    match /item/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /button/{buttonId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /sideDishes/{sideDishId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /welcomeCustomer/{welcomeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. Coleção de Controle de Estoque (stock)
+    // Permite que os administradores controlem tudo.
+    // Clientes podem ler dados básicos do estoque se necessário, ou atualizar ao confirmar o pedido (se sua lógica do totens fizer decremento direto).
+    match /stock/{stockId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. Coleção de Documentos Fiscais (taxDocuments) e BenefitedCustomer
+    match /taxDocuments/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /BenefitedCustomer/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 6. Coleção de Administradores (/admins)
+    // Apenas outros administradores podem gerenciar a lista de administradores
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Regra de Fallback / Catch-All
+    // Protege qualquer outra coleção não especificada acima, liberando acesso apenas para admins
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

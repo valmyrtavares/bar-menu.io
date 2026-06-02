@@ -1,7 +1,7 @@
 import React from 'react';
 import Input from '../../component/Input.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { db } from '../../config-firebase/firebase.js';
+import { getFirestore, collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { db, auth } from '../../config-firebase/firebase.js';
 import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../../GlobalContext';
 import '../../assets/styles/createCustomer.css';
@@ -131,13 +131,15 @@ const CreateCustomer = () => {
     if (error.birthday || error.phone || error.cpf) {
       setErrorPopup(true);
     } else {
-      // Envia o formulário para o Firestore
-      addDoc(collection(db, 'user'), formToSubmit)
-        .then((docRef) => {
-          global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+      // Envia o formulário para o Firestore usando o UID anônimo pré-existente
+      const uid = auth.currentUser?.uid || `legacy_user_${Date.now()}`;
+      setDoc(doc(db, 'user', uid), formToSubmit)
+        .then(() => {
+          global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
           const currentUser = {
-            id: docRef.id,
+            id: uid,
             name: formToSubmit.name,
+            migratedToAuth: true
           };
           localStorage.setItem('userMenu', JSON.stringify(currentUser));
           localStorage.removeItem('backorder');
@@ -205,12 +207,14 @@ const CreateCustomer = () => {
       formWithDefaults.fantasyName = name;
     }
 
-    addDoc(collection(db, 'user'), formWithDefaults)
-      .then((docRef) => {
-        global.setId(docRef.id); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+    const uid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
+    setDoc(doc(db, 'user', uid), formWithDefaults)
+      .then(() => {
+        global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
         const currentUser = {
-          id: docRef.id,
-          name: formWithDefaults.fantasyName,
+          id: uid,
+          name: formWithDefaults.fantasyName || 'anonimo',
+          migratedToAuth: true
         };
         localStorage.setItem('userMenu', JSON.stringify(currentUser));
         localStorage.removeItem('backorder');

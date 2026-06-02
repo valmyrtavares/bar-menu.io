@@ -50,7 +50,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   const [modal, setModal] = React.useState(false);
   const [disabledBtn, setDisabledBtn] = React.useState(true);
   const [finalPriceRequest, setFinalPriceRequest] = React.useState(null);
-  const [isToten, setIsToten] = React.useState(null); //Habilita certos dispositivos a deslogar o cliente após o envio do pedido
+  // const [isToten, setIsToten] = React.useState(null); // Removido local, usando o global.isToten em seu lugar
   const [warningMsg, setWarningMsg] = React.useState(false); //Open message to before send request to next step
   const [totenMessage, setTotenMessage] = React.useState(false); //Open message to before send request to next step
   const [openCloseTotenPupup, setOpenCloseTotenPopup] = React.useState(false); //Open message to before send request to next step
@@ -218,6 +218,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
 
   const navigate = useNavigate();
   const global = React.useContext(GlobalContext);
+  const isToten = global?.isToten;
   const location = useLocation();
   const isAdminOrigin = !!location.state?.isAdminOrigin;
   const [stylePdv, setStylePdv] = React.useState(false);
@@ -232,10 +233,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
       setCurrentUser(currentUserNew.id);
     }
-    if (localStorage.hasOwnProperty('isToten')) {
-      const toten = JSON.parse(localStorage.getItem('isToten'));
-      if (toten) setIsToten(true);
-    }
+    // isToten removido localmente, agora é lido diretamente do global context (global.isToten)
 
     if (localStorage.hasOwnProperty('autoPaymentMachineOn')) {
       const autoPaymentAllow = JSON.parse(
@@ -441,41 +439,43 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   };
 
   const openRegisterPopup = async () => {
-    if (isToten && userData?.name === 'anonymous') {
+    console.log("=== DEBUG CHECKOUT TOTEN ===");
+    console.log("isToten (state local):", isToten);
+    console.log("global.isToten (context):", global?.isToten);
+    console.log("userData:", userData);
+    console.log("userData?.name:", userData?.name);
+    console.log("isTableClient:", isTableClient);
+    console.log("localStorage isToten:", localStorage.getItem('isToten'));
+    console.log("localStorage autoPaymentMachineOn:", localStorage.getItem('autoPaymentMachineOn'));
+
+    if (isToten && (userData?.name === 'anonymous' || userData?.name === 'anonimo')) {
       if (userData?.request) {
         // Salvar os pedidos do anonymous na Ref da memória (Mais seguro) e no localStorage (Fallback)
         frozenRequestsForTotenCheckout.current = userData.request;
         localStorage.setItem('backorder', JSON.stringify(userData.request));
 
         try {
-          // Buscar o documento do usuário "anonymous" pelo campo 'name'
-          const userQuery = query(
-            collection(db, 'user'),
-            where('name', '==', 'anonymous'),
-          );
-          const querySnapshot = await getDocs(userQuery);
-
-          if (!querySnapshot.empty) {
-            // Pegar o primeiro documento encontrado (deve ser único)
-            const anonymousUserDoc = querySnapshot.docs[0];
-            const userDocRef = doc(db, 'user', anonymousUserDoc.id);
-            // Atualizar o campo 'requests' para []
-            await updateDoc(userDocRef, { request: [] });
-            // Buscar o documento atualizado
-            const updatedDoc = await getDoc(userDocRef);
-            console.log('Dados atualizados:', updatedDoc.data());
-          } else {
-            console.warn('Usuário anonymous não encontrado no Firestore.');
-          }
+          // Limpa o carrinho do usuário atual (que é individual agora)
+          const userDocRef = doc(db, 'user', userData.id);
+          await updateDoc(userDocRef, { request: [] });
+          console.log('Carrinho limpo para o usuário atual:', userData.id);
         } catch (error) {
           console.error(
-            'Erro ao buscar ou atualizar usuário anonymous:',
+            'Erro ao limpar carrinho do usuário anônimo:',
             error,
           );
         }
       }
 
       setOpenCloseTotenPopup(true);
+      return;
+    }
+
+    // Se for Toten e o cliente for cadastrado (como Valmyr Tavares), 
+    // não precisamos pedir apelido, mas iniciamos o fluxo de pagamento diretamente!
+    if (isToten) {
+      console.log("Iniciando auto pagamento diretamente para usuário cadastrado:", userData?.name);
+      onChoose();
       return;
     }
 
@@ -497,18 +497,18 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       frozenRequestsForTotenCheckout.current = userData.request;
       localStorage.setItem('backorder', JSON.stringify(userData.request));
       try {
-        const userQuery = query(collection(db, 'user'), where('name', '==', 'anonymous'));
-        const querySnapshot = await getDocs(userQuery);
-        if (!querySnapshot.empty) {
-          const anonymousUserDoc = querySnapshot.docs[0];
-          await updateDoc(doc(db, 'user', anonymousUserDoc.id), { request: [] });
-        }
+        const userDocRef = doc(db, 'user', userData.id);
+        await updateDoc(userDocRef, { request: [] });
       } catch (err) {}
     }
     logout();
   };
 
   const sendRequestToKitchen = async (e) => {
+    console.log("=== sendRequestToKitchen chamada ===");
+    console.log("isToten local:", isToten);
+    console.log("pdv:", pdv);
+    console.log("global.pdvRequest:", global?.pdvRequest);
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
 
