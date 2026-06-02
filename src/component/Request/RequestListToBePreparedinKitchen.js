@@ -11,6 +11,10 @@ import {
   doc,
   getDoc,
   updateDoc,
+  runTransaction,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore';
 import style from '../../assets/styles/RequestListToBePreparedKitchen.module.scss';
 import WarningAmoutMessage from '../Messages/WarningAmoutMessage';
@@ -356,88 +360,91 @@ const RequestListToBePrepared = () => {
   }, [requestsDoneList]);
 
   const updateIngredientsStock = async (item) => {
-    // No pacote básico (1 ou 3), não realizamos baixa de estoque
-    if (Number(global.packageTier) === 1 || Number(global.packageTier) === 3) {
-      console.log('Pacote Básico: Baixa de estoque ignorada.');
-      return;
-    }
-
-    const ObjPadrao = {
-      CostPerUnit: 0,
-      amount: 0,
-      product: '',
-      totalCost: 0,
-      totalVolume: 0,
-      unitOfMeasurement: '',
-      columePerUnit: 0,
-    };
-
     const dateTime = item.dateTime;
     const { request } = item;
     const orderNumber = item.countRequest || '';
 
     if (request && request.length > 0) {
-      await updateSideDihesInStock(request, dateTime, ObjPadrao, orderNumber);
+      await updateSideDihesInStock(request, dateTime, orderNumber);
     }
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
+      const account = currentItem.name;
+      const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
 
-      if (!currentItem) {
-        console.log('Item inválido na request:', request);
-        continue;
-      }
-
-      if (!currentItem.recipe) {
-        console.log('Item sem recipe:', currentItem);
-        continue;
-      }
-
-      if (!currentItem.recipe.FinalingridientsList) {
+      if (!FinalingridientsList) {
         console.log('FinalingridientsList está undefined:', currentItem.recipe);
         continue;
       }
-      const account = currentItem.name;
-      const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
-      if (!Array.isArray(FinalingridientsList)) {
-        console.log(
-          'ERRO: FinalingridientsList está indefinido para:',
-          currentItem
-        );
-        continue; // pula para o próximo item da request
-      }
+
       const size = currentItem?.size;
-      const listBySize = FinalingridientsList?.[size];
+      let listBySize = null;
+
+      if (Array.isArray(FinalingridientsList)) {
+        listBySize = FinalingridientsList;
+      } else if (typeof FinalingridientsList === 'object') {
+        if (size) {
+          if (Array.isArray(FinalingridientsList[size])) {
+            listBySize = FinalingridientsList[size];
+          } else {
+            try {
+              const dishDef = await getOneItemColleciton('item', currentItem.id);
+              if (dishDef && dishDef.CustomizedPrice) {
+                const mapping = {
+                  [dishDef.CustomizedPrice.firstLabel]: 'firstPrice',
+                  [dishDef.CustomizedPrice.secondLabel]: 'secondPrice',
+                  [dishDef.CustomizedPrice.thirdLabel]: 'thirdPrice',
+                };
+                const mappedKey = mapping[size];
+                if (mappedKey && Array.isArray(FinalingridientsList[mappedKey])) {
+                  listBySize = FinalingridientsList[mappedKey];
+                }
+              }
+            } catch (err) {
+              console.error(`Erro ao buscar definição do prato ${currentItem.name}:`, err);
+            }
+
+            // Fallback difuso caso as labels difiram por espaços ou caixa (ex: "330 ml" vs "330ml")
+            if (!listBySize) {
+              const normalizedSize = size.replace(/\s+/g, '').toLowerCase();
+              const foundKey = Object.keys(FinalingridientsList).find(k => 
+                k.replace(/\s+/g, '').toLowerCase() === normalizedSize
+              );
+              if (foundKey && Array.isArray(FinalingridientsList[foundKey])) {
+                listBySize = FinalingridientsList[foundKey];
+              }
+            }
+          }
+        }
+      }
+
       if (Array.isArray(listBySize)) {
-        for (let i = 0; i < listBySize.length; i++) {
-          const ingredient = listBySize[i];
-          ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
-          ObjPadrao.product = ingredient.name;
-          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement;
-          ObjPadrao.CostPerUnit = ingredient.portionCost;
-          const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime, orderNumber);
+        for (let j = 0; j < listBySize.length; j++) {
+          const ingredient = listBySize[j];
+          const currentObj = {
+            product: ingredient.name,
+            totalVolume: -Number(ingredient.amount.replace(',', '.')),
+            unitOfMeasurement: ingredient.unitOfMeasurement || '',
+            CostPerUnit: ingredient.portionCost || 0,
+            amount: 0,
+            totalCost: 0,
+            columePerUnit: 0,
+          };
+          await handleStock(currentObj, account, dateTime, orderNumber);
         }
       } else {
-        for (let i = 0; i < FinalingridientsList.length; i++) {
-          const ingredient = FinalingridientsList[i];
-          ObjPadrao.totalVolume = -Number(ingredient.amount.replace(',', '.'));
-          ObjPadrao.product = ingredient.name;
-          ObjPadrao.unitOfMeasurement = ingredient.unitOfMeasurement || '';
-          ObjPadrao.CostPerUnit = ingredient.portionCost;
-          const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime, orderNumber);
-        }
+        console.warn(`[STOCK-KITCHEN] Não foi possível encontrar a lista de ingredientes para o tamanho "${size}" do prato "${currentItem.name}"`);
       }
     }
   };
 
-  const updateSideDihesInStock = async (request, dateTime, ObjPadrao, orderNumber = '') => {
+  const updateSideDihesInStock = async (request, dateTime, orderNumber = '') => {
     if (!request || !Array.isArray(request) || request.length === 0) return;
 
     for (let i = 0; i < request.length; i++) {
       const currentItem = request[i];
-      const account = request[i].name;
+      const account = currentItem.name;
       if (
         currentItem.sideDishes &&
         Array.isArray(currentItem.sideDishes) &&
@@ -447,12 +454,18 @@ const RequestListToBePrepared = () => {
           const sideDish = currentItem.sideDishes[j];
           if (sideDish.isBasic) continue; // Pula baixa de estoque se for modo básico (sem vínculo)
           
-          ObjPadrao.totalVolume = -parseToNumber(sideDish.portionCost); // amount removed from stock
-          ObjPadrao.product = sideDish.name;
-          ObjPadrao.unitOfMeasurement = sideDish.unit || '';
-          ObjPadrao.CostPerUnit = sideDish.portionCost;
-          const arrayParams = [ObjPadrao];
-          await handleStock(arrayParams, account, dateTime, orderNumber);
+          const portionVal = sideDish.portionUsed !== undefined ? sideDish.portionUsed : sideDish.portionCost;
+          
+          const currentObj = {
+            product: sideDish.name,
+            totalVolume: -parseToNumber(portionVal),
+            unitOfMeasurement: sideDish.unit || '',
+            CostPerUnit: sideDish.portionCost || 0,
+            amount: 0,
+            totalCost: 0,
+            columePerUnit: 0,
+          };
+          await handleStock(currentObj, account, dateTime, orderNumber);
         }
       }
     }
@@ -487,83 +500,98 @@ const RequestListToBePrepared = () => {
       paymentDate = `${day}/${month}/${year}`;
     }
 
-    const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
-
     for (let i = 0; i < itemsStock.length; i++) {
       let currentItem = itemsStock[i];
 
-      // Verifica se o item já existe no banco de dados
-      const itemFinded = data?.find(
-        (itemSearch) => itemSearch.product === currentItem.product
-      );
-      console.log('itemFinded', itemFinded);
+      // Busca o documento correspondente pelo nome do produto
+      const stockCol = collection(db, 'stock');
+      const q = query(stockCol, where('product', '==', currentItem.product));
+      const querySnapshot = await getDocs(q);
 
-      if (itemFinded) {
-        // Atualiza os valores de custo e volume totais
-        const previousCost = itemFinded.totalCost;
-        const previousVolume = itemFinded.totalVolume;
-        const cost = account === 'Editado' ? 0 : currentItem.totalCost;
-        const pack =
-          account === 'Editado'
-            ? Number(currentItem.amount)
-            : Number(itemFinded.amount) + Number(currentItem.amount);
-        const volume = account === 'Editado' ? 0 : currentItem.totalVolume;
-        const unit = currentItem.unitOfMeasurement;
+      if (!querySnapshot.empty) {
+        const docSnap = querySnapshot.docs[0];
+        const docRef = doc(db, 'stock', docSnap.id);
 
-        if (
-          account !== 'Editado' && // Não é "Editado"
-          /^[^\d]+$/.test(account) && // Não contém números
-          isNaN(account) // Não é um número
-        ) {
-          // Atualiza totalCost proporcionalmente
-          // currentItem.totalCost = previousCost - currentItem.CostPerUnit;
+        try {
+          const result = await runTransaction(db, async (transaction) => {
+            const freshDoc = await transaction.get(docRef);
+            if (!freshDoc.exists()) {
+              throw new Error('Stock item not found during transaction');
+            }
+            const itemFinded = freshDoc.data();
+            itemFinded.id = docSnap.id; // Garante o id
 
-          const previousCost = parseToNumber(itemFinded.totalCost);
-          const costPerUnit = parseToNumber(currentItem.CostPerUnit);
-          currentItem.totalCost = round(previousCost - costPerUnit, 2);
+            // Executa os cálculos de volume e custo usando dados frescos do servidor
+            const previousCost = parseToNumber(itemFinded.totalCost);
+            const previousVolume = parseToNumber(itemFinded.totalVolume);
+            const cost = account === 'Editado' ? 0 : currentItem.totalCost;
+            const pack =
+              account === 'Editado'
+                ? Number(currentItem.amount)
+                : Number(itemFinded.amount) + Number(currentItem.amount);
+            const volume = account === 'Editado' ? 0 : currentItem.totalVolume;
+            const unit = currentItem.unitOfMeasurement;
 
-          // Mantém a atualização de totalVolume
-          // currentItem.totalVolume =
-          //   (currentItem.totalVolume || 0) + (itemFinded.totalVolume || 0);
-          const volumeBefore = parseToNumber(currentItem.totalVolume);
-          const volumeAdd = parseToNumber(itemFinded.totalVolume);
-          currentItem.totalVolume = round(volumeBefore + volumeAdd, 4);
+            let updatedTotalCost = previousCost;
+            let updatedTotalVolume = previousVolume;
 
-          if (currentItem.totalVolume < 0) {
-            alert(
-              `Volume do item ${currentItem.name} está negativo. Verifique o estoque.`
+            if (
+              account !== 'Editado' &&
+              /^[^\d]+$/.test(account) &&
+              isNaN(account)
+            ) {
+              const costPerUnit = parseToNumber(currentItem.CostPerUnit);
+              updatedTotalCost = round(previousCost - costPerUnit, 2);
+
+              const volumeBefore = parseToNumber(currentItem.totalVolume);
+              updatedTotalVolume = round(volumeBefore + previousVolume, 4);
+
+              if (updatedTotalVolume < 0) {
+                alert(
+                  `Volume do item ${itemFinded.product || itemFinded.name} está negativo. Verifique o estoque.`
+                );
+                updatedTotalVolume = 0;
+              }
+            }
+
+            const updatedProduct = {
+              ...itemFinded,
+              totalCost: updatedTotalCost,
+              totalVolume: updatedTotalVolume,
+              amount: pack,
+            };
+
+            const logEvent = stockHistoryList(
+              itemFinded,
+              account,
+              paymentDate,
+              pack,
+              cost,
+              unit,
+              volume,
+              previousVolume,
+              previousCost,
+              updatedTotalCost,
+              updatedTotalVolume,
+              orderNumber
             );
-            currentItem.totalVolume = 0;
-          }
+
+            const cleanedProduct = cleanObject(updatedProduct);
+            delete cleanedProduct.UsageHistory;
+            delete cleanedProduct.id;
+
+            transaction.update(docRef, cleanedProduct);
+
+            return { cleanedProduct, logEvent };
+          });
+
+          await logStockUsage(docSnap.id, result.logEvent);
+
+        } catch (txError) {
+          console.error(`Erro na transação de estoque para ${currentItem.product}:`, txError);
         }
 
-        // Inicializa ou adiciona ao UsageHistory
-        const logEvent = stockHistoryList(
-          itemFinded,
-          account,
-          paymentDate,
-          pack,
-          cost,
-          unit,
-          volume,
-          previousVolume,
-          previousCost,
-          currentItem.totalCost,
-          currentItem.totalVolume,
-          orderNumber
-        );
-
-        console.log('item atual atualizado   ', currentItem);
-        currentItem = cleanObject(currentItem);
-        // Remove UsageHistory local se existir, pois não vamos mais guardá-lo aqui
-        delete currentItem.UsageHistory;
-
-        // Atualiza o registro no banco de dados
-        const docRef = doc(db, 'stock', itemFinded.id);
-        await updateDoc(docRef, currentItem);
-        await logStockUsage(itemFinded.id, logEvent);
       } else {
-        // Cria um novo registro para o item no banco de dados
         const logEvent = stockHistoryList(
           currentItem,
           account,
@@ -573,10 +601,10 @@ const RequestListToBePrepared = () => {
           currentItem.totalVolume,
           orderNumber
         );
-        currentItem = cleanObject(currentItem);
-        delete currentItem.UsageHistory;
+        let cleanedItem = cleanObject(currentItem);
+        delete cleanedItem.UsageHistory;
         
-        const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
+        const newDocRef = await addDoc(collection(db, 'stock'), cleanedItem);
         await logStockUsage(newDocRef.id, logEvent);
       }
     }
