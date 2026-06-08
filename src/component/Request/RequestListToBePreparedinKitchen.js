@@ -373,8 +373,11 @@ const RequestListToBePrepared = () => {
       const account = currentItem.name;
       const FinalingridientsList = currentItem?.recipe?.FinalingridientsList;
 
+      console.log(`[STOCK-KITCHEN DEBUG] Processing item: ${account}, id: ${currentItem.id}, size: ${currentItem.size}`);
+      console.log(`[STOCK-KITCHEN DEBUG] FinalingridientsList:`, FinalingridientsList);
+
       if (!FinalingridientsList) {
-        console.log('FinalingridientsList está undefined:', currentItem.recipe);
+        console.warn(`[STOCK-KITCHEN DEBUG] No FinalingridientsList for ${account}. recipe object:`, currentItem?.recipe);
         continue;
       }
 
@@ -383,13 +386,18 @@ const RequestListToBePrepared = () => {
 
       if (Array.isArray(FinalingridientsList)) {
         listBySize = FinalingridientsList;
+        console.log(`[STOCK-KITCHEN DEBUG] FinalingridientsList is array. listBySize length: ${listBySize.length}`);
       } else if (typeof FinalingridientsList === 'object') {
+        console.log(`[STOCK-KITCHEN DEBUG] FinalingridientsList is object.`);
         if (size) {
           if (Array.isArray(FinalingridientsList[size])) {
             listBySize = FinalingridientsList[size];
+            console.log(`[STOCK-KITCHEN DEBUG] Found list for exact size: ${size}. Length: ${listBySize.length}`);
           } else {
+            console.log(`[STOCK-KITCHEN DEBUG] Exact size not found. Fetching dish definition for mapping...`);
             try {
               const dishDef = await getOneItemColleciton('item', currentItem.id);
+              console.log(`[STOCK-KITCHEN DEBUG] dishDef CustomizedPrice:`, dishDef?.CustomizedPrice);
               if (dishDef && dishDef.CustomizedPrice) {
                 const mapping = {
                   [dishDef.CustomizedPrice.firstLabel]: 'firstPrice',
@@ -397,8 +405,10 @@ const RequestListToBePrepared = () => {
                   [dishDef.CustomizedPrice.thirdLabel]: 'thirdPrice',
                 };
                 const mappedKey = mapping[size];
+                console.log(`[STOCK-KITCHEN DEBUG] Mapped key for size ${size} is ${mappedKey}`);
                 if (mappedKey && Array.isArray(FinalingridientsList[mappedKey])) {
                   listBySize = FinalingridientsList[mappedKey];
+                  console.log(`[STOCK-KITCHEN DEBUG] Found list using mapped key ${mappedKey}. Length: ${listBySize.length}`);
                 }
               }
             } catch (err) {
@@ -407,19 +417,25 @@ const RequestListToBePrepared = () => {
 
             // Fallback difuso caso as labels difiram por espaços ou caixa (ex: "330 ml" vs "330ml")
             if (!listBySize) {
+              console.log(`[STOCK-KITCHEN DEBUG] Fallback difuso para tamanho: ${size}`);
               const normalizedSize = size.replace(/\s+/g, '').toLowerCase();
               const foundKey = Object.keys(FinalingridientsList).find(k => 
                 k.replace(/\s+/g, '').toLowerCase() === normalizedSize
               );
+              console.log(`[STOCK-KITCHEN DEBUG] Fallback difuso encontrou chave: ${foundKey}`);
               if (foundKey && Array.isArray(FinalingridientsList[foundKey])) {
                 listBySize = FinalingridientsList[foundKey];
+                console.log(`[STOCK-KITCHEN DEBUG] Found list using fallback key ${foundKey}. Length: ${listBySize.length}`);
               }
             }
           }
+        } else {
+          console.log(`[STOCK-KITCHEN DEBUG] Item has no size specified, but recipe is object. Cannot determine ingredients list.`);
         }
       }
 
       if (Array.isArray(listBySize)) {
+        console.log(`[STOCK-KITCHEN DEBUG] Proceeding to deduct ${listBySize.length} ingredients for ${account}`);
         for (let j = 0; j < listBySize.length; j++) {
           const ingredient = listBySize[j];
           const currentObj = {
@@ -431,10 +447,12 @@ const RequestListToBePrepared = () => {
             totalCost: 0,
             columePerUnit: 0,
           };
+          console.log(`[STOCK-KITCHEN DEBUG] Deducting ingredient: ${ingredient.name}, volume: ${currentObj.totalVolume}`);
           await handleStock(currentObj, account, dateTime, orderNumber);
         }
+        console.log(`[STOCK-KITCHEN DEBUG] Finished deducting ingredients for ${account}`);
       } else {
-        console.warn(`[STOCK-KITCHEN] Não foi possível encontrar a lista de ingredientes para o tamanho "${size}" do prato "${currentItem.name}"`);
+        console.error(`[STOCK-KITCHEN DEBUG] CRITICAL: Não foi possível encontrar a lista de ingredientes para o tamanho "${size}" do prato "${currentItem.name}"! recipe object:`, currentItem?.recipe);
       }
     }
   };
@@ -536,9 +554,7 @@ const RequestListToBePrepared = () => {
             let updatedTotalVolume = previousVolume;
 
             if (
-              account !== 'Editado' &&
-              /^[^\d]+$/.test(account) &&
-              isNaN(account)
+              account !== 'Editado'
             ) {
               const costPerUnit = parseToNumber(currentItem.CostPerUnit);
               updatedTotalCost = round(previousCost - costPerUnit, 2);
@@ -1043,24 +1059,36 @@ const RequestListToBePrepared = () => {
   };
 
   const orderDelivery = async (item) => {
-    if (item.name === 'anonimo' || item.name === 'anonymous') {
-      await deleteData('user', item.idUser);
-    } else if (item.idUser) {
-      const userRef = doc(db, 'user', item.idUser);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        if (userData.request && Array.isArray(userData.request)) {
-          const updatedRequest = userData.request.map((reqItem) => {
-            // Apenas marca como 'Pronto' os itens que pertencem a este pedido específico (item.id)
-            if (reqItem.parentRequestId === item.id) {
-              return { ...reqItem, status: 'Pronto' };
-            }
-            return reqItem;
-          });
-          await updateDoc(userRef, { request: updatedRequest });
+    try {
+      if (item.name === 'anonimo' || item.name === 'anonymous') {
+        if (item.idUser) {
+          const userRef = doc(db, 'user', item.idUser);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            await deleteData('user', item.idUser);
+          }
+        }
+      } else if (item.idUser) {
+        const userRef = doc(db, 'user', item.idUser);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          if (userData.request && Array.isArray(userData.request)) {
+            const updatedRequest = userData.request.map((reqItem) => {
+              // Apenas marca como 'Pronto' os itens que pertencem a este pedido específico (item.id)
+              if (reqItem.parentRequestId === item.id) {
+                return { ...reqItem, status: 'Pronto' };
+              }
+              return reqItem;
+            });
+            await updateDoc(userRef, { request: updatedRequest });
+          }
+        } else {
+          console.warn(`[WARNING] Documento de usuário ${item.idUser} não existe, pulando limpeza.`);
         }
       }
+    } catch (userError) {
+      console.error('Erro ao limpar carrinho do usuário (não bloqueante):', userError);
     }
 
     await updateIngredientsStock(item);

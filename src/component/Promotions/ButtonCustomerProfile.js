@@ -34,21 +34,26 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
     };
 
     const fetchOneCustomer = async () => {
-      const data = await getOneItemColleciton('user', item.idUser);
-      const currentVoucherValue = await getVoucherValueDirectly(); // Fetch directly to avoid stale state in validation
+      try {
+        const data = await getOneItemColleciton('user', item.idUser);
+        const currentVoucherValue = await getVoucherValueDirectly(); // Fetch directly to avoid stale state in validation
 
-      if (data && data.name !== 'anonimo') {
-        const isInVoucher = await fetchVoucherClients(item.idUser);
-        setPromotionClient(data);
-        setNoRegistration('registrated');
+        if (data && data.name !== 'anonimo') {
+          const isInVoucher = await fetchVoucherClients(item.idUser);
+          setPromotionClient(data);
+          setNoRegistration('registrated');
 
-        // Only clickable if registered, NOT used voucher, AND voucher value is > 0
-        if (!isInVoucher && currentVoucherValue > 0) {
-          setDisabledCustomer(false);
+          // Only clickable if registered, NOT used voucher, AND voucher value is > 0
+          if (!isInVoucher && currentVoucherValue > 0) {
+            setDisabledCustomer(false);
+          } else {
+            setDisabledCustomer(true);
+          }
         } else {
           setDisabledCustomer(true);
         }
-      } else {
+      } catch (error) {
+        console.warn('Erro ao buscar cliente ou cliente inexistente:', error.message);
         setDisabledCustomer(true);
       }
     };
