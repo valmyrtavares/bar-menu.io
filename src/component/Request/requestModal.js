@@ -1469,7 +1469,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       ) : (
         <p className="no-request">Não há pedidos por enquanto</p>
       )}
-      <div className={stylePdv ? 'pdv-footer-actions' : ''}>
+      <div className={stylePdv ? 'pdv-footer-actions' : 'customer-footer-actions'}>
         <div className="btnFinalRequest">
           <button className="keep-shopping" onClick={handleRoute}>
             Continue Comprando

@@ -1,7 +1,50 @@
 @import 'variables';
 
 .container-modal-request {
-    min-height: 75vh;
+    min-height: 50vh;
+    max-height: calc(100dvh - 245px);
+    overflow-y: auto;
+    padding-bottom: 40px;
+    touch-action: pan-y;
+}
+
+.customer-footer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.customer-footer-actions .btnFinalRequest {
+    margin: 0;
+    width: 100%;
+}
+
+.customer-footer-actions .btnFinalRequest button,
+.customer-footer-actions .btnFinalRequest .keep-shopping,
+.customer-footer-actions .btnFinalRequest .send-request {
+    margin: 0 auto !important;
+    width: 80% !important;
+}
+
+/* Custom scrollbar styling to make it visible and premium */
+.container-modal-request::-webkit-scrollbar {
+    width: 6px;
+}
+
+.container-modal-request::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.container-modal-request::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.container-modal-request::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .container-modal-request .warning-messages-container {
