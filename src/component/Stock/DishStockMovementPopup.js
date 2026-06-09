@@ -23,11 +23,20 @@ const DishStockMovementPopup = ({ onClose }) => {
 
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
-    const [datePart] = dateStr.split(' - ');
-    const parts = datePart.split('/');
+    const [datePart, timePart] = dateStr.split(' - ');
+    const parts = datePart ? datePart.split('/') : [];
     if (parts.length !== 3) return null;
     const [day, month, year] = parts.map(Number);
-    return new Date(year, month - 1, day);
+    
+    let hours = 0, minutes = 0, seconds = 0;
+    if (timePart) {
+      const timeParts = timePart.split(':');
+      hours = Number(timeParts[0]) || 0;
+      minutes = Number(timeParts[1]) || 0;
+      seconds = Number(timeParts[2]) || 0;
+    }
+    
+    return new Date(year, month - 1, day, hours, minutes, seconds);
   };
 
   const handleFilter = async () => {
@@ -87,6 +96,9 @@ const DishStockMovementPopup = ({ onClose }) => {
           });
         }
       });
+
+      // Inverte para garantir que os mais recentes fiquem por cima mesmo com horários iguais
+      filteredResults.reverse();
 
       // Sort by dateTime desc
       filteredResults.sort((a, b) => {
