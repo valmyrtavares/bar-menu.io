@@ -611,7 +611,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
       );
       if (selectedExpense[0].multiply === 'composto') {
         setShowItemsDetailsForm(true);
-        setEntryType('stock');
+        setEntryType('expense');
       } else {
         setShowItemsDetailsForm(false);
         setEntryType('expense');
