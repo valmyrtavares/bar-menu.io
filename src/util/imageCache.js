@@ -21,7 +21,7 @@ export async function cacheImage(id, imageUrl) {
 
     if (hasThumb && hasFull) return;
 
-    const response = await fetch(imageUrl);
+    const response = await fetch(imageUrl, { cache: 'reload' });
     const blob = await response.blob();
     const bitmap = await createImageBitmap(blob);
 
@@ -85,9 +85,18 @@ export async function precacheAllImages(db) {
     for (const item of allItems) {
       if (item.image) {
         await cacheImage(item.id, item.image);
+        
+        // ⚡ Coloca no Hot Cache (RAM) se já estiver no IndexedDB (ou após cachear)
+        const key = `thumb-${item.id}`;
+        if (!hotCache.has(key)) {
+          const blob = await localforage.getItem(key);
+          if (blob) {
+            hotCache.set(key, URL.createObjectURL(blob));
+          }
+        }
       }
     }
-    console.log('✅ Pré-carregamento concluído!');
+    console.log('✅ Pré-carregamento concluído e Hot Cache aquecido!');
   } catch (err) {
     console.error('Erro no pre-cache global:', err);
   }

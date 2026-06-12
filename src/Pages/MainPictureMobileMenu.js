@@ -9,7 +9,7 @@ import { GlobalContext } from '../GlobalContext.js';
 import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnonymousUser.js';
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
-import { ensureImagesInCache, nativePreloadImages } from '../util/imageCache.js';
+import { ensureImagesInCache, nativePreloadImages, getHotCache } from '../util/imageCache.js';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
 import { db } from '../config-firebase/firebase.js';
@@ -77,7 +77,7 @@ const MainPictureMobileMenu = () => {
 
   const DishItemImage = ({ item }) => {
     const src = useCachedImage(item.id, item.image, 'thumb');
-    const [imageLoaded, setImageLoaded] = React.useState(false);
+    const [imageLoaded, setImageLoaded] = React.useState(() => !!getHotCache(item.id, 'thumb'));
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '120px' }}>

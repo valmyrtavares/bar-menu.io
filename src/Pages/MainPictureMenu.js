@@ -11,11 +11,12 @@ import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnon
 import WarningMessage from '../component/WarningMessages.js';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config-firebase/firebase.js';
-import { nativePreloadImages } from '../util/imageCache.js';
+import { nativePreloadImages, ensureImagesInCache } from '../util/imageCache.js';
+import { useCachedImage } from '../Hooks/useCachedImage.js';
 
 
 const CategoryItemImage = ({ item }) => {
-  const src = item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg';
+  const src = useCachedImage(item.id, item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg', 'thumb');
   return <img src={src} alt="" />;
 };
 
@@ -108,6 +109,9 @@ const MainPictureMenu = () => {
       }
     }
  
+    // Garante que o IndexedDB seja carregado em background, mas não bloqueia a UI
+    ensureImagesInCache(filtered, 'thumb');
+
     setDishesFiltered(filtered);
   };
 
@@ -288,6 +292,7 @@ const MainPictureMenu = () => {
                 dishesFiltered.length > 0 &&
                 dishesFiltered.map((item, index) => (
                   <EachTotenDish
+                    key={item.id}
                     item={item}
                     index={index}
                     preparedRequest={preparedRequest}

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import style from '../assets/styles/EachTotenDish.module.scss';
 import { useCachedImage } from '../Hooks/useCachedImage';
+import { getHotCache } from '../util/imageCache';
 
 const EachTotenDish = ({ item, index, preparedRequest }) => {
   const src = useCachedImage(item.id, item.image, 'thumb');
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(() => !!getHotCache(item.id, 'thumb'));
 
   return (
     <div
