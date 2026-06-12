@@ -77,6 +77,7 @@ const FinancialSummary = () => {
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [refreshData, setRefreshData] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
+  const [sideDishes, setSideDishes] = useState([]);
   const [startDateRank, setStartDateRank] = useState(() => {
     const d = new Date();
     // Use local time to avoid timezone offset issues pushing to previous day
@@ -105,10 +106,15 @@ const FinancialSummary = () => {
       setMenuItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const unsubSideDishes = onSnapshot(collection(db, 'sideDishes'), (snapshot) => {
+      setSideDishes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     return () => {
       unsubExpenses();
       unsubRevenue();
       unsubItems();
+      unsubSideDishes();
     };
   }, []);
 
@@ -142,6 +148,49 @@ const FinancialSummary = () => {
     return { monthExpenses, monthRevenue };
   }, [expenses, revenue, selectedMonth, selectedYear]);
 
+  const calculateItemProfit = (item) => {
+    const finalPrice = Number(item.finalPrice) || Number(item.price) || 0;
+    let cost = 0;
+
+    if (item.historicalCost !== undefined) {
+      cost = Number(item.historicalCost);
+    } else {
+      let sideDishesCost = 0;
+      if (item.sideDishes && item.sideDishes.length > 0) {
+        item.sideDishes.forEach((sd) => {
+          const sdObj = sideDishes.find((dish) => dish.sideDishes === sd.name);
+          if (sdObj && !sdObj.isBasic && sdObj.costPriceObj) {
+            sideDishesCost += Number(sdObj.costPriceObj.cost || 0);
+          }
+        });
+      }
+
+      let selectedDish = menuItems.find((m) => m.id === item.id);
+      if (!selectedDish) {
+        selectedDish = menuItems.find((m) => m.title && item.name && m.title.trim().toLowerCase() === item.name.trim().toLowerCase());
+      }
+      
+      let mainCost = 0;
+      if (selectedDish) {
+        const { costProfitMarginCustomized = {}, costPriceObj = {} } = selectedDish;
+        if (!item.size || item.size === '') {
+          mainCost = Number(costPriceObj.cost || 0);
+        } else {
+          const currentCostData = Object.values(costProfitMarginCustomized || {}).find(
+            (priceObj) => priceObj.label === item.size
+          );
+          if (currentCostData) {
+            mainCost = Number(currentCostData.cost || 0);
+          }
+        }
+      }
+
+      cost = mainCost + sideDishesCost;
+    }
+
+    return finalPrice - cost;
+  };
+
   const stats = useMemo(() => {
     if (viewMode === 'annual') {
       const now = new Date();
@@ -171,7 +220,7 @@ const FinancialSummary = () => {
         });
 
         const profitValue = monthRevenue.reduce((acc, rev) => {
-          return acc + (rev.request || []).reduce((a, item) => a + (Number(item.finalPrice) || 0), 0);
+          return acc + (rev.request || []).reduce((a, item) => a + calculateItemProfit(item), 0);
         }, 0);
 
         const variableValue = monthExpenses
@@ -276,8 +325,8 @@ const FinancialSummary = () => {
         const dayIdx = d.getDate() - 1;
         if (dailyData[dayIdx]) {
           (rev.request || []).forEach(item => {
-            const price = Number(item.finalPrice) || 0;
-            dailyData[dayIdx].profit += price;
+            const profit = calculateItemProfit(item);
+            dailyData[dayIdx].profit += profit;
           });
         }
       }
@@ -384,7 +433,7 @@ const FinancialSummary = () => {
       topProducts,
       topExpensesPie,
     };
-  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue]);
+  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes]);
 
   useEffect(() => {
     if (stats.overdue.length > 0) {
@@ -484,22 +533,49 @@ const FinancialSummary = () => {
       }
       const data = payload[payload.length - 1]?.payload || {};
       const profit = Number(data.profit) || 0;
+      const profitCum = Number(data.profitCum) || 0;
       const expenses = Number(data.expenses) || 0;
+      const expensesCum = Number(data.expensesCum) || 0;
       const fixedRemaining = Number(data.fixedRemaining) || 0;
       return (
         <div className={style.customTooltip}>
           <h4>Dia {label}</h4>
-          <div className={`${style.tooltipItem} ${style.green}`}>
-            <span>Lucro do Dia:</span>
-            <strong>R$ {profit.toFixed(2)}</strong>
-          </div>
-          <div className={`${style.tooltipItem} ${style.red}`}>
-            <span>Gasto do Dia:</span>
-            <strong>R$ {expenses.toFixed(2)}</strong>
-          </div>
-          <div className={`${style.tooltipItem} ${style.yellow}`}>
-            <span>Custo Fixo Restante:</span>
-            <strong>R$ {fixedRemaining.toFixed(2)}</strong>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
+              <span>Lucro do dia:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{profit.toFixed(2)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
+              <span>Total acumulado no mes:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{profitCum.toFixed(2)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
+              <span>Despesa do dia:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{expenses.toFixed(2)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
+              <span>Despesa acumulada:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{expensesCum.toFixed(2)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FCA311', fontSize: '0.9rem' }}>
+              <span>Custo Fixo Restante:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{fixedRemaining.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
           {data.expensesList.length > 0 && (
             <div className={style.details}>
