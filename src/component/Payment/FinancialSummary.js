@@ -15,6 +15,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  ComposedChart,
 } from 'recharts';
 import style from '../../assets/styles/FinancialSummary.module.scss';
 import Title from '../title';
@@ -69,6 +70,7 @@ const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
   const [expenses, setExpenses] = useState([]);
   const [revenue, setRevenue] = useState([]);
+  const [stock, setStock] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'annual'
@@ -110,11 +112,16 @@ const FinancialSummary = () => {
       setSideDishes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const unsubStock = onSnapshot(collection(db, 'stock'), (snapshot) => {
+      setStock(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     return () => {
       unsubExpenses();
       unsubRevenue();
       unsubItems();
       unsubSideDishes();
+      unsubStock();
     };
   }, []);
 
@@ -192,6 +199,10 @@ const FinancialSummary = () => {
   };
 
   const stats = useMemo(() => {
+    const totalStockValue = stock
+      .filter(item => item.operationSupplies === false && (item.activityStatus === undefined || item.activityStatus === false))
+      .reduce((acc, item) => acc + (Number(item.totalCost) || 0), 0);
+
     if (viewMode === 'annual') {
       const now = new Date();
       now.setHours(0, 0, 0, 0); // Reset time for date comparisons
@@ -274,6 +285,7 @@ const FinancialSummary = () => {
           variable,
           fixed: monthFixed,
           isEstimated: isFuture,
+          stockValue: totalStockValue,
           monthName: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m]
         });
 
@@ -288,6 +300,7 @@ const FinancialSummary = () => {
         totalFixed: totalAnnualFixed,
         remainingFixed: totalAnnualFixed,
         superavit: totalAnnualProfit - totalAnnualVariable - totalAnnualFixed,
+        totalStockValue,
         dailyData: annualData,
         viewMode: 'annual',
         refMonthName: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][refMonth],
@@ -372,6 +385,7 @@ const FinancialSummary = () => {
       day.profitCum = currentProfitCum;
       day.expensesCum = currentExpensesCum;
       day.fixedRemaining = Math.max(0, currentFixedRemaining);
+      day.stockValue = totalStockValue;
     });
 
     const totalPaidFixed = monthExpenses
@@ -428,12 +442,13 @@ const FinancialSummary = () => {
       totalPaid: expensesTotal,
       remainingFixed,
       superavit: profitTotal - expensesTotal - remainingFixed, // Adjusted superavit calculation
+      totalStockValue,
       dailyData,
       overdue,
       topProducts,
       topExpensesPie,
     };
-  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes]);
+  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes, stock]);
 
   useEffect(() => {
     if (stats.overdue.length > 0) {
@@ -517,7 +532,7 @@ const FinancialSummary = () => {
               {data.isEstimated ? '📊 PROJEÇÃO' : '✅ DADOS REAIS'}
             </div>
             <div className={`${style.tooltipItem} ${style.green}`}>
-              <span>{data.isEstimated ? 'Lucro Estimado:' : 'Lucro Real:'}</span>
+              <span>{data.isEstimated ? 'Resultado Bruto Estimado:' : 'Resultado Bruto Real:'}</span>
               <strong>R$ {profit.toFixed(2)}</strong>
             </div>
             <div className={`${style.tooltipItem} ${style.red}`}>
@@ -525,8 +540,12 @@ const FinancialSummary = () => {
               <strong>R$ {variable.toFixed(2)}</strong>
             </div>
             <div className={`${style.tooltipItem} ${style.yellow}`}>
-              <span>Custo Fixo Real:</span>
+              <span>Contas a pagar:</span>
               <strong>R$ {fixed.toFixed(2)}</strong>
+            </div>
+            <div className={`${style.tooltipItem}`} style={{ color: '#0088FE' }}>
+              <span>Valor do Estoque:</span>
+              <strong>R$ {(Number(data.stockValue) || 0).toFixed(2)}</strong>
             </div>
           </div>
         );
@@ -542,14 +561,14 @@ const FinancialSummary = () => {
           <h4>Dia {label}</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
-              <span>Lucro do dia:</span>
+              <span>Resultado Bruto do dia:</span>
               <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
                 <span>R$</span>
                 <span>{profit.toFixed(2)}</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
-              <span>Total acumulado no mes:</span>
+              <span>Resultado Bruto Acumulado:</span>
               <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
                 <span>R$</span>
                 <span>{profitCum.toFixed(2)}</span>
@@ -563,17 +582,24 @@ const FinancialSummary = () => {
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
-              <span>Despesa acumulada:</span>
+              <span>Despesas Acumuladas:</span>
               <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
                 <span>R$</span>
                 <span>{expensesCum.toFixed(2)}</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FCA311', fontSize: '0.9rem' }}>
-              <span>Custo Fixo Restante:</span>
+              <span>Contas a pagar:</span>
               <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
                 <span>R$</span>
                 <span>{fixedRemaining.toFixed(2)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0088FE', fontSize: '0.9rem' }}>
+              <span>Valor do Estoque:</span>
+              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                <span>R$</span>
+                <span>{(Number(data.stockValue) || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -700,25 +726,25 @@ const FinancialSummary = () => {
 
       <div className={style.dashboardCards}>
         <div className={`${style.card} ${stats.superavit >= 0 ? style.profit : style.loss}`}>
-          <span>Distância (Vantagem)</span>
+          <span>Resultado atual</span>
           <strong>R$ {Math.abs(stats.superavit).toFixed(2)}</strong>
           <small>{stats.superavit >= 0 ? 'Superavit' : 'Deficit'}</small>
         </div>
         <div className={`${style.card} ${style.profit}`}>
-          <span>Lucro Acumulado</span>
+          <span>Resultado Bruto Acumulado</span>
           <strong>R$ {stats.totalRevenue.toFixed(2)}</strong>
         </div>
         <div className={`${style.card} ${style.loss}`}>
-          <span>Gastos Acumulados</span>
+          <span>Despesas Acumuladas</span>
           <strong>R$ {stats.totalPaid.toFixed(2)}</strong>
         </div>
         <div className={`${style.card} ${style.fixed}`}>
-          <span>Custo Fixo Restante</span>
+          <span>Contas a pagar</span>
           <strong>R$ {stats.remainingFixed.toFixed(2)}</strong>
         </div>
-        <div className={`${style.card} ${style.neutral}`}>
-          <span>Quem está vencendo?</span>
-          <strong>{stats.superavit >= 0 ? 'Você' : 'As Contas'}</strong>
+        <div className={`${style.card}`} style={{ backgroundColor: '#0088FE', color: '#fff', border: '1px solid #0056b3' }}>
+          <span style={{ color: '#fff' }}>Valor do Estoque</span>
+          <strong>R$ {(stats.totalStockValue || 0).toFixed(2)}</strong>
         </div>
       </div>
 
@@ -727,15 +753,25 @@ const FinancialSummary = () => {
         <div className={style.chartContainer}>
           {viewMode === 'annual' ? (
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={stats.dailyData}>
+              <ComposedChart data={stats.dailyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="monthName" stroke="#888" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#888" tick={{ fontSize: 12 }} />
                 <RechartsTooltip content={<CustomTooltipContent />} />
-                <Bar dataKey="profit" fill="#00ff88" name="Lucro" radius={[4, 4, 0, 0]} />
+                <Legend verticalAlign="top" height={36} />
+                <Bar dataKey="profit" fill="#00ff88" name="Resultado Bruto" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="fixed" fill="#FCA311" name="Fixo" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Bar dataKey="fixed" fill="#FCA311" name="Contas a pagar" radius={[4, 4, 0, 0]} />
+                <Line 
+                  type="monotone" 
+                  dataKey="stockValue" 
+                  stroke="#0088FE" 
+                  strokeWidth={3}
+                  name="Valor do Estoque"
+                  dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
+                  activeDot={{ r: 8 }}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <ResponsiveContainer width="100%" height={350}>
@@ -751,7 +787,7 @@ const FinancialSummary = () => {
                   dataKey="profitCum" 
                   stroke="#00ff88" 
                   strokeWidth={3}
-                  name="Lucro Acumulado"
+                  name="Resultado Bruto Acumulado"
                   dot={{ r: 4, fill: '#00ff88', strokeWidth: 2 }} 
                   activeDot={{ r: 8 }}
                 />
@@ -760,7 +796,7 @@ const FinancialSummary = () => {
                   dataKey="expensesCum" 
                   stroke="#ff4d4d" 
                   strokeWidth={3}
-                  name="Gastos Acumulados"
+                  name="Despesas Acumuladas"
                   dot={{ r: 4, fill: '#ff4d4d', strokeWidth: 2 }} 
                   activeDot={{ r: 8 }}
                 />
@@ -769,9 +805,18 @@ const FinancialSummary = () => {
                   dataKey="fixedRemaining" 
                   stroke="#FCA311" 
                   strokeWidth={3}
-                  name="Custo Fixo Restante"
+                  name="Contas a pagar"
                   dot={<CustomYellowDot />}
                   isAnimationActive={false}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="stockValue" 
+                  stroke="#0088FE" 
+                  strokeWidth={3}
+                  name="Valor do Estoque"
+                  dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
+                  activeDot={{ r: 8 }}
                 />
               </LineChart>
             </ResponsiveContainer>
