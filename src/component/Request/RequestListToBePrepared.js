@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getBtnData, deleteData, getOneItemColleciton, logStockUsage } from '../../api/Api.js';
+import { getBtnData, deleteData, getOneItemColleciton, logStockUsage, registerDailyStockMovement } from '../../api/Api.js';
 import { issueAutoNfce } from '../../services/fiscalService';
 import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod';
@@ -1390,6 +1390,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       // 3. Atualizar estoque (processo mais pesado) - Apenas se o pacote for completo
       if (global.hasRawMaterial) {
         await updateIngredientsStock(item);
+        await registerDailyStockMovement('Venda (Baixa Automática)');
         console.log('Stock updated successfully!');
       } else {
         console.log('Stock update skipped (Basic Package)');

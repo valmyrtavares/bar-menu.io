@@ -14,7 +14,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { db } from '../../../config-firebase/firebase.js';
-import { getBtnData, deleteData } from '../../../api/Api';
+import { getBtnData, deleteData, registerDailyStockMovement } from '../../../api/Api';
 import WarningMessage from '../../WarningMessages.js';
 
 const RegisterProduct = ({ setShowPopup }) => {
@@ -164,6 +164,7 @@ const RegisterProduct = ({ setShowPopup }) => {
           await updateDoc(stockRef, updatedData);
           console.log(`Stock item updated successfully: ${docSnap.id}`);
         }
+        await registerDailyStockMovement('Novo Produto Financeiro');
       }
 
       const sideDishesQuery = query(

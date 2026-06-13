@@ -2,7 +2,7 @@ import React from 'react';
 import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
-import { getBtnData, logStockUsage } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
@@ -247,6 +247,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       setLoadingAvailableMenuDishes(res);
 
       updateRecipesinDishesAndSideDishes(stockProductObj);
+      await registerDailyStockMovement('Edição de Estoque');
       fetchStock();
       setShowEditForm(false);
     } catch (error) {

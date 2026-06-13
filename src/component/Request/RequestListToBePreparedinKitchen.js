@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { getBtnData, deleteData, getOneItemColleciton, logStockUsage } from '../../api/Api.js';
+import { getBtnData, deleteData, getOneItemColleciton, logStockUsage, registerDailyStockMovement } from '../../api/Api.js';
 import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod.js';
 import { fetchInDataChanges } from '../../api/Api.js';
@@ -1092,6 +1092,7 @@ const RequestListToBePrepared = () => {
     }
 
     await updateIngredientsStock(item);
+    await registerDailyStockMovement('Venda (Baixa Automática Cozinha)');
 
     item.orderDelivered = true;
     try {

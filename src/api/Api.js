@@ -16,6 +16,8 @@ import {
   startAfter,
   endBefore,
   limitToLast,
+  arrayUnion,
+  setDoc,
 } from 'firebase/firestore';
 import {
   getStorage,
@@ -499,5 +501,66 @@ export async function fetchStockUsageLogs(stockId) {
   } catch (error) {
     console.error('Erro ao buscar logs de estoque:', error);
     return [];
+  }
+}
+
+/**
+ * Registra a movimentação diária consolidada do estoque.
+ * Essa função calcula o valor atualizado do estoque na hora em que é chamada
+ * e insere um registro na coleção dailyStockSnapshot no documento correspondente a "hoje".
+ * 
+ * @param {string} agent - Agente da movimentação (Venda, Entrada de Mercadoria, Edição, Inventário, Perda, etc.)
+ */
+export async function registerDailyStockMovement(agent) {
+  try {
+    const stockCollection = collection(db, 'stock');
+    const stockDocs = await getDocs(stockCollection);
+    
+    let totalStockValue = 0;
+    stockDocs.forEach(docSnap => {
+      const item = docSnap.data();
+      if (item.operationSupplies === false && (item.activityStatus === undefined || item.activityStatus === false)) {
+        totalStockValue += Number(item.totalCost) || 0;
+      }
+    });
+
+    // Pega a data local no formato YYYY-MM-DD para usar como ID
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    const docRef = doc(db, 'dailyStockSnapshot', dateStr);
+    const docSnap = await getDoc(docRef);
+
+    const movement = {
+      value: totalStockValue,
+      agent: agent,
+      timestamp: Date.now()
+    };
+
+    if (!docSnap.exists()) {
+      // Se não existir o doc do dia, insere primeiro um "Valor Inicial" (o valor atual antes dessa alteração específica não temos exatamente, 
+      // mas se não existia o documento, podemos assumir que o "Valor Inicial" é igual ao primeiro cálculo, ou apenas começar com o agent)
+      // Como o usuário pediu "Valor Inicial", vamos colocar um de Valor Inicial e o da ação atual.
+      await setDoc(docRef, {
+        date: dateStr,
+        timestamp: Date.now(),
+        totalStockValue: totalStockValue,
+        movements: [
+          { value: totalStockValue, agent: 'Valor Inicial', timestamp: Date.now() - 1000 },
+          movement
+        ]
+      });
+    } else {
+      await updateDoc(docRef, {
+        totalStockValue: totalStockValue,
+        movements: arrayUnion(movement)
+      });
+    }
+    console.log(`[Snapshot] Movimentação salva com sucesso! Agente: ${agent}, Valor: R$${totalStockValue}`);
+  } catch (err) {
+    console.error('Erro ao registrar movimentação de estoque:', err);
   }
 }

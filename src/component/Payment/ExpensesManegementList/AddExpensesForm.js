@@ -13,7 +13,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import { db } from '../../../config-firebase/firebase.js';
-import { getBtnData, addItemToCollection, logStockUsage } from '../../../api/Api';
+import { getBtnData, addItemToCollection, logStockUsage, registerDailyStockMovement } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
@@ -516,6 +516,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           await handleStock(enrichedItems, form.account, form.paymentDate);
           const data = await getBtnData('stock');
           handleWarningCleanup(data, enrichedItems);
+          await registerDailyStockMovement('Entrada Financeira/Despesa');
         }
 
         await saveExpense({ 

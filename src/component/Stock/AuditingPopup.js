@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { getBtnData, logStockUsage } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
 import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
@@ -312,6 +312,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       // Update Dishes in Firebase
       await Promise.all(uniqueUpdatedDishes.map(updateDishInFirebase));
 
+      await registerDailyStockMovement('Inventário/Auditoria');
       fetchStock();
       onClose();
     } catch (error) {

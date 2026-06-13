@@ -4,7 +4,7 @@ import style from '../../assets/styles/AddStockEntryForm.module.scss';
 import CloseBtn from '../closeBtn';
 import { db } from '../../config-firebase/firebase.js';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { getBtnData, addItemToCollection, logStockUsage } from '../../api/Api';
+import { getBtnData, addItemToCollection, logStockUsage, registerDailyStockMovement } from '../../api/Api';
 import { GlobalContext } from '../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage.js';
@@ -138,6 +138,8 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
       // 2. Save to Outgoing
       const finalData = { ...form, dueDate: form.paymentDate }; // Sync dueDate for DB
       await addDoc(collection(db, 'outgoing'), finalData);
+
+      await registerDailyStockMovement('Entrada de Estoque');
 
       setRefreshData(prev => !prev);
       setShowPopup(false);
