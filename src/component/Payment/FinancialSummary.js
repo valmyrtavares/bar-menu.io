@@ -16,6 +16,7 @@ import {
   Pie,
   Cell,
   ComposedChart,
+  LabelList,
 } from 'recharts';
 import style from '../../assets/styles/FinancialSummary.module.scss';
 import Title from '../title';
@@ -285,7 +286,7 @@ const FinancialSummary = () => {
           variable,
           fixed: monthFixed,
           isEstimated: isFuture,
-          stockValue: totalStockValue,
+          stockValue: (y > 2026 || (y === 2026 && m >= 5)) ? totalStockValue : null,
           monthName: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m]
         });
 
@@ -331,6 +332,9 @@ const FinancialSummary = () => {
       dueFixedList: [],
     }));
 
+    let grossRevenueTotal = 0;
+    let cmvTotal = 0;
+
     // Daily Profit and Due Fixed Expenses
     monthRevenue.forEach(rev => {
       const d = parseDate(rev.dateTime);
@@ -338,7 +342,13 @@ const FinancialSummary = () => {
         const dayIdx = d.getDate() - 1;
         if (dailyData[dayIdx]) {
           (rev.request || []).forEach(item => {
+            const finalPrice = Number(item.finalPrice) || Number(item.price) || 0;
             const profit = calculateItemProfit(item);
+            const cost = finalPrice - profit;
+            
+            grossRevenueTotal += finalPrice;
+            cmvTotal += cost;
+
             dailyData[dayIdx].profit += profit;
           });
         }
@@ -385,7 +395,7 @@ const FinancialSummary = () => {
       day.profitCum = currentProfitCum;
       day.expensesCum = currentExpensesCum;
       day.fixedRemaining = Math.max(0, currentFixedRemaining);
-      day.stockValue = totalStockValue;
+      day.stockValue = (selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) ? totalStockValue : null;
     });
 
     const totalPaidFixed = monthExpenses
@@ -439,6 +449,8 @@ const FinancialSummary = () => {
 
     return {
       totalRevenue: profitTotal,
+      grossRevenueTotal,
+      cmvTotal,
       totalPaid: expensesTotal,
       remainingFixed,
       superavit: profitTotal - expensesTotal - remainingFixed, // Adjusted superavit calculation
@@ -543,10 +555,12 @@ const FinancialSummary = () => {
               <span>Contas a pagar:</span>
               <strong>R$ {fixed.toFixed(2)}</strong>
             </div>
-            <div className={`${style.tooltipItem}`} style={{ color: '#0088FE' }}>
-              <span>Valor do Estoque:</span>
-              <strong>R$ {(Number(data.stockValue) || 0).toFixed(2)}</strong>
-            </div>
+            {data.stockValue !== null && (
+              <div className={`${style.tooltipItem}`} style={{ color: '#0088FE' }}>
+                <span>Valor do Estoque:</span>
+                <strong>R$ {(Number(data.stockValue) || 0).toFixed(2)}</strong>
+              </div>
+            )}
           </div>
         );
       }
@@ -595,13 +609,15 @@ const FinancialSummary = () => {
                 <span>{fixedRemaining.toFixed(2)}</span>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0088FE', fontSize: '0.9rem' }}>
-              <span>Valor do Estoque:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{(Number(data.stockValue) || 0).toFixed(2)}</span>
+            {data.stockValue !== null && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0088FE', fontSize: '0.9rem' }}>
+                <span>Valor do Estoque:</span>
+                <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                  <span>R$</span>
+                  <span>{(Number(data.stockValue) || 0).toFixed(2)}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           {data.expensesList.length > 0 && (
             <div className={style.details}>
@@ -659,6 +675,40 @@ const FinancialSummary = () => {
       );
     }
     return null;
+  };
+
+  const CustomXAxisTick = (props) => {
+    const { x, y, payload } = props;
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={16} textAnchor="middle" fill="#888" fontSize={12} fontWeight="bold">
+          {payload.value}
+        </text>
+        {payload.value === 'CMV' && (
+          <text x={0} y={0} dy={30} textAnchor="middle" fill="#888" fontSize={10}>
+            (Custo da Mercadoria Vendida)
+          </text>
+        )}
+      </g>
+    );
+  };
+
+  const waterfallData = [
+    { name: 'Receita', value: stats.grossRevenueTotal || 0, color: '#0088FE' },
+    { name: 'CMV', value: stats.cmvTotal || 0, color: '#ffc658' },
+    { name: 'Resultado Bruto', value: stats.totalRevenue || 0, color: '#00C49F' },
+    { name: 'Despesas', value: (stats.totalPaid || 0) + (stats.remainingFixed || 0), color: '#ff9f43' },
+    { 
+      name: 'Resultado Final', 
+      value: stats.superavit || 0, 
+      color: (stats.superavit || 0) > 0 ? '#00ff88' : ((stats.superavit || 0) < 0 ? '#ff7b9c' : '#a0a0a0') 
+    }
+  ];
+
+  const getSuperavitStatusText = () => {
+    if ((stats.superavit || 0) > 0) return 'Resultado positivo';
+    if ((stats.superavit || 0) < 0) return 'Resultado negativo';
+    return 'Ponto de equilíbrio';
   };
 
   if (!hasFinancial) return <div className={style.accessDenied}>Acesso Restrito ao Pacote Financeiro</div>;
@@ -742,10 +792,12 @@ const FinancialSummary = () => {
           <span>Contas a pagar</span>
           <strong>R$ {stats.remainingFixed.toFixed(2)}</strong>
         </div>
-        <div className={`${style.card}`} style={{ backgroundColor: '#0088FE', color: '#fff', border: '1px solid #0056b3' }}>
-          <span style={{ color: '#fff' }}>Valor do Estoque</span>
-          <strong>R$ {(stats.totalStockValue || 0).toFixed(2)}</strong>
-        </div>
+        {(selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) && (
+          <div className={`${style.card}`} style={{ backgroundColor: '#0088FE', color: '#fff', border: '1px solid #0056b3' }}>
+            <span style={{ color: '#fff' }}>Valor do Estoque</span>
+            <strong>R$ {(stats.totalStockValue || 0).toFixed(2)}</strong>
+          </div>
+        )}
       </div>
 
       <div className={style.chartCard}>
@@ -829,6 +881,44 @@ const FinancialSummary = () => {
           </div>
         )}
       </div>
+
+      {viewMode === 'monthly' && (
+        <div className={style.chartCard} style={{ marginTop: '30px' }}>
+          <h3>💸 Resultados</h3>
+          <div className={style.chartContainer}>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={waterfallData} margin={{ top: 30, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                <XAxis dataKey="name" stroke="#888" tick={<CustomXAxisTick />} />
+                <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
+                <RechartsTooltip 
+                  formatter={(value) => `R$ ${Number(value).toFixed(2)}`}
+                  contentStyle={{ backgroundColor: '#14213D', borderColor: '#333' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {waterfallData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                  <LabelList 
+                    dataKey="value" 
+                    position="top" 
+                    formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
+                    fill="#fff" 
+                    fontSize={12} 
+                    fontWeight="bold"
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '10px' }}>
+            <p style={{ fontWeight: 'bold', fontSize: '1.2rem', color: waterfallData[4].color }}>
+              {getSuperavitStatusText()}
+            </p>
+          </div>
+        </div>
+      )}
 
       {viewMode === 'monthly' && (
         <div style={{ marginTop: '30px', marginBottom: '30px', width: '100%' }}>
