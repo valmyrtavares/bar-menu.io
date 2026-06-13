@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../config-firebase/firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, getDoc, setDoc, getDocs, where } from 'firebase/firestore';
 import {
   LineChart,
   Line,
@@ -96,6 +96,9 @@ const FinancialSummary = () => {
     return `${year}-${month}-${day}`;
   });
 
+  const [wasteRankingData, setWasteRankingData] = useState([]);
+  const [isLoadingWaste, setIsLoadingWaste] = useState(false);
+
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
       setExpenses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -125,6 +128,114 @@ const FinancialSummary = () => {
       unsubStock();
     };
   }, []);
+
+  useEffect(() => {
+    const fetchWasteRanking = async () => {
+      // 1. Cutoff: May 2026 onwards
+      if (selectedYear < 2026 || (selectedYear === 2026 && selectedMonth < 4)) {
+        setWasteRankingData([]);
+        return;
+      }
+
+      setIsLoadingWaste(true);
+      try {
+        const monthId = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}`;
+        const wasteCacheRef = doc(db, 'monthlyWasteRanking', monthId);
+        
+        // Data helpers for the selected month
+        const startOfMonth = new Date(selectedYear, selectedMonth, 1);
+        const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999);
+        const startISO = startOfMonth.toISOString();
+        const endISO = endOfMonth.toISOString();
+
+        // Check if the month is already in the past
+        const now = new Date();
+        const isPastMonth = selectedYear < now.getFullYear() || (selectedYear === now.getFullYear() && selectedMonth < now.getMonth());
+
+        if (isPastMonth) {
+          const cacheSnap = await getDoc(wasteCacheRef);
+          if (cacheSnap.exists()) {
+            setWasteRankingData(cacheSnap.data().ranking || []);
+            setIsLoadingWaste(false);
+            return;
+          }
+        }
+
+        // If not cached or is current month, calculate it!
+        const lossesMap = {}; // key: product name -> value: total loss in R$
+        
+        // A) Inventory History (Audits)
+        const inventoryQuery = query(
+          collection(db, 'inventoryHistory'),
+          where('timestamp', '>=', startOfMonth.getTime()),
+          where('timestamp', '<=', endOfMonth.getTime())
+        );
+        const inventorySnap = await getDocs(inventoryQuery);
+        inventorySnap.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.items && Array.isArray(data.items)) {
+            data.items.forEach(item => {
+              if (item.product && item.lossValue > 0) {
+                lossesMap[item.product] = (lossesMap[item.product] || 0) + Number(item.lossValue);
+              }
+            });
+          }
+        });
+
+        // B) Stock Usage Logs (Edits)
+        const logsQuery = query(
+          collection(db, 'stockUsageLogs'),
+          where('timestamp', '>=', startISO),
+          where('timestamp', '<=', endISO)
+        );
+        const logsSnap = await getDocs(logsQuery);
+        
+        // We need product names, so map stockId -> productName
+        const stockRef = collection(db, 'stock');
+        const stockSnap = await getDocs(stockRef);
+        const stockMap = {};
+        stockSnap.forEach(s => stockMap[s.id] = s.data().product);
+
+        logsSnap.forEach(docSnap => {
+          const data = docSnap.data();
+          // Filter: Must have noteReasonsEditingProduct, and must NOT be 'Auditoria de Estoque'
+          if (data.noteReasonsEditingProduct && data.noteReasonsEditingProduct !== 'Auditoria de Estoque') {
+            const previousCost = Number(data.previousCost) || 0;
+            const currentCost = Number(data.totalResourceInvested) || 0;
+            const lossValue = previousCost - currentCost;
+            
+            if (lossValue > 0) {
+              const productName = stockMap[data.stockId] || 'Produto Desconhecido';
+              lossesMap[productName] = (lossesMap[productName] || 0) + lossValue;
+            }
+          }
+        });
+
+        // C) Consolidate and Sort
+        const ranking = Object.entries(lossesMap)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        setWasteRankingData(ranking);
+
+        // Save to cache
+        await setDoc(wasteCacheRef, {
+          month: selectedMonth + 1,
+          year: selectedYear,
+          isClosed: isPastMonth,
+          ranking: ranking,
+          updatedAt: Date.now()
+        });
+
+      } catch (err) {
+        console.error("Erro ao buscar waste ranking:", err);
+      } finally {
+        setIsLoadingWaste(false);
+      }
+    };
+
+    fetchWasteRanking();
+  }, [selectedMonth, selectedYear]);
 
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
@@ -1110,6 +1221,49 @@ const FinancialSummary = () => {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* NOVO RANKING DE DESPERDÍCIOS */}
+      <div className={style.summaryGrid} style={{ marginBottom: '30px' }}>
+        <div className={style.tableSection}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+            <h3 style={{ margin: 0 }}>🗑️ Ranking de Desperdícios (Mensal)</h3>
+          </div>
+          <div className={style.chartContainer} style={{ marginTop: '20px' }}>
+            {isLoadingWaste ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>Carregando dados de desperdício...</div>
+            ) : wasteRankingData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={Math.max(250, wasteRankingData.length * 60)}>
+                <BarChart 
+                  layout="vertical" 
+                  data={wasteRankingData} 
+                  margin={{ top: 10, right: 80, left: 20, bottom: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" width={120} stroke="#888" tick={{ fill: '#888', fontSize: 12 }} />
+                  <RechartsTooltip 
+                    formatter={(value) => `R$ ${Number(value).toFixed(2)}`}
+                    contentStyle={{ backgroundColor: '#14213D', borderColor: '#333' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                  <Bar dataKey="value" fill="#ff4d4d" barSize={30} radius={[0, 4, 4, 0]}>
+                    <LabelList 
+                      dataKey="value" 
+                      position="right" 
+                      formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
+                      fill="#ff4d4d" 
+                      fontSize={13} 
+                      fontWeight="bold"
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>Nenhum desperdício registrado neste mês.</div>
+            )}
+          </div>
         </div>
       </div>
 
