@@ -17,14 +17,14 @@ import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const [Dishes, setDishes] = React.useState([]);
   const [stockProductObj, setStockProductObj] = React.useState({
-    CostPerUnit: Number(obj.CostPerUnit),
-    amount: Number(obj.amount),
+    CostPerUnit: Number(Number(obj.CostPerUnit).toFixed(2)),
+    amount: Number(Number(obj.amount).toFixed(2)),
     product: obj.product,
-    totalCost: Number(obj.totalCost),
-    totalVolume: Number(obj.totalVolume),
+    totalCost: Number(Number(obj.totalCost).toFixed(2)),
+    totalVolume: Number(Number(obj.totalVolume).toFixed(2)),
     unitOfMeasurement: obj.unitOfMeasurement,
-    volumePerUnit: Number(obj.volumePerUnit),
-    minimumAmount: Number(obj.minimumAmount),
+    volumePerUnit: Number(Number(obj.volumePerUnit).toFixed(2)),
+    minimumAmount: Number(Number(obj.minimumAmount).toFixed(2)),
     noteReasonsEditingProduct: '',
     disabledDish: obj.disabledDish || null,
     id: obj.id,
@@ -425,6 +425,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               onChange={handleChange}
               onBlur={updateCost}
               title="O volume total disponível do produto no estoque atualmente."
+              unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
 
@@ -453,6 +454,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               onChange={handleChange}
               onBlur={updateCost}
               title="Limite mínimo de estoque. Abaixo disso, o sistema emitirá um alerta de reposição."
+              unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
           <div className={edit.fieldWrapper}>
@@ -466,6 +468,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               onChange={handleChange}
               onBlur={updateCost}
               title="Volume crítico. Quando o estoque atingir este nível, os pratos que usam esta matéria-prima serão desativados no menu."
+              unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
         </div>

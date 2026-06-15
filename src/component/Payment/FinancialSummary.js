@@ -162,7 +162,7 @@ const FinancialSummary = () => {
         }
 
         // If not cached or is current month, calculate it!
-        const lossesMap = {}; // key: product name -> value: total loss in R$
+        const lossesMap = {}; // key: product name -> value: { total: number, events: [] }
         
         // A) Inventory History (Audits)
         const inventoryQuery = query(
@@ -173,10 +173,19 @@ const FinancialSummary = () => {
         const inventorySnap = await getDocs(inventoryQuery);
         inventorySnap.forEach(docSnap => {
           const data = docSnap.data();
+          const auditDate = data.date || new Date(data.timestamp).toLocaleDateString();
           if (data.items && Array.isArray(data.items)) {
             data.items.forEach(item => {
               if (item.product && item.lossValue > 0) {
-                lossesMap[item.product] = (lossesMap[item.product] || 0) + Number(item.lossValue);
+                if (!lossesMap[item.product]) lossesMap[item.product] = { total: 0, events: [] };
+                lossesMap[item.product].total += Number(item.lossValue);
+                lossesMap[item.product].events.push({
+                   date: auditDate,
+                   reason: 'Auditoria de Estoque (Falta)',
+                   quantity: item.lossVolume || Math.abs(item.correction || 0),
+                   unit: item.unit || '',
+                   value: Number(item.lossValue)
+                });
               }
             });
           }
@@ -206,14 +215,26 @@ const FinancialSummary = () => {
             
             if (lossValue > 0) {
               const productName = stockMap[data.stockId] || 'Produto Desconhecido';
-              lossesMap[productName] = (lossesMap[productName] || 0) + lossValue;
+              const previousVolume = Number(data.previousVolume) || 0;
+              const currentVolume = Number(data.ContentsInStock) || 0;
+              const lossQty = previousVolume - currentVolume;
+
+              if (!lossesMap[productName]) lossesMap[productName] = { total: 0, events: [] };
+              lossesMap[productName].total += lossValue;
+              lossesMap[productName].events.push({
+                 date: data.date || new Date(data.timestamp || 0).toLocaleDateString(),
+                 reason: data.noteReasonsEditingProduct,
+                 quantity: lossQty > 0 ? lossQty : 0,
+                 unit: data.unit || '',
+                 value: lossValue
+              });
             }
           }
         });
 
         // C) Consolidate and Sort
         const ranking = Object.entries(lossesMap)
-          .map(([name, value]) => ({ name, value }))
+          .map(([name, data]) => ({ name, value: data.total, events: data.events }))
           .sort((a, b) => b.value - a.value);
 
         setWasteRankingData(ranking);
@@ -635,6 +656,44 @@ const FinancialSummary = () => {
       .map(([name, sold]) => ({ name, sold }))
       .sort((a, b) => b.sold - a.sold);
   }, [revenue, menuItems, startDateRank, endDateRank]);
+
+  const CustomWasteTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          backgroundColor: 'rgba(20, 33, 61, 0.95)',
+          border: '1px solid #444',
+          padding: '15px',
+          borderRadius: '8px',
+          color: 'white',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+          width: '280px'
+        }}>
+          <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #444', paddingBottom: '5px', color: '#FCA311' }}>
+            {data.name}
+          </h4>
+          <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#00ff88', fontWeight: 'bold' }}>
+            Total Desperdiçado: R$ {Number(data.value).toFixed(2)}
+          </p>
+          <div style={{ maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
+            {data.events && data.events.length > 0 ? data.events.map((ev, i) => (
+              <div key={i} style={{ marginBottom: '8px', fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '5px' }}>
+                <div style={{ color: '#aaa', fontSize: '0.75rem', marginBottom: '2px' }}>{ev.date} • {ev.reason}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{Number(ev.quantity).toFixed(2)} {ev.unit}</span>
+                  <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>R$ {Number(ev.value).toFixed(2)}</span>
+                </div>
+              </div>
+            )) : (
+              <div style={{ fontSize: '0.85rem', color: '#aaa' }}>Sem detalhes adicionais.</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const CustomTooltipContent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -1225,8 +1284,8 @@ const FinancialSummary = () => {
       </div>
 
       {/* NOVO RANKING DE DESPERDÍCIOS */}
-      <div className={style.summaryGrid} style={{ marginBottom: '30px' }}>
-        <div className={style.tableSection}>
+      <div style={{ width: '100%', marginBottom: '30px', boxSizing: 'border-box' }}>
+        <div className={style.tableSection} style={{ overflow: 'visible', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <h3 style={{ margin: 0 }}>🗑️ Ranking de Desperdícios (Mensal)</h3>
           </div>
@@ -1234,32 +1293,47 @@ const FinancialSummary = () => {
             {isLoadingWaste ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>Carregando dados de desperdício...</div>
             ) : wasteRankingData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={Math.max(250, wasteRankingData.length * 60)}>
-                <BarChart 
-                  layout="vertical" 
-                  data={wasteRankingData} 
-                  margin={{ top: 10, right: 80, left: 20, bottom: 10 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" width={120} stroke="#888" tick={{ fill: '#888', fontSize: 12 }} />
-                  <RechartsTooltip 
-                    formatter={(value) => `R$ ${Number(value).toFixed(2)}`}
-                    contentStyle={{ backgroundColor: '#14213D', borderColor: '#333' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Bar dataKey="value" fill="#ff4d4d" barSize={30} radius={[0, 4, 4, 0]}>
-                    <LabelList 
-                      dataKey="value" 
-                      position="right" 
-                      formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
-                      fill="#ff4d4d" 
-                      fontSize={13} 
-                      fontWeight="bold"
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div style={{ 
+                display: 'flex', 
+                flexWrap: 'nowrap', 
+                gap: '15px', 
+                width: '100%',
+                alignItems: 'flex-start'
+              }}>
+                {Array.from({ length: Math.ceil(wasteRankingData.length / 10) }, (_, i) => wasteRankingData.slice(i * 10, i * 10 + 10)).map((chunk, index) => (
+                  <div key={index} style={{ flex: 1, minWidth: 0, border: '1px solid #333', borderRadius: '8px', padding: '10px 0' }}>
+                    <h4 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#888', fontSize: '0.9rem' }}>
+                      Página {index + 1}
+                    </h4>
+                    <ResponsiveContainer width="100%" height={Math.max(200, chunk.length * 50)}>
+                      <BarChart 
+                        layout="vertical" 
+                        data={chunk} 
+                        margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" width={100} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
+                        <RechartsTooltip 
+                          content={<CustomWasteTooltip />} 
+                          wrapperStyle={{ zIndex: 1000 }}
+                          allowEscapeViewBox={{ x: true, y: true }}
+                        />
+                        <Bar dataKey="value" fill="#ff4d4d" barSize={20} radius={[0, 4, 4, 0]}>
+                          <LabelList 
+                            dataKey="value" 
+                            position="right" 
+                            formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
+                            fill="#ff4d4d" 
+                            fontSize={12} 
+                            fontWeight="bold"
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '20px' }}>Nenhum desperdício registrado neste mês.</div>
             )}
