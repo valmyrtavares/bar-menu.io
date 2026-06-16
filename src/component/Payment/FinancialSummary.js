@@ -72,6 +72,8 @@ const FinancialSummary = () => {
   const [expenses, setExpenses] = useState([]);
   const [revenue, setRevenue] = useState([]);
   const [stock, setStock] = useState([]);
+  const [dailyStock, setDailyStock] = useState([]);
+  const [monthlyStockLogs, setMonthlyStockLogs] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'annual'
@@ -120,14 +122,36 @@ const FinancialSummary = () => {
       setStock(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const unsubDailyStock = onSnapshot(collection(db, 'dailyStockSnapshot'), (snapshot) => {
+      setDailyStock(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     return () => {
       unsubExpenses();
       unsubRevenue();
       unsubItems();
       unsubSideDishes();
       unsubStock();
+      unsubDailyStock();
     };
   }, []);
+
+  useEffect(() => {
+    const startISO = new Date(selectedYear, selectedMonth, 1).toISOString();
+    const endISO = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toISOString();
+
+    const logsQuery = query(
+      collection(db, 'stockUsageLogs'),
+      where('timestamp', '>=', startISO),
+      where('timestamp', '<=', endISO)
+    );
+
+    const unsubStockLogs = onSnapshot(logsQuery, (snapshot) => {
+      setMonthlyStockLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsubStockLogs();
+  }, [selectedMonth, selectedYear]);
 
   useEffect(() => {
     const fetchWasteRanking = async () => {
@@ -514,6 +538,58 @@ const FinancialSummary = () => {
     let currentExpensesCum = 0;
     let currentFixedRemaining = totalEstimatedFixed;
 
+    // Build chronological dailyStock array to carry over values
+    const sortedStock = [...dailyStock].sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    // Group variations by day using monthlyStockLogs
+    const dailyVariations = {};
+    monthlyStockLogs.forEach(log => {
+      const d = new Date(log.timestamp);
+      const day = d.getDate();
+      const prevCost = Number(log.previousCost) || 0;
+      const currCost = Number(log.totalResourceInvested) || 0;
+      const diff = currCost - prevCost;
+      
+      if (!dailyVariations[day]) dailyVariations[day] = 0;
+      dailyVariations[day] += diff;
+    });
+
+    const stockByDay = new Array(daysInMonth + 1).fill(null);
+    
+    // 1. Fill stockByDay with snapshots where available
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDayStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const snapForDay = sortedStock.find(s => s.id === currentDayStr);
+      if (snapForDay) {
+          stockByDay[day] = snapForDay.totalStockValue;
+      }
+    }
+
+    // 2. Fallback for today if no snapshot exists yet
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) {
+       const todayDate = today.getDate();
+       if (stockByDay[todayDate] === null) {
+           stockByDay[todayDate] = totalStockValue;
+       }
+    }
+
+    // 3. Backwards reconstruction: calculates past end-of-day stock using recorded daily variations
+    for (let day = daysInMonth - 1; day >= 1; day--) {
+       if (stockByDay[day] === null && stockByDay[day + 1] !== null) {
+           const diffNextDay = dailyVariations[day + 1] || 0;
+           stockByDay[day] = stockByDay[day + 1] - diffNextDay;
+       }
+    }
+
+    // 4. Forward carry-over: if a future day has no snapshot, carry over the last known value
+    for (let day = 2; day <= daysInMonth; day++) {
+       if (stockByDay[day] === null && stockByDay[day - 1] !== null) {
+           stockByDay[day] = stockByDay[day - 1] + (dailyVariations[day] || 0);
+       }
+    }
+
     dailyData.forEach(day => {
       currentProfitCum += day.profit;
       currentExpensesCum += day.expenses;
@@ -527,7 +603,17 @@ const FinancialSummary = () => {
       day.profitCum = currentProfitCum;
       day.expensesCum = currentExpensesCum;
       day.fixedRemaining = Math.max(0, currentFixedRemaining);
-      day.stockValue = (selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) ? totalStockValue : null;
+
+      const targetDate = new Date(selectedYear, selectedMonth, day.day);
+      if (targetDate > today) {
+         day.stockValue = null;
+      } else {
+         if (selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) {
+            day.stockValue = stockByDay[day.day];
+         } else {
+            day.stockValue = null;
+         }
+      }
     });
 
     const totalPaidFixed = monthExpenses
@@ -592,7 +678,7 @@ const FinancialSummary = () => {
       topProducts,
       topExpensesPie,
     };
-  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes, stock]);
+  }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes, stock, dailyStock, monthlyStockLogs]);
 
   useEffect(() => {
     if (stats.overdue.length > 0) {

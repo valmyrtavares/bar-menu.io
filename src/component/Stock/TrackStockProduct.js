@@ -1,8 +1,11 @@
 import React from 'react';
-import { getBtnData, updateOrCreateKeyInDocument, fetchStockUsageLogs, logStockUsage } from '../../api/Api';
+import { getBtnData, fetchStockUsageLogs } from '../../api/Api';
 import style from '../../assets/styles/TrackStockProduct.module.scss';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import EditFormStockProduct from './EditFormStockProduct';
+import ExcludedStockPopup from './ExcludedStockPopup';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../config-firebase/firebase.js';
 import AdjustmentRecords from './AdjustmentRecords';
 import StockMovementPopup from './StockMovementPopup';
 import DishStockMovementPopup from './DishStockMovementPopup';
@@ -18,8 +21,6 @@ import { GlobalContext } from '../../GlobalContext';
 
 const TrackStockProduct = () => {
   const [stock, setStock] = React.useState(null);
-  const [allStockItems, setAllStockItems] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
   const [migrationLoadingId, setMigrationLoadingId] = React.useState(null);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
@@ -29,16 +30,16 @@ const TrackStockProduct = () => {
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
-  const [showDeleted, setShowDeleted] = React.useState(false);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
-  const [subTitle, setSubTitle] = React.useState('Matéria Prima');
-  const [checkResults, setCheckResults] = React.useState({}); // ← guarda o status e mensagens de cada item
   const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
   const [showDishMovementPopup, setShowDishMovementPopup] = React.useState(false);
   const [showAuditingPopup, setShowAuditingPopup] = React.useState(false);
   const [showAddStockEntryForm, setShowAddStockEntryForm] = React.useState(false);
   const [showInventoryHistoryPopup, setShowInventoryHistoryPopup] = React.useState(false);
+  const [showExcludedStockPopup, setShowExcludedStockPopup] = React.useState(false);
+  const [showBlockDeletionPopup, setShowBlockDeletionPopup] = React.useState(false);
+  const [deletionBlockedMessage, setDeletionBlockedMessage] = React.useState('');
 
   const handleActionSelect = (e) => {
     const value = e.target.value;
@@ -47,6 +48,7 @@ const TrackStockProduct = () => {
     if (value === 'audit') setShowAuditingPopup(true);
     if (value === 'addStock') setShowAddStockEntryForm(true);
     if (value === 'inventoryHistory') setShowInventoryHistoryPopup(true);
+    if (value === 'excludedStock') setShowExcludedStockPopup(true);
     e.target.value = ''; // reset the select
   };
   const { setWarningLowRawMaterial } = React.useContext(GlobalContext);
@@ -86,8 +88,6 @@ const TrackStockProduct = () => {
     const data = await getBtnData('stock');
     const sorted = data.sort((a, b) => a.product.localeCompare(b.product));
 
-    setAllStockItems(sorted);
-
     // Padrão inicial: mostrar apenas os não deletados (activityStatus false ou undefined)
     const filtered = sorted.filter(
       (item) =>
@@ -98,24 +98,75 @@ const TrackStockProduct = () => {
     setStock(filtered);
   };
 
-  const disableStockItem = (item, permission) => {
+  const disableStockItem = async (item, permission) => {
     console.log('item a ser excluido   ', item);
 
     if (item) {
       setExcludeStockItem(item);
+      
+      // Checagem se o ingrediente a ser excluído está na receita de algum prato ativo:
+      try {
+        const dishesList = await getBtnData('item'); // Pega todos os pratos
+        const usedInDishes = [];
+        
+        const normalizedProduct = item.product.trim().toLowerCase();
+        
+        dishesList.forEach(dish => {
+          const checkIngredients = (ingredients) => {
+            if (!Array.isArray(ingredients)) return;
+            ingredients.forEach(ing => {
+              if (ing.name && ing.name.trim().toLowerCase() === normalizedProduct) {
+                if (!usedInDishes.includes(dish.title)) {
+                  usedInDishes.push(dish.title);
+                }
+              }
+            });
+          };
+
+          const list = dish.recipe?.FinalingridientsList;
+          if (list) {
+            if (Array.isArray(list)) {
+              checkIngredients(list);
+            } else if (typeof list === 'object') {
+              Object.entries(list).forEach(([_, ingList]) => {
+                checkIngredients(ingList);
+              });
+            }
+          }
+        });
+
+        if (usedInDishes.length > 0) {
+          setDeletionBlockedMessage(
+            `Não é possível excluir a matéria-prima "${item.product}" pois ela está sendo usada nos seguintes pratos: ${usedInDishes.join(', ')}. Remova-a das receitas antes de prosseguir.`
+          );
+          setShowBlockDeletionPopup(true);
+          return;
+        }
+      } catch (err) {
+        console.error("Erro ao verificar receitas:", err);
+      }
+
+      setShowWarningDeltePopup(true);
     }
-    setShowWarningDeltePopup(true);
+
     if (permission) {
       setShowWarningDeltePopup(false);
-      updateOrCreateKeyInDocument(
-        'stock',
-        excludeStockItem.id,
-        'activityStatus',
-        showDeleted ? false : true
-      );
-      // deleteData('stock', item.id);
-      // setRefreshData((prev) => !prev);
-      fetchStock();
+      try {
+        const deletedItem = { 
+          ...excludeStockItem, 
+          activityStatus: true,
+          deletedAt: new Date().toISOString()
+        };
+        
+        // 1. Gravar na nova coleção deletedStock
+        await setDoc(doc(db, 'deletedStock', excludeStockItem.id), deletedItem);
+        // 2. Deletar da coleção stock
+        await deleteDoc(doc(db, 'stock', excludeStockItem.id));
+        
+        fetchStock();
+      } catch (err) {
+        console.error("Erro ao excluir matéria-prima:", err);
+      }
     }
   };
   const editStockItem = (item) => {
@@ -134,23 +185,6 @@ const TrackStockProduct = () => {
     
     setEventLogData(mergedLogs);
     setShowAdjustmentRecords(true);
-  };
-
-  const toggleDeletedProducts = () => {
-    const nextShowDeleted = !showDeleted;
-    nextShowDeleted
-      ? setSubTitle('Matéria Prima (Excluídas)')
-      : setSubTitle('Matéria Prima');
-    const filtered = allStockItems.filter(
-      (item) =>
-        item.operationSupplies === false && //true = insumo false = matéria prima
-        (nextShowDeleted
-          ? item.activityStatus === true //if it is or not avaiable
-          : item.activityStatus === false || item.activityStatus === undefined)
-    );
-
-    setStock(filtered);
-    setShowDeleted(nextShowDeleted);
   };
 
   const handleMigrateSingleItem = async (item) => {
@@ -185,9 +219,33 @@ const TrackStockProduct = () => {
 
         for (const log of item.UsageHistory) {
           const newLogRef = doc(collection(db, 'stockUsageLogs'));
+          let timestamp = new Date().toISOString();
+          if (log.date) {
+            // log.date is formatted as "DD/MM/YYYY" or "DD/MM/YYYY HH:MM"
+            const parts = log.date.split(' ');
+            const dateParts = parts[0].split('/');
+            if (dateParts.length === 3) {
+              const day = Number(dateParts[0]);
+              const month = Number(dateParts[1]) - 1;
+              const year = Number(dateParts[2]);
+              let hours = 12;
+              let minutes = 0;
+              if (parts[1]) {
+                const timeParts = parts[1].split(':');
+                if (timeParts.length >= 2) {
+                  hours = Number(timeParts[0]);
+                  minutes = Number(timeParts[1]);
+                }
+              }
+              const d = new Date(year, month, day, hours, minutes);
+              if (!isNaN(d.getTime())) {
+                timestamp = d.toISOString();
+              }
+            }
+          }
           batch.set(newLogRef, {
             stockId: item.id,
-            timestamp: new Date().toISOString(),
+            timestamp: timestamp,
             ...log,
             productName: item.product
           });
@@ -271,6 +329,16 @@ const TrackStockProduct = () => {
       {showInventoryHistoryPopup && (
         <InventoryHistoryPopup onClose={() => setShowInventoryHistoryPopup(false)} />
       )}
+      {showExcludedStockPopup && (
+        <ExcludedStockPopup onClose={() => setShowExcludedStockPopup(false)} />
+      )}
+      {showBlockDeletionPopup && (
+        <DefaultComumMessage
+          msg={deletionBlockedMessage}
+          onClose={() => setShowBlockDeletionPopup(false)}
+          negativeResponse="OK"
+        />
+      )}
       <div className={style.containerAdjustmentScreen}>
         {showAdjustmentRecords && (
           <AdjustmentRecords
@@ -292,9 +360,10 @@ const TrackStockProduct = () => {
             <option value="addStock">Nova Entrada</option>
             <option value="audit">Auditoria</option>
             <option value="inventoryHistory">Histórico de inventários</option>
+            <option value="excludedStock">Matérias Primas Excluídas</option>
           </select>
         </div>
-        <h2>{subTitle}</h2>
+        <h2>Matéria Prima</h2>
         <div className={style.stockValueHighlight}>
           <span>Valor total em estoque:</span>
           <strong>R$ {totalStockValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
@@ -348,9 +417,7 @@ const TrackStockProduct = () => {
                   </td>
                   {showWarningDeletePopup && (
                     <DefaultComumMessage
-                      msg={`Você está prestes a ${
-                        showDeleted ? 'Restaurar' : 'Excluir'
-                      } ${excludeStockItem.product}`}
+                      msg={`Você está prestes a Excluir ${excludeStockItem.product}`}
                       item={excludeStockItem}
                       onConfirm={() => disableStockItem(undefined, true)}
                       onClose={() => setShowWarningDeltePopup(false)}
@@ -367,23 +434,12 @@ const TrackStockProduct = () => {
                     style={{ cursor: 'pointer' }}
                     onClick={() => disableStockItem(item, false)}
                   >
-                    {showDeleted ? 'Restaurar' : 'Excluir'}
+                    Excluir
                   </td>
                 </tr>
               ))}
           </tbody>
         </table>
-      </div>
-      <div
-        className={style.containerBtnStockList}
-        title={tooltips.trackStockProduct.toggleBtnAbleAndDisable}
-      >
-        <button
-          className={style.btnChangeStockList}
-          onClick={toggleDeletedProducts}
-        >
-          {showDeleted ? 'Itens Habilitados' : 'Itens Excluidos'}
-        </button>
       </div>
     </div>
   );

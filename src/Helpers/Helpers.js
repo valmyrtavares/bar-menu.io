@@ -213,6 +213,11 @@ export async function checkUnavaiableRawMaterial(id) {
 // helpers/alertMinimumAmount.js
 
 export const alertMinimunAmount = (product, volume, minimum, cost) => {
+  // Caso especial: estoque zerado intencionalmente (sem estoque e sem volume mínimo)
+  if (Number(volume) === 0 && Number(minimum) === 0) {
+    return { status: true, message: '' };
+  }
+
   if (volume < minimum) {
     return {
       status: false,

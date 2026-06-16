@@ -211,10 +211,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const addItem = async () => {
     if (
       noteReasonsEditingProduct === '' ||
-      stockProductObj.totalVolume <= 0 ||
-      stockProductObj.totalCost <= 0 ||
-      stockProductObj.minimumAmount <= 0 ||
-      stockProductObj.disabledDish <= 0
+      stockProductObj.totalVolume === '' ||
+      stockProductObj.totalCost === '' ||
+      stockProductObj.minimumAmount === '' ||
+      stockProductObj.disabledDish === '' ||
+      Number(stockProductObj.totalVolume) < 0 ||
+      Number(stockProductObj.totalCost) < 0 ||
+      Number(stockProductObj.minimumAmount) < 0 ||
+      Number(stockProductObj.disabledDish) < 0
     ) {
       alert('Todos os campos de edição são obrigatórios.');
       return;

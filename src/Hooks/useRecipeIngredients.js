@@ -91,11 +91,22 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
             const matchedProduct = productList.find(
                 (product) => product.product.trim() === ingredient.name.trim()
             );
-            if (!matchedProduct || matchedProduct.totalVolume === 0)
+            if (!matchedProduct) {
                 return {
                     costPerUnit: 0,
                     portionCost: 0,
+                    warningAmountRawMaterial: false,
+                    unavailableRawMaterial: false,
                 };
+            }
+            if (matchedProduct.totalVolume === 0) {
+                return {
+                    costPerUnit: 0,
+                    portionCost: 0,
+                    warningAmountRawMaterial: matchedProduct.minimumAmount === 0 ? true : false,
+                    unavailableRawMaterial: true,
+                };
+            }
             const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
             const portionCost = parseFloat(ingredient.amount) * costPerUnit;
 

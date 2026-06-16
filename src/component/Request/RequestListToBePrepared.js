@@ -791,6 +791,9 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
 
               const volumeBefore = parseToNumber(currentItem.totalVolume);
               updatedTotalVolume = round(volumeBefore + previousVolume, 4);
+              if (updatedTotalVolume < 0) {
+                updatedTotalVolume = 0;
+              }
             }
 
             const updatedProduct = {
@@ -856,7 +859,16 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       console.warn(`[STOCK] updatingStockAndMenu ignorado: "${currentItem.product}" não possui registro de estoque correspondente.`);
       return;
     }
-    if (currentItem.totalVolume < itemFinded.minimumAmount) {
+
+    // Sempre atualiza a disponibilidade dos pratos no menu ao alterar o estoque
+    setLoadingAvailableMenuDishes(true);
+    const res = await checkUnavaiableRawMaterial(itemFinded.id);
+    setLoadingAvailableMenuDishes(res);
+
+    // Silencia avisos/alerta se os limites de aviso e indisponibilidade forem zero
+    const isZeroThreshold = Number(itemFinded.minimumAmount) === 0 && Number(itemFinded.disabledDish) === 0;
+
+    if (!isZeroThreshold && currentItem.totalVolume < itemFinded.minimumAmount) {
       if (!hasWarningForProduct(currentItem.product)) {
         console.log(`Aviso já registrado para ${currentItem.product}`);
         alert(
@@ -887,12 +899,6 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             );
           }
         }
-      }
-      setLoadingAvailableMenuDishes(true);
-      const res = await checkUnavaiableRawMaterial(itemFinded.id);
-      setLoadingAvailableMenuDishes(res);
-      if (currentItem.totalVolume < 0) {
-        currentItem.totalVolume = 0;
       }
     }
   };
