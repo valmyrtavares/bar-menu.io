@@ -258,7 +258,7 @@ const FinancialSummary = () => {
 
         // C) Consolidate and Sort
         const ranking = Object.entries(lossesMap)
-          .map(([name, data]) => ({ name, value: data.total, events: data.events }))
+          .map(([name, data]) => ({ name: `${name} (R$ ${data.total.toFixed(2)})`, value: data.total, events: data.events }))
           .sort((a, b) => b.value - a.value);
 
         setWasteRankingData(ranking);
@@ -875,16 +875,40 @@ const FinancialSummary = () => {
               </div>
             )}
           </div>
-          {data.expensesList.length > 0 && (
-            <div className={style.details}>
-              {data.expensesList.map((ex, i) => (
-                <div key={i} className={style.expenseItem}>
-                  <span>{ex.name} ({ex.category === 'fixed' ? 'Fixa' : 'Var'}):</span>
-                  <strong>R$ {ex.value.toFixed(2)}</strong>
-                </div>
-              ))}
-            </div>
-          )}
+          {(() => {
+            console.log('Tooltip render day:', label, 'expensesList:', data.expensesList);
+            return data.expensesList.length > 0 && (
+              <div className={style.details}>
+                {/* Non-discard expenses */}
+                {data.expensesList.filter(ex => !ex.name || !ex.name.toLowerCase().includes('descarte')).map((ex, i) => (
+                  <div key={`exp-${i}`} className={style.expenseItem}>
+                    <span>{ex.name} ({ex.category === 'fixed' ? 'Fixa' : 'Var'}):</span>
+                    <strong>R$ {ex.value.toFixed(2)}</strong>
+                  </div>
+                ))}
+                
+                {/* Grouped discard expenses */}
+                {data.expensesList.some(ex => ex.name && ex.name.toLowerCase().includes('descarte')) && (
+                  <div style={{ marginTop: '5px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '5px' }}>
+                    <span style={{ color: '#FCA311', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                      Descarte de MP:
+                    </span>
+                    {data.expensesList.filter(ex => ex.name && ex.name.toLowerCase().includes('descarte')).map((ex, i) => {
+                      const subtitle = ex.name.includes('-') 
+                        ? ex.name.split('-').slice(1).join('-').trim() 
+                        : ex.name;
+                      return (
+                        <div key={`discard-${i}`} className={style.expenseItem} style={{ paddingLeft: '8px', marginBottom: '2px' }}>
+                          <span style={{ color: '#ccc' }}>↳ {subtitle}:</span>
+                          <strong style={{ color: '#fff' }}>R$ {ex.value.toFixed(2)}</strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {data.dueFixedList && data.dueFixedList.length > 0 && (
             <div className={`${style.details} ${style.dueSection}`}>
               <h5 style={{ color: '#FCA311', marginBottom: '5px' }}>Vencimentos Hoje:</h5>
@@ -1399,7 +1423,7 @@ const FinancialSummary = () => {
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
                         <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" width={100} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
+                        <YAxis dataKey="name" type="category" width={200} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
                         <RechartsTooltip 
                           content={<CustomWasteTooltip />} 
                           wrapperStyle={{ zIndex: 1000 }}
