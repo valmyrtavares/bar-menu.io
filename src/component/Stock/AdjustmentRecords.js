@@ -138,8 +138,8 @@ const AdjustmentRecords = ({
         return val > 0 && !isNaN(val);
       });
       data = data.slice(0, 100);
-    } else if (filter === 'Edição de MP') {
-      data = data.filter(item => item.category === 'Editado' || item.category === 'Auditoria' || item.adjustmentExpenseNote || item.noteReasonsEditingProduct);
+    } else if (filter === 'Descarte de MP') {
+      data = data.filter(item => item.category === 'Editado' || item.category === 'Descarte' || item.category === 'Auditoria' || item.adjustmentExpenseNote || item.noteReasonsEditingProduct);
       data = data.slice(0, 10);
     }
     
@@ -182,7 +182,7 @@ const AdjustmentRecords = ({
           <option value="Todas as Movimentações">Todas as Movimentações</option>
           <option value="Entrada de MP">Entrada de MP</option>
           <option value="Saída de MP">Saída de MP</option>
-          <option value="Edição de MP">Edição de MP</option>
+          <option value="Descarte de MP">Descarte de MP</option>
         </select>
       </div>
 
@@ -200,7 +200,7 @@ const AdjustmentRecords = ({
               <th title="Número do pedido vinculado à saída, se houver.">
                 Pedido
               </th>
-              <th title="O tipo de movimentação (Entrada, Saída, Ajuste, Edição, etc.).">
+              <th title="O tipo de movimentação (Entrada, Saída, Ajuste, Descarte, etc.).">
                 Categoria
               </th>
               <th title="O volume que existia no estoque antes desta movimentação.">
@@ -264,11 +264,10 @@ const AdjustmentRecords = ({
                           : item.adjustmentExpenseNote
                       }
                     >
-                      {item.category === 'Editado' || item.adjustmentExpenseNote
+                      {item.category === 'Editado' || item.category === 'Descarte' || item.adjustmentExpenseNote
                         ? item.noteReasonsEditingProduct ||
-                          item.adjustmentExpenseNote
-                          ? 'notas'
-                          : 'sem notas '
+                          item.adjustmentExpenseNote ||
+                          'sem notas'
                         : item.package}
                     </td>
                   </tr>

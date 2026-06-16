@@ -377,7 +377,7 @@ const TrackStockProduct = () => {
               <th>Produto</th>
               <th>Custo de Estoque</th>
               <th>Estoque em volume</th>
-              <th>Editar</th>
+              <th>Descarte</th>
               <th>Excluir</th>
             </tr>
           </thead>
@@ -427,7 +427,7 @@ const TrackStockProduct = () => {
                     style={{ cursor: 'pointer' }}
                     onClick={() => editStockItem(item)}
                   >
-                    Editar
+                    Descarte
                   </td>
                   <td
                     title={tooltips.trackStockProduct.toggleBtn}

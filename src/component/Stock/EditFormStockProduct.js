@@ -29,10 +29,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     disabledDish: obj.disabledDish || null,
     id: obj.id,
   });
-  const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] =
-    React.useState('');
-  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
-    React.useState(false);
+  
+  const [discardAmount, setDiscardAmount] = React.useState('');
+  const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] = React.useState('');
+  const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
@@ -54,51 +54,49 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
   const handleStock = async (
     itemsStock,
-    account = 'Editado',
+    account = 'Descarte',
     paymentDate = null
   ) => {
     if (!Array.isArray(itemsStock)) {
-      itemsStock = [itemsStock]; // Coloca o objeto recebido em um array
+      itemsStock = [itemsStock];
     }
 
     if (!paymentDate) {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
-      const month = String(today.getMonth() + 1).padStart(2, '0'); // Mês é zero-based
+      const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = today.getFullYear();
-      paymentDate = `${day}/${month}/${year}`; //Cria a data no formato DD/MM/YYYY atual
+      paymentDate = `${day}/${month}/${year}`;
     }
 
-    const data = await getBtnData('stock'); // Obtém todos os registros existentes no estoque
+    const data = await getBtnData('stock');
 
     for (let i = 0; i < itemsStock.length; i++) {
       const currentItem = itemsStock[i];
 
-      // Verifica se o item já existe no banco de dados
       const itemFinded = data?.find(
         (itemSearch) => itemSearch.product === currentItem.product
       );
       if (itemFinded) {
-        // Atualiza os valores de custo e volume totais
         const previousCost = itemFinded.totalCost;
         const previousVolume = itemFinded.totalVolume;
-        const cost = account === 'Editado' ? 0 : currentItem.totalCost;
+        const cost = account === 'Descarte' || account === 'Editado' ? 0 : currentItem.totalCost;
         const noteReasonsEditingProduct =
-          account === 'Editado' ? currentItem.noteReasonsEditingProduct : '';
+          account === 'Descarte' || account === 'Editado' ? currentItem.noteReasonsEditingProduct : '';
         const pack =
-          account === 'Editado'
+          account === 'Descarte' || account === 'Editado'
             ? Number(currentItem.amount)
             : Number(itemFinded.amount) + Number(currentItem.amount);
-        const volume = account === 'Editado' ? 0 : currentItem.totalVolume;
+        const volume = account === 'Descarte' || account === 'Editado' ? 0 : currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
-        if (account !== 'Editado') {
+        
+        if (account !== 'Descarte' && account !== 'Editado') {
           currentItem.totalCost =
             (currentItem.totalCost || 0) + (itemFinded.totalCost || 0);
           currentItem.totalVolume =
             (currentItem.totalVolume || 0) + (itemFinded.totalVolume || 0);
         }
 
-        // Inicializa ou adiciona ao UsageHistory
         const logEvent = stockHistoryList(
           itemFinded,
           account,
@@ -113,16 +111,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
           currentItem.totalCost,
           currentItem.totalVolume
         );
-        console.log('Item atual  ', currentItem);
         delete currentItem.UsageHistory;
         
         await logStockUsage(itemFinded.id, logEvent);
-
-        // Atualiza o registro no banco de dados
-        // const docRef = doc(db, 'stock', itemFinded.id);
-        // await updateDoc(docRef, currentItem);
       } else {
-        // Cria um novo registro para o item no banco de dados
         const logEvent = stockHistoryList(
           currentItem,
           account,
@@ -132,10 +124,6 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
           currentItem.totalVolume
         );
         delete currentItem.UsageHistory;
-        
-        // Se este fosse ativado:
-        // const newDocRef = await addDoc(collection(db, 'stock'), currentItem);
-        // await logStockUsage(newDocRef.id, logEvent);
       }
     }
   };
@@ -157,7 +145,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   ) => {
     const stockEventRegistration = {
       date: paymentDate,
-      outputProduct: 0,
+      outputProduct: account === 'Descarte' ? Number(Math.max(0, previousVolume - totalVolume).toFixed(2)) : 0,
       category: account || 0,
       unit: unit,
       noteReasonsEditingProduct: noteReasonsEditingProduct,
@@ -173,54 +161,66 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     return stockEventRegistration;
   };
 
-  const updateCost = (e) => {
-    const { id, value } = e.target;
-
-    if (id === 'totalVolume' || id === 'totalCost') {
-      const newVolumeValue = id === 'totalVolume' ? Number(value) : Number(stockProductObj.totalVolume);
-      let newTotalCostValue = id === 'totalCost' ? Number(value) : Number(stockProductObj.totalCost);
-
-      // Lógica de proporção solicitada: Se mudar o volume, o custo segue a proporção original
-      if (id === 'totalVolume' && obj.totalVolume > 0) {
-        const unitPriceOriginal = Number(obj.totalCost) / Number(obj.totalVolume);
-        newTotalCostValue = Number((newVolumeValue * unitPriceOriginal).toFixed(2));
-      }
-
-      const newUnit = Number(obj.volumePerUnit) > 0 ? newVolumeValue / Number(obj.volumePerUnit) : 0;
-      const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : 0;
-
-      setStockProductObj((prev) => ({
-        ...prev,
-        totalVolume: newVolumeValue,
-        totalCost: newTotalCostValue,
-        amount: Number(newUnit.toFixed(2)),
-        CostPerUnit: Number(newCostPerUnit.toFixed(2)),
-      }));
+  const handleDiscardChange = (e) => {
+    const val = e.target.value;
+    
+    // Permite digitar vírgula ou ponto (apenas UI control)
+    if (val !== '' && isNaN(Number(val.replace(',', '.')))) return;
+    
+    let numVal = Number(val.replace(',', '.'));
+    if (numVal < 0) {
+      numVal = 0;
     }
+
+    if (numVal > Number(obj.totalVolume)) {
+      alert(`Você não pode descartar mais do que o volume total disponível (${Number(obj.totalVolume).toFixed(2)} ${obj.unitOfMeasurement}).`);
+      numVal = Number(obj.totalVolume);
+    }
+
+    setDiscardAmount(val);
+
+    const originalVol = Number(obj.totalVolume);
+    const newVolume = Math.max(0, originalVol - numVal);
+    let newCost = 0;
+
+    if (originalVol > 0 && newVolume > 0) {
+      const unitPriceOriginal = Number(obj.totalCost) / originalVol;
+      newCost = newVolume * unitPriceOriginal;
+    }
+
+    if (newVolume <= 0) {
+      newCost = 0;
+    }
+
+    const newUnit = Number(obj.volumePerUnit) > 0 ? newVolume / Number(obj.volumePerUnit) : 0;
+    const newCostPerUnit = newVolume > 0 ? newCost / newVolume : 0;
+
+    setStockProductObj((prev) => ({
+      ...prev,
+      totalVolume: Number(newVolume.toFixed(2)),
+      totalCost: Number(newCost.toFixed(2)),
+      amount: Number(newUnit.toFixed(2)),
+      CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+    }));
   };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    // const parsedValue = Number(value);
     setStockProductObj((prevForm) => ({
       ...prevForm,
-      [id]: isNaN(value) ? 0 : value, // Fallback para valores inválidos
+      [id]: isNaN(value) ? 0 : value,
     }));
   };
 
   const addItem = async () => {
     if (
-      noteReasonsEditingProduct === '' ||
-      stockProductObj.totalVolume === '' ||
-      stockProductObj.totalCost === '' ||
+      !noteReasonsEditingProduct || noteReasonsEditingProduct.trim() === '' ||
       stockProductObj.minimumAmount === '' ||
       stockProductObj.disabledDish === '' ||
-      Number(stockProductObj.totalVolume) < 0 ||
-      Number(stockProductObj.totalCost) < 0 ||
       Number(stockProductObj.minimumAmount) < 0 ||
       Number(stockProductObj.disabledDish) < 0
     ) {
-      alert('Todos os campos de edição são obrigatórios.');
+      alert('Por favor, preencha a justificativa do descarte e certifique-se de que nenhum campo está vazio ou negativo.');
       return;
     }
 
@@ -228,30 +228,51 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     setIsSubmitting(true);
 
     const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
-    console.log('Pratos que foram alterados:', updatedDishes);
 
     try {
-      // Atualiza cada prato no Firebase em paralelo
       await Promise.all(updatedDishes.map(updateDishInFirebase));
-
-      console.log('Receitas atualizadas com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar receitas:', error);
     }
 
     try {
-      await handleStock(stockProductObj);
+      // 1. Atualizar histórico (Descarte) e salvar o documento principal do estoque
+      await handleStock(stockProductObj, 'Descarte');
       const docRef = doc(db, 'stock', stockProductObj.id);
-      await updateDoc(docRef, stockProductObj); // Atualiza com os dados do estado "form"
-      // const disabledDish = Number(stockProductObj.disabledDish);
-      // const totalVolume = Number(stockProductObj.totalVolume);
+      await updateDoc(docRef, stockProductObj);
+
+      // 2. Registrar despesa na coleção outgoing se houve perda real
+      const discardedVolume = Number(discardAmount.replace(',', '.') || 0);
+      if (discardedVolume > 0) {
+        const discardedCost = Number(obj.totalCost) - Number(stockProductObj.totalCost);
+        if (discardedCost > 0) {
+          const today = new Date();
+          const day = String(today.getDate()).padStart(2, '0');
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const year = today.getFullYear();
+          const currentDate = `${day}/${month}/${year}`;
+
+          await addDoc(collection(db, 'outgoing'), {
+            name: `Descarte - ${obj.product}`,
+            value: Number(discardedCost.toFixed(2)),
+            confirmation: Number(discardedCost.toFixed(2)),
+            category: 'Descarte', // Nova categoria para fácil rastreamento
+            entryType: 'descarte',
+            paymentDate: currentDate,
+            dueDate: currentDate,
+            formOfPayment: 'N/A',
+            obs: noteReasonsEditingProduct,
+            stockId: stockProductObj.id
+          });
+        }
+      }
 
       setLoadingAvailableMenuDishes(true);
       const res = await checkUnavaiableRawMaterial(stockProductObj.id);
       setLoadingAvailableMenuDishes(res);
 
       updateRecipesinDishesAndSideDishes(stockProductObj);
-      await registerDailyStockMovement('Edição de Estoque');
+      await registerDailyStockMovement('Edição de Estoque (Descarte)');
       fetchStock();
       setShowEditForm(false);
     } catch (error) {
@@ -264,15 +285,12 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   const updateRecipesinDishesAndSideDishes = (stockProduct) => {
     const updatedDishes = [];
     if (Dishes && Dishes.length > 0) {
-      console.log('DISHES   ', Dishes);
       try {
         Dishes.forEach((dish) => {
-          // CENÁRIO 1 - Produto com apenas 1 preço
-
           if (
-            !dish.CustomizedPrice || // não existe
+            !dish.CustomizedPrice ||
             (typeof dish.CustomizedPrice === 'object' &&
-              (!dish.CustomizedPrice.firstLabel || // não tem firstLabel
+              (!dish.CustomizedPrice.firstLabel ||
                 dish.CustomizedPrice.firstLabel.trim() === ''))
           ) {
             if (
@@ -287,11 +305,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               );
               if (!currentIngredient) return;
 
-              // Atualiza ingrediente
               const newCostPerUnit =
                 stockProduct.totalCost / stockProduct.totalVolume;
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
-              //update costs if changed
+              
               if (
                 currentIngredient.costPerUnit !== newCostPerUnit ||
                 currentIngredient.portionCost !== newPortionCost
@@ -305,22 +322,20 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
                 );
                 dish.costPriceObj.cost = totalPortionCost;
 
-                updatedDishes.push(dish); //
+                updatedDishes.push(dish);
               }
             }
           }
-
-          // CENÁRIO 2 - Produto com 3 preços (primeiro label não é vazio)\
           else if (
-            dish.CustomizedPrice && // existe
+            dish.CustomizedPrice &&
             typeof dish.CustomizedPrice === 'object' &&
-            dish.CustomizedPrice.firstLabel && // não é vazio
+            dish.CustomizedPrice.firstLabel &&
             dish.CustomizedPrice.firstLabel.trim() !== ''
           ) {
             const labels = ['firstLabel', 'secondLabel', 'thirdLabel'];
             const costs = ['firstCost', 'secondCost', 'thirdCost'];
 
-            let wasUpdated = false; // 👈 flag
+            let wasUpdated = false;
 
             labels.forEach((label, index) => {
               const recipeList =
@@ -341,25 +356,17 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
                 const newPortionCost =
                   currentIngredient.amount * newCostPerUnit;
 
-                // Atualiza ingrediente
-                // currentIngredient.costPerUnit =
-                //   stockProduct.totalCost / stockProduct.totalVolume;
-                // currentIngredient.portionCost =
-                //   currentIngredient.amount * currentIngredient.costPerUnit;
                 if (
                   currentIngredient.costPerUnit !== newCostPerUnit ||
                   currentIngredient.portionCost !== newPortionCost
                 ) {
                   currentIngredient.costPerUnit = newCostPerUnit;
                   currentIngredient.portionCost = newPortionCost;
-                  // Recalcula custo total da receita
                   const totalPortionCost = recipeList.reduce((sum, item) => {
                     return sum + (item.portionCost || 0);
                   }, 0);
-                  // Atualiza custos no CustomizedPrice
                   dish.CustomizedPrice[costs[index]] = totalPortionCost;
 
-                  // Garante que dish.costPriceObj.cost recebe o mesmo do firstCost
                   if (index === 0) {
                     dish.costPriceObj.cost = totalPortionCost;
                   }
@@ -379,9 +386,8 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     }
   };
 
-  //Update costs which were changed in the stock edit form
   const updateDishInFirebase = async (dish) => {
-    const docRef = doc(db, 'item', dish.id); // 👈 coleção dos pratos
+    const docRef = doc(db, 'item', dish.id);
     await updateDoc(docRef, {
       recipe: dish.recipe,
       costPriceObj: dish.costPriceObj,
@@ -415,20 +421,47 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
         <div className={edit.titleRow}>
           <h2>{`${stockProductObj.product} - ${stockProductObj.unitOfMeasurement}`}</h2>
+          <p style={{
+            fontSize: '15px',
+            color: '#000',
+            marginTop: '8px',
+            lineHeight: '1.4',
+            maxWidth: '90%',
+            textAlign: 'center'
+          }}>
+            Esta tela deve ser usada para registrar <strong>descartes</strong> quando uma matéria-prima estragou, 
+            saiu da validade ou foi perdida. O volume descartado reduzirá proporcionalmente o custo do seu estoque 
+            e lançará uma despesa no Resumo Financeiro.
+          </p>
         </div>
 
         <div className={edit.inputGrid}>
           <div className={edit.fieldWrapper}>
             <Input
+              id="discardAmount"
+              autoComplete="off"
+              className="num"
+              label="Volume Descartado"
+              value={discardAmount}
+              type="text"
+              prefix="-"
+              onChange={handleDiscardChange}
+              title="Digite a quantidade exata de produto que será subtraída e removida do seu estoque. O sistema considerará este valor para reduzir o volume final."
+              unitText={stockProductObj.unitOfMeasurement}
+              placeholder="Ex: 2.5"
+            />
+          </div>
+
+          <div className={edit.fieldWrapper}>
+            <Input
               id="totalVolume"
               autoComplete="off"
               className="num"
-              label="Volume Total"
+              label="Novo Volume Total"
               value={stockProductObj.totalVolume}
               type="text"
-              onChange={handleChange}
-              onBlur={updateCost}
-              title="O volume total disponível do produto no estoque atualmente."
+              readOnly={true}
+              title="O volume resultante após o descarte."
               unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
@@ -438,12 +471,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               id="totalCost"
               autoComplete="off"
               className="num"
-              label="Custo Total"
+              label="Novo Custo Total"
               value={stockProductObj.totalCost}
               type="text"
-              onChange={handleChange}
-              onBlur={updateCost}
-              title="O valor total investido no volume que está em estoque."
+              readOnly={true}
+              title="O custo total remanescente após o descarte (calculado proporcionalmente)."
             />
           </div>
 
@@ -456,11 +488,11 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               value={stockProductObj.minimumAmount}
               type="text"
               onChange={handleChange}
-              onBlur={updateCost}
               title="Limite mínimo de estoque. Abaixo disso, o sistema emitirá um alerta de reposição."
               unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
+          
           <div className={edit.fieldWrapper}>
             <Input
               id="disabledDish"
@@ -470,14 +502,13 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               value={stockProductObj.disabledDish}
               type="text"
               onChange={handleChange}
-              onBlur={updateCost}
               title="Volume crítico. Quando o estoque atingir este nível, os pratos que usam esta matéria-prima serão desativados no menu."
               unitText={stockProductObj.unitOfMeasurement}
             />
           </div>
         </div>
         <div className={edit.textareaField}>
-          <label htmlFor="minimumAmountNote">Nota sobre a edição</label>
+          <label htmlFor="editAdminNote">Justificativa de Descarte (Obrigatório)</label>
           <textarea
             id="editAdminNote"
             className="num"
@@ -485,23 +516,24 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
             autoComplete="off"
             rows={3}
-            placeholder="Adicione uma observação sobre os motivos da sua edição"
+            placeholder="Qual foi o motivo da perda ou descarte deste produto?"
             onBlur={updateNoteEdit}
-            title="Espaço para registrar o motivo deste ajuste manual (ex: perda, contagem de estoque, etc.)."
+            title="Espaço para registrar o motivo deste ajuste manual (ex: validade, quebra, contaminação, etc.)."
+            required
           />
         </div>
 
         <div className={edit.volumeRow}>
-          <h3>Volume Total do Produto</h3>
+          <h3>Volume Original do Produto</h3>
           <p>
-            {stockProductObj.totalVolume}
-            {stockProductObj.unitOfMeasurement}
+            {Number(obj.totalVolume).toFixed(2)}
+            {obj.unitOfMeasurement}
           </p>
         </div>
 
         <div className={edit.btnRow}>
           <button className={edit.addBtn} type="button" onClick={addItem} disabled={isSubmitting}>
-            {isSubmitting ? 'Enviando...' : 'Adicionar'}
+            {isSubmitting ? 'Enviando...' : 'Registrar Descarte'}
           </button>
         </div>
       </div>

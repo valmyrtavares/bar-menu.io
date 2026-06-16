@@ -2,7 +2,7 @@ import React from 'react';
 import style from '../assets/styles/Input.module.scss';
 import PropTypes from 'prop-types';
 
-const Input = ({ label, fieldFocus, id, unitText, ...props }) => {
+const Input = ({ label, fieldFocus, id, unitText, prefix, ...props }) => {
   const inputStyle = {
     fontSize: window.innerWidth > 900 ? 'fontSizeForm' : '16px',
     padding: '10px',
@@ -14,16 +14,17 @@ const Input = ({ label, fieldFocus, id, unitText, ...props }) => {
       <label className={style.labelForm} htmlFor={label}>
         {label}
       </label>
-      {unitText ? (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+      {unitText || prefix ? (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          {prefix && <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#e74c3c', marginLeft: '5px' }}>{prefix}</span>}
           <input
             ref={fieldFocus}
-            style={{ ...inputStyle, margin: 0 }}
+            style={{ ...inputStyle, margin: 0, width: '100%' }}
             className="form-control"
             id={id}
             {...props}
           />
-          <span style={{ fontWeight: 'bold', color: 'var(--font-color)' }}>{unitText}</span>
+          {unitText && <span style={{ fontWeight: 'bold', color: 'var(--font-color)' }}>{unitText}</span>}
         </span>
       ) : (
         <input
