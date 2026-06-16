@@ -570,9 +570,7 @@ const FinancialSummary = () => {
     today.setHours(0,0,0,0);
     if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) {
        const todayDate = today.getDate();
-       if (stockByDay[todayDate] === null) {
-           stockByDay[todayDate] = totalStockValue;
-       }
+       stockByDay[todayDate] = totalStockValue;
     }
 
     // 3. Backwards reconstruction: calculates past end-of-day stock using recorded daily variations
