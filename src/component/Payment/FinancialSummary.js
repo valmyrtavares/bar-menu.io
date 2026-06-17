@@ -100,6 +100,15 @@ const FinancialSummary = () => {
 
   const [wasteRankingData, setWasteRankingData] = useState([]);
   const [isLoadingWaste, setIsLoadingWaste] = useState(false);
+  const [showProductRanking, setShowProductRanking] = useState(false);
+  const [showDetailedExpenses, setShowDetailedExpenses] = useState(false);
+  const [showWasteRanking, setShowWasteRanking] = useState(false);
+  const [showZeroSales, setShowZeroSales] = useState(false);
+
+  const [showRevenueLine, setShowRevenueLine] = useState(true);
+  const [showExpensesLine, setShowExpensesLine] = useState(true);
+  const [showFixedLine, setShowFixedLine] = useState(true);
+  const [showStockLine, setShowStockLine] = useState(true);
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -678,6 +687,21 @@ const FinancialSummary = () => {
     };
   }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes, stock, dailyStock, monthlyStockLogs]);
 
+  const averageDailyCMV = useMemo(() => {
+    const now = new Date();
+    const isCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth();
+    let daysToDivide = 1;
+    
+    if (isCurrentMonth) {
+      daysToDivide = Math.max(1, now.getDate());
+    } else {
+      const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+      daysToDivide = Math.max(1, daysInMonth);
+    }
+    
+    return (stats.cmvTotal || 0) / daysToDivide;
+  }, [stats.cmvTotal, selectedMonth, selectedYear]);
+
   useEffect(() => {
     if (stats.overdue.length > 0) {
       setShowOverduePopup(true);
@@ -741,6 +765,19 @@ const FinancialSummary = () => {
       .sort((a, b) => b.sold - a.sold);
   }, [revenue, menuItems, startDateRank, endDateRank]);
 
+  const { productsWithSales, productsWithoutSales } = useMemo(() => {
+    const withSales = [];
+    const withoutSales = [];
+    productRankingList.forEach(prod => {
+      if (prod.sold > 0) {
+        withSales.push(prod);
+      } else {
+        withoutSales.push(prod);
+      }
+    });
+    return { productsWithSales: withSales, productsWithoutSales: withoutSales };
+  }, [productRankingList]);
+
   const CustomWasteTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -797,19 +834,25 @@ const FinancialSummary = () => {
             }}>
               {data.isEstimated ? '📊 PROJEÇÃO' : '✅ DADOS REAIS'}
             </div>
-            <div className={`${style.tooltipItem} ${style.green}`}>
-              <span>{data.isEstimated ? 'Resultado Bruto Estimado:' : 'Resultado Bruto Real:'}</span>
-              <strong>R$ {profit.toFixed(2)}</strong>
-            </div>
-            <div className={`${style.tooltipItem} ${style.red}`}>
-              <span>{data.isEstimated ? 'Despesa Variável:' : 'Despesa Real:'}</span>
-              <strong>R$ {variable.toFixed(2)}</strong>
-            </div>
-            <div className={`${style.tooltipItem} ${style.yellow}`}>
-              <span>Contas a pagar:</span>
-              <strong>R$ {fixed.toFixed(2)}</strong>
-            </div>
-            {data.stockValue !== null && (
+            {showRevenueLine && (
+              <div className={`${style.tooltipItem} ${style.green}`}>
+                <span>{data.isEstimated ? 'Resultado Bruto Estimado:' : 'Resultado Bruto Real:'}</span>
+                <strong>R$ {profit.toFixed(2)}</strong>
+              </div>
+            )}
+            {showExpensesLine && (
+              <div className={`${style.tooltipItem} ${style.red}`}>
+                <span>{data.isEstimated ? 'Despesa Variável:' : 'Despesa Real:'}</span>
+                <strong>R$ {variable.toFixed(2)}</strong>
+              </div>
+            )}
+            {showFixedLine && (
+              <div className={`${style.tooltipItem} ${style.yellow}`}>
+                <span>Contas a pagar:</span>
+                <strong>R$ {fixed.toFixed(2)}</strong>
+              </div>
+            )}
+            {showStockLine && data.stockValue !== null && (
               <div className={`${style.tooltipItem}`} style={{ color: '#0088FE' }}>
                 <span>Valor do Estoque:</span>
                 <strong>R$ {(Number(data.stockValue) || 0).toFixed(2)}</strong>
@@ -828,42 +871,52 @@ const FinancialSummary = () => {
         <div className={style.customTooltip}>
           <h4>Dia {label}</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
-              <span>Resultado Bruto do dia:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{profit.toFixed(2)}</span>
+            {showRevenueLine && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
+                  <span>Resultado Bruto do dia:</span>
+                  <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                    <span>R$</span>
+                    <span>{profit.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
+                  <span>Resultado Bruto Acumulado:</span>
+                  <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                    <span>R$</span>
+                    <span>{profitCum.toFixed(2)}</span>
+                  </div>
+                </div>
+              </>
+            )}
+            {showExpensesLine && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
+                  <span>Despesa do dia:</span>
+                  <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                    <span>R$</span>
+                    <span>{expenses.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
+                  <span>Despesas Acumuladas:</span>
+                  <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                    <span>R$</span>
+                    <span>{expensesCum.toFixed(2)}</span>
+                  </div>
+                </div>
+              </>
+            )}
+            {showFixedLine && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FCA311', fontSize: '0.9rem' }}>
+                <span>Contas a pagar:</span>
+                <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
+                  <span>R$</span>
+                  <span>{fixedRemaining.toFixed(2)}</span>
+                </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#00ff88', fontSize: '0.9rem' }}>
-              <span>Resultado Bruto Acumulado:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{profitCum.toFixed(2)}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
-              <span>Despesa do dia:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{expenses.toFixed(2)}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ff4d4d', fontSize: '0.9rem' }}>
-              <span>Despesas Acumuladas:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{expensesCum.toFixed(2)}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FCA311', fontSize: '0.9rem' }}>
-              <span>Contas a pagar:</span>
-              <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
-                <span>R$</span>
-                <span>{fixedRemaining.toFixed(2)}</span>
-              </div>
-            </div>
-            {data.stockValue !== null && (
+            )}
+            {showStockLine && data.stockValue !== null && (
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0088FE', fontSize: '0.9rem' }}>
                 <span>Valor do Estoque:</span>
                 <div style={{ display: 'flex', width: '120px', justifyContent: 'space-between' }}>
@@ -873,7 +926,7 @@ const FinancialSummary = () => {
               </div>
             )}
           </div>
-          {(() => {
+          {showExpensesLine && (() => {
             console.log('Tooltip render day:', label, 'expensesList:', data.expensesList);
             return data.expensesList.length > 0 && (
               <div className={style.details}>
@@ -907,7 +960,7 @@ const FinancialSummary = () => {
               </div>
             );
           })()}
-          {data.dueFixedList && data.dueFixedList.length > 0 && (
+          {showFixedLine && data.dueFixedList && data.dueFixedList.length > 0 && (
             <div className={`${style.details} ${style.dueSection}`}>
               <h5 style={{ color: '#FCA311', marginBottom: '5px' }}>Vencimentos Hoje:</h5>
               {data.dueFixedList.map((ex, i) => (
@@ -1058,22 +1111,76 @@ const FinancialSummary = () => {
           <strong>R$ {Math.abs(stats.superavit).toFixed(2)}</strong>
           <small>{stats.superavit >= 0 ? 'Superavit' : 'Deficit'}</small>
         </div>
-        <div className={`${style.card} ${style.profit}`}>
-          <span>Resultado Bruto Acumulado</span>
+        <div 
+          className={`${style.card} ${style.profit} ${!showRevenueLine ? style.inactiveCard : ''}`}
+          onClick={() => setShowRevenueLine(prev => !prev)}
+        >
+          <div className={style.cardHeader}>
+            <span>Resultado Bruto Acumulado</span>
+            <div className={`${style.customCheckbox} ${showRevenueLine ? style.checked : ''}`}>
+              {showRevenueLine && '✓'}
+            </div>
+          </div>
           <strong>R$ {stats.totalRevenue.toFixed(2)}</strong>
         </div>
-        <div className={`${style.card} ${style.loss}`}>
-          <span>Despesas Acumuladas</span>
+        <div 
+          className={`${style.card} ${style.loss} ${!showExpensesLine ? style.inactiveCard : ''}`}
+          onClick={() => setShowExpensesLine(prev => !prev)}
+        >
+          <div className={style.cardHeader}>
+            <span>Despesas Acumuladas</span>
+            <div className={`${style.customCheckbox} ${showExpensesLine ? style.checked : ''}`}>
+              {showExpensesLine && '✓'}
+            </div>
+          </div>
           <strong>R$ {stats.totalPaid.toFixed(2)}</strong>
         </div>
-        <div className={`${style.card} ${style.fixed}`}>
-          <span>Contas a pagar</span>
+        <div 
+          className={`${style.card} ${style.fixed} ${!showFixedLine ? style.inactiveCard : ''}`}
+          onClick={() => setShowFixedLine(prev => !prev)}
+        >
+          <div className={style.cardHeader}>
+            <span>Contas a pagar</span>
+            <div className={`${style.customCheckbox} ${showFixedLine ? style.checked : ''}`}>
+              {showFixedLine && '✓'}
+            </div>
+          </div>
           <strong>R$ {stats.remainingFixed.toFixed(2)}</strong>
         </div>
         {(selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) && (
-          <div className={`${style.card}`} style={{ backgroundColor: '#0088FE', color: '#fff', border: '1px solid #0056b3' }}>
-            <span style={{ color: '#fff' }}>Valor do Estoque</span>
+          <div 
+            className={`${style.card} ${!showStockLine ? style.inactiveCard : ''}`}
+            onClick={() => setShowStockLine(prev => !prev)}
+            style={{ 
+              backgroundColor: showStockLine ? '#0088FE' : '#1a1a1a', 
+              color: showStockLine ? '#fff' : '#555', 
+              border: showStockLine ? '1px solid #0056b3' : '1px solid #333',
+              cursor: 'pointer' 
+            }}
+          >
+            <div className={style.cardHeader}>
+              <span style={{ color: showStockLine ? '#fff' : '#444' }}>Valor do Estoque</span>
+              <div 
+                className={`${style.customCheckbox} ${showStockLine ? style.checked : ''}`}
+                style={{ 
+                  color: showStockLine ? '#0088FE' : '#444',
+                  borderColor: showStockLine ? '#fff' : '#444'
+                }}
+              >
+                {showStockLine && '✓'}
+              </div>
+            </div>
             <strong>R$ {(stats.totalStockValue || 0).toFixed(2)}</strong>
+            <div style={{ marginTop: '8px', borderTop: showStockLine ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #333', paddingTop: '6px', fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: showStockLine ? '#fff' : '#555' }}>
+                <span style={{ color: 'inherit' }}>CMV Médio Diário:</span>
+                <span style={{ fontWeight: 'bold', color: 'inherit' }}>R$ {averageDailyCMV.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: showStockLine ? '#fff' : '#555' }}>
+                <span style={{ color: 'inherit' }}>Cobertura Aproximada:</span>
+                <span style={{ fontWeight: 'bold', color: 'inherit' }}>{averageDailyCMV > 0 ? `${Math.round((stats.totalStockValue || 0) / averageDailyCMV)} dias` : 'N/A'}</span>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1089,18 +1196,20 @@ const FinancialSummary = () => {
                 <YAxis stroke="#888" tick={{ fontSize: 12 }} />
                 <RechartsTooltip content={<CustomTooltipContent />} />
                 <Legend verticalAlign="top" height={36} />
-                <Bar dataKey="profit" fill="#00ff88" name="Resultado Bruto" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="fixed" fill="#FCA311" name="Contas a pagar" radius={[4, 4, 0, 0]} />
-                <Line 
-                  type="monotone" 
-                  dataKey="stockValue" 
-                  stroke="#0088FE" 
-                  strokeWidth={3}
-                  name="Valor do Estoque"
-                  dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
-                  activeDot={{ r: 8 }}
-                />
+                {showRevenueLine && <Bar dataKey="profit" fill="#00ff88" name="Resultado Bruto" radius={[4, 4, 0, 0]} />}
+                {showExpensesLine && <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />}
+                {showFixedLine && <Bar dataKey="fixed" fill="#FCA311" name="Contas a pagar" radius={[4, 4, 0, 0]} />}
+                {showStockLine && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="stockValue" 
+                    stroke="#0088FE" 
+                    strokeWidth={3}
+                    name="Valor do Estoque"
+                    dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
+                    activeDot={{ r: 8 }}
+                  />
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
@@ -1112,42 +1221,50 @@ const FinancialSummary = () => {
                 <RechartsTooltip content={<CustomTooltipContent />} />
                 <Legend verticalAlign="top" height={36} />
                 
-                <Line 
-                  type="monotone" 
-                  dataKey="profitCum" 
-                  stroke="#00ff88" 
-                  strokeWidth={3}
-                  name="Resultado Bruto Acumulado"
-                  dot={{ r: 4, fill: '#00ff88', strokeWidth: 2 }} 
-                  activeDot={{ r: 8 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="expensesCum" 
-                  stroke="#ff4d4d" 
-                  strokeWidth={3}
-                  name="Despesas Acumuladas"
-                  dot={{ r: 4, fill: '#ff4d4d', strokeWidth: 2 }} 
-                  activeDot={{ r: 8 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="fixedRemaining" 
-                  stroke="#FCA311" 
-                  strokeWidth={3}
-                  name="Contas a pagar"
-                  dot={<CustomYellowDot />}
-                  isAnimationActive={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="stockValue" 
-                  stroke="#0088FE" 
-                  strokeWidth={3}
-                  name="Valor do Estoque"
-                  dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
-                  activeDot={{ r: 8 }}
-                />
+                {showRevenueLine && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="profitCum" 
+                    stroke="#00ff88" 
+                    strokeWidth={3}
+                    name="Resultado Bruto Acumulado"
+                    dot={{ r: 4, fill: '#00ff88', strokeWidth: 2 }} 
+                    activeDot={{ r: 8 }}
+                  />
+                )}
+                {showExpensesLine && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="expensesCum" 
+                    stroke="#ff4d4d" 
+                    strokeWidth={3}
+                    name="Despesas Acumuladas"
+                    dot={{ r: 4, fill: '#ff4d4d', strokeWidth: 2 }} 
+                    activeDot={{ r: 8 }}
+                  />
+                )}
+                {showFixedLine && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="fixedRemaining" 
+                    stroke="#FCA311" 
+                    strokeWidth={3}
+                    name="Contas a pagar"
+                    dot={<CustomYellowDot />}
+                    isAnimationActive={false}
+                  />
+                )}
+                {showStockLine && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="stockValue" 
+                    stroke="#0088FE" 
+                    strokeWidth={3}
+                    name="Valor do Estoque"
+                    dot={{ r: 4, fill: '#0088FE', strokeWidth: 2 }} 
+                    activeDot={{ r: 8 }}
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -1201,63 +1318,94 @@ const FinancialSummary = () => {
       {viewMode === 'monthly' && (
         <div style={{ marginTop: '30px', marginBottom: '30px', width: '100%' }}>
           <div className={style.tableSection}>
-            <h3>Detalhamento de Saídas</h3>
-            <table>
-                <thead>
-                  <tr>
-                    <th>Descrição</th>
-                    <th>Tipo</th>
-                    <th>Vencimento</th>
-                    <th>Pagamento</th>
-                    <th>Estimado</th>
-                    <th>Pago</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {detailedExpensesList.map((exp, i) => {
-                    const isPending = !exp.paymentDate || !exp.confirmation || Number(exp.confirmation) === 0;
-                    const formatData = (dStr) => dStr ? (dStr.includes('-') ? dStr.split('-').reverse().join('/') : dStr) : '-';
-                    return (
-                      <tr key={i}>
-                        <td>{exp.name}</td>
-                        <td>{exp.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
-                        <td>{formatData(exp.dueDate)}</td>
-                        <td>{formatData(exp.paymentDate)}</td>
-                        <td>R$ {(Number(exp.value) || 0).toFixed(2)}</td>
-                        <td>R$ {(Number(exp.confirmation) || 0).toFixed(2)}</td>
-                        <td className={isPending ? style.pending : style.paidStatus}>
-                          {isPending ? 'Pendente' : 'Pago'}
-                        </td>
-                        <td>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDotClick(exp);
-                            }}
-                            style={{
-                              backgroundColor: isPending ? '#00ff88' : '#FCA311',
-                              color: isPending ? '#14213D' : '#fff',
-                              border: 'none',
-                              padding: '5px 10px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              fontSize: '0.8rem',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {isPending ? '💳 Pagar Conta' : '✏️ Editar'}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '15px',
+              borderBottom: showDetailedExpenses ? '1px solid #eee' : 'none',
+              paddingBottom: showDetailedExpenses ? '12px' : '0',
+              marginBottom: showDetailedExpenses ? '15px' : '0'
+            }}>
+              <h3 style={{ margin: 0 }}>Detalhamento de Saídas</h3>
+              <button 
+                onClick={() => setShowDetailedExpenses(prev => !prev)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid #14213D',
+                  color: '#14213D',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s',
+                  outline: 'none'
+                }}
+              >
+                {showDetailedExpenses ? '▲ Recolher' : '▼ Expandir'}
+              </button>
             </div>
+            {showDetailedExpenses && (
+              <table>
+                  <thead>
+                    <tr>
+                      <th>Descrição</th>
+                      <th>Tipo</th>
+                      <th>Vencimento</th>
+                      <th>Pagamento</th>
+                      <th>Estimado</th>
+                      <th>Pago</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailedExpensesList.map((exp, i) => {
+                      const isPending = !exp.paymentDate || !exp.confirmation || Number(exp.confirmation) === 0;
+                      const formatData = (dStr) => dStr ? (dStr.includes('-') ? dStr.split('-').reverse().join('/') : dStr) : '-';
+                      return (
+                        <tr key={i}>
+                          <td>{exp.name}</td>
+                          <td>{exp.category === 'fixed' ? 'Fixa' : 'Variável'}</td>
+                          <td>{formatData(exp.dueDate)}</td>
+                          <td>{formatData(exp.paymentDate)}</td>
+                          <td>R$ {(Number(exp.value) || 0).toFixed(2)}</td>
+                          <td>R$ {(Number(exp.confirmation) || 0).toFixed(2)}</td>
+                          <td className={isPending ? style.pending : style.paidStatus}>
+                            {isPending ? 'Pendente' : 'Pago'}
+                          </td>
+                          <td>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDotClick(exp);
+                              }}
+                              style={{
+                                backgroundColor: isPending ? '#00ff88' : '#FCA311',
+                                color: isPending ? '#14213D' : '#fff',
+                                border: 'none',
+                                padding: '5px 10px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.8rem',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {isPending ? '💳 Pagar Conta' : '✏️ Editar'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+            )}
           </div>
+        </div>
       )}
 
       {viewMode === 'monthly' && (
@@ -1337,115 +1485,236 @@ const FinancialSummary = () => {
       {/* NOVO RANKING DE PRODUTOS COMPLETO */}
       <div className={style.summaryGrid} style={{ marginTop: '30px', marginBottom: '30px' }}>
         <div className={style.tableSection}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-            <h3 style={{ margin: 0 }}>🏆 Ranking Completo de Vendas</h3>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Inicial</label>
-                <input 
-                  type="date" 
-                  value={startDateRank} 
-                  onChange={(e) => setStartDateRank(e.target.value)}
-                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
-                />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Final</label>
-                <input 
-                  type="date" 
-                  value={endDateRank} 
-                  onChange={(e) => setEndDateRank(e.target.value)}
-                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
-                />
-              </div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            flexWrap: 'wrap', 
+            gap: '15px',
+            borderBottom: showProductRanking ? '1px solid #eee' : 'none',
+            paddingBottom: showProductRanking ? '12px' : '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <h3 style={{ margin: 0 }}>🏆 Ranking Completo de Vendas</h3>
+              <button 
+                onClick={() => setShowProductRanking(prev => !prev)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid #14213D',
+                  color: '#14213D',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s',
+                  outline: 'none'
+                }}
+              >
+                {showProductRanking ? '▲ Recolher' : '▼ Expandir'}
+              </button>
             </div>
+            {showProductRanking && (
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Inicial</label>
+                  <input 
+                    type="date" 
+                    value={startDateRank} 
+                    onChange={(e) => setStartDateRank(e.target.value)}
+                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#14213D', fontWeight: 'bold' }}>Data Final</label>
+                  <input 
+                    type="date" 
+                    value={endDateRank} 
+                    onChange={(e) => setEndDateRank(e.target.value)}
+                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ccc', outline: 'none' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
-          <table style={{ marginTop: '15px' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
-                <th style={{ textAlign: 'left' }}>Nome do Produto</th>
-                <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productRankingList.map((prod, index) => (
-                <tr key={index} style={{ backgroundColor: prod.sold === 0 ? '#ffe6e6' : 'inherit' }}>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{index + 1}º</td>
-                  <td>{prod.name}</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold', color: prod.sold === 0 ? '#ff4d4d' : 'inherit' }}>
-                    {prod.sold}
-                  </td>
-                </tr>
-              ))}
-              {productRankingList.length === 0 && (
-                <tr>
-                  <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
-                    Nenhum produto encontrado no cardápio atual.
-                  </td>
-                </tr>
+          {showProductRanking && (
+            <>
+              <table style={{ marginTop: '15px' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
+                    <th style={{ textAlign: 'left' }}>Nome do Produto</th>
+                    <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productsWithSales.map((prod, index) => (
+                    <tr key={index}>
+                      <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{index + 1}º</td>
+                      <td>{prod.name}</td>
+                      <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                        {prod.sold}
+                      </td>
+                    </tr>
+                  ))}
+                  {productsWithSales.length === 0 && (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
+                        Nenhum produto vendido no período selecionado.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {productsWithoutSales.length > 0 && (
+                <div style={{ marginTop: '20px', borderTop: '1px dashed #ccc', paddingTop: '15px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+                    <h4 style={{ margin: 0, color: '#ff4d4d' }}>❌ Produtos sem vendas ({productsWithoutSales.length})</h4>
+                    <button 
+                      type="button"
+                      onClick={() => setShowZeroSales(prev => !prev)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: '1px solid #ff4d4d',
+                        color: '#ff4d4d',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        transition: 'all 0.2s',
+                        outline: 'none'
+                      }}
+                    >
+                      {showZeroSales ? '▲ Recolher' : '▼ Mostrar Produtos'}
+                    </button>
+                  </div>
+                  
+                  {showZeroSales && (
+                    <table style={{ marginTop: '10px' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
+                          <th style={{ textAlign: 'left' }}>Nome do Produto</th>
+                          <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {productsWithoutSales.map((prod, index) => {
+                          const realPos = productsWithSales.length + index + 1;
+                          return (
+                            <tr key={index} style={{ backgroundColor: '#ffe6e6' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{realPos}º</td>
+                              <td>{prod.name}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: '#ff4d4d' }}>
+                                {prod.sold}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               )}
-            </tbody>
-          </table>
+            </>
+          )}
         </div>
       </div>
 
       {/* NOVO RANKING DE DESPERDÍCIOS */}
       <div style={{ width: '100%', marginBottom: '30px', boxSizing: 'border-box' }}>
         <div className={style.tableSection} style={{ overflow: 'visible', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '15px',
+            borderBottom: showWasteRanking ? '1px solid #eee' : 'none',
+            paddingBottom: showWasteRanking ? '12px' : '0',
+            marginBottom: showWasteRanking ? '15px' : '0'
+          }}>
             <h3 style={{ margin: 0 }}>🗑️ Ranking de Desperdícios (Mensal)</h3>
+            <button 
+              onClick={() => setShowWasteRanking(prev => !prev)}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid #14213D',
+                color: '#14213D',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s',
+                outline: 'none'
+              }}
+            >
+              {showWasteRanking ? '▲ Recolher' : '▼ Expandir'}
+            </button>
           </div>
-          <div className={style.chartContainer} style={{ marginTop: '20px' }}>
-            {isLoadingWaste ? (
-              <div style={{ textAlign: 'center', padding: '20px' }}>Carregando dados de desperdício...</div>
-            ) : wasteRankingData.length > 0 ? (
-              <div style={{ 
-                display: 'flex', 
-                flexWrap: 'nowrap', 
-                gap: '15px', 
-                width: '100%',
-                alignItems: 'flex-start'
-              }}>
-                {Array.from({ length: Math.ceil(wasteRankingData.length / 10) }, (_, i) => wasteRankingData.slice(i * 10, i * 10 + 10)).map((chunk, index) => (
-                  <div key={index} style={{ flex: 1, minWidth: 0, border: '1px solid #333', borderRadius: '8px', padding: '10px 0' }}>
-                    <h4 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#888', fontSize: '0.9rem' }}>
-                      Página {index + 1}
-                    </h4>
-                    <ResponsiveContainer width="100%" height={Math.max(200, chunk.length * 50)}>
-                      <BarChart 
-                        layout="vertical" 
-                        data={chunk} 
-                        margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
-                        <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" width={200} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
-                        <RechartsTooltip 
-                          content={<CustomWasteTooltip />} 
-                          wrapperStyle={{ zIndex: 1000 }}
-                          allowEscapeViewBox={{ x: true, y: true }}
-                        />
-                        <Bar dataKey="value" fill="#ff4d4d" barSize={20} radius={[0, 4, 4, 0]}>
-                          <LabelList 
-                            dataKey="value" 
-                            position="right" 
-                            formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
-                            fill="#ff4d4d" 
-                            fontSize={12} 
-                            fontWeight="bold"
+          
+          {showWasteRanking && (
+            <div className={style.chartContainer} style={{ marginTop: '20px' }}>
+              {isLoadingWaste ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>Carregando dados de desperdício...</div>
+              ) : wasteRankingData.length > 0 ? (
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: '15px', 
+                  width: '100%',
+                  alignItems: 'flex-start'
+                }}>
+                  {Array.from({ length: Math.ceil(wasteRankingData.length / 10) }, (_, i) => wasteRankingData.slice(i * 10, i * 10 + 10)).map((chunk, index) => (
+                    <div key={index} style={{ flex: '1 1 350px', minWidth: '300px', border: '1px solid #333', borderRadius: '8px', padding: '10px 0' }}>
+                      <h4 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#888', fontSize: '0.9rem' }}>
+                        Página {index + 1}
+                      </h4>
+                      <ResponsiveContainer width="100%" height={Math.max(200, chunk.length * 50)}>
+                        <BarChart 
+                          layout="vertical" 
+                          data={chunk} 
+                          margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                          <XAxis type="number" hide />
+                          <YAxis dataKey="name" type="category" width={200} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
+                          <RechartsTooltip 
+                            content={<CustomWasteTooltip />} 
+                            wrapperStyle={{ zIndex: 1000 }}
+                            allowEscapeViewBox={{ x: true, y: true }}
                           />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px' }}>Nenhum desperdício registrado neste mês.</div>
-            )}
-          </div>
+                          <Bar dataKey="value" fill="#ff4d4d" barSize={20} radius={[0, 4, 4, 0]}>
+                            <LabelList 
+                              dataKey="value" 
+                              position="right" 
+                              formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
+                              fill="#ff4d4d" 
+                              fontSize={12} 
+                              fontWeight="bold"
+                            />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px' }}>Nenhum desperdício registrado neste mês.</div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

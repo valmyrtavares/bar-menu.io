@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
-import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
@@ -205,6 +205,49 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     });
   };
 
+  const updateSideDishesInFirebase = async (stockProduct) => {
+    try {
+      const sideDishesRef = collection(db, 'sideDishes');
+      const q = query(sideDishesRef, where('sideDishes', '==', stockProduct.product));
+      const querySnapshot = await getDocs(q);
+      
+      const newCostPerUnit = stockProduct.totalVolume > 0 
+        ? stockProduct.totalCost / stockProduct.totalVolume 
+        : 0;
+
+      const updates = [];
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const portionUsed = Number(data.portionUsed) || 0;
+        const newPortionCost = Number((portionUsed * newCostPerUnit).toFixed(2));
+        
+        const docRef = doc(db, 'sideDishes', docSnap.id);
+        const updatedFields = {
+          costPerUnit: Number(newCostPerUnit.toFixed(4)),
+          portionCost: newPortionCost,
+        };
+        
+        if (data.costPriceObj) {
+          updatedFields.costPriceObj = {
+            ...data.costPriceObj,
+            cost: newPortionCost,
+            profit: Number(((Number(data.costPriceObj.price) || 0) - newPortionCost).toFixed(2)),
+            percentage: data.costPriceObj.price > 0 
+              ? ((newPortionCost / Number(data.costPriceObj.price)) * 100).toFixed(2) 
+              : '0.00'
+          };
+        }
+        
+        updates.push(updateDoc(docRef, updatedFields));
+      });
+
+      await Promise.all(updates);
+      console.log(`[STOCK-UPDATE-AUDIT] Updated ${updates.length} sideDishes matching "${stockProduct.product}"`);
+    } catch (err) {
+      console.error('Erro ao atualizar acompanhamentos:', err);
+    }
+  };
+
   const stockHistoryList = (item, account, paymentDate, pack, cost, unit, volume, previousVolume, previousCost, totalCost, totalVolume, orderNumber = '') => {
     return {
       date: paymentDate,
@@ -297,6 +340,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         const docRef = doc(db, 'stock', updatedProduct.id);
         await updateDoc(docRef, updatedProduct);
         await logStockUsage(updatedProduct.id, logEvent);
+
+        // Update Side Dishes
+        await updateSideDishesInFirebase(updatedProduct);
 
         // Check availability
         await checkUnavaiableRawMaterial(updatedProduct.id);

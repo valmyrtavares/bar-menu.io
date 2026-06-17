@@ -10,6 +10,9 @@ import {
   addDoc,
   updateDoc,
   doc,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
@@ -231,8 +234,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
 
     try {
       await Promise.all(updatedDishes.map(updateDishInFirebase));
+      await updateSideDishesInFirebase(stockProductObj);
     } catch (error) {
-      console.error('Erro ao atualizar receitas:', error);
+      console.error('Erro ao atualizar receitas/acompanhamentos:', error);
     }
 
     try {
@@ -393,6 +397,49 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       costPriceObj: dish.costPriceObj,
       CustomizedPrice: dish.CustomizedPrice,
     });
+  };
+
+  const updateSideDishesInFirebase = async (stockProduct) => {
+    try {
+      const sideDishesRef = collection(db, 'sideDishes');
+      const q = query(sideDishesRef, where('sideDishes', '==', stockProduct.product));
+      const querySnapshot = await getDocs(q);
+      
+      const newCostPerUnit = stockProduct.totalVolume > 0 
+        ? stockProduct.totalCost / stockProduct.totalVolume 
+        : 0;
+
+      const updates = [];
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const portionUsed = Number(data.portionUsed) || 0;
+        const newPortionCost = Number((portionUsed * newCostPerUnit).toFixed(2));
+        
+        const docRef = doc(db, 'sideDishes', docSnap.id);
+        const updatedFields = {
+          costPerUnit: Number(newCostPerUnit.toFixed(4)),
+          portionCost: newPortionCost,
+        };
+        
+        if (data.costPriceObj) {
+          updatedFields.costPriceObj = {
+            ...data.costPriceObj,
+            cost: newPortionCost,
+            profit: Number(((Number(data.costPriceObj.price) || 0) - newPortionCost).toFixed(2)),
+            percentage: data.costPriceObj.price > 0 
+              ? ((newPortionCost / Number(data.costPriceObj.price)) * 100).toFixed(2) 
+              : '0.00'
+          };
+        }
+        
+        updates.push(updateDoc(docRef, updatedFields));
+      });
+
+      await Promise.all(updates);
+      console.log(`[STOCK-UPDATE-EDIT] Updated ${updates.length} sideDishes matching "${stockProduct.product}"`);
+    } catch (err) {
+      console.error('Erro ao atualizar acompanhamentos:', err);
+    }
   };
 
   return (
