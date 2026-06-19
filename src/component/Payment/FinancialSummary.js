@@ -67,6 +67,75 @@ const PieTooltip = ({ active, payload, isCurrency }) => {
   return null;
 };
 
+const CustomWaterfallTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    
+    let description = '';
+    switch (data.name) {
+      case 'Receita':
+        description = 'É a soma de todas as vendas sem descontar o custo dos ingredientes que foram usados em cada prato. Não é o mesmo que lucro, mas é tudo que foi pago no caixa deste estabelecimento.';
+        break;
+      case 'CMV':
+        description = 'Custo de Mercadoria Vendida. É o custo dos ingredientes e insumos que foram efetivamente usados para preparar os pratos e bebidas vendidos no período.';
+        break;
+      case 'Resultado Bruto':
+        description = 'É a Receita menos o CMV. Mostra quanto o estabelecimento ganhou com as vendas após cobrir o custo dos ingredientes, antes de pagar as outras despesas (como aluguel, luz e funcionários).';
+        break;
+      case 'Despesas':
+        description = 'É a soma de todas as despesas operacionais do período (como aluguel, salários, contas e taxas), excluindo o custo dos ingredientes (CMV).';
+        break;
+      case 'Resultado Final':
+        description = 'É o saldo que sobra (superavit) ou falta (deficit) após subtrair todas as despesas e custos do faturamento total. É o lucro real ou prejuízo do período.';
+        break;
+      default:
+        description = '';
+    }
+
+    return (
+      <div style={{
+        backgroundColor: '#14213D',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        padding: '15px',
+        borderRadius: '8px',
+        color: '#fff',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+        maxWidth: '320px',
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        <h4 style={{ 
+          margin: '0 0 8px 0', 
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)', 
+          paddingBottom: '5px', 
+          color: data.color || '#fff',
+          fontSize: '1rem',
+          fontWeight: 'bold'
+        }}>
+          {data.name}
+        </h4>
+        <p style={{ 
+          margin: '0 0 10px 0', 
+          fontSize: '1.2rem', 
+          fontWeight: 'bold',
+          color: '#fff'
+        }}>
+          R$ {Number(data.value).toFixed(2)}
+        </p>
+        <p style={{ 
+          margin: 0, 
+          fontSize: '0.85rem', 
+          lineHeight: '1.4', 
+          color: '#e0e0e0',
+          textAlign: 'left'
+        }}>
+          {description}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
   const [expenses, setExpenses] = useState([]);
@@ -1286,11 +1355,7 @@ const FinancialSummary = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="name" stroke="#888" tick={<CustomXAxisTick />} />
                 <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
-                <RechartsTooltip 
-                  formatter={(value) => `R$ ${Number(value).toFixed(2)}`}
-                  contentStyle={{ backgroundColor: '#14213D', borderColor: '#333' }}
-                  itemStyle={{ color: '#fff' }}
-                />
+                <RechartsTooltip content={<CustomWaterfallTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {waterfallData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
