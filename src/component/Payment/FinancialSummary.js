@@ -136,6 +136,119 @@ const CustomWaterfallTooltip = ({ active, payload }) => {
   return null;
 };
 
+const CustomLegendItem = ({ entry }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const descriptions = {
+    'Resultado Bruto': 'É a diferença entre o faturamento total das vendas e o CMV (custo dos ingredientes). Representa o montante que sobrou para pagar todas as outras despesas do restaurante.',
+    'Resultado Bruto Acumulado': 'É a soma diária do seu faturamento menos o custo dos ingredientes (CMV). Mostra a evolução do dinheiro que sobra no caixa dia após dia para pagar as despesas operacionais.',
+    'Variável': 'Despesas que oscilam conforme o volume de vendas e a operação diária do restaurante (como taxas de cartão, comissões e compras extras).',
+    'Despesas Acumuladas': 'Representa a soma acumulada de todos os gastos operacionais que já foram de fato pagos no período. Ela engloba tanto as contas fixas pagas quanto as despesas variáveis, como a compra de insumos e ingredientes. Por ser acumulada dia após dia, esta linha tende apenas a subir ao longo do mês.',
+    'Contas a pagar': 'Representa exclusivamente os gastos fixos (como aluguel, salários, luz, etc.) agendados ou pendentes que ainda precisam ser pagos no mês. Como este saldo devedor restante diminui à medida que você realiza os pagamentos e quita seus compromissos, esta linha tende a descer ao longo do mês.',
+    'Valor do Estoque': 'O valor total estimado de todas as mercadorias armazenadas. É o dinheiro do estabelecimento que está "parado" em forma de produtos estocados.'
+  };
+
+  const explanation = descriptions[entry.value] || entry.value;
+
+  return (
+    <div 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '6px', 
+        cursor: 'pointer',
+        position: 'relative',
+        padding: '4px 8px',
+        borderRadius: '6px',
+        backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+        transition: 'background 0.2s',
+        userSelect: 'none'
+      }}
+    >
+      <span style={{ 
+        display: 'inline-block', 
+        width: '12px', 
+        height: '4px', 
+        backgroundColor: entry.color,
+        borderRadius: '2px'
+      }} />
+      <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.85rem' }}>
+        {entry.value}
+      </span>
+
+      {isHovered && explanation && (
+        <div style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          marginBottom: '10px',
+          backgroundColor: '#14213D',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          padding: '15px',
+          borderRadius: '8px',
+          color: '#fff',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.6)',
+          width: '280px',
+          zIndex: 10005,
+          pointerEvents: 'none',
+          textAlign: 'left',
+          fontFamily: "'Inter', sans-serif"
+        }}>
+          <h4 style={{ 
+            margin: '0 0 8px 0', 
+            borderBottom: '1px solid rgba(255, 255, 255, 0.15)', 
+            paddingBottom: '5px', 
+            color: entry.color || '#fff',
+            fontSize: '0.9rem',
+            fontWeight: 'bold'
+          }}>
+            {entry.value}
+          </h4>
+          <p style={{ 
+            margin: '0 0 10px 0', 
+            fontSize: '0.8rem', 
+            lineHeight: '1.4', 
+            color: '#e0e0e0'
+          }}>
+            {explanation}
+          </p>
+          <div style={{ 
+            borderTop: '1px dashed rgba(255, 255, 255, 0.15)', 
+            paddingTop: '8px', 
+            fontSize: '0.72rem', 
+            color: '#FCA311',
+            fontStyle: 'italic',
+            lineHeight: '1.3'
+          }}>
+            💡 Dica: Encoste o mouse em cada nódulo (bolinha) ou barra do gráfico para ver os detalhes daquele dia ou mês.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CustomChartLegend = (props) => {
+  const { payload } = props;
+  if (!payload || payload.length === 0) return null;
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      gap: '12px', 
+      flexWrap: 'wrap', 
+      marginBottom: '15px'
+    }}>
+      {payload.map((entry, index) => (
+        <CustomLegendItem key={`legend-item-${index}`} entry={entry} />
+      ))}
+    </div>
+  );
+};
+
 const FinancialSummary = () => {
   const { hasFinancial } = React.useContext(GlobalContext);
   const [expenses, setExpenses] = useState([]);
@@ -1276,7 +1389,7 @@ const FinancialSummary = () => {
                 <XAxis dataKey="monthName" stroke="#888" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#888" tick={{ fontSize: 12 }} />
                 <RechartsTooltip content={<CustomTooltipContent />} wrapperStyle={{ zIndex: 10000 }} />
-                <Legend verticalAlign="top" height={36} />
+                <Legend content={<CustomChartLegend />} />
                 {showRevenueLine && <Bar dataKey="profit" fill="#00ff88" name="Resultado Bruto" radius={[4, 4, 0, 0]} />}
                 {showExpensesLine && <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />}
                 {showFixedLine && <Bar dataKey="fixed" fill="#FCA311" name="Contas a pagar" radius={[4, 4, 0, 0]} />}
@@ -1300,7 +1413,7 @@ const FinancialSummary = () => {
                 <XAxis dataKey="day" stroke="#888" />
                 <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
                 <RechartsTooltip content={<CustomTooltipContent />} wrapperStyle={{ zIndex: 10000 }} />
-                <Legend verticalAlign="top" height={36} />
+                <Legend content={<CustomChartLegend />} />
                 
                 {showRevenueLine && (
                   <Line 
