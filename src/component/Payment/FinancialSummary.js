@@ -1263,7 +1263,7 @@ const FinancialSummary = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="monthName" stroke="#888" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#888" tick={{ fontSize: 12 }} />
-                <RechartsTooltip content={<CustomTooltipContent />} />
+                <RechartsTooltip content={<CustomTooltipContent />} wrapperStyle={{ zIndex: 10000 }} />
                 <Legend verticalAlign="top" height={36} />
                 {showRevenueLine && <Bar dataKey="profit" fill="#00ff88" name="Resultado Bruto" radius={[4, 4, 0, 0]} />}
                 {showExpensesLine && <Bar dataKey="variable" fill="#ff4d4d" name="Variável" radius={[4, 4, 0, 0]} />}
@@ -1287,7 +1287,7 @@ const FinancialSummary = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="day" stroke="#888" />
                 <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
-                <RechartsTooltip content={<CustomTooltipContent />} />
+                <RechartsTooltip content={<CustomTooltipContent />} wrapperStyle={{ zIndex: 10000 }} />
                 <Legend verticalAlign="top" height={36} />
                 
                 {showRevenueLine && (
@@ -1355,7 +1355,7 @@ const FinancialSummary = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="name" stroke="#888" tick={<CustomXAxisTick />} />
                 <YAxis stroke="#888" tickFormatter={(val) => `R$ ${val}`} />
-                <RechartsTooltip content={<CustomWaterfallTooltip />} />
+                <RechartsTooltip content={<CustomWaterfallTooltip />} wrapperStyle={{ zIndex: 10000 }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {waterfallData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -1499,7 +1499,7 @@ const FinancialSummary = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                         ))}
                       </Pie>
-                      <RechartsTooltip content={<PieTooltip />} />
+                      <RechartsTooltip content={<PieTooltip />} wrapperStyle={{ zIndex: 10000 }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -1534,7 +1534,7 @@ const FinancialSummary = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                         ))}
                       </Pie>
-                      <RechartsTooltip content={<PieTooltip isCurrency={true} />} />
+                      <RechartsTooltip content={<PieTooltip isCurrency={true} />} wrapperStyle={{ zIndex: 10000 }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
