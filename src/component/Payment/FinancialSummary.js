@@ -1224,7 +1224,9 @@ const FinancialSummary = () => {
               backgroundColor: showStockLine ? '#0088FE' : '#1a1a1a', 
               color: showStockLine ? '#fff' : '#555', 
               border: showStockLine ? '1px solid #0056b3' : '1px solid #333',
-              cursor: 'pointer' 
+              cursor: 'pointer',
+              paddingLeft: '12px',
+              paddingRight: '12px'
             }}
           >
             <div className={style.cardHeader}>
@@ -1240,14 +1242,24 @@ const FinancialSummary = () => {
               </div>
             </div>
             <strong>R$ {(stats.totalStockValue || 0).toFixed(2)}</strong>
-            <div style={{ marginTop: '8px', borderTop: showStockLine ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #333', paddingTop: '6px', fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: showStockLine ? '#fff' : '#555' }}>
-                <span style={{ color: 'inherit' }}>CMV Médio Diário:</span>
-                <span style={{ fontWeight: 'bold', color: 'inherit' }}>R$ {averageDailyCMV.toFixed(2)}</span>
+            <div style={{ 
+              marginTop: '8px', 
+              borderTop: showStockLine ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #333', 
+              paddingTop: '6px', 
+              fontSize: '0.62rem', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '4px', 
+              textAlign: 'left',
+              letterSpacing: '-0.015em'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: showStockLine ? '#fff' : '#555', gap: '4px' }}>
+                <span style={{ color: 'inherit', whiteSpace: 'nowrap' }}>CMV Médio Diário:</span>
+                <span style={{ fontWeight: 'bold', color: 'inherit', whiteSpace: 'nowrap' }}>R$ {averageDailyCMV.toFixed(2)}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: showStockLine ? '#fff' : '#555' }}>
-                <span style={{ color: 'inherit' }}>Cobertura Aproximada:</span>
-                <span style={{ fontWeight: 'bold', color: 'inherit' }}>{averageDailyCMV > 0 ? `${Math.round((stats.totalStockValue || 0) / averageDailyCMV)} dias` : 'N/A'}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: showStockLine ? '#fff' : '#555', gap: '4px' }}>
+                <span style={{ color: 'inherit', whiteSpace: 'nowrap' }}>Cobertura Aproximada:</span>
+                <span style={{ fontWeight: 'bold', color: 'inherit', whiteSpace: 'nowrap' }}>{averageDailyCMV > 0 ? `${Math.round((stats.totalStockValue || 0) / averageDailyCMV)} dias` : 'N/A'}</span>
               </div>
             </div>
           </div>
