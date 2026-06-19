@@ -196,7 +196,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     }
 
     const newUnit = Number(obj.volumePerUnit) > 0 ? newVolume / Number(obj.volumePerUnit) : 0;
-    const newCostPerUnit = newVolume > 0 ? newCost / newVolume : 0;
+    const newCostPerUnit = newVolume > 0 ? newCost / newVolume : (Number(obj.CostPerUnit) || 0);
 
     setStockProductObj((prev) => ({
       ...prev,
@@ -309,8 +309,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               );
               if (!currentIngredient) return;
 
-              const newCostPerUnit =
-                stockProduct.totalCost / stockProduct.totalVolume;
+              const newCostPerUnit = stockProduct.totalVolume > 0
+                ? stockProduct.totalCost / stockProduct.totalVolume
+                : (Number(stockProduct.CostPerUnit) || 0);
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
               
               if (
@@ -355,8 +356,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
                 );
                 if (!currentIngredient) return;
 
-                const newCostPerUnit =
-                  stockProduct.totalCost / stockProduct.totalVolume;
+                const newCostPerUnit = stockProduct.totalVolume > 0
+                  ? stockProduct.totalCost / stockProduct.totalVolume
+                  : (Number(stockProduct.CostPerUnit) || 0);
                 const newPortionCost =
                   currentIngredient.amount * newCostPerUnit;
 
@@ -407,7 +409,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       
       const newCostPerUnit = stockProduct.totalVolume > 0 
         ? stockProduct.totalCost / stockProduct.totalVolume 
-        : 0;
+        : (Number(stockProduct.CostPerUnit) || 0);
 
       const updates = [];
       querySnapshot.forEach((docSnap) => {

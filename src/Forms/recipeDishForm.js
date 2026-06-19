@@ -193,6 +193,24 @@ const RecipeDish = ({
       );
       return;
     }
+
+    const amountNum = parseFloat(ingridients.amount.replace(',', '.'));
+    const unit = (ingridients.unitOfMeasurement || '').toLowerCase().trim();
+
+    // Verifica se a unidade é kg/L/unidade e o valor é >= 0.5, ou se é g/ml/grama/mililitro e o valor é >= 500
+    const isLargeAmount = 
+      ((unit === 'kg' || unit === 'l' || unit === 'quilo' || unit === 'litro' || unit === 'un' || unit === 'unidade') && amountNum >= 0.5) ||
+      ((unit === 'g' || unit === 'ml' || unit === 'grama' || unit === 'mililitro') && amountNum >= 500);
+
+    if (isLargeAmount) {
+      const confirm = window.confirm(
+        `Atenção: Você está tentando adicionar ${amountNum} ${ingridients.unitOfMeasurement} de "${ingridients.name}" na receita.\n` +
+        `Isso equivale a 500g (ou 0.5kg/L) ou mais para uma única porção/receita de prato, o que é incomum.\n\n` +
+        `Deseja confirmar e prosseguir com esta quantidade?`
+      );
+      if (!confirm) return;
+    }
+
     addIngredient(ingridients, sizeKey); // Chama o do hook usando a chave fixa
     setIngridients({ name: '', amount: '', unitOfMeasurement: '' }); // Limpa UI
   };

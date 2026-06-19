@@ -125,7 +125,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
               );
               if (!currentIngredient) return;
 
-              const newCostPerUnit = stockProduct.totalCost / stockProduct.totalVolume;
+              const newCostPerUnit = stockProduct.totalVolume > 0
+                ? stockProduct.totalCost / stockProduct.totalVolume
+                : (Number(stockProduct.CostPerUnit) || 0);
               const newPortionCost = currentIngredient.amount * newCostPerUnit;
 
               if (
@@ -163,7 +165,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                 );
                 if (!currentIngredient) return;
 
-                const newCostPerUnit = stockProduct.totalCost / stockProduct.totalVolume;
+                const newCostPerUnit = stockProduct.totalVolume > 0
+                  ? stockProduct.totalCost / stockProduct.totalVolume
+                  : (Number(stockProduct.CostPerUnit) || 0);
                 const newPortionCost = currentIngredient.amount * newCostPerUnit;
 
                 if (
@@ -213,7 +217,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       
       const newCostPerUnit = stockProduct.totalVolume > 0 
         ? stockProduct.totalCost / stockProduct.totalVolume 
-        : 0;
+        : (Number(stockProduct.CostPerUnit) || 0);
 
       const updates = [];
       querySnapshot.forEach((docSnap) => {
@@ -299,7 +303,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         const newTotalCostValue = item.newCost;
 
         const newUnit = Number(original.volumePerUnit) > 0 ? newVolumeValue / Number(original.volumePerUnit) : 0;
-        const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : 0;
+        const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : (Number(original.CostPerUnit) || 0);
 
         const updatedProduct = {
           ...original,
@@ -407,8 +411,13 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                   const newVolume = hasCorrection ? Number(item.totalVolume) + correction : Number(item.totalVolume);
                   
                   let newCost = Number(item.totalCost);
-                  if (hasCorrection && item.totalVolume > 0) {
-                    const unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
+                  if (hasCorrection) {
+                    let unitPriceOriginal = 0;
+                    if (Number(item.totalVolume) > 0) {
+                      unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
+                    } else {
+                      unitPriceOriginal = Number(item.CostPerUnit || 0);
+                    }
                     newCost = newVolume * unitPriceOriginal;
                   }
 
@@ -474,6 +483,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       let newCost = Number(original.totalCost);
       if (original.totalVolume > 0) {
          const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);
+         newCost = newVolume * unitPriceOriginal;
+      } else {
+         const unitPriceOriginal = Number(original.CostPerUnit || 0);
          newCost = newVolume * unitPriceOriginal;
       }
 

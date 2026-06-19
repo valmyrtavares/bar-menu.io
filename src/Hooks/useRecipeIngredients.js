@@ -99,23 +99,21 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
                     unavailableRawMaterial: false,
                 };
             }
-            if (matchedProduct.totalVolume === 0) {
-                return {
-                    costPerUnit: 0,
-                    portionCost: 0,
-                    warningAmountRawMaterial: matchedProduct.minimumAmount === 0 ? true : false,
-                    unavailableRawMaterial: true,
-                };
-            }
-            const costPerUnit = matchedProduct.totalCost / matchedProduct.totalVolume;
+            const totalVolume = Number(matchedProduct.totalVolume) || 0;
+            const disabledDish = Number(matchedProduct.disabledDish) || 0;
+            const minimumAmount = Number(matchedProduct.minimumAmount) || 0;
+
+            const costPerUnit = totalVolume > 0 
+                ? matchedProduct.totalCost / totalVolume 
+                : (Number(matchedProduct.CostPerUnit) || 0);
             const portionCost = parseFloat(ingredient.amount) * costPerUnit;
 
-            const warningAmountRawMaterial =
-                matchedProduct.totalVolume > matchedProduct.minimumAmount
-                    ? true
-                    : false;
-            const unavailableRawMaterial =
-                matchedProduct.totalVolume === 0 ? true : false;
+            const warningAmountRawMaterial = totalVolume === 0
+                ? (minimumAmount === 0 ? true : false)
+                : (totalVolume > minimumAmount ? true : false);
+
+            const unavailableRawMaterial = disabledDish >= totalVolume ? true : false;
+
             return {
                 costPerUnit,
                 portionCost,

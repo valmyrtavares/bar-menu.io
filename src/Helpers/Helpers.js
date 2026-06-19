@@ -62,18 +62,18 @@ export async function checkUnavaiableRawMaterial(id) {
   //
   // 4) Função que processa um array de ingredientes
   //
+  let foundIngredient = false;
   const processIngredientsArray = (arr, isUnavailable) => {
     if (!Array.isArray(arr)) return;
 
     arr.forEach((ing) => {
       if (!ing || typeof ing.name !== 'string') return;
-      foundIngredient = false;
       const normalizedIngName = normalize(ing.name);
 
       // Se é a matéria-prima alvo da função
       if (normalizedIngName === normalizedProduct) {
         ing.unavailableRawMaterial = isUnavailable; // true ou false
-        foundIngredient = true; // <-- ADICIONAR ESTA LINHA
+        foundIngredient = true;
       }
     });
   };
@@ -82,10 +82,9 @@ export async function checkUnavaiableRawMaterial(id) {
   // 5) Para cada prato (item)
   //
 
-  let foundIngredient = false;
-
   for (const dishSnap of itemsSnapshot.docs) {
     const data = dishSnap.data();
+    foundIngredient = false;
 
     const recipe = data?.recipe?.FinalingridientsList;
     if (!recipe) continue;

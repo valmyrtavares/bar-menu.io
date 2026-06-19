@@ -197,6 +197,7 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
       } else {
         const newRecord = {
           ...currentItem,
+          CostPerUnit: currentItem.totalVolume > 0 ? Number((currentItem.totalCost / currentItem.totalVolume).toFixed(2)) : 0,
         };
         const newDoc = await addDoc(collection(db, 'stock'), newRecord);
         await logStockUsage(newDoc.id, {
