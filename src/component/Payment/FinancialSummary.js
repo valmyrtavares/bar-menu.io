@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../config-firebase/firebase';
-import { collection, onSnapshot, query, doc, getDoc, setDoc, getDocs, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, getDoc, setDoc, getDocs, where, updateDoc } from 'firebase/firestore';
 import {
   LineChart,
   Line,
@@ -293,6 +293,7 @@ const FinancialSummary = () => {
   const [showStockLine, setShowStockLine] = useState(true);
   const [productMetric, setProductMetric] = useState('quantity'); // 'quantity' | 'profit'
   const [tableMetric, setTableMetric] = useState('quantity'); // 'quantity' | 'profit'
+  const [expenseTableTab, setExpenseTableTab] = useState('fixed'); // 'fixed' | 'variable'
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -494,7 +495,7 @@ const FinancialSummary = () => {
       const dDue = parseDate(exp.dueDate);
       const inPay = dPay && dPay.getMonth() === selectedMonth && dPay.getFullYear() === selectedYear;
       const inDue = dDue && dDue.getMonth() === selectedMonth && dDue.getFullYear() === selectedYear;
-      return (inPay || inDue) && exp.entryType !== 'stock';
+      return (inPay || inDue) && exp.entryType !== 'stock' && exp.name?.toLowerCase() !== 'entrada de estoque';
     });
 
     const monthRevenue = revenue.filter(rev => {
@@ -577,7 +578,7 @@ const FinancialSummary = () => {
         });
         const monthExpenses = expenses.filter(exp => {
           const dPay = parseDate(exp.paymentDate);
-          return dPay && dPay.getMonth() === m && dPay.getFullYear() === y && exp.confirmation && exp.entryType !== 'stock';
+          return dPay && dPay.getMonth() === m && dPay.getFullYear() === y && exp.confirmation && exp.entryType !== 'stock' && exp.name?.toLowerCase() !== 'entrada de estoque';
         });
 
         const profitValue = monthRevenue.reduce((acc, rev) => {
@@ -624,7 +625,7 @@ const FinancialSummary = () => {
         const monthFixed = expenses
           .filter(exp => {
             const dDue = parseDate(exp.dueDate);
-            return exp.category === 'fixed' && dDue && dDue.getMonth() === m && dDue.getFullYear() === y && exp.entryType !== 'stock';
+            return exp.category === 'fixed' && dDue && dDue.getMonth() === m && dDue.getFullYear() === y && exp.entryType !== 'stock' && exp.name?.toLowerCase() !== 'entrada de estoque';
           })
           .reduce((acc, exp) => acc + (Number(exp.value) || 0), 0);
 
@@ -1195,6 +1196,25 @@ const FinancialSummary = () => {
     setShowEditPopup(true);
   };
 
+  const handlePayExpense = async (expense) => {
+    try {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      
+      const expenseRef = doc(db, 'outgoing', expense.id);
+      await updateDoc(expenseRef, {
+        paymentDate: todayStr,
+        confirmation: Number(expense.value) || 0
+      });
+    } catch (error) {
+      console.error("Erro ao pagar conta automaticamente:", error);
+      alert("Erro ao processar o pagamento.");
+    }
+  };
+
   const CustomYellowDot = (props) => {
     const { cx, cy, payload } = props;
     if (payload && payload.dueFixedList && payload.dueFixedList.length > 0) {
@@ -1541,35 +1561,62 @@ const FinancialSummary = () => {
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
               gap: '15px',
               borderBottom: showDetailedExpenses ? '1px solid #eee' : 'none',
               paddingBottom: showDetailedExpenses ? '12px' : '0',
               marginBottom: showDetailedExpenses ? '15px' : '0'
             }}>
-              <h3 style={{ margin: 0 }}>Detalhamento de Saídas</h3>
-              <button 
-                onClick={() => setShowDetailedExpenses(prev => !prev)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid #14213D',
-                  color: '#14213D',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  transition: 'all 0.2s',
-                  outline: 'none'
-                }}
-              >
-                {showDetailedExpenses ? '▲ Recolher' : '▼ Expandir'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <h3 style={{ margin: 0 }}>💵 Detalhamento de Despesas</h3>
+                <button 
+                  onClick={() => setShowDetailedExpenses(prev => !prev)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid #14213D',
+                    color: '#14213D',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.2s',
+                    outline: 'none'
+                  }}
+                >
+                  {showDetailedExpenses ? '▲ Recolher' : '▼ Expandir'}
+                </button>
+              </div>
+              
+              {showDetailedExpenses && (
+                <div className={style.metricToggle}>
+                  <button
+                    type="button"
+                    className={`${style.toggleBtn} ${expenseTableTab === 'fixed' ? style.activeToggle : ''}`}
+                    onClick={() => setExpenseTableTab('fixed')}
+                  >
+                    Fixas
+                  </button>
+                  <button
+                    type="button"
+                    className={`${style.toggleBtn} ${expenseTableTab === 'variable' ? style.activeToggle : ''}`}
+                    onClick={() => setExpenseTableTab('variable')}
+                  >
+                    Variáveis
+                  </button>
+                </div>
+              )}
             </div>
-            {showDetailedExpenses && (
-              <table>
+            {showDetailedExpenses && (() => {
+              const listToShow = expenseTableTab === 'fixed' 
+                ? detailedExpensesList.filter(exp => exp.category === 'fixed')
+                : detailedExpensesList.filter(exp => exp.category !== 'fixed');
+              return (
+                <table>
                   <thead>
                     <tr>
                       <th>Descrição</th>
@@ -1583,7 +1630,7 @@ const FinancialSummary = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {detailedExpensesList.map((exp, i) => {
+                    {listToShow.map((exp, i) => {
                       const isPending = !exp.paymentDate || !exp.confirmation || Number(exp.confirmation) === 0;
                       const formatData = (dStr) => dStr ? (dStr.includes('-') ? dStr.split('-').reverse().join('/') : dStr) : '-';
                       return (
@@ -1598,32 +1645,85 @@ const FinancialSummary = () => {
                             {isPending ? 'Pendente' : 'Pago'}
                           </td>
                           <td>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDotClick(exp);
-                              }}
-                              style={{
-                                backgroundColor: isPending ? '#00ff88' : '#FCA311',
-                                color: isPending ? '#14213D' : '#fff',
-                                border: 'none',
-                                padding: '5px 10px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {isPending ? '💳 Pagar Conta' : '✏️ Editar'}
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              {isPending ? (
+                                <>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePayExpense(exp);
+                                    }}
+                                    style={{
+                                      backgroundColor: '#00ff88',
+                                      color: '#14213D',
+                                      border: 'none',
+                                      padding: '5px 10px',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontWeight: 'bold',
+                                      fontSize: '0.8rem',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    💳 Pagar
+                                  </button>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDotClick(exp);
+                                    }}
+                                    style={{
+                                      backgroundColor: '#FCA311',
+                                      color: '#fff',
+                                      border: 'none',
+                                      padding: '5px 10px',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      fontWeight: 'bold',
+                                      fontSize: '0.8rem',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    ✏️ Editar
+                                  </button>
+                                </>
+                              ) : (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDotClick(exp);
+                                  }}
+                                  style={{
+                                    backgroundColor: '#FCA311',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '5px 10px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.8rem',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  ✏️ Editar
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
                     })}
+                    {listToShow.length === 0 && (
+                      <tr>
+                        <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                          Nenhuma despesa registrada nesta aba.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
-            )}
+              );
+            })()}
           </div>
         </div>
       )}
