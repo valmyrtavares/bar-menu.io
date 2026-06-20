@@ -985,6 +985,11 @@ const FinancialSummary = () => {
     return { productsWithSales: withSales, productsWithoutSales: withoutSales };
   }, [productRankingList]);
 
+  const maxWasteValue = useMemo(() => {
+    if (!wasteRankingData || wasteRankingData.length === 0) return 0;
+    return Math.max(...wasteRankingData.map(item => item.value));
+  }, [wasteRankingData]);
+
   const CustomWasteTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -1930,45 +1935,53 @@ const FinancialSummary = () => {
                 <div style={{ textAlign: 'center', padding: '20px' }}>Carregando dados de desperdício...</div>
               ) : wasteRankingData.length > 0 ? (
                 <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
                   gap: '15px', 
-                  width: '100%',
-                  alignItems: 'flex-start'
+                  width: '100%'
                 }}>
-                  {Array.from({ length: Math.ceil(wasteRankingData.length / 10) }, (_, i) => wasteRankingData.slice(i * 10, i * 10 + 10)).map((chunk, index) => (
-                    <div key={index} style={{ flex: '1 1 350px', minWidth: '300px', border: '1px solid #333', borderRadius: '8px', padding: '10px 0' }}>
-                      <h4 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#888', fontSize: '0.9rem' }}>
-                        Página {index + 1}
-                      </h4>
-                      <ResponsiveContainer width="100%" height={Math.max(200, chunk.length * 50)}>
-                        <BarChart 
-                          layout="vertical" 
-                          data={chunk} 
-                          margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
-                          <XAxis type="number" hide />
-                          <YAxis dataKey="name" type="category" width={200} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
-                          <RechartsTooltip 
-                            content={<CustomWasteTooltip />} 
-                            wrapperStyle={{ zIndex: 1000 }}
-                            allowEscapeViewBox={{ x: true, y: true }}
-                          />
-                          <Bar dataKey="value" fill="#ff4d4d" barSize={20} radius={[0, 4, 4, 0]}>
-                            <LabelList 
-                              dataKey="value" 
-                              position="right" 
-                              formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
-                              fill="#ff4d4d" 
-                              fontSize={12} 
-                              fontWeight="bold"
+                  {Array.from({ length: Math.ceil(wasteRankingData.length / 10) }, (_, i) => wasteRankingData.slice(i * 10, i * 10 + 10)).map((chunk, index) => {
+                    const chunkWithRank = chunk.map((item, itemIndex) => {
+                      const absoluteRank = index * 10 + itemIndex + 1;
+                      return {
+                        ...item,
+                        name: `${absoluteRank}º ${item.name}`
+                      };
+                    });
+                    return (
+                      <div key={index} style={{ border: '1px solid #333', borderRadius: '8px', padding: '10px 0' }}>
+                        <h4 style={{ textAlign: 'center', margin: '0 0 10px 0', color: '#888', fontSize: '0.9rem' }}>
+                          Página {index + 1}
+                        </h4>
+                        <ResponsiveContainer width="100%" height={Math.max(200, chunk.length * 50)}>
+                          <BarChart 
+                            layout="vertical" 
+                            data={chunkWithRank} 
+                            margin={{ top: 10, right: 60, left: 20, bottom: 10 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                            <XAxis type="number" hide domain={[0, maxWasteValue || 'auto']} />
+                            <YAxis dataKey="name" type="category" width={200} stroke="#888" tick={{ fill: '#888', fontSize: 11 }} />
+                            <RechartsTooltip 
+                              content={<CustomWasteTooltip />} 
+                              wrapperStyle={{ zIndex: 1000 }}
+                              allowEscapeViewBox={{ x: true, y: true }}
                             />
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ))}
+                            <Bar dataKey="value" fill="#ff4d4d" barSize={20} radius={[0, 4, 4, 0]}>
+                              <LabelList 
+                                dataKey="value" 
+                                position="right" 
+                                formatter={(val) => `R$ ${Number(val).toFixed(2)}`} 
+                                fill="#ff4d4d" 
+                                fontSize={12} 
+                                fontWeight="bold"
+                              />
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '20px' }}>Nenhum desperdício registrado neste mês.</div>
