@@ -792,14 +792,16 @@ const FinancialSummary = () => {
         }
       });
 
-      day.profitCum = currentProfitCum;
-      day.expensesCum = currentExpensesCum;
-      day.fixedRemaining = Math.max(0, currentFixedRemaining);
-
       const targetDate = new Date(selectedYear, selectedMonth, day.day);
       if (targetDate > today) {
+         day.profitCum = null;
+         day.expensesCum = null;
+         day.fixedRemaining = null;
          day.stockValue = null;
       } else {
+         day.profitCum = currentProfitCum;
+         day.expensesCum = currentExpensesCum;
+         day.fixedRemaining = Math.max(0, currentFixedRemaining);
          if (selectedYear > 2026 || (selectedYear === 2026 && selectedMonth >= 5)) {
             day.stockValue = stockByDay[day.day];
          } else {
