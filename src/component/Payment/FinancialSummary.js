@@ -291,6 +291,7 @@ const FinancialSummary = () => {
   const [showExpensesLine, setShowExpensesLine] = useState(true);
   const [showFixedLine, setShowFixedLine] = useState(true);
   const [showStockLine, setShowStockLine] = useState(true);
+  const [productMetric, setProductMetric] = useState('quantity'); // 'quantity' | 'profit'
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -653,7 +654,8 @@ const FinancialSummary = () => {
         viewMode: 'annual',
         refMonthName: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][refMonth],
         overdue: [],
-        topProducts: [],
+        topProductsQty: [],
+        topProductsProfit: [],
         topExpensesPie: [],
       };
     }
@@ -824,21 +826,31 @@ const FinancialSummary = () => {
       return due < today;
     });
 
-    // Top Products Logic
-    const productMap = {};
+    // Top Products Logic (Quantity & Profit)
+    const productQtyMap = {};
+    const productProfitMap = {};
     monthRevenue.forEach(rev => {
       (rev.request || []).forEach(item => {
         const name = item.product || item.name || 'Produto s/ nome';
         const qty = Number(item.amount || item.quantity || 1);
         if (qty > 0) {
-          productMap[name] = (productMap[name] || 0) + qty;
+          productQtyMap[name] = (productQtyMap[name] || 0) + qty;
+          
+          const unitProfit = calculateItemProfit(item);
+          const totalProfit = unitProfit * qty;
+          productProfitMap[name] = (productProfitMap[name] || 0) + totalProfit;
         }
       });
     });
-    const topProducts = Object.entries(productMap)
+    const topProductsQty = Object.entries(productQtyMap)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 8); // Top 8
+      .slice(0, 8); // Top 8 Qty
+
+    const topProductsProfit = Object.entries(productProfitMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8); // Top 8 Profit
 
     // Top Expenses Logic (Pie)
     const expensePieMap = {};
@@ -864,7 +876,8 @@ const FinancialSummary = () => {
       totalStockValue,
       dailyData,
       overdue,
-      topProducts,
+      topProductsQty,
+      topProductsProfit,
       topExpensesPie,
     };
   }, [filteredData, selectedMonth, selectedYear, viewMode, expenses, revenue, menuItems, sideDishes, stock, dailyStock, monthlyStockLogs]);
@@ -1601,38 +1614,61 @@ const FinancialSummary = () => {
       {viewMode === 'monthly' && (
         <div className={style.pieChartsGrid}>
           <div className={style.pieCard}>
-            <h3>🍕 Produtos Mais Vendidos (%)</h3>
-            {stats.topProducts.length > 0 ? (
-              <>
-                <div className={style.pieWrapper}>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={stats.topProducts}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={false}
-                        outerRadius={100}
-                        innerRadius={65}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="name"
-                        paddingAngle={3}
-                      >
-                        {stats.topProducts.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip content={<PieTooltip />} wrapperStyle={{ zIndex: 10000 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <CustomLegend data={stats.topProducts} colors={COLORS} />
-              </>
-            ) : (
-              <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
-            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '15px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', textAlign: 'left' }}>
+                🍕 {productMetric === 'quantity' ? 'Produtos Mais Vendidos (%)' : 'Produtos Mais Lucrativos (%)'}
+              </h3>
+              <div className={style.metricToggle}>
+                <button
+                  type="button"
+                  className={`${style.toggleBtn} ${productMetric === 'quantity' ? style.activeToggle : ''}`}
+                  onClick={() => setProductMetric('quantity')}
+                >
+                  Qtd
+                </button>
+                <button
+                  type="button"
+                  className={`${style.toggleBtn} ${productMetric === 'profit' ? style.activeToggle : ''}`}
+                  onClick={() => setProductMetric('profit')}
+                >
+                  Lucro
+                </button>
+              </div>
+            </div>
+            {(() => {
+              const topProductsToShow = productMetric === 'quantity' ? stats.topProductsQty : stats.topProductsProfit;
+              return topProductsToShow && topProductsToShow.length > 0 ? (
+                <>
+                  <div className={style.pieWrapper}>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={topProductsToShow}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={false}
+                          outerRadius={100}
+                          innerRadius={65}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          paddingAngle={3}
+                        >
+                          {topProductsToShow.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip content={<PieTooltip isCurrency={productMetric === 'profit'} />} wrapperStyle={{ zIndex: 10000 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <CustomLegend data={topProductsToShow} colors={COLORS} />
+                </>
+              ) : (
+                <div className={style.noDataMessage}>As vendas não estavam ativas naquela época.</div>
+              );
+            })()}
           </div>
 
           <div className={style.pieCard}>
