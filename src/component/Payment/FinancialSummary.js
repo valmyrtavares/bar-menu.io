@@ -292,6 +292,7 @@ const FinancialSummary = () => {
   const [showFixedLine, setShowFixedLine] = useState(true);
   const [showStockLine, setShowStockLine] = useState(true);
   const [productMetric, setProductMetric] = useState('quantity'); // 'quantity' | 'profit'
+  const [tableMetric, setTableMetric] = useState('quantity'); // 'quantity' | 'profit'
 
   useEffect(() => {
     const unsubExpenses = onSnapshot(collection(db, 'outgoing'), (snapshot) => {
@@ -929,10 +930,10 @@ const FinancialSummary = () => {
 
   const productRankingList = useMemo(() => {
     const rankingMap = {};
-    // Initialize all active menu items with 0 sales
+    // Initialize all active menu items with 0 sales and 0 profit
     menuItems.forEach(item => {
       if (item.title) {
-        rankingMap[item.title] = 0;
+        rankingMap[item.title] = { sold: 0, profit: 0 };
       }
     });
 
@@ -948,7 +949,10 @@ const FinancialSummary = () => {
           if (name && qty > 0) {
             // Only count if it's currently in the menu (this excludes deleted products)
             if (rankingMap.hasOwnProperty(name)) {
-              rankingMap[name] += qty;
+              rankingMap[name].sold += qty;
+              
+              const unitProfit = calculateItemProfit(reqItem);
+              rankingMap[name].profit += (unitProfit * qty);
             }
           }
         });
@@ -956,9 +960,15 @@ const FinancialSummary = () => {
     });
 
     return Object.entries(rankingMap)
-      .map(([name, sold]) => ({ name, sold }))
-      .sort((a, b) => b.sold - a.sold);
-  }, [revenue, menuItems, startDateRank, endDateRank]);
+      .map(([name, data]) => ({ name, sold: data.sold, profit: data.profit }))
+      .sort((a, b) => {
+        if (tableMetric === 'quantity') {
+          return b.sold - a.sold;
+        } else {
+          return b.profit - a.profit;
+        }
+      });
+  }, [revenue, menuItems, startDateRank, endDateRank, tableMetric]);
 
   const { productsWithSales, productsWithoutSales } = useMemo(() => {
     const withSales = [];
@@ -1720,7 +1730,7 @@ const FinancialSummary = () => {
             borderBottom: showProductRanking ? '1px solid #eee' : 'none',
             paddingBottom: showProductRanking ? '12px' : '0'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
               <h3 style={{ margin: 0 }}>🏆 Ranking Completo de Vendas</h3>
               <button 
                 onClick={() => setShowProductRanking(prev => !prev)}
@@ -1742,6 +1752,24 @@ const FinancialSummary = () => {
               >
                 {showProductRanking ? '▲ Recolher' : '▼ Expandir'}
               </button>
+              {showProductRanking && (
+                <div className={style.metricToggle} style={{ marginLeft: '10px' }}>
+                  <button
+                    type="button"
+                    className={`${style.toggleBtn} ${tableMetric === 'quantity' ? style.activeToggle : ''}`}
+                    onClick={() => setTableMetric('quantity')}
+                  >
+                    Qtd
+                  </button>
+                  <button
+                    type="button"
+                    className={`${style.toggleBtn} ${tableMetric === 'profit' ? style.activeToggle : ''}`}
+                    onClick={() => setTableMetric('profit')}
+                  >
+                    Lucro
+                  </button>
+                </div>
+              )}
             </div>
             {showProductRanking && (
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -1774,7 +1802,9 @@ const FinancialSummary = () => {
                   <tr>
                     <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
                     <th style={{ textAlign: 'left' }}>Nome do Produto</th>
-                    <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
+                    <th style={{ textAlign: 'center' }}>
+                      {tableMetric === 'quantity' ? 'Quantidade Vendida' : 'Lucro Total'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1783,7 +1813,7 @@ const FinancialSummary = () => {
                       <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{index + 1}º</td>
                       <td>{prod.name}</td>
                       <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                        {prod.sold}
+                        {tableMetric === 'quantity' ? prod.sold : `R$ ${prod.profit.toFixed(2)}`}
                       </td>
                     </tr>
                   ))}
@@ -1830,7 +1860,9 @@ const FinancialSummary = () => {
                         <tr>
                           <th style={{ textAlign: 'center', width: '80px' }}>Posição</th>
                           <th style={{ textAlign: 'left' }}>Nome do Produto</th>
-                          <th style={{ textAlign: 'center' }}>Quantidade Vendida</th>
+                          <th style={{ textAlign: 'center' }}>
+                            {tableMetric === 'quantity' ? 'Quantidade Vendida' : 'Lucro Total'}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1841,7 +1873,7 @@ const FinancialSummary = () => {
                               <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{realPos}º</td>
                               <td>{prod.name}</td>
                               <td style={{ textAlign: 'center', fontWeight: 'bold', color: '#ff4d4d' }}>
-                                {prod.sold}
+                                {tableMetric === 'quantity' ? prod.sold : `R$ ${prod.profit.toFixed(2)}`}
                               </td>
                             </tr>
                           );
