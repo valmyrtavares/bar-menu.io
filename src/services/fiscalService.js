@@ -1,9 +1,6 @@
 import {
-  getFirestore,
   collection,
   addDoc,
-  doc,
-  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../config-firebase/firebase';
 
@@ -110,13 +107,60 @@ export const issueAutoNfce = async (order) => {
   nfce.formas_pagamento.push({
     indicador_pagamento: '0', // 0: Pagamento à Vista
     forma_pagamento: paymentMethodWay(paymentMethod),
-    valor_pagamento: order.finalPriceRequest,
+    valor_pagamento: parseFloat(order.finalPriceRequest || 0),
     bandeira_operadora: paymentDetails ? paymentDetails.cardBrandCode : '',
   });
 
   // Itens do pedido
   if (order.request && Array.isArray(order.request)) {
-    order.request.forEach((item, index) => {
+    const totalPayment = parseFloat(order.finalPriceRequest || 0);
+    const totalItemsSum = order.request.reduce((acc, item) => acc + parseFloat(item.finalPrice || 0), 0);
+
+    let adjustedItems = [];
+    if (totalItemsSum > 0 && totalPayment > 0 && Math.abs(totalItemsSum - totalPayment) > 0.005) {
+      // Distribui o valor total do pagamento proporcionalmente entre os itens
+      let accumulatedSum = 0;
+      
+      order.request.forEach((item, index) => {
+        const originalPrice = parseFloat(item.finalPrice || 0);
+        let adjustedPrice;
+        
+        if (index === order.request.length - 1) {
+          // Último item absorve qualquer diferença de arredondamento de centavos
+          adjustedPrice = parseFloat((totalPayment - accumulatedSum).toFixed(2));
+        } else {
+          // Calcula a proporção e arredonda para 2 casas decimais
+          adjustedPrice = parseFloat((originalPrice * (totalPayment / totalItemsSum)).toFixed(2));
+          accumulatedSum += adjustedPrice;
+        }
+        
+        // Evita que o preço ajustado seja menor ou igual a zero (caso do último item ou arredondamento estranho)
+        if (adjustedPrice <= 0) {
+          adjustedPrice = 0.01;
+        }
+        
+        adjustedItems.push({
+          ...item,
+          finalPrice: adjustedPrice
+        });
+      });
+      
+      // Ajuste final secundário de segurança para garantir que a soma dos itens seja exatamente igual a totalPayment
+      const newSum = adjustedItems.reduce((acc, item) => acc + item.finalPrice, 0);
+      if (Math.abs(newSum - totalPayment) > 0.005 && adjustedItems.length > 0) {
+        const diff = parseFloat((totalPayment - newSum).toFixed(2));
+        // Adiciona a diferença ao último item
+        adjustedItems[adjustedItems.length - 1].finalPrice = parseFloat((adjustedItems[adjustedItems.length - 1].finalPrice + diff).toFixed(2));
+      }
+    } else {
+      // Sem alteração (ou valores zerados/iguais)
+      adjustedItems = order.request.map(item => ({
+        ...item,
+        finalPrice: parseFloat(item.finalPrice || 0)
+      }));
+    }
+
+    adjustedItems.forEach((item, index) => {
       nfce.items.push({
         numero_item: index + 1,
         codigo_ncm: fillingNcmCode(item.category),
