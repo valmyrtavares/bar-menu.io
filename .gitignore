@@ -26,3 +26,6 @@ cors.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# local XML downloads
+/XMLs_Abril_Maio_2026/
