@@ -11,7 +11,10 @@ import {
   updateDoc,
   setDoc,
   getDoc,
+  getDocs,
+  deleteDoc,
 } from 'firebase/firestore';
+import { db } from '../../config-firebase/firebase.js';
 import { getBtnData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 import { issueAutoNfce } from '../../services/fiscalService';
@@ -132,6 +135,33 @@ const FiscalAttributes = () => {
     } catch (error) {
       console.error('Erro na emissão manual:', error);
       alert('Erro ao emitir nota fiscal. Verifique os logs.');
+    }
+  };
+
+  const handleCleanupRejectedDocs = async () => {
+    const confirmCleanup = window.confirm("Deseja deletar todas as notas fiscais rejeitadas (com erro ou sem PDF) da coleção taxDocuments? Isso liberará espaço e otimizará as leituras.");
+    if (!confirmCleanup) return;
+    
+    try {
+      setBtnValidation(true);
+      const qSnap = await getDocs(collection(db, 'taxDocuments'));
+      let deleteCount = 0;
+      
+      for (const docSnap of qSnap.docs) {
+        const data = docSnap.data();
+        if (!data.caminho_danfe || data.status !== 'autorizado') {
+          const docRef = doc(db, 'taxDocuments', docSnap.id);
+          await deleteDoc(docRef);
+          deleteCount++;
+        }
+      }
+      alert(`Limpeza concluída com sucesso! ${deleteCount} documentos rejeitados/inúteis foram removidos.`);
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao realizar limpeza: " + e.message);
+    } finally {
+      setBtnValidation(false);
     }
   };
 
@@ -409,6 +439,13 @@ const FiscalAttributes = () => {
         className="btn btn-success"
       >
         Gerar Nota fiscal
+      </button>
+      <button
+        onClick={handleCleanupRejectedDocs}
+        className="btn btn-danger"
+        style={{ marginLeft: '10px', backgroundColor: '#dc3545', borderColor: '#dc3545', color: '#fff' }}
+      >
+        Limpar Notas Rejeitadas
       </button>
       {/* <div>
         <button onClick={handleConsulta}>Consultar NFC-e</button>

@@ -158,7 +158,9 @@ export const issueAutoNfce = async (order) => {
       const result = await response.json();
       console.log('Resposta NFC-e:', result);
 
-      await saveToFirestore(result, order.finalPriceRequest, ref);
+      if (result && result.status === 'autorizado' && result.caminho_danfe) {
+        await saveToFirestore(result, order.finalPriceRequest, ref);
+      }
 
       // Retorna o resultado + ref para que o chamador (triggerFiscal) faça o updateDoc
       // IMPORTANTE: NÃO fazemos updateDoc aqui para evitar onSnapshot intermediário

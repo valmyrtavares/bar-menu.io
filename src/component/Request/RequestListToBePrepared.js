@@ -237,6 +237,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             order.paymentDone === true &&
             !order.nfceIssued &&
             !order.sendingNfce &&
+            order.nfceStatus !== 'erro' &&
+            order.nfceStatus !== 'rejeitado' &&
             !global.processedOrdersGlobal.current.has(order.id)
           ) {
             // Marca IMEDIATAMENTE na memória para bloquear próximas renderizações
@@ -310,12 +312,16 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                   `[SUCESSO] Nota emitida para ${order.countRequest}. Trava liberada.`,
                 );
               } else {
-                // ERRO NA API: Solta a trava para tentar de novo
+                // ERRO NA API: Grava o erro e solta a trava (sem re-emitir automaticamente)
                 console.error(
-                  `[ERRO API] Falha autorização para ${order.countRequest}. Soltando trava.`,
+                  `[ERRO API] Falha autorização para ${order.countRequest}. Gravando erro.`,
                   result,
                 );
-                await updateDoc(orderRef, { sendingNfce: false });
+                await updateDoc(orderRef, { 
+                  sendingNfce: false,
+                  nfceStatus: result?.status || 'erro',
+                  nfceErrorDetail: result?.mensagem_sefaz || result?.erro || 'Erro na resposta da Focus API'
+                });
                 global.processedOrdersGlobal.current.delete(order.id);
               }
             } catch (err) {
@@ -324,11 +330,12 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 `[ERRO GERAL] Falha no processo para ${order.countRequest}:`,
                 err,
               );
-              // Solta ambas as travas para não travar o pedido para sempre
               global.processedOrdersGlobal.current.delete(order.id);
               try {
                 await updateDoc(doc(db, 'requests', order.id), {
                   sendingNfce: false,
+                  nfceStatus: 'erro',
+                  nfceErrorDetail: err?.message || 'Erro de rede ou conexão com o servidor'
                 });
               } catch (unlockErr) {
                 console.error('Falha crítica ao destrancar pedido:', unlockErr);
