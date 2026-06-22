@@ -63,6 +63,7 @@ export async function checkUnavaiableRawMaterial(id) {
   // 4) Função que processa um array de ingredientes
   //
   let foundIngredient = false;
+  let recipeChanged = false;
   const processIngredientsArray = (arr, isUnavailable) => {
     if (!Array.isArray(arr)) return;
 
@@ -72,7 +73,10 @@ export async function checkUnavaiableRawMaterial(id) {
 
       // Se é a matéria-prima alvo da função
       if (normalizedIngName === normalizedProduct) {
-        ing.unavailableRawMaterial = isUnavailable; // true ou false
+        if (ing.unavailableRawMaterial !== isUnavailable) {
+          ing.unavailableRawMaterial = isUnavailable; // true ou false
+          recipeChanged = true;
+        }
         foundIngredient = true;
       }
     });
@@ -85,6 +89,7 @@ export async function checkUnavaiableRawMaterial(id) {
   for (const dishSnap of itemsSnapshot.docs) {
     const data = dishSnap.data();
     foundIngredient = false;
+    recipeChanged = false;
 
     const recipe = data?.recipe?.FinalingridientsList;
     if (!recipe) continue;
@@ -125,9 +130,12 @@ export async function checkUnavaiableRawMaterial(id) {
     //
     // 8) Ajuste da flag LOW AMOUNT no prato
     //
+    const originalLowAmount = !!data.lowAmountRawMaterial;
+    let nextLowAmount = false;
+
     if (isUnavailable && foundIngredient) {
       // Se a matéria-prima está indisponível → prato fica indisponível
-      data.lowAmountRawMaterial = true;
+      nextLowAmount = true;
     } else {
       //
       // Cenário inverso:
@@ -143,11 +151,9 @@ export async function checkUnavaiableRawMaterial(id) {
         return found ? true : null; // true = indisponível; null = irrelevante
       };
 
-      let stillUnavailable = false;
-
       if (Array.isArray(updatedRecipe)) {
         // Receita de array único
-        stillUnavailable = checkStillUnavailable(updatedRecipe) === true;
+        nextLowAmount = checkStillUnavailable(updatedRecipe) === true;
       } else {
         // Receita com múltiplos arrays
         const labels = data.CustomizedPrice;
@@ -165,46 +171,49 @@ export async function checkUnavaiableRawMaterial(id) {
         }
 
         // Se QUALQUER grupo retornar true → prato fora do cardápio
-        stillUnavailable = results.includes(true);
+        nextLowAmount = results.includes(true);
+      }
+    }
+
+    if (originalLowAmount !== nextLowAmount) {
+      data.lowAmountRawMaterial = nextLowAmount;
+      recipeChanged = true;
+    }
+
+    if (recipeChanged) {
+      console.log(
+        `[OPTIMIZATION] Prato ${data.title} atualizado no Firestore: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`,
+      );
+
+      // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
+      const dishRef = doc(db, 'item', dishSnap.id);
+
+      // monta o payload atualizado
+      // --- MONTAR PAYLOAD CONFORME O TIPO DE RECIPE ---
+      let updatedPayload;
+
+      if (Array.isArray(recipe)) {
+        // 1) Recipe simples (um único array)
+        updatedPayload = {
+          ...data,
+          recipe: {
+            FinalingridientsList: updatedRecipe,
+          },
+        };
+      } else {
+        // 2) Recipe com 3 arrays dentro de um objeto
+        updatedPayload = {
+          ...data,
+          recipe: {
+            FinalingridientsList: updatedRecipe, // updatedRecipe já é o objeto com 3 arrays
+          },
+          CustomizedPrice: data.CustomizedPrice, // mantém o mapeamento dos 3 labels
+        };
       }
 
-      // Define o status final do prato
-      data.lowAmountRawMaterial = stillUnavailable;
+      // salva no firestore
+      await updateDoc(dishRef, updatedPayload);
     }
-    console.log(
-      `Prato ${data.title} atualizado: lowAmountRawMaterial = ${data.lowAmountRawMaterial}`,
-    );
-
-    // --- SALVAR AS ALTERAÇÕES NO FIRESTORE ---
-
-    // referência do prato
-    const dishRef = doc(db, 'item', dishSnap.id);
-
-    // monta o payload atualizado
-    // --- MONTAR PAYLOAD CONFORME O TIPO DE RECIPE ---
-    let updatedPayload;
-
-    if (Array.isArray(recipe)) {
-      // 1) Recipe simples (um único array)
-      updatedPayload = {
-        ...data,
-        recipe: {
-          FinalingridientsList: updatedRecipe,
-        },
-      };
-    } else {
-      // 2) Recipe com 3 arrays dentro de um objeto
-      updatedPayload = {
-        ...data,
-        recipe: {
-          FinalingridientsList: updatedRecipe, // updatedRecipe já é o objeto com 3 arrays
-        },
-        CustomizedPrice: data.CustomizedPrice, // mantém o mapeamento dos 3 labels
-      };
-    }
-
-    // salva no firestore
-    await updateDoc(dishRef, updatedPayload);
   }
   return false;
 }

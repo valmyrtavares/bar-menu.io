@@ -8,6 +8,7 @@ import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 
 import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
+import styleProgress from '../../assets/styles/AuditingPopupProgress.module.scss';
 
 const AuditingPopup = ({ onClose, fetchStock }) => {
   const [stockItems, setStockItems] = useState([]);
@@ -17,6 +18,13 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dishes, setDishes] = useState([]);
   const [showSummaryScreen, setShowSummaryScreen] = useState(false);
+
+  // Estados para o Progresso e Resiliência
+  const [progressIndex, setProgressIndex] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentUpdatingItemName, setCurrentUpdatingItemName] = useState('');
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [pendingAuditState, setPendingAuditState] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -45,6 +53,20 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         setStockItems(itemsWithEditedVolume);
         
         exportToExcel(itemsWithEditedVolume);
+
+        // Verificar se há alguma auditoria não concluída no localStorage
+        const saved = localStorage.getItem('pending_stock_audit');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed && parsed.summaryItems && parsed.summaryItems.length > 0) {
+              setPendingAuditState(parsed);
+            }
+          } catch (e) {
+            console.error("Erro ao ler auditoria pendente do localStorage:", e);
+            localStorage.removeItem('pending_stock_audit');
+          }
+        }
       } catch (err) {
         console.error("Erro ao carregar dados", err);
       } finally {
@@ -53,6 +75,28 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     };
     init();
   }, []);
+
+  // Efeito do Cronômetro Ativo durante a submissão
+  useEffect(() => {
+    let interval = null;
+    if (isSubmitting) {
+      setElapsedTime(0);
+      interval = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSubmitting]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   const exportToExcel = (items) => {
     const dataToExport = items.map(item => ({
@@ -270,35 +314,44 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     };
   };
 
-  const handleConfirmAndSave = async (summaryItems, totalLossValue, fullDate, paymentDate) => {
-    if (isSubmitting) return;
+  const runAuditProcess = async (auditData) => {
     setIsSubmitting(true);
+    let currentAudit = { ...auditData };
+    setTotalItems(currentAudit.summaryItems.length);
+    setProgressIndex(currentAudit.currentIndex);
 
     try {
-      let allUpdatedDishes = [];
+      // 1. Criar o registro no histórico de inventário caso ainda não exista no Firestore
+      if (!currentAudit.inventoryHistoryDocId) {
+        const inventoryRecord = {
+          date: currentAudit.fullDate,
+          timestamp: Date.now(),
+          totalLossValue: currentAudit.totalLossValue,
+          items: currentAudit.summaryItems.map(item => ({
+            product: item.product,
+            unit: item.unitOfMeasurement,
+            previousVolume: item.originalVolume,
+            previousCost: item.originalCost,
+            currentVolume: item.newVolume,
+            currentCost: item.newCost,
+            lossVolume: item.lossVolume,
+            lossValue: item.lossValue,
+            correction: item.correction
+          }))
+        };
 
-      // Create history record
-      const inventoryRecord = {
-        date: fullDate,
-        timestamp: Date.now(),
-        totalLossValue,
-        items: summaryItems.map(item => ({
-          product: item.product,
-          unit: item.unitOfMeasurement,
-          previousVolume: item.originalVolume,
-          previousCost: item.originalCost,
-          currentVolume: item.newVolume,
-          currentCost: item.newCost,
-          lossVolume: item.lossVolume,
-          lossValue: item.lossValue,
-          correction: item.correction
-        }))
-      };
+        const docRef = await addDoc(collection(db, 'inventoryHistory'), inventoryRecord);
+        currentAudit.inventoryHistoryDocId = docRef.id;
+        localStorage.setItem('pending_stock_audit', JSON.stringify(currentAudit));
+      }
 
-      await addDoc(collection(db, 'inventoryHistory'), inventoryRecord);
+      // 2. Loop de atualização atômica item por item
+      for (let i = currentAudit.currentIndex; i < currentAudit.summaryItems.length; i++) {
+        const item = currentAudit.summaryItems[i];
+        setCurrentUpdatingItemName(item.product);
+        setProgressIndex(i);
 
-      for (const item of summaryItems) {
-        const original = originalItems[item.id];
+        const original = originalItems[item.id] || item;
         const newVolumeValue = item.newVolume;
         const newTotalCostValue = item.newCost;
 
@@ -323,7 +376,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         const logEvent = stockHistoryList(
           original,
           'Auditoria',
-          paymentDate,
+          currentAudit.paymentDate,
           pack,
           cost,
           unit,
@@ -336,41 +389,147 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
         delete updatedProduct.UsageHistory;
 
-        // Update Dishes locally
+        // Atualizar pratos localmente para este item
         const dishesToUpdateForThisItem = updateRecipesinDishesAndSideDishes(updatedProduct, dishes);
-        allUpdatedDishes = [...allUpdatedDishes, ...dishesToUpdateForThisItem];
+        // Gravar no Firestore imediatamente (se existirem pratos afetados)
+        if (dishesToUpdateForThisItem && dishesToUpdateForThisItem.length > 0) {
+          const uniqueDishesMap = new Map();
+          dishesToUpdateForThisItem.forEach(d => uniqueDishesMap.set(d.id, d));
+          await Promise.all(Array.from(uniqueDishesMap.values()).map(updateDishInFirebase));
+        }
 
-        // Update Firestore Stock
+        // Atualizar Firestore Stock
         const docRef = doc(db, 'stock', updatedProduct.id);
         await updateDoc(docRef, updatedProduct);
         await logStockUsage(updatedProduct.id, logEvent);
 
-        // Update Side Dishes
+        // Atualizar Side Dishes
         await updateSideDishesInFirebase(updatedProduct);
 
-        // Check availability
+        // Verificar disponibilidade (otimizada)
         await checkUnavaiableRawMaterial(updatedProduct.id);
+
+        // Atualizar progresso no localStorage
+        currentAudit.currentIndex = i + 1;
+        currentAudit.completedIds = [...(currentAudit.completedIds || []), item.id];
+        localStorage.setItem('pending_stock_audit', JSON.stringify(currentAudit));
       }
 
-      // Remove duplicates from allUpdatedDishes if multiple items modified the same dish
-      const uniqueUpdatedDishesMap = new Map();
-      allUpdatedDishes.forEach(dish => {
-        uniqueUpdatedDishesMap.set(dish.id, dish);
-      });
-      const uniqueUpdatedDishes = Array.from(uniqueUpdatedDishesMap.values());
-
-      // Update Dishes in Firebase
-      await Promise.all(uniqueUpdatedDishes.map(updateDishInFirebase));
-
+      // 3. Registrar movimentação consolidada final
+      setProgressIndex(currentAudit.summaryItems.length);
       await registerDailyStockMovement('Inventário/Auditoria');
+      
+      // Limpar do localStorage
+      localStorage.removeItem('pending_stock_audit');
+      
       fetchStock();
       onClose();
     } catch (error) {
       console.error("Erro ao salvar auditoria:", error);
-      alert("Ocorreu um erro ao salvar. Verifique o console.");
+      alert("Ocorreu um erro ao salvar a auditoria. O progresso foi mantido e você poderá retomar de onde parou ao reabrir a tela.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleConfirmAndSave = async (summaryItems, totalLossValue, fullDate, paymentDate) => {
+    if (isSubmitting) return;
+
+    const auditData = {
+      summaryItems,
+      totalLossValue,
+      fullDate,
+      paymentDate,
+      currentIndex: 0,
+      completedIds: [],
+      inventoryHistoryDocId: null
+    };
+
+    localStorage.setItem('pending_stock_audit', JSON.stringify(auditData));
+    await runAuditProcess(auditData);
+  };
+
+  const handleResumeAudit = async () => {
+    if (!pendingAuditState) return;
+    const auditToRun = { ...pendingAuditState };
+    setPendingAuditState(null); // Fecha a tela de prompt
+    await runAuditProcess(auditToRun);
+  };
+
+  const handleDiscardAudit = () => {
+    if (window.confirm("Tem certeza de que deseja descartar o progresso salvo? Alguns itens que já foram atualizados no banco de dados não serão desfeitos.")) {
+      localStorage.removeItem('pending_stock_audit');
+      setPendingAuditState(null);
+    }
+  };
+
+  const renderProgressScreen = () => {
+    const percent = totalItems > 0 ? Math.round((progressIndex / totalItems) * 100) : 0;
+    return (
+      <div className={styleProgress.progressOverlay}>
+        <div className={styleProgress.progressCard}>
+          <div className={styleProgress.spinner}></div>
+          <h3>Salvando Auditoria de Estoque</h3>
+          
+          <div className={styleProgress.progressBarContainer}>
+            <div 
+              className={styleProgress.progressBar} 
+              style={{ width: `${percent}%` }}
+            ></div>
+          </div>
+          
+          <p className={styleProgress.progressText}>
+            Atualizando item <strong>{progressIndex + 1}</strong> de <strong>{totalItems}</strong> ({percent}%)
+          </p>
+          
+          <p className={styleProgress.currentItemName}>
+            {currentUpdatingItemName}
+          </p>
+          
+          <div className={styleProgress.timerContainer}>
+            Tempo decorrido: <strong>{formatTime(elapsedTime)}</strong>
+          </div>
+          
+          <p className={styleProgress.warningText}>
+            ⚠️ Por favor, não feche esta página ou recarregue o navegador.
+            O sistema está realizando gravações otimizadas e seguras.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderRecoveryScreen = () => {
+    return (
+      <div className={styleProgress.recoveryOverlay}>
+        <div className={styleProgress.recoveryCard}>
+          <h3>Auditoria Incompleta Detectada</h3>
+          <p>
+            Uma auditoria de estoque iniciada em <strong>{pendingAuditState.fullDate}</strong> não foi concluída com sucesso.
+          </p>
+          <p>
+            Total de itens a atualizar: <strong>{pendingAuditState.summaryItems.length}</strong>
+          </p>
+          <p>
+            Progresso salvo: <strong>{pendingAuditState.currentIndex}</strong> de <strong>{pendingAuditState.summaryItems.length}</strong> itens concluídos.
+          </p>
+          <div className={styleProgress.recoveryButtons}>
+            <button 
+              className={styleProgress.confirmBtn} 
+              onClick={handleResumeAudit}
+            >
+              Retomar Auditoria
+            </button>
+            <button 
+              className={styleProgress.cancelBtn} 
+              onClick={handleDiscardAudit}
+            >
+              Descartar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderMainScreen = () => {
@@ -381,8 +540,6 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
             X
           </button>
         </div>
-        
-        {isSubmitting && <UpdateMenuMessage />}
 
         <div className={styleEdit.titleRow}>
           <h2>Auditoria de Estoque</h2>
@@ -562,16 +719,17 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
              onClick={() => handleConfirmAndSave(summaryItems, totalLossValue, fullDate, paymentDate)} 
              disabled={isSubmitting}
            >
-             {isSubmitting ? 'Enviando...' : 'Confirmar e Salvar'}
+             Confirmar e Salvar
            </button>
         </div>
-        {isSubmitting && <UpdateMenuMessage />}
       </div>
     );
   };
 
   return (
     <div className={styleEdit.popupOverlay}>
+      {pendingAuditState && renderRecoveryScreen()}
+      {isSubmitting && renderProgressScreen()}
       {showSummaryScreen ? renderSummaryScreen() : renderMainScreen()}
     </div>
   );
