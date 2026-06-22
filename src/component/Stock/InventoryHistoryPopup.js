@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
+import styleProgress from '../../assets/styles/AuditingPopupProgress.module.scss';
 
 const InventoryHistoryPopup = ({ onClose }) => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInventory, setSelectedInventory] = useState(null);
+  
+  const [activeTab, setActiveTab] = useState('history'); // 'history' | 'analytics'
+  const [menuItems, setMenuItems] = useState([]);
+  const [adjustmentLogs, setAdjustmentLogs] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchHistoryAndAnalytics = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'inventoryHistory'));
         const data = [];
@@ -24,7 +32,6 @@ const InventoryHistoryPopup = ({ onClose }) => {
               return acc + (Number(item.currentCost) - Number(item.previousCost));
             }, 0);
           } else {
-            // Fallback se por acaso a lógica de items falhar (ex: usando apenas totalLossValue antigo)
             difference = -(docData.totalLossValue || 0);
           }
 
@@ -40,8 +47,188 @@ const InventoryHistoryPopup = ({ onClose }) => {
 
         // Ordenar do mais recente para o mais antigo
         data.sort((a, b) => b.timestamp - a.timestamp);
-        
         setHistoryItems(data);
+
+        // Buscar pratos e logs de calibração
+        const [dishesSnap, logsSnap] = await Promise.all([
+          getDocs(collection(db, 'item')),
+          getDocs(collection(db, 'recipeAdjustmentsLogs'))
+        ]);
+
+        const loadedDishes = [];
+        dishesSnap.forEach(d => {
+          loadedDishes.push({ id: d.id, ...d.data() });
+        });
+        setMenuItems(loadedDishes);
+
+        const loadedLogs = [];
+        logsSnap.forEach(l => {
+          loadedLogs.push({ id: l.id, ...l.data() });
+        });
+        setAdjustmentLogs(loadedLogs);
+
+        // --- PROCESSAMENTO DOS DADOS DE INTELIGÊNCIA ---
+        const productsMap = {};
+
+        // Processar em ordem cronológica (mais antigos primeiro) para poder traçar histórico
+        const chronologicalInventories = [...data].reverse();
+
+        chronologicalInventories.forEach((inv) => {
+          if (inv.items && Array.isArray(inv.items)) {
+            inv.items.forEach((item) => {
+              const name = item.product;
+              if (!name) return;
+
+              if (!productsMap[name]) {
+                productsMap[name] = {
+                  product: name,
+                  unit: item.unit || '',
+                  history: [],
+                  totalAudits: 0,
+                  negativeCount: 0,
+                  positiveCount: 0,
+                  totalLossValue: 0,
+                  totalGainValue: 0,
+                  netVolumeDiff: 0,
+                  lastVolume: Number(item.currentVolume) || 0,
+                };
+              }
+
+              const difVol = Number(item.currentVolume) - Number(item.previousVolume);
+              const difCost = Number(item.currentCost) - Number(item.previousCost);
+
+              productsMap[name].history.push({
+                date: inv.date,
+                timestamp: inv.timestamp,
+                difVol,
+                difCost,
+                previousVolume: Number(item.previousVolume),
+                currentVolume: Number(item.currentVolume),
+              });
+
+              productsMap[name].totalAudits += 1;
+              if (difVol < 0) {
+                productsMap[name].negativeCount += 1;
+                productsMap[name].totalLossValue += Math.abs(difCost);
+              } else if (difVol > 0) {
+                productsMap[name].positiveCount += 1;
+                productsMap[name].totalGainValue += difCost;
+              }
+              productsMap[name].netVolumeDiff += difVol;
+              productsMap[name].lastVolume = Number(item.currentVolume);
+            });
+          }
+        });
+
+        const processedAnalytics = Object.values(productsMap).map((prod) => {
+          // Classificar padrão
+          let pattern = 'Estável';
+          let explanation = 'Estoque saudável ou com poucas correções necessárias.';
+
+          if (prod.totalAudits >= 3) {
+            const negRate = prod.negativeCount / prod.totalAudits;
+
+            if (negRate >= 0.8) {
+              pattern = 'Perda Sistemática';
+              explanation = `Este ingrediente apresenta falta física constante (em ${prod.negativeCount} de ${prod.totalAudits} contagens). Isto indica desperdício na preparação ou que a dosagem nas receitas no sistema está abaixo do consumo real na cozinha.`;
+            } else if (prod.negativeCount > 0 && prod.positiveCount > 0) {
+              pattern = 'Flutuação';
+              explanation = `Apresenta variações frequentes de saldo positivo e negativo entre os períodos. Isso costuma indicar erros de contagem física pelos operadores ou atrasos no lançamento de notas de entrada.`;
+            }
+          } else {
+            pattern = 'Dados Insuficientes';
+            explanation = 'É necessário pelo menos 3 inventários contendo este item para traçar um diagnóstico preciso.';
+          }
+
+          // Encontrar pratos que usam este ingrediente
+          const dishesUsingItem = loadedDishes.filter(dish => {
+            const list = dish.recipe?.FinalingridientsList;
+            if (!list) return false;
+            
+            const matches = (arr) => {
+              if (!Array.isArray(arr)) return false;
+              return arr.some(ing => ing.name && ing.name.trim().toLowerCase() === prod.product.trim().toLowerCase());
+            };
+
+            if (Array.isArray(list)) return matches(list);
+            if (typeof list === 'object') {
+              return matches(list.firstPrice) || matches(list.secondPrice) || matches(list.thirdPrice) ||
+                     (dish.CustomizedPrice && (
+                       matches(list[dish.CustomizedPrice.firstLabel]) ||
+                       matches(list[dish.CustomizedPrice.secondLabel]) ||
+                       matches(list[dish.CustomizedPrice.thirdLabel])
+                     ));
+            }
+            return false;
+          }).map(d => d.title);
+
+          // Verificar logs de calibração para o Feedback Loop
+          const logsForProduct = loadedLogs
+            .filter(l => l.product === prod.product)
+            .sort((a, b) => b.timestamp - a.timestamp); // mais recente primeiro
+          
+          let lastAdjustment = null;
+          let feedbackMessage = null;
+          let feedbackType = null;
+
+          if (logsForProduct.length > 0) {
+            lastAdjustment = logsForProduct[0];
+            const postAdjustmentAudits = prod.history.filter(h => h.timestamp > lastAdjustment.timestamp);
+            
+            if (postAdjustmentAudits.length > 0) {
+              const avgPostDiff = postAdjustmentAudits.reduce((acc, h) => acc + h.difVol, 0) / postAdjustmentAudits.length;
+              const avgVolume = postAdjustmentAudits.reduce((acc, h) => acc + h.previousVolume, 0) / postAdjustmentAudits.length;
+              const ratio = avgVolume > 0 ? (avgPostDiff / avgVolume) * 100 : 0;
+
+              if (ratio >= -2 && ratio <= 2) {
+                feedbackType = 'success';
+                feedbackMessage = `✅ Correção Bem-Sucedida: O ajuste de +${Math.round((lastAdjustment.scaleFactor - 1) * 100)}% feito em ${lastAdjustment.date} calibrou a receita com sucesso. A discrepância média caiu para ${ratio.toFixed(1)}%.`;
+              } else if (ratio < -2) {
+                feedbackType = 'neutral';
+                feedbackMessage = `⚠️ Sub-calibrado: A perda residual média ainda é de ${ratio.toFixed(1)}% mesmo após o ajuste de +${Math.round((lastAdjustment.scaleFactor - 1) * 100)}%. Sugerimos aumentar a receita.`;
+              } else if (ratio > 2) {
+                feedbackType = 'neutral';
+                feedbackMessage = `⚖️ Super-calibrado: Após o ajuste de +${Math.round((lastAdjustment.scaleFactor - 1) * 100)}%, houve sobra média de +${ratio.toFixed(1)}%. Sugerimos reduzir um pouco a receita.`;
+              }
+            } else {
+              feedbackType = 'neutral';
+              feedbackMessage = `⏳ Aguardando novo inventário para avaliar o impacto do ajuste de +${Math.round((lastAdjustment.scaleFactor - 1) * 100)}% realizado em ${lastAdjustment.date}.`;
+            }
+          }
+
+          // Sugestão de correção
+          let suggestedCorrectionPct = 0;
+          if (pattern === 'Perda Sistemática' && prod.history.length > 0) {
+            const totalPrevious = prod.history.reduce((acc, h) => acc + h.previousVolume, 0);
+            const totalDiff = prod.history.reduce((acc, h) => acc + Math.abs(h.difVol), 0);
+            suggestedCorrectionPct = totalPrevious > 0 ? (totalDiff / totalPrevious) * 100 : 0;
+            if (suggestedCorrectionPct > 30) suggestedCorrectionPct = 30; // Segurança max 30%
+          }
+
+          return {
+            ...prod,
+            pattern,
+            explanation,
+            dishesUsingItem,
+            lastAdjustment,
+            feedbackMessage,
+            feedbackType,
+            suggestedCorrectionPct,
+            isHighImpact: false
+          };
+        });
+
+        // Ordenar por perda absoluta em dinheiro desc
+        processedAnalytics.sort((a, b) => b.totalLossValue - a.totalLossValue);
+        
+        // Marcar top 3 com perda significativa (> R$ 50) como Alto Impacto
+        processedAnalytics.forEach((item, index) => {
+          if (index < 3 && item.totalLossValue > 50) {
+            item.isHighImpact = true;
+          }
+        });
+
+        setAnalyticsData(processedAnalytics);
       } catch (err) {
         console.error("Erro ao carregar histórico de inventários", err);
       } finally {
@@ -49,8 +236,112 @@ const InventoryHistoryPopup = ({ onClose }) => {
       }
     };
 
-    fetchHistory();
-  }, []);
+    fetchHistoryAndAnalytics();
+  }, [refreshTrigger]);
+
+  const handleAutomaticRecipeAdjustment = async (productName, correctionPct) => {
+    if (isAdjusting) return;
+    
+    const scaleFactor = 1 + (correctionPct / 100);
+    const confirm = window.confirm(
+      `Deseja ajustar as receitas automaticamente? Isso aumentará a quantidade de "${productName}" em todas as receitas em +${Math.round(correctionPct)}% e atualizará seus respectivos custos no sistema.`
+    );
+    if (!confirm) return;
+
+    setIsAdjusting(true);
+    try {
+      let updatedCount = 0;
+      const updates = [];
+
+      menuItems.forEach((dish) => {
+        let recipeList = dish.recipe?.FinalingridientsList;
+        if (!recipeList) return;
+
+        let changed = false;
+
+        const scaleArray = (arr) => {
+          if (!Array.isArray(arr)) return 0;
+          let diff = 0;
+          arr.forEach((ing) => {
+            if (ing.name && ing.name.trim().toLowerCase() === productName.trim().toLowerCase()) {
+              const originalAmount = Number(ing.amount) || 0;
+              const originalPortionCost = Number(ing.portionCost) || 0;
+
+              ing.amount = Number((originalAmount * scaleFactor).toFixed(4));
+              ing.portionCost = Number((originalPortionCost * scaleFactor).toFixed(2));
+              
+              diff += (ing.portionCost - originalPortionCost);
+              changed = true;
+            }
+          });
+          return diff;
+        };
+
+        if (Array.isArray(recipeList)) {
+          const diff = scaleArray(recipeList);
+          if (diff !== 0 && dish.costPriceObj) {
+            dish.costPriceObj.cost = Number((Number(dish.costPriceObj.cost || 0) + diff).toFixed(2));
+          }
+        } else if (typeof recipeList === 'object' && recipeList !== null) {
+          const labels = dish.CustomizedPrice;
+          
+          const firstDiff = scaleArray(recipeList.firstPrice || (labels ? recipeList[labels.firstLabel] : null));
+          if (firstDiff !== 0 && dish.CustomizedPrice) {
+            dish.CustomizedPrice.firstCost = Number((Number(dish.CustomizedPrice.firstCost || 0) + firstDiff).toFixed(2));
+            dish.costPriceObj.cost = dish.CustomizedPrice.firstCost;
+          }
+
+          const secondDiff = scaleArray(recipeList.secondPrice || (labels ? recipeList[labels.secondLabel] : null));
+          if (secondDiff !== 0 && dish.CustomizedPrice) {
+            dish.CustomizedPrice.secondCost = Number((Number(dish.CustomizedPrice.secondCost || 0) + secondDiff).toFixed(2));
+          }
+
+          const thirdDiff = scaleArray(recipeList.thirdPrice || (labels ? recipeList[labels.thirdLabel] : null));
+          if (thirdDiff !== 0 && dish.CustomizedPrice) {
+            dish.CustomizedPrice.thirdCost = Number((Number(dish.CustomizedPrice.thirdCost || 0) + thirdDiff).toFixed(2));
+          }
+        }
+
+        if (changed) {
+          updatedCount++;
+          const docRef = doc(db, 'item', dish.id);
+          updates.push(updateDoc(docRef, {
+            recipe: dish.recipe,
+            costPriceObj: dish.costPriceObj,
+            CustomizedPrice: dish.CustomizedPrice
+          }));
+        }
+      });
+
+      if (updatedCount > 0) {
+        await Promise.all(updates);
+        
+        // Registrar log de calibração
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        const dateStr = `${day}/${month}/${year}`;
+
+        await addDoc(collection(db, 'recipeAdjustmentsLogs'), {
+          product: productName,
+          scaleFactor: scaleFactor,
+          timestamp: Date.now(),
+          date: dateStr
+        });
+
+        alert(`Sucesso! ${updatedCount} receita(s) contendo "${productName}" foram recalibradas em +${Math.round(correctionPct)}% no sistema.`);
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        alert(`Nenhuma receita ativa encontrada que utilize "${productName}".`);
+      }
+    } catch (err) {
+      console.error("Erro ao recalibrar receitas:", err);
+      alert("Ocorreu um erro ao atualizar as receitas. Verifique o console.");
+    } finally {
+      setIsAdjusting(false);
+    }
+  };
 
   return (
     <div className={styleEdit.popupOverlay}>
@@ -62,11 +353,38 @@ const InventoryHistoryPopup = ({ onClose }) => {
         </div>
 
         <div className={styleEdit.titleRow}>
-          <h2>{selectedInventory ? `Detalhes do Inventário ${selectedInventory.id}` : 'Histórico de Inventários'}</h2>
+          <h2>
+            {selectedInventory 
+              ? `Detalhes do Inventário ${selectedInventory.id}` 
+              : activeTab === 'analytics' 
+                ? 'Inteligência de Estoque e Receitas' 
+                : 'Histórico de Inventários'}
+          </h2>
           <p style={{ marginTop: '10px' }}>
-            {selectedInventory ? `Data: ${selectedInventory.date}` : 'Consulta de inventários salvos anteriormente. Clique na linha para detalhes.'}
+            {selectedInventory 
+              ? `Data: ${selectedInventory.date}` 
+              : activeTab === 'analytics'
+                ? 'Análise automatizada de perdas sistemáticas, erros de contagem e calibragem de receitas.'
+                : 'Consulta de inventários salvos anteriormente. Clique na linha para detalhes.'}
           </p>
         </div>
+
+        {!selectedInventory && (
+          <div className={styleProgress.tabsHeader}>
+            <button 
+              className={`${styleProgress.tabButton} ${activeTab === 'history' ? styleProgress.active : ''}`}
+              onClick={() => setActiveTab('history')}
+            >
+              Histórico de Inventários
+            </button>
+            <button 
+              className={`${styleProgress.tabButton} ${activeTab === 'analytics' ? styleProgress.active : ''}`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              Análise de Inteligência
+            </button>
+          </div>
+        )}
 
         <div className={styleTrack.tableStockContainer} style={{ maxHeight: '400px', overflowY: 'auto' }}>
           {loading ? (
@@ -110,6 +428,81 @@ const InventoryHistoryPopup = ({ onClose }) => {
                 })}
               </tbody>
             </table>
+          ) : activeTab === 'analytics' ? (
+            <div className={styleProgress.analysisGrid}>
+              {analyticsData.length === 0 ? (
+                <p>Nenhuma matéria-prima analisada ainda. Faça mais inventários.</p>
+              ) : (
+                analyticsData.map((item, idx) => {
+                  const hasSystematic = item.pattern === 'Perda Sistemática';
+                  const hasFluctuation = item.pattern === 'Flutuação';
+                  
+                  return (
+                    <div key={idx} className={styleProgress.analysisCard}>
+                      <div className={styleProgress.cardHeader}>
+                        <h4 className={styleProgress.cardTitle}>{item.product}</h4>
+                        <div className={styleProgress.badgeList}>
+                          {item.isHighImpact && (
+                            <span className={`${styleProgress.badge} ${styleProgress.highImpact}`}>🚨 Alto Prejuízo</span>
+                          )}
+                          {hasSystematic && (
+                            <span className={`${styleProgress.badge} ${styleProgress.systematic}`}>⚠️ Perda Sistemática</span>
+                          )}
+                          {hasFluctuation && (
+                            <span className={`${styleProgress.badge} ${styleProgress.fluctuation}`}>🔄 Flutuação</span>
+                          )}
+                          {item.pattern === 'Estável' && (
+                            <span className={`${styleProgress.badge} ${styleProgress.stable}`}>✅ Saudável</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={styleProgress.cardBody}>
+                        <p>{item.explanation}</p>
+                        <p>
+                          Ajustes históricos: <strong>{item.totalAudits}</strong> contagens |
+                          Diferença Acumulada: <strong style={{ color: item.netVolumeDiff < 0 ? '#ef4444' : '#10b981' }}>
+                            {item.netVolumeDiff > 0 ? '+' : ''}{item.netVolumeDiff.toFixed(2)} {item.unit}
+                          </strong>
+                        </p>
+                        {item.totalLossValue > 0 && (
+                          <p>
+                            Prejuízo total estimado: <strong style={{ color: '#ef4444' }}>R$ {item.totalLossValue.toFixed(2).replace('.', ',')}</strong>
+                          </p>
+                        )}
+                        {item.dishesUsingItem.length > 0 && (
+                          <p style={{ fontSize: '0.85rem', color: '#a0a0b0' }}>
+                            Usado nas receitas de: <em>{item.dishesUsingItem.join(', ')}</em>
+                          </p>
+                        )}
+                        
+                        {/* Feedback Loop Alert */}
+                        {item.feedbackMessage && (
+                          <div className={`${styleProgress.feedbackAlert} ${item.feedbackType === 'success' ? styleProgress.success : styleProgress.neutral}`}>
+                            {item.feedbackMessage}
+                          </div>
+                        )}
+                      </div>
+
+                      {hasSystematic && item.suggestedCorrectionPct > 0 && (
+                        <div className={styleProgress.cardActions}>
+                          <p className={styleProgress.cardSuggestion}>
+                            Sugestão: Ajustar dose nas receitas em <strong>+{Math.round(item.suggestedCorrectionPct)}%</strong>
+                          </p>
+                          <button 
+                            className={styleProgress.adjustBtn}
+                            onClick={() => handleAutomaticRecipeAdjustment(item.product, item.suggestedCorrectionPct)}
+                            disabled={isAdjusting}
+                          >
+                            {isAdjusting ? 'Ajustando...' : 'Calibrar Receitas'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           ) : (
             <table>
               <thead>
