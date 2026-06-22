@@ -31,6 +31,11 @@ service cloud.firestore {
       return true;
     }
 
+    // Protege o mesmo documento contra enxurrada de atualizações repetidas (rate limit)
+    function safeFromRateLimit(seconds) {
+      return resource == null || request.time > resource.updateTime + duration.value(seconds, 's');
+    }
+
     // ==========================================
     // REGRAS POR COLEÇÃO
     // ==========================================
@@ -57,7 +62,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (resource.data.idUser == request.auth.uid || isAdmin());
       allow update: if isAuthenticated() && 
                     (resource.data.idUser == request.auth.uid || isAdmin()) && 
-                    isAppCheckVerified();
+                    isAppCheckVerified() &&
+                    safeFromRateLimit(3);
       
       // Apenas administradores podem deletar pedidos
       allow delete: if isAdmin();
@@ -90,16 +96,18 @@ service cloud.firestore {
     // Clientes podem ler dados básicos do estoque se necessário, ou atualizar ao confirmar o pedido (se sua lógica do totens fizer decremento direto).
     match /stock/{stockId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && safeFromRateLimit(3);
     }
 
     // 5. Coleção de Documentos Fiscais (taxDocuments) e BenefitedCustomer
     match /taxDocuments/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isAdmin() && safeFromRateLimit(3);
     }
 
     match /BenefitedCustomer/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isAdmin() && safeFromRateLimit(3);
     }
 
     // 6. Coleção de Administradores (/admins)
@@ -111,7 +119,8 @@ service cloud.firestore {
     // Regra de Fallback / Catch-All
     // Protege qualquer outra coleção não especificada acima, liberando acesso apenas para admins
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isAdmin() && safeFromRateLimit(3);
     }
   }
 }
