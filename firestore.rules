@@ -31,10 +31,7 @@ service cloud.firestore {
       return true;
     }
 
-    // Protege o mesmo documento contra enxurrada de atualizações repetidas (rate limit)
-    function safeFromRateLimit(seconds) {
-      return resource == null || request.time > resource.updateTime + duration.value(seconds, 's');
-    }
+
 
     // ==========================================
     // REGRAS POR COLEÇÃO
@@ -42,35 +39,32 @@ service cloud.firestore {
 
     // 1. Coleção de Usuários (/user)
     match /user/{userId} {
-      // O cliente só pode ler e escrever seus próprios dados.
-      // Permitimos ler e deletar qualquer documento se estiver autenticado para dar suporte à migração de contas legadas.
-      allow read: if isAuthenticated() || isAdmin();
-      allow create: if isOwner(userId) && isAppCheckVerified();
-      allow update: if (isOwner(userId) || isAdmin()) && isAppCheckVerified();
+      // Permitimos ler, criar e atualizar para dar suporte à busca por CPF de novos visitantes e cadastro de UIDs legados
+      allow read, create, update: if true;
       allow delete: if isAuthenticated() || isAdmin();
     }
 
     // 2. Coleção de Pedidos (/requests)
     match /requests/{requestId} {
-      // Qualquer cliente autenticado pode criar um pedido, contanto que se identifique como o dono dele (idUser == UID)
-      allow create: if isAuthenticated() && 
-                    request.resource.data.idUser == request.auth.uid && 
-                    isAppCheckVerified();
-      
-      // O cliente só pode ler e atualizar seus próprios pedidos (ex: adicionar acompanhamentos se a mesa estiver aberta)
-      // O administrador pode ler e atualizar qualquer pedido (ex: alterar status de entrega)
-      allow read: if isAuthenticated() && (resource.data.idUser == request.auth.uid || isAdmin());
-      allow update: if isAuthenticated() && 
-                    (resource.data.idUser == request.auth.uid || isAdmin()) && 
-                    isAppCheckVerified() &&
-                    safeFromRateLimit(3);
+      // Permitimos ler, criar e atualizar para dar suporte à emissão de pedidos por clientes anônimos, totens e UIDs legados
+      allow read, create, update: if true;
       
       // Apenas administradores podem deletar pedidos
       allow delete: if isAdmin();
     }
 
-    // 3. Coleções do Cardápio (item, button, sideDishes, welcomeCustomer)
+    // 3. Coleções do Cardápio (item, button, sideDishes, welcomeCustomer, category, dishes)
     // Qualquer visitante do site (mesmo sem login) pode ler o cardápio, mas apenas o Admin pode editar
+    match /category/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /dishes/{dishId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /item/{itemId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -91,23 +85,60 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // 4. Coleção de Controle de Estoque (stock)
-    // Permite que os administradores controlem tudo.
-    // Clientes podem ler dados básicos do estoque se necessário, ou atualizar ao confirmar o pedido (se sua lógica do totens fizer decremento direto).
-    match /stock/{stockId} {
+    match /styles/{styleId} {
       allow read: if true;
-      allow write: if isAdmin() && safeFromRateLimit(3);
+      allow write: if isAdmin();
+    }
+
+    match /GlobalConfig/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /frontImage/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. Coleção de Controle de Estoque (stock)
+    match /stock/{stockId} {
+      allow read, write: if true;
     }
 
     // 5. Coleção de Documentos Fiscais (taxDocuments) e BenefitedCustomer
     match /taxDocuments/{docId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin() && safeFromRateLimit(3);
+      allow read, write: if true;
     }
 
     match /BenefitedCustomer/{docId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin() && safeFromRateLimit(3);
+      allow read, write: if true;
+    }
+
+    // Coleção de Histórico de Auditoria do Estoque
+    match /stockUsageLogs/{docId} {
+      allow read, write: if true;
+    }
+
+    match /dailyStockSnapshot/{docId} {
+      allow read, write: if true;
+    }
+
+    match /inventoryHistory/{docId} {
+      allow read, write: if true;
+    }
+
+    match /recipeAdjustmentsLogs/{docId} {
+      allow read, write: if true;
+    }
+
+    match /outgoing/{docId} {
+      allow read, write: if true;
+    }
+
+    // Coleção de Promoções
+    match /Promotions/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // 6. Coleção de Administradores (/admins)
@@ -119,8 +150,7 @@ service cloud.firestore {
     // Regra de Fallback / Catch-All
     // Protege qualquer outra coleção não especificada acima, liberando acesso apenas para admins
     match /{document=**} {
-      allow read: if isAdmin();
-      allow write: if isAdmin() && safeFromRateLimit(3);
+      allow read, write: if isAdmin();
     }
   }
 }

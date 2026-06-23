@@ -22,16 +22,26 @@ export const getAnonymousUser = async () => {
   try {
     let currentUser = auth.currentUser;
     if (!currentUser) {
-      const userCredential = await signInAnonymously(auth);
-      currentUser = userCredential.user;
+      try {
+        const userCredential = await signInAnonymously(auth);
+        currentUser = userCredential.user;
+      } catch (authError) {
+        console.warn('signInAnonymously falhou em getAnonymousUser:', authError.message);
+      }
     }
-    const docRef = doc(db, 'user', currentUser.uid);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      return { id: snap.id, ...snap.data() };
+    if (currentUser) {
+      const docRef = doc(db, 'user', currentUser.uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return { id: snap.id, ...snap.data() };
+      } else {
+        await setDoc(docRef, defaultNoCustomer);
+        return { id: currentUser.uid, ...defaultNoCustomer };
+      }
     } else {
-      await setDoc(docRef, defaultNoCustomer);
-      return { id: currentUser.uid, ...defaultNoCustomer };
+      // Fallback sem auth
+      const tempId = `legacy_anon_${Date.now()}`;
+      return { id: tempId, ...defaultNoCustomer };
     }
   } catch (error) {
     console.error('Erro em getAnonymousUser:', error);
@@ -46,9 +56,29 @@ export const useEnsureAnonymousUser = () => {
         // 1. Garante que o cliente tem uma sessão anônima ativa do Firebase Auth
         let currentUser = auth.currentUser;
         if (!currentUser) {
-          const userCredential = await signInAnonymously(auth);
-          currentUser = userCredential.user;
-          console.log('Firebase Auth Anônimo ativado. UID:', currentUser.uid);
+          try {
+            const userCredential = await signInAnonymously(auth);
+            currentUser = userCredential.user;
+            console.log('Firebase Auth Anônimo ativado. UID:', currentUser.uid);
+          } catch (authError) {
+            console.warn('Firebase Auth Anônimo desativado ou sem rede. Usando fluxo sem autenticação.');
+          }
+        }
+
+        // Se realmente não temos um usuário autenticado (Anonymous Auth desativado)
+        if (!currentUser) {
+          const storedUser = localStorage.getItem('userMenu');
+          if (!storedUser) {
+            const tempUid = `legacy_anon_${Date.now()}`;
+            const updatedUser = {
+              id: tempUid,
+              name: 'anonimo',
+              migratedToAuth: false
+            };
+            localStorage.setItem('userMenu', JSON.stringify(updatedUser));
+            console.log('Criado usuário temporário não autenticado:', tempUid);
+          }
+          return;
         }
 
         // 2. Verifica o localStorage para checar status de login legados ou atuais

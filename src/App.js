@@ -55,11 +55,15 @@ import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
 import FiscalObserver from './component/FiscalObserver';
 
+import { useEnsureAnonymousUser } from './Hooks/useEnsureAnonymousUser';
+
 function App() {
   const [showHeader, setShowHeader] = React.useState(true);
   const [MainMenu, setMainMenu] = React.useState(() => MainMenuDefault);
   const location = useLocation();
   const global = React.useContext(GlobalContext);
+
+  useEnsureAnonymousUser(); // Garante sessão anônima ativa em qualquer rota da aplicação
 
   React.useEffect(() => {
     const isToten = localStorage.getItem('isToten') === 'true';
