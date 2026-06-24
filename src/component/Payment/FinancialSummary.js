@@ -818,8 +818,8 @@ const FinancialSummary = () => {
       })
       .reduce((acc, exp) => acc + (Number(exp.confirmation) || 0), 0);
     
-    const profitTotal = dailyData[daysInMonth-1]?.profitCum || 0;
-    const expensesTotal = dailyData[daysInMonth-1]?.expensesCum || 0;
+    const profitTotal = currentProfitCum;
+    const expensesTotal = currentExpensesCum;
     const remainingFixed = Math.max(0, totalEstimatedFixed - totalPaidFixed);
 
     const overdue = monthExpenses.filter(exp => {
