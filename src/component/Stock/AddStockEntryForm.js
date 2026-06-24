@@ -119,6 +119,29 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
     });
   };
 
+  const formatPaymentDateWithCurrentTime = (dateStr) => {
+    if (!dateStr) return '';
+    let day, month, year;
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      year = parts[0];
+      month = parts[1];
+      day = parts[2];
+    } else if (dateStr.includes('/')) {
+      const parts = dateStr.split('/');
+      day = parts[0];
+      month = parts[1];
+      year = parts[2];
+    } else {
+      return dateStr;
+    }
+    const today = new Date();
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const seconds = String(today.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+  };
+
   const deleteItem = (idx) => setItemArrayList(prev => prev.filter((_, i) => i !== idx));
 
   const handleSubmit = async (e) => {
@@ -130,7 +153,8 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
     setIsSubmitting(true);
     try {
       // 1. Update Stock
-      await handleStock(itemArrayList, form.account, form.paymentDate);
+      const formattedDate = formatPaymentDateWithCurrentTime(form.paymentDate);
+      await handleStock(itemArrayList, form.account, formattedDate);
       
       const updatedStockData = await getBtnData('stock');
       handleWarningCleanup(updatedStockData, itemArrayList);
@@ -173,9 +197,17 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
     for (const currentItem of itemsStock) {
       const itemFinded = data?.find(s => s.product === currentItem.product);
       if (itemFinded) {
-        const pack = Number(itemFinded.amount) + Number(currentItem.amount);
-        const totalCost = Number(itemFinded.totalCost || 0) + Number(currentItem.totalCost);
-        const totalVolume = Number(itemFinded.totalVolume || 0) + Number(currentItem.totalVolume);
+        const pack = Math.max(0, Number(itemFinded.amount) + Number(currentItem.amount));
+        let totalCost = Number(itemFinded.totalCost || 0) + Number(currentItem.totalCost);
+        let totalVolume = Number(itemFinded.totalVolume || 0) + Number(currentItem.totalVolume);
+
+        if (totalVolume <= 0) {
+          totalVolume = 0;
+          totalCost = 0;
+        } else if (totalCost < 0) {
+          totalCost = 0;
+        }
+
         const costPerUnit = totalVolume > 0 ? Number((totalCost / totalVolume).toFixed(2)) : 0;
 
         const updateData = {
@@ -189,7 +221,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
         await logStockUsage(itemFinded.id, {
           date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
           package: pack, unit: currentItem.unitOfMeasurement, ContentsInStock: totalVolume,
-          totalResourceInvested: totalCost, category: account
+          totalResourceInvested: totalCost, category: account,
+          previousVolume: Number(itemFinded.totalVolume || 0),
+          previousCost: Number(itemFinded.totalCost || 0)
         });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(itemFinded.id);
@@ -203,7 +237,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
         await logStockUsage(newDoc.id, {
           date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
           package: currentItem.amount, unit: currentItem.unitOfMeasurement, ContentsInStock: currentItem.totalVolume,
-          totalResourceInvested: currentItem.totalCost, category: account
+          totalResourceInvested: currentItem.totalCost, category: account,
+          previousVolume: 0,
+          previousCost: 0
         });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(newDoc.id);

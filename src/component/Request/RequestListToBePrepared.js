@@ -749,7 +749,10 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0'); // Mês é zero-based
       const year = today.getFullYear();
-      paymentDate = `${day}/${month}/${year}`;
+      const hours = String(today.getHours()).padStart(2, '0');
+      const minutes = String(today.getMinutes()).padStart(2, '0');
+      const seconds = String(today.getSeconds()).padStart(2, '0');
+      paymentDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
     }
 
     for (let i = 0; i < itemsStock.length; i++) {
@@ -792,14 +795,15 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             ) {
               const costPerUnit = parseToNumber(currentItem.CostPerUnit);
               updatedTotalCost = round(previousCost - costPerUnit, 2);
-              if (updatedTotalCost < 0) {
-                updatedTotalCost = 0;
-              }
 
               const volumeBefore = parseToNumber(currentItem.totalVolume);
               updatedTotalVolume = round(volumeBefore + previousVolume, 4);
-              if (updatedTotalVolume < 0) {
+
+              if (updatedTotalVolume <= 0) {
                 updatedTotalVolume = 0;
+                updatedTotalCost = 0;
+              } else if (updatedTotalCost < 0) {
+                updatedTotalCost = 0;
               }
             }
 

@@ -130,7 +130,7 @@ const AdjustmentRecords = ({
         const val = Math.abs(Number(String(valRaw).replace(',', '.')));
         return val > 0 && !isNaN(val);
       });
-      data = data.slice(0, 10);
+      data = data.slice(0, 100);
     } else if (filter === 'Saída de MP') {
       data = data.filter(item => {
         const valRaw = item.outputProduct ?? item.saida ?? 0;
@@ -139,8 +139,11 @@ const AdjustmentRecords = ({
       });
       data = data.slice(0, 100);
     } else if (filter === 'Descarte de MP') {
-      data = data.filter(item => item.category === 'Editado' || item.category === 'Descarte' || item.category === 'Auditoria' || item.adjustmentExpenseNote || item.noteReasonsEditingProduct);
-      data = data.slice(0, 10);
+      data = data.filter(item => item.category === 'Editado' || item.category === 'Descarte' || item.adjustmentExpenseNote || item.noteReasonsEditingProduct);
+      data = data.slice(0, 100);
+    } else if (filter === 'Auditoria de MP') {
+      data = data.filter(item => item.category === 'Auditoria');
+      data = data.slice(0, 100);
     }
     
     return data;
@@ -183,6 +186,7 @@ const AdjustmentRecords = ({
           <option value="Entrada de MP">Entrada de MP</option>
           <option value="Saída de MP">Saída de MP</option>
           <option value="Descarte de MP">Descarte de MP</option>
+          <option value="Auditoria de MP">Auditoria de MP</option>
         </select>
       </div>
 

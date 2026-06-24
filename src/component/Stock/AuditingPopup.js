@@ -630,8 +630,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     const year = today.getFullYear();
     const hours = String(today.getHours()).padStart(2, '0');
     const minutes = String(today.getMinutes()).padStart(2, '0');
-    const paymentDate = `${day}/${month}/${year}`;
-    const fullDate = `${paymentDate} ${hours}:${minutes}`;
+    const seconds = String(today.getSeconds()).padStart(2, '0');
+    const paymentDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+    const fullDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 
     const summaryItems = itemsToUpdate.map(item => {
       const original = originalItems[item.id];

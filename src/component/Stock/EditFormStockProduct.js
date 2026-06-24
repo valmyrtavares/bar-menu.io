@@ -69,7 +69,18 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = today.getFullYear();
-      paymentDate = `${day}/${month}/${year}`;
+      const hours = String(today.getHours()).padStart(2, '0');
+      const minutes = String(today.getMinutes()).padStart(2, '0');
+      const seconds = String(today.getSeconds()).padStart(2, '0');
+      paymentDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+    } else {
+      if (!paymentDate.includes('-') && !paymentDate.includes(':')) {
+        const today = new Date();
+        const hours = String(today.getHours()).padStart(2, '0');
+        const minutes = String(today.getMinutes()).padStart(2, '0');
+        const seconds = String(today.getSeconds()).padStart(2, '0');
+        paymentDate = `${paymentDate} - ${hours}:${minutes}:${seconds}`;
+      }
     }
 
     const data = await getBtnData('stock');

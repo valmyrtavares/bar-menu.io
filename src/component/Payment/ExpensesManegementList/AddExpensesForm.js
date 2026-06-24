@@ -228,6 +228,29 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
     );
   };
 
+  const formatPaymentDateWithCurrentTime = (dateStr) => {
+    if (!dateStr) return '';
+    let day, month, year;
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      year = parts[0];
+      month = parts[1];
+      day = parts[2];
+    } else if (dateStr.includes('/')) {
+      const parts = dateStr.split('/');
+      day = parts[0];
+      month = parts[1];
+      year = parts[2];
+    } else {
+      return dateStr;
+    }
+    const today = new Date();
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const seconds = String(today.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+  };
+
   const renderTableItem = () => {
     return (
       <div className={style.ContainerTableIngredients}>
@@ -305,7 +328,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         const volume = currentItem.totalVolume;
         const unit = currentItem.unitOfMeasurement;
         
-        currentItem.amount = pack; // Ensure the stock total amount is updated
+        currentItem.amount = Math.max(0, pack); // Ensure the stock total amount is updated
         currentItem.totalCost += Number(
           currentItem.currentAmountProduct
             ? previousCost
@@ -316,6 +339,13 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             ? previousVolume
             : itemFinded.totalVolume || 0
         );
+
+        if (currentItem.totalVolume <= 0) {
+          currentItem.totalVolume = 0;
+          currentItem.totalCost = 0;
+        } else if (currentItem.totalCost < 0) {
+          currentItem.totalCost = 0;
+        }
 
         // Recalculate and update the CostPerUnit using the new Weighted Average
         if (currentItem.totalVolume > 0) {
@@ -504,16 +534,17 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         }
       } else {
         // Single save
+        const formattedDate = formatPaymentDateWithCurrentTime(form.paymentDate);
         const enrichedItems = form.items.map((item) => ({
           ...item,
           account: form.account,
           provider: form.provider,
-          paymentDate: form.paymentDate,
+          paymentDate: formattedDate,
           expenseId: form.expenseId,
         }));
 
         if (enrichedItems.length > 0) {
-          await handleStock(enrichedItems, form.account, form.paymentDate);
+          await handleStock(enrichedItems, form.account, formattedDate);
           const data = await getBtnData('stock');
           handleWarningCleanup(data, enrichedItems);
           await registerDailyStockMovement('Entrada Financeira/Despesa');
