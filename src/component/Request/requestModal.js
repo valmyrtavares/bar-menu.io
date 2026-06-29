@@ -12,6 +12,7 @@ import {
   addDoc,
   doc,
   onSnapshot,
+  arrayUnion,
 } from 'firebase/firestore';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
@@ -386,27 +387,9 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
     try {
       if (!data || data.length === 0) return;
       const userDocRef = doc(db, 'user', currentUser);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        // Se o documento do usuário já existir, atualiza o array request
-        const currentRequests = userDocSnap.data().request || [];
-        console.log('DATA É    ', data);
-        console.log('currentRequests É    ', currentRequests);
-        // Acrescente o novo objeto 'form' ao array 'requests'
-        currentRequests.push(...data);
-        console.log('form   ', currentRequests);
-
-        // Atualize o documento com o novo array 'requests'
-        await updateDoc(userDocRef, {
-          request: currentRequests,
-        });
-      } else {
-        // Se o documento do usuário não existir, cria o documento com o array request
-        await setDoc(userDocRef, {
-          request: [...data],
-        });
-      }
+      setDoc(userDocRef, {
+        request: arrayUnion(...data)
+      }, { merge: true }).catch(err => console.error(err));
       fetchUser();
       localStorage.removeItem('backorder');
       setBackorder(null);
@@ -723,7 +706,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
             // mas cleanedUserNewRequest já foi ajustado acima.
           }
 
-          await updateDoc(requestDocRef, cleanedUserNewRequest);
+          updateDoc(requestDocRef, cleanedUserNewRequest).catch(err => console.error(err));
           global.setOrderBeingEdited(null);
           // Só limpa o tableNumber se estivermos explicitamente no modo PDV/Admin
           if (pdv || stylePdv) {
@@ -738,19 +721,22 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
               parentRequestId: targetId,
               indexInRequest: idx
             }));
-            await updateDoc(userDocRef, { request: updatedRequests });
+            updateDoc(userDocRef, { request: updatedRequests }).catch(err => console.error(err));
           } else {
-            await updateDoc(userDocRef, { request: [] });
+            updateDoc(userDocRef, { request: [] }).catch(err => console.error(err));
           }
         } else {
-          const docRef = await addDoc(collection(db, 'requests'), cleanedUserNewRequest);
+          const docRef = doc(collection(db, 'requests'));
           
           // Se acabamos de criar o pedido, atualizamos os documentos com o ID real
-          const finalItemsWithId = cleanedUserNewRequest.request.map(item => ({
+          const finalItemsWithId = cleanedUserNewRequest.request.map((item, idx) => ({
             ...item,
-            parentRequestId: docRef.id
+            parentRequestId: docRef.id,
+            indexInRequest: idx
           }));
-          await updateDoc(docRef, { request: finalItemsWithId });
+          cleanedUserNewRequest.request = finalItemsWithId;
+
+          setDoc(docRef, cleanedUserNewRequest).catch(err => console.error(err));
 
           const userDocRef = doc(db, 'user', cleanedUserNewRequest.idUser);
           if (cleanedUserNewRequest.tableNumber) {
@@ -760,9 +746,9 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
               parentRequestId: docRef.id,
               indexInRequest: idx
             }));
-            await updateDoc(userDocRef, { request: updatedRequests });
+            updateDoc(userDocRef, { request: updatedRequests }).catch(err => console.error(err));
           } else {
-            await updateDoc(userDocRef, { request: [] });
+            updateDoc(userDocRef, { request: [] }).catch(err => console.error(err));
           }
         }
       }
@@ -773,7 +759,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
         try {
           if (!userNewRequest.tableNumber) {
             const userDocRef = doc(db, 'user', currentUser);
-            await updateDoc(userDocRef, { request: [] });
+            updateDoc(userDocRef, { request: [] }).catch(err => console.error(err));
           }
           localStorage.removeItem('userMenu');
           global.setAuthorizated(false);

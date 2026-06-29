@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { GlobalContext } from '../../GlobalContext';
 import { CheckUser } from '../../Helpers/Helpers.js';
@@ -84,19 +84,10 @@ function Dishes({ newItem }) {
 
       // 4. Gravação no Firestore
       const userDocRef = doc(db, 'user', currentUser);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        const currentRequests = userDocSnap.data().request || [];
-        currentRequests.push(orderItem);
-        await updateDoc(userDocRef, {
-          request: currentRequests,
-        });
-      } else {
-        await setDoc(userDocRef, {
-          request: [orderItem],
-        });
-      }
+      
+      setDoc(userDocRef, {
+        request: arrayUnion(orderItem)
+      }, { merge: true }).catch(err => console.error(err));
 
       // 5. Navegação
       const pdv = JSON.parse(localStorage.getItem('pdv') || 'false');

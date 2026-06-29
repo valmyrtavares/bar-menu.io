@@ -133,43 +133,43 @@ const CreateCustomer = () => {
     } else {
       // Envia o formulário para o Firestore usando o UID anônimo pré-existente
       const uid = auth.currentUser?.uid || `legacy_user_${Date.now()}`;
-      setDoc(doc(db, 'user', uid), formToSubmit)
-        .then(() => {
-          global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-          const currentUser = {
-            id: uid,
-            name: formToSubmit.name,
-            migratedToAuth: true
-          };
-          localStorage.setItem('userMenu', JSON.stringify(currentUser));
-          localStorage.removeItem('backorder');
-          localStorage.removeItem('noFantasyName');
-          setForm({
-            name: '',
-            phone: '',
-            birthday: '',
-            email: '',
-          });
-        })
-        .then(() => {
-          if (!pdv) {
-            if (backorder && backorder.length > 0) {
-              navigate('/request');
-            } else {
-              const table = localStorage.getItem('tableNumber');
-              if (table) {
-                navigate(`/${table}`);
-              } else {
-                navigate('/');
-              }
-            }
+      
+      // Envia para o Firestore em background (não esperamos o retorno para não travar no modo offline)
+      setDoc(doc(db, 'user', uid), formToSubmit).catch((error) => {
+        console.log("Erro ao salvar no Firestore: ", error);
+      });
+
+      // Atualização Otimista: Já aplicamos os estados e navegamos na mesma hora
+      global.setId(uid);
+      const currentUser = {
+        id: uid,
+        name: formToSubmit.name,
+        migratedToAuth: true
+      };
+      localStorage.setItem('userMenu', JSON.stringify(currentUser));
+      localStorage.removeItem('backorder');
+      localStorage.removeItem('noFantasyName');
+      setForm({
+        name: '',
+        phone: '',
+        birthday: '',
+        email: '',
+      });
+
+      if (!pdv) {
+        if (backorder && backorder.length > 0) {
+          navigate('/request');
+        } else {
+          const table = localStorage.getItem('tableNumber');
+          if (table) {
+            navigate(`/${table}`);
           } else {
-            navigate('/admin/requestlist');
+            navigate('/');
           }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        }
+      } else {
+        navigate('/admin/requestlist');
+      }
     }
   }
 
@@ -208,44 +208,44 @@ const CreateCustomer = () => {
     }
 
     const uid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
-    setDoc(doc(db, 'user', uid), formWithDefaults)
-      .then(() => {
-        global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
-        const currentUser = {
-          id: uid,
-          name: formWithDefaults.fantasyName || 'anonimo',
-          migratedToAuth: true
-        };
-        localStorage.setItem('userMenu', JSON.stringify(currentUser));
-        localStorage.removeItem('backorder');
-        localStorage.removeItem('noFantasyName');
-        setForm({
-          name: '',
-          phone: '',
-          birthday: '',
-          email: '',
-          cpf: '',
-        });
-      })
-      .then(() => {
-        if (!pdv) {
-          if (backorder && backorder.length > 0) {
-            navigate('/request');
-          } else {
-            const table = localStorage.getItem('tableNumber');
-            if (table) {
-              navigate(`/${table}`);
-            } else {
-              navigate('/');
-            }
-          }
+    
+    // Envia para o Firestore em background (não esperamos o retorno para não travar no modo offline)
+    setDoc(doc(db, 'user', uid), formWithDefaults).catch((error) => {
+      console.log("Erro ao salvar no Firestore anonimamente: ", error);
+    });
+
+    // Atualização Otimista: Já aplicamos os estados e navegamos na mesma hora
+    global.setId(uid);
+    const currentUser = {
+      id: uid,
+      name: formWithDefaults.fantasyName || 'anonimo',
+      migratedToAuth: true
+    };
+    localStorage.setItem('userMenu', JSON.stringify(currentUser));
+    localStorage.removeItem('backorder');
+    localStorage.removeItem('noFantasyName');
+    setForm({
+      name: '',
+      phone: '',
+      birthday: '',
+      email: '',
+      cpf: '',
+    });
+
+    if (!pdv) {
+      if (backorder && backorder.length > 0) {
+        navigate('/request');
+      } else {
+        const table = localStorage.getItem('tableNumber');
+        if (table) {
+          navigate(`/${table}`);
         } else {
-          navigate('/admin/requestlist');
+          navigate('/');
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      }
+    } else {
+      navigate('/admin/requestlist');
+    }
   }
 
   // IMPLEMENTANDO TECLADO VIRTUAL  ********************************************************** */

@@ -182,9 +182,9 @@ export async function deleteRequestItem(userId, itemId) {
           (_, index) => index != itemId
         );
 
-        await updateDoc(userRef, {
+        updateDoc(userRef, {
           request: updatedRequest,
-        });
+        }).catch(err => console.error('Erro ao deletar item do request:', err));
       }
 
       console.log('Item removed successfully.');

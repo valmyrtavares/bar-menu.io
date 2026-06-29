@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getBtnData, getStockByProductName } from '../api/Api';
+import { getBtnData, getStockByProductName, getOneItemColleciton } from '../api/Api';
 import { cardClasses } from '@mui/material';
 import {
   getFirestore,
@@ -325,17 +325,20 @@ export function getFirstFourLetters(inputString, max) {
 export async function CheckUser(check, isToten, packageTier) {
   if (localStorage.hasOwnProperty(check)) {
     const userMenu = JSON.parse(localStorage.getItem(check));
-    const userList = await getBtnData('user');
-    const currentUser = userList.filter((item) => item.id === userMenu.id);
-    if (currentUser && currentUser.length > 0 && currentUser[0].name) {
-      if (isToten) {
-        return '/new-layout';
-      } else if (localStorage.getItem('pdv') === 'true') {
-        return '/admin/requestlist';
+    try {
+      const currentUser = await getOneItemColleciton('user', userMenu.id);
+      if (currentUser && currentUser.name) {
+        if (isToten) {
+          return '/new-layout';
+        } else if (localStorage.getItem('pdv') === 'true') {
+          return '/admin/requestlist';
+        } else {
+          return '/'; // return to main screen
+        }
       } else {
-        return '/'; // return to main screen
+        throw new Error('User not found or no name');
       }
-    } else {
+    } catch (err) {
       localStorage.removeItem(check);
       // No pacote básico (1), não queremos passar pela tela de busca de CPF (NoLog)
       // Queremos ir direto para a tela de apelido (create-customer)

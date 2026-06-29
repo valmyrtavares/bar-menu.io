@@ -7,6 +7,8 @@ import {
   initializeFirestore,
   persistentLocalCache,
   persistentSingleTabManager,
+  disableNetwork,
+  enableNetwork,
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -29,5 +31,21 @@ const db = initializeFirestore(app, {
     tabManager: persistentSingleTabManager(),
   }),
 });
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('offline', () => {
+    console.log('Modo Offline detectado: Desativando rede do Firestore para agilizar o cache.');
+    disableNetwork(db).catch(console.error);
+  });
+  window.addEventListener('online', () => {
+    console.log('Modo Online detectado: Reativando rede do Firestore.');
+    enableNetwork(db).catch(console.error);
+  });
+
+  // Se já iniciar offline
+  if (!navigator.onLine) {
+    disableNetwork(db).catch(console.error);
+  }
+}
 
 export { app, auth, storage, db };

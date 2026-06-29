@@ -184,26 +184,10 @@ const DishesModal = ({ item, setModal }) => {
 
     try {
       const userDocRef = doc(db, 'user', currentUser);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        // Se o documento do usuário já existir, atualiza o array request
-        const currentRequests = userDocSnap.data().request || [];
-
-        // Acrescente o novo objeto 'form' ao array 'requests'
-        currentRequests.push(form);
-        console.log('form   ', form);
-
-        // Atualize o documento com o novo array 'requests'
-        await updateDoc(userDocRef, {
-          request: currentRequests,
-        });
-      } else {
-        // Se o documento do usuário não existir, cria o documento com o array request
-        await setDoc(userDocRef, {
-          request: [form],
-        });
-      }
+      
+      setDoc(userDocRef, {
+        request: arrayUnion(form)
+      }, { merge: true }).catch(err => console.error(err));
 
       // Atualiza o estado do formulário para o próximo item
       setForm({
