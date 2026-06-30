@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, updateDoc, query, where } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
@@ -16,6 +16,10 @@ const InventoryHistoryPopup = ({ onClose }) => {
   const [analyticsData, setAnalyticsData] = useState([]);
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [isSavingCorrection, setIsSavingCorrection] = useState(false);
 
   useEffect(() => {
     const fetchHistoryAndAnalytics = async () => {
@@ -343,6 +347,106 @@ const InventoryHistoryPopup = ({ onClose }) => {
     }
   };
 
+  const handleSaveCorrection = async (prod, idx) => {
+    const val = Number(editValue);
+    if (isNaN(val) || val < 0 || editValue === '') {
+      alert("Valor inválido. Digite um número maior ou igual a zero.");
+      return;
+    }
+    
+    const oldVolume = Number(prod.currentVolume);
+    if (val === oldVolume) {
+      setEditingIndex(null);
+      return;
+    }
+    
+    setIsSavingCorrection(true);
+    try {
+      const deltaVolume = val - oldVolume;
+      
+      let invUnitCost = 0;
+      if (oldVolume > 0) {
+        invUnitCost = Number(prod.currentCost) / oldVolume;
+      } else if (Number(prod.previousVolume) > 0) {
+        invUnitCost = Number(prod.previousCost) / Number(prod.previousVolume);
+      }
+      
+      const invDeltaCost = deltaVolume * invUnitCost;
+      const newCurrentCost = Number(prod.currentCost) + invDeltaCost;
+      
+      const updatedItems = [...selectedInventory.items];
+      updatedItems[idx] = {
+        ...prod,
+        currentVolume: val,
+        currentCost: newCurrentCost
+      };
+      
+      const invRef = doc(db, 'inventoryHistory', selectedInventory.fullId);
+      await updateDoc(invRef, {
+        items: updatedItems
+      });
+      
+      const stockDocs = await getDocs(query(collection(db, 'stock'), where('product', '==', prod.product)));
+      if (!stockDocs.empty) {
+        const stockDoc = stockDocs.docs[0];
+        const stockData = stockDoc.data();
+        
+        const stockUnitCost = Number(stockData.totalVolume) > 0 
+          ? Number(stockData.totalCost) / Number(stockData.totalVolume) 
+          : Number(stockData.CostPerUnit || 0);
+          
+        const stockDeltaCost = deltaVolume * stockUnitCost;
+        const newStockVolume = Math.max(0, Number(stockData.totalVolume) + deltaVolume);
+        const newStockCost = Math.max(0, Number(stockData.totalCost) + stockDeltaCost);
+        const newUnit = Number(stockData.volumePerUnit) > 0 ? newStockVolume / Number(stockData.volumePerUnit) : 0;
+        
+        await updateDoc(doc(db, 'stock', stockDoc.id), {
+          totalVolume: newStockVolume,
+          totalCost: newStockCost,
+          amount: newUnit
+        });
+        
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        const hours = String(today.getHours()).padStart(2, '0');
+        const minutes = String(today.getMinutes()).padStart(2, '0');
+        const seconds = String(today.getSeconds()).padStart(2, '0');
+        const formattedDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+
+        await addDoc(collection(db, 'stockUsageLogs'), {
+          stockId: stockDoc.id,
+          timestamp: new Date().toISOString(),
+          date: formattedDate,
+          category: 'Correção de Inventário',
+          unit: stockData.unitOfMeasurement || prod.unit,
+          package: Number(newUnit),
+          inputProduct: deltaVolume > 0 ? deltaVolume : 0,
+          outputProduct: deltaVolume < 0 ? Math.abs(deltaVolume) : 0,
+          cost: 0,
+          previousVolume: Number(stockData.totalVolume),
+          previousCost: Number(stockData.totalCost),
+          ContentsInStock: newStockVolume,
+          totalResourceInvested: newStockCost,
+          noteReasonsEditingProduct: `Correção ref. ao inventário ${selectedInventory.id}: alterado de ${oldVolume} para ${val}`
+        });
+      }
+      
+      setSelectedInventory({
+        ...selectedInventory,
+        items: updatedItems
+      });
+      setEditingIndex(null);
+      setRefreshTrigger(prev => prev + 1);
+    } catch (err) {
+      console.error("Erro ao corrigir inventário:", err);
+      alert("Ocorreu um erro ao corrigir o inventário.");
+    } finally {
+      setIsSavingCorrection(false);
+    }
+  };
+
   return (
     <div className={styleEdit.popupOverlay}>
       <div className={styleEdit.containerEditStock} style={{ maxWidth: '800px' }}>
@@ -400,11 +504,12 @@ const InventoryHistoryPopup = ({ onClose }) => {
                   <th>Depois</th>
                   <th>Dif. Volume</th>
                   <th>Dif. Dinheiro</th>
+                  <th>Ação</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedInventory.items.length === 0 && (
-                   <tr><td colSpan="5" style={{textAlign: 'center'}}>Sem detalhes de itens para este inventário.</td></tr>
+                   <tr><td colSpan="6" style={{textAlign: 'center'}}>Sem detalhes de itens para este inventário.</td></tr>
                 )}
                 {selectedInventory.items.map((prod, idx) => {
                   const difVol = Number(prod.currentVolume) - Number(prod.previousVolume);
@@ -418,10 +523,35 @@ const InventoryHistoryPopup = ({ onClose }) => {
                     <tr key={idx}>
                       <td>{prod.product}</td>
                       <td>{Number(prod.previousVolume).toFixed(2)} {prod.unit}</td>
-                      <td>{Number(prod.currentVolume).toFixed(2)} {prod.unit}</td>
+                      <td>
+                        {editingIndex === idx ? (
+                           <input 
+                              type="text" 
+                              value={editValue} 
+                              onChange={(e) => {
+                                 let val = e.target.value.replace(',', '.');
+                                 if (val !== '' && isNaN(Number(val))) return;
+                                 setEditValue(val);
+                              }}
+                              style={{ width: '80px', padding: '5px' }}
+                           />
+                        ) : (
+                           `${Number(prod.currentVolume).toFixed(2)} ${prod.unit}`
+                        )}
+                      </td>
                       <td>{difVol > 0 ? '+' : ''}{difVol.toFixed(2)} {prod.unit}</td>
                       <td style={{ color: color, fontWeight: 'bold' }}>
                         {difCost > 0 ? '+' : ''}R$ {difCost.toFixed(2).replace('.', ',')}
+                      </td>
+                      <td>
+                        {editingIndex === idx ? (
+                           <div style={{ display: 'flex', gap: '10px' }}>
+                             <button onClick={() => handleSaveCorrection(prod, idx)} disabled={isSavingCorrection} style={{ color: 'green', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Salvar</button>
+                             <button onClick={() => setEditingIndex(null)} disabled={isSavingCorrection} style={{ color: 'red', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Cancelar</button>
+                           </div>
+                        ) : (
+                           <button onClick={() => { setEditingIndex(idx); setEditValue(Number(prod.currentVolume).toString()); }} style={{ color: '#007bff', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Editar</button>
+                        )}
                       </td>
                     </tr>
                   );

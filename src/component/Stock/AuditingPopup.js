@@ -114,13 +114,16 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   };
 
   const handleVolumeChange = (id, value) => {
+    let val = value.replace(',', '.');
+    if (val !== '' && isNaN(Number(val))) return;
+
     // Update both lists to keep them in sync
     setAllItems(prev => prev.map(item => {
-      if (item.id === id) return { ...item, correctionValue: value };
+      if (item.id === id) return { ...item, correctionValue: val };
       return item;
     }));
     setStockItems(prev => prev.map(item => {
-      if (item.id === id) return { ...item, correctionValue: value };
+      if (item.id === id) return { ...item, correctionValue: val };
       return item;
     }));
   };
@@ -302,7 +305,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       outputProduct: 0,
       category: account || 0,
       unit: unit,
-      noteReasonsEditingProduct: 'Auditoria de Estoque',
+      noteReasonsEditingProduct: `Antes ${item.product} ${Number(previousVolume).toFixed(2)}${unit} / Agora ${Number(totalVolume).toFixed(2)}${unit}`,
       package: pack,
       inputProduct: volume,
       cost: cost,
@@ -555,7 +558,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                 <tr>
                   <th>Produto</th>
                   <th>Volume Atual</th>
-                  <th>Correção</th>
+                  <th>Estoque Físico</th>
                   <th>Novo Volume</th>
                   <th>Custo Atual</th>
                   <th>Novo Custo</th>
@@ -563,9 +566,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
               </thead>
               <tbody>
                 {stockItems.map(item => {
-                  const correction = Number(item.correctionValue);
-                  const hasCorrection = item.correctionValue !== '' && !isNaN(correction);
-                  const newVolume = hasCorrection ? Number(item.totalVolume) + correction : Number(item.totalVolume);
+                  const enteredValue = Number(item.correctionValue);
+                  const hasCorrection = item.correctionValue !== '' && !isNaN(enteredValue);
+                  const newVolume = hasCorrection ? enteredValue : Number(item.totalVolume);
                   
                   let newCost = Number(item.totalCost);
                   if (hasCorrection) {
@@ -584,10 +587,10 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                       <td>{Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
                       <td>
                         <input
-                          type="number"
+                          type="text"
                           value={item.correctionValue}
                           onChange={(e) => handleVolumeChange(item.id, e.target.value)}
-                          placeholder="Ex: -5"
+                          placeholder="Ex: 5"
                           style={{ width: '80px', padding: '5px' }}
                         />
                       </td>
@@ -636,8 +639,10 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
     const summaryItems = itemsToUpdate.map(item => {
       const original = originalItems[item.id];
-      const correction = Number(item.correctionValue);
-      const newVolume = Number(original.totalVolume) + correction;
+      const enteredValue = Number(item.correctionValue);
+      const newVolume = enteredValue;
+      const correction = newVolume - Number(original.totalVolume);
+
       let newCost = Number(original.totalCost);
       if (original.totalVolume > 0) {
          const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);

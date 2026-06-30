@@ -268,7 +268,7 @@ const AdjustmentRecords = ({
                           : item.adjustmentExpenseNote
                       }
                     >
-                      {item.category === 'Editado' || item.category === 'Descarte' || item.adjustmentExpenseNote
+                      {item.category === 'Editado' || item.category === 'Descarte' || item.category === 'Auditoria' || item.adjustmentExpenseNote
                         ? item.noteReasonsEditingProduct ||
                           item.adjustmentExpenseNote ||
                           'sem notas'
