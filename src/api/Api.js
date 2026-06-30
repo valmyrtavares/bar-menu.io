@@ -295,6 +295,7 @@ export const updateItemsSideDishes = async () => {
             ...sideDishElement,
             price: matchedSideDish.price, // Atualiza o preço
             sideDishes: matchedSideDish.sideDishes, // Atualiza o nome
+            unavailableRawMaterial: matchedSideDish.unavailableRawMaterial || false, // Atualiza disponibilidade
           };
           updatedSideDishes.push(updatedElement);
         } else {

@@ -321,9 +321,14 @@ const DishesModal = ({ item, setModal }) => {
                       value={sideDishItem.price}
                       type="checkbox"
                       onChange={handleChange}
+                      disabled={sideDishItem.unavailableRawMaterial}
                     />
-                    <label className="form-check-label">
+                    <label 
+                      className="form-check-label"
+                      style={sideDishItem.unavailableRawMaterial ? { color: 'red' } : {}}
+                    >
                       {sideDishItem.sideDishes}
+                      {sideDishItem.unavailableRawMaterial && ' (Indisponível)'}
                     </label>
                   </div>
                 ))
@@ -338,10 +343,16 @@ const DishesModal = ({ item, setModal }) => {
                     >
                       <option value="" disabled selected>Selecione</option>
                       {item.sideDishesElementList &&
-                        item.sideDishesElementList.map((item, index) => (
-                          <option key={index} value={index}>
+                        item.sideDishesElementList.map((sideDishItem, index) => (
+                          <option 
+                            key={index} 
+                            value={index}
+                            disabled={sideDishItem.unavailableRawMaterial}
+                            style={sideDishItem.unavailableRawMaterial ? { color: 'red' } : {}}
+                          >
                             {' '}
-                            {item.sideDishes}
+                            {sideDishItem.sideDishes}
+                            {sideDishItem.unavailableRawMaterial && ' (Indisponível)'}
                           </option>
                         ))}
                     </select>

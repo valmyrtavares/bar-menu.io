@@ -2,7 +2,7 @@ import React from 'react';
 import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
-import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement, updateItemsSideDishes } from '../../api/Api';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
@@ -246,6 +246,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     try {
       await Promise.all(updatedDishes.map(updateDishInFirebase));
       await updateSideDishesInFirebase(stockProductObj);
+      await updateItemsSideDishes(); // Sincroniza a disponibilidade com os pratos
     } catch (error) {
       console.error('Erro ao atualizar receitas/acompanhamentos:', error);
     }
@@ -428,10 +429,13 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         const portionUsed = Number(data.portionUsed) || 0;
         const newPortionCost = Number((portionUsed * newCostPerUnit).toFixed(2));
         
+        const isUnavailable = Number(stockProduct.totalVolume) <= Number(stockProduct.disabledDish);
+        
         const docRef = doc(db, 'sideDishes', docSnap.id);
         const updatedFields = {
           costPerUnit: Number(newCostPerUnit.toFixed(4)),
           portionCost: newPortionCost,
+          unavailableRawMaterial: isUnavailable,
         };
         
         if (data.costPriceObj) {
