@@ -367,6 +367,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
           totalCost: newTotalCostValue,
           amount: Number(newUnit.toFixed(2)),
           CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+          lastUnitCost: newCostPerUnit > 0 ? Number(newCostPerUnit.toFixed(2)) : (original.lastUnitCost || 0)
         };
 
         const previousCost = original.totalCost;
@@ -575,6 +576,8 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                     let unitPriceOriginal = 0;
                     if (Number(item.totalVolume) > 0) {
                       unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
+                    } else if (Number(item.lastUnitCost) > 0) {
+                      unitPriceOriginal = Number(item.lastUnitCost);
                     } else {
                       unitPriceOriginal = Number(item.CostPerUnit || 0);
                     }

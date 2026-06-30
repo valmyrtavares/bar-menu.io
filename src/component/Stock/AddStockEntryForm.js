@@ -217,6 +217,12 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
           totalVolume,
           CostPerUnit: costPerUnit,
         };
+        
+        if (costPerUnit > 0) {
+          updateData.lastUnitCost = costPerUnit;
+        } else if (itemFinded.lastUnitCost) {
+          updateData.lastUnitCost = itemFinded.lastUnitCost;
+        }
         await updateDoc(doc(db, 'stock', itemFinded.id), updateData);
         await logStockUsage(itemFinded.id, {
           date: paymentDate, inputProduct: currentItem.totalVolume, cost: currentItem.totalCost,
@@ -229,9 +235,11 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
         const res = await checkUnavaiableRawMaterial(itemFinded.id);
         setLoadingAvailableMenuDishes(res || false);
       } else {
+        const newCostPerUnit = currentItem.totalVolume > 0 ? Number((currentItem.totalCost / currentItem.totalVolume).toFixed(2)) : 0;
         const newRecord = {
           ...currentItem,
-          CostPerUnit: currentItem.totalVolume > 0 ? Number((currentItem.totalCost / currentItem.totalVolume).toFixed(2)) : 0,
+          CostPerUnit: newCostPerUnit,
+          lastUnitCost: newCostPerUnit > 0 ? newCostPerUnit : 0,
         };
         const newDoc = await addDoc(collection(db, 'stock'), newRecord);
         await logStockUsage(newDoc.id, {

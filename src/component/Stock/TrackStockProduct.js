@@ -56,9 +56,8 @@ const TrackStockProduct = () => {
   React.useEffect(() => {
     fetchStock();
   }, []);
-  // React.useEffect(() => {
-  //   fetchStock();
-  // }, [refreshData]);
+
+
 
   React.useEffect(() => {
     if (!stock || stock.length === 0) return;

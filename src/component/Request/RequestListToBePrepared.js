@@ -678,7 +678,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             CostPerUnit: ingredient.portionCost || 0,
             amount: 0,
             totalCost: 0,
-            columePerUnit: 0,
+            volumePerUnit: 0,
           };
           console.log(`[STOCK DEBUG] Deducting ingredient: ${ingredient.name}, volume: ${currentObj.totalVolume}`);
           await handleStock(currentObj, account, dateTime, orderNumber);
@@ -715,7 +715,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             CostPerUnit: sideDish.portionCost || 0,
             amount: 0,
             totalCost: 0,
-            columePerUnit: 0,
+            volumePerUnit: 0,
           };
           await handleStock(currentObj, account, dateTime, orderNumber);
         }

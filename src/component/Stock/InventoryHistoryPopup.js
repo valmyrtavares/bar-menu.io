@@ -391,9 +391,14 @@ const InventoryHistoryPopup = ({ onClose }) => {
         const stockDoc = stockDocs.docs[0];
         const stockData = stockDoc.data();
         
-        const stockUnitCost = Number(stockData.totalVolume) > 0 
-          ? Number(stockData.totalCost) / Number(stockData.totalVolume) 
-          : Number(stockData.CostPerUnit || 0);
+        let stockUnitCost = 0;
+        if (Number(stockData.totalVolume) > 0) {
+          stockUnitCost = Number(stockData.totalCost) / Number(stockData.totalVolume);
+        } else if (Number(stockData.lastUnitCost) > 0) {
+          stockUnitCost = Number(stockData.lastUnitCost);
+        } else {
+          stockUnitCost = Number(stockData.CostPerUnit || 0);
+        }
           
         const stockDeltaCost = deltaVolume * stockUnitCost;
         const newStockVolume = Math.max(0, Number(stockData.totalVolume) + deltaVolume);
