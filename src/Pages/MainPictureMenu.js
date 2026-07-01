@@ -15,7 +15,7 @@ import { useCachedImage } from '../Hooks/useCachedImage.js';
 
 
 const CategoryItemImage = ({ item }) => {
-  const src = useCachedImage(item.id, item.image || 'https://i.pinimg.com/736x/fe/23/38/fe2338260fb041d8d94999fe48cb218f.jpg', 'thumb');
+  const src = useCachedImage(item.id, item.image || '', 'thumb');
   return <img src={src} alt="" />;
 };
 
