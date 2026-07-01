@@ -248,6 +248,9 @@ const MainPictureMenu = () => {
           !isLoading ? style.loaded : ''
         }`}
       >
+        {/* Backdoor administrativo invisível no canto superior direito */}
+        <Link to="/admin/admin" className={style.hiddenAdminBackdoor}></Link>
+
         <div className="WarningMessage-container">
           {logoutAdminPopup && (
             <WarningMessage
@@ -267,8 +270,6 @@ const MainPictureMenu = () => {
           <div className={style.leftColumn}>
             <div className={style.logoWrapper}>
               <img src={global.image} alt="logo" className={style.totenLogo} />
-              {/* Link oculto backdoor sobreposto ao logotipo */}
-              <Link to="/admin/admin" className={style.hiddenAdminLink}></Link>
             </div>
             <nav className={style.categories}>
               {menuButton &&
