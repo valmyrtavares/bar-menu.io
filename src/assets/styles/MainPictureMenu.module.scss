@@ -1,18 +1,21 @@
 .containerPictureMenu {
     position: relative;
-    top:-260px;
-    .containerDishes{
+    top: -260px;
+
+    .containerDishes {
         position: absolute;
-        top:20%;
-        left:200px;
-        z-index:50;
+        top: 20%;
+        left: 200px;
+        z-index: 50;
     }
+
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 
     &.loaded {
         opacity: 1;
     }
+
     .submenu {
         display: grid;
         grid-template-columns: 1fr 4fr;
@@ -22,42 +25,46 @@
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
             margin-top: 56px;
             background-color: var(--bg-color);
+
             .categoryItem {
-                    width: 100%;
-                    aspect-ratio: 1 / 1; // Torna a div quadrada
+                width: 100%;
+                aspect-ratio: 1 / 1; // Torna a div quadrada
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                overflow: hidden;
+                position: relative;
+                background-color: var(--secundary-bg-color);
+                margin-bottom: 10px;
+
+                h3 {
+                    height: auto;
+                    min-height: 20%;
+                    padding: 5px;
                     display: flex;
-                    flex-direction: column;
+                    color: var(--title-font-color);
                     align-items: center;
-                    justify-content: space-between;
-                    overflow: hidden;
-                    position: relative;
-                    background-color: var(--secundary-bg-color);
-                    margin-bottom: 10px;
-            
-                    h3 {
-                        height: 20%; // Ocupa 1/5 da altura total
-                        display: flex;
-                        color: var(--title-font-color);
-                        align-items: center;
-                        justify-content: center;
-                        text-align: center;
-            
-                        width: 100%;
-                        z-index: 2;
-                    }
-            
-                    img {
-                        width: 85%; // Faz a imagem ficar mais larga que alta
-                        height: 80%; // Ocupa o restante do espaço disponível
-                        object-fit: cover; // Garante que as bordas sejam cortadas
-                        position: absolute;
-                        bottom: 0;
-                        left: 50%;
-                        transform: translateX(-50%);
-                    }
+                    justify-content: center;
+                    text-align: center;
+
+                    width: 100%;
+                    z-index: 2;
                 }
-            
+
+                img {
+                    width: 85%; // Faz a imagem ficar mais larga que alta
+                    height: 80%; // Ocupa o restante do espaço disponível
+                    object-fit: cover; // Garante que as bordas sejam cortadas
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+            }
+
         }
+
         .dishes {
             .mainTitle {
                 color: var(--btn-color);
@@ -70,9 +77,9 @@
                 overflow-y: auto;
                 display: flex;
                 flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 10px;
-               
+                justify-content: flex-start;
+                gap: 2%;
+
                 opacity: 0;
                 transform: translateY(10px);
                 transition: none;
@@ -127,6 +134,32 @@
                     max-width: 600px;
                     font-weight: 500;
                     opacity: 0.8;
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 400px) and (max-width: 1024px) {
+    .containerPictureMenu {
+        .submenu {
+            .categories {
+                .categoryItem {
+                    h3 {
+                        font-size: 1.8vw !important;
+                    }
+                }
+            }
+
+            .dishes {
+                padding: 1.5vw;
+
+                .mainTitle {
+                    font-size: 3.5vw !important;
+                }
+
+                .subContainer {
+                    gap: 1.5vw;
                 }
             }
         }
