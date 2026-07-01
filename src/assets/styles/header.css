@@ -5,15 +5,34 @@
     height: auto;
     overflow: hidden;    
 }
-.main_header .toten{
-    height: 5vh;
+.main_header.toten {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 15px 0;
+    background-color: var(--bg-color);
 }
 .main_header.toten nav {
-    height: 242px;
-    width: 261px;
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;    
-    overflow: visible;
-    
+    overflow: hidden;
+}
+.main_header.toten nav::after {
+    display: none;
+}
+.main_header.toten nav img {
+    position: relative;
+    max-height: 80px;
+    width: auto;
+    object-fit: contain;
+    left: 0;
+    top: 0;
+    transform: none;
 }
 .main_header.orderqueue nav {
     /* Estilos específicos para o header quando a URL contém /orderqueue */
@@ -22,11 +41,6 @@
    
      /* Exemplo: tamanho reduzido do logotipo */
     /* Adicione outros estilos conforme necessário */
-  }
-  .main_header.toten nav img {
-      left: -10px;
-      top: 34%;
-      transform: translate(36%, -53%);
   }
 
 
