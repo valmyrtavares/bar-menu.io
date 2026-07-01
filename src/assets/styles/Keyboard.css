@@ -1,19 +1,16 @@
 .character-container {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 380px;
+    position: relative;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 360px;
     background-color: var(--secundary-bg-color);
     border: 2px solid var(--btn-color);
-    border-radius: 15px 15px 0 0;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     padding: 15px;
     gap: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    z-index: 10000;
     box-sizing: border-box;
 }
 

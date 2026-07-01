@@ -1,7 +1,9 @@
 @import 'variables';
-.welcome-message{
-    padding:5px;
-    padding-bottom: 280px; /* Garante espaço para rolar os campos acima do teclado fixo */
+.welcome-message {
+    padding: 5px;
+    padding-bottom: 300px; /* Garante espaço para rolar os campos acima do teclado fixo */
+    min-height: calc(100vh + 300px); /* Força a página a ser rolável para que o scrollIntoView funcione */
+    box-sizing: border-box;
 }
 
 .welcome-message .container-first-message{

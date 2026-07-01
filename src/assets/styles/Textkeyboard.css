@@ -1,17 +1,14 @@
 .total-keyboard-container {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    max-width: 850px;
+    position: relative;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 800px;
     background-color: var(--secundary-bg-color);
     padding: 15px 10px;
     box-sizing: border-box;
-    z-index: 10000;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
-    border-radius: 15px 15px 0 0;
-    border-top: 2px solid var(--btn-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 15px;
+    border: 2px solid var(--btn-color);
 }
 
 .text-keyboard-line-container {

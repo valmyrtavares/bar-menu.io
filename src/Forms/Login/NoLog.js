@@ -59,7 +59,7 @@ const NoLog = () => {
     const target = e.target;
     setTimeout(() => {
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 150);
+    }, 250);
   };
 
   // Função chamada quando um número é clicado no teclado
