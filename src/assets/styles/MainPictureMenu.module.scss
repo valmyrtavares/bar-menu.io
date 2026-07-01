@@ -1,6 +1,6 @@
 .containerPictureMenu {
     position: relative;
-    top: -260px;
+    top: 0;
 
     .containerDishes {
         position: absolute;
@@ -20,63 +20,125 @@
         display: grid;
         grid-template-columns: 1fr 4fr;
 
-        .categories {
-            max-height: calc(100vh - 120px); // Limita a altura máxima dinamicamente
-            overflow-y: auto; // Adiciona barra de rolagem caso necessário
-            touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
-            -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
-            padding-bottom: 120px; // Evita que os últimos itens fiquem cortados
-            margin-top: 56px;
-            background-color: var(--bg-color);
+        .leftColumn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
 
-            .categoryItem {
-                width: 100%;
-                aspect-ratio: 1 / 1; // Torna a div quadrada
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-between;
-                overflow: hidden;
+            .logoWrapper {
                 position: relative;
-                background-color: var(--secundary-bg-color);
-                margin-bottom: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 15px 0;
+                border-bottom: 1px solid rgba(var(--secundary-bg-color-rgb), 0.1);
 
-                h3 {
-                    height: auto;
-                    min-height: 20%;
-                    padding: 5px;
-                    display: flex;
-                    color: var(--title-font-color);
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-
-                    width: 100%;
-                    z-index: 2;
+                .totenLogo {
+                    max-height: 80px;
+                    max-width: 85%;
+                    object-fit: contain;
+                    transition: max-height 0.3s ease;
                 }
 
-                img {
-                    width: 85%; // Faz a imagem ficar mais larga que alta
-                    height: 80%; // Ocupa o restante do espaço disponível
-                    object-fit: cover; // Garante que as bordas sejam cortadas
+                .hiddenAdminLink {
                     position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
                     bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
+                    z-index: 10;
+                    opacity: 0;
+                    cursor: default;
                 }
             }
 
+            .categories {
+                max-height: calc(100vh - 150px); // Limita a altura máxima dinamicamente descomprimindo o logo
+                width: 100%;
+                overflow-y: auto; // Adiciona barra de rolagem caso necessário
+                touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
+                -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
+                padding-bottom: 120px; // Evita que os últimos itens fiquem cortados
+                margin-top: 10px;
+                background-color: var(--bg-color);
+
+                .categoryItem {
+                    width: 100%;
+                    aspect-ratio: 1 / 1; // Torna a div quadrada
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                    overflow: hidden;
+                    position: relative;
+                    background-color: var(--secundary-bg-color);
+                    margin-bottom: 10px;
+
+                    h3 {
+                        height: auto;
+                        min-height: 20%;
+                        padding: 5px;
+                        display: flex;
+                        color: var(--title-font-color);
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
+
+                        width: 100%;
+                        z-index: 2;
+                    }
+
+                    img {
+                        width: 85%; // Faz a imagem ficar mais larga que alta
+                        height: 80%; // Ocupa o restante do espaço disponível
+                        object-fit: cover; // Garante que as bordas sejam cortadas
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                    }
+                }
+            }
         }
 
         .dishes {
+            .buttonWrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-top: 10px;
+            }
+
+            .orderBtn {
+                background-color: var(--btn-color);
+                color: var(--title-font-color);
+                border: 2px solid var(--title-font-color);
+                border-radius: 20px;
+                padding: 12px 32px;
+                font-weight: bold;
+                font-size: 16px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                cursor: pointer;
+                font-family: var(--title-font);
+                transition: transform 0.2s ease, background-color 0.2s ease;
+
+                &:active {
+                    transform: scale(0.95);
+                }
+            }
+
             .mainTitle {
                 color: var(--btn-color);
                 font-size: 30px !important;
                 color: var(--title-font-color);
+                text-align: center;
             }
 
             .subContainer {
-                max-height: calc(100vh - 180px); // Limita a altura máxima dinamicamente
+                max-height: calc(100vh - 230px); // Limita a altura máxima dinamicamente considerando o botão
                 overflow-y: auto;
                 touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
                 -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
@@ -149,16 +211,28 @@
 @media (min-width: 400px) and (max-width: 1024px) {
     .containerPictureMenu {
         .submenu {
-            .categories {
-                .categoryItem {
-                    h3 {
-                        font-size: 1.8vw !important;
+            .leftColumn {
+                .logoWrapper {
+                    .totenLogo {
+                        max-height: 55px; // Logo menor em tablets
+                    }
+                }
+                .categories {
+                    .categoryItem {
+                        h3 {
+                            font-size: 1.8vw !important;
+                        }
                     }
                 }
             }
 
             .dishes {
                 padding: 1.5vw;
+
+                .orderBtn {
+                    font-size: 2vw !important;
+                    padding: 1.2vw 3vw !important;
+                }
 
                 .mainTitle {
                     font-size: 3.5vw !important;

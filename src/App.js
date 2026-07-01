@@ -82,7 +82,7 @@ function App() {
       }
       // Verifica se a URL atual é exatamente "/admin"
     };
-    setShowHeader(!location.pathname.startsWith('/admin'));
+    setShowHeader(!location.pathname.startsWith('/admin') && location.pathname !== '/new-layout');
     setSystemMode();
   }, [location.pathname]); // Reexecuta sempre que a URL muda
 

@@ -3,7 +3,6 @@ import style from '../assets/styles/MainPictureMenu.module.scss';
 import EachTotenDish from './EachTotenDish.js';
 import { getBtnData, getOneItemColleciton, deleteData } from '../api/Api';
 import DishesModal from '../component/Dishes/dishesModal';
-import SubHeaderCustomer from '../component/subHeaderCustomer.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckUser } from '../Helpers/Helpers.js';
 import { GlobalContext } from '../GlobalContext';
@@ -155,7 +154,7 @@ const MainPictureMenu = () => {
            if (!currentUser) {
                navigate(path);
            }
-        });
+         });
       }
 
       if (!currentUser) {
@@ -235,6 +234,13 @@ const MainPictureMenu = () => {
     navigate(userId);
   }
 
+  const handleNavigate = () => {
+    console.log('🚀 Navegação acionada (Toten)!');
+    if (!global.pdvRequest) {
+      navigate('/request');
+    }
+  };
+
   return (
     !isLoading && (
       <div
@@ -251,32 +257,45 @@ const MainPictureMenu = () => {
             />
           )}
         </div>
-        <SubHeaderCustomer
-          logoutCustomer={logoutCustomer}
-          nameClient={nameClient}
-          isToten={global.isToten}
-        />
         <div className={style.containerDishes}>
           {openModalDishes && (
             <DishesModal item={item} setModal={setOpenModalDishes} />
           )}
         </div>
         <div className={style.submenu}>
-          <nav className={style.categories}>
-            {menuButton &&
-              menuButton.length > 0 &&
-              menuButton.map((item) => (
-                <div
-                  key={item.id}
-                  className={style.categoryItem}
-                  onClick={() => chooseCategory(item.parent, item.title)}
-                >
-                  <h3>{item.title}</h3>
-                  <CategoryItemImage item={item} />
-                </div>
-              ))}
-          </nav>
+          {/* Coluna Esquerda: Logotipo + Categorias */}
+          <div className={style.leftColumn}>
+            <div className={style.logoWrapper}>
+              <img src={global.image} alt="logo" className={style.totenLogo} />
+              {/* Link oculto backdoor sobreposto ao logotipo */}
+              <Link to="/admin/admin" className={style.hiddenAdminLink}></Link>
+            </div>
+            <nav className={style.categories}>
+              {menuButton &&
+                menuButton.length > 0 &&
+                menuButton.map((item) => (
+                  <div
+                    key={item.id}
+                    className={style.categoryItem}
+                    onClick={() => chooseCategory(item.parent, item.title)}
+                  >
+                    <h3>{item.title}</h3>
+                    <CategoryItemImage item={item} />
+                  </div>
+                ))}
+            </nav>
+          </div>
+
+          {/* Coluna Direita: Botão "Veja os seus pedidos" + Título + Pratos */}
           <section className={style.dishes}>
+            <div className={style.buttonWrapper}>
+              <button
+                className={style.orderBtn}
+                onClick={handleNavigate}
+              >
+                VEJA O SEUS PEDIDOS
+              </button>
+            </div>
             <h3 className={style.mainTitle}>{categorySelected}</h3>
             <div className={`${style.subContainer} ${showFilteredDishes ? style.visible : style.hidden}`}>
               {isNestedCategory && (
