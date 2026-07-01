@@ -68,9 +68,14 @@ const MainPictureMenu = () => {
         grabClient();
         if (Array.isArray(data) && data.length > 0) {
           data.unshift(bestSeller);
-          const filteredButtonCategory = data.filter(
-            (item) => item.parent !== 'hide',
-          );
+          const filteredButtonCategory = data.filter((item) => {
+            if (item.parent === 'hide') return false;
+            if (item.parent === 'bestSellers') return true;
+            
+            // Mantém apenas categorias que contêm pratos vinculados diretamente
+            const hasDishes = Array.isArray(dataItem) && dataItem.some((dish) => dish.category === item.parent);
+            return hasDishes;
+          });
 
           setMenuButton(filteredButtonCategory);
         }
