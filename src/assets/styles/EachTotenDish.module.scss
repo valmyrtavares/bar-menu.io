@@ -98,20 +98,20 @@
      background-color: var(--bg-color);
  }
 
- @media (min-width: 400px) and (max-width: 1024px) {
+ @media (max-width: 1024px) {
      .itemContainer {
          .text {
              h3 {
-                 font-size: 2.2vw !important;
-                 max-height: 4vw !important;
+                 font-size: clamp(12px, 2.2vw, 18px) !important;
+                 max-height: clamp(24px, 4vw, 36px) !important;
 
                  span {
-                     font-size: 1.2vw !important;
+                     font-size: clamp(10px, 1.2vw, 14px) !important;
                  }
              }
 
              p {
-                 font-size: 1.6vw !important;
+                 font-size: clamp(11px, 1.6vw, 14px) !important;
              }
          }
      }

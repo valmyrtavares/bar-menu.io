@@ -208,7 +208,7 @@
     }
 }
 
-@media (min-width: 400px) and (max-width: 1024px) {
+@media (max-width: 1024px) {
     .containerPictureMenu {
         .submenu {
             .leftColumn {
@@ -220,7 +220,7 @@
                 .categories {
                     .categoryItem {
                         h3 {
-                            font-size: 1.8vw !important;
+                            font-size: clamp(11px, 1.8vw, 16px) !important;
                         }
                     }
                 }
@@ -230,12 +230,12 @@
                 padding: 1.5vw;
 
                 .orderBtn {
-                    font-size: 2vw !important;
+                    font-size: clamp(14px, 2vw, 18px) !important;
                     padding: 1.2vw 3vw !important;
                 }
 
                 .mainTitle {
-                    font-size: 3.5vw !important;
+                    font-size: clamp(18px, 3.5vw, 28px) !important;
                 }
 
                 .subContainer {
