@@ -1,40 +1,56 @@
-@import 'variables';
-
-.total-keyboard-container{
-background-color: var(--bg-color);
-padding: 4px;
-width: 135%;
-height: 150%;
-position: relative;
-left: -25%;
+.total-keyboard-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    max-width: 850px;
+    background-color: var(--secundary-bg-color);
+    padding: 15px 10px;
+    box-sizing: border-box;
+    z-index: 10000;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+    border-radius: 15px 15px 0 0;
+    border-top: 2px solid var(--btn-color);
 }
-.text-keyboard-line-container{
-    margin-bottom:5px;
 
-     border:solid 2px var( --secundary-bg-color);
-     justify-items:center ;
-     padding: 5;
-     gap: 5px;
-     display: grid;
-     grid-auto-flow: column;
-     grid-auto-columns: min-content;;
-     justify-content: center;
+.text-keyboard-line-container {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
 
-     
-     
-  }
-  .text-keyboard-line-container .text-character{
-     width: 50px;
-     height: 50px;    
-     display: grid;
-     background-color: var(--btn-color);
-     place-items: center;
-   font-size: 18px;
- 
-  }
-  .text-keyboard-line-container .one-char{
-   font-size: 25px;
-  }
-  .space{
-   width: 100px !important;
-  }
+.text-keyboard-line-container .text-character {
+    flex: 1;
+    min-width: 30px;
+    max-width: 60px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--btn-color);
+    color: var(--title-font-color);
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    user-select: none;
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+
+.text-keyboard-line-container .text-character:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+}
+
+.text-keyboard-line-container .one-char {
+    font-size: 20px;
+}
+
+.text-keyboard-line-container .space {
+    flex-grow: 3;
+    max-width: 250px !important;
+}

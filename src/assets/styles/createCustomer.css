@@ -1,6 +1,7 @@
 @import 'variables';
 .welcome-message{
     padding:5px;
+    padding-bottom: 280px; /* Garante espaço para rolar os campos acima do teclado fixo */
 }
 
 .welcome-message .container-first-message{
