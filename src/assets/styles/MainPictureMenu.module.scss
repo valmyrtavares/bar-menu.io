@@ -21,8 +21,11 @@
         grid-template-columns: 1fr 4fr;
 
         .categories {
-            max-height: 90vh; // Limita a altura máxima
+            max-height: calc(100vh - 120px); // Limita a altura máxima dinamicamente
             overflow-y: auto; // Adiciona barra de rolagem caso necessário
+            touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
+            -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
+            padding-bottom: 120px; // Evita que os últimos itens fiquem cortados
             margin-top: 56px;
             background-color: var(--bg-color);
 
@@ -73,8 +76,11 @@
             }
 
             .subContainer {
-                max-height: 70vh; // Limita a altura máxima
+                max-height: calc(100vh - 180px); // Limita a altura máxima dinamicamente
                 overflow-y: auto;
+                touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
+                -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
+                padding-bottom: 180px; // Evita que os últimos pratos fiquem cortados pela metade
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: flex-start;
