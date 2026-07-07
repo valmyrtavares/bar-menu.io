@@ -18,6 +18,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dishes, setDishes] = useState([]);
   const [showSummaryScreen, setShowSummaryScreen] = useState(false);
+  const [justification, setJustification] = useState('');
 
   // Estados para o Progresso e Resiliência
   const [progressIndex, setProgressIndex] = useState(0);
@@ -299,13 +300,14 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     }
   };
 
-  const stockHistoryList = (item, account, paymentDate, pack, cost, unit, volume, previousVolume, previousCost, totalCost, totalVolume, orderNumber = '') => {
+  const stockHistoryList = (item, account, paymentDate, pack, cost, unit, volume, previousVolume, previousCost, totalCost, totalVolume, orderNumber = '', justification = '') => {
+    const defaultReason = `Antes ${item.product} ${Number(previousVolume).toFixed(2)}${unit} / Agora ${Number(totalVolume).toFixed(2)}${unit}`;
     return {
       date: paymentDate,
       outputProduct: 0,
       category: account || 0,
       unit: unit,
-      noteReasonsEditingProduct: `Antes ${item.product} ${Number(previousVolume).toFixed(2)}${unit} / Agora ${Number(totalVolume).toFixed(2)}${unit}`,
+      noteReasonsEditingProduct: justification ? `${defaultReason} | Justificativa: ${justification}` : defaultReason,
       package: pack,
       inputProduct: volume,
       cost: cost,
@@ -330,6 +332,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
           date: currentAudit.fullDate,
           timestamp: Date.now(),
           totalLossValue: currentAudit.totalLossValue,
+          justification: currentAudit.justification || '',
           items: currentAudit.summaryItems.map(item => ({
             product: item.product,
             unit: item.unitOfMeasurement,
@@ -388,7 +391,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
           previousVolume,
           previousCost,
           updatedProduct.totalCost,
-          updatedProduct.totalVolume
+          updatedProduct.totalVolume,
+          '',
+          currentAudit.justification || ''
         );
 
         delete updatedProduct.UsageHistory;
@@ -439,11 +444,17 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const handleConfirmAndSave = async (summaryItems, totalLossValue, fullDate, paymentDate) => {
     if (isSubmitting) return;
 
+    if (!justification || justification.trim() === '') {
+      alert('Por favor, preencha a justificativa para esta auditoria.');
+      return;
+    }
+
     const auditData = {
       summaryItems,
       totalLossValue,
       fullDate,
       paymentDate,
+      justification: justification.trim(),
       currentIndex: 0,
       completedIds: [],
       inventoryHistoryDocId: null
@@ -574,7 +585,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                   let newCost = Number(item.totalCost);
                   if (hasCorrection) {
                     let unitPriceOriginal = 0;
-                    if (Number(item.totalVolume) > 0) {
+                    if (Number(item.totalCost) > 0 && Number(item.totalVolume) > 0) {
                       unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
                     } else if (Number(item.lastUnitCost) > 0) {
                       unitPriceOriginal = Number(item.lastUnitCost);
@@ -647,8 +658,11 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       const correction = newVolume - Number(original.totalVolume);
 
       let newCost = Number(original.totalCost);
-      if (original.totalVolume > 0) {
+      if (Number(original.totalCost) > 0 && Number(original.totalVolume) > 0) {
          const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);
+         newCost = newVolume * unitPriceOriginal;
+      } else if (Number(original.lastUnitCost) > 0 || Number(original.CostPerUnit) > 0) {
+         const unitPriceOriginal = Number(original.lastUnitCost) > 0 ? Number(original.lastUnitCost) : Number(original.CostPerUnit || 0);
          newCost = newVolume * unitPriceOriginal;
       } else {
          const unitPriceOriginal = Number(original.CostPerUnit || 0);
@@ -712,6 +726,30 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
         <div style={{ marginTop: '20px', fontWeight: 'bold', fontSize: '18px', textAlign: 'right', paddingRight: '20px' }}>
           Perda total em dinheiro: R$ {totalLossValue.toFixed(2)}
         </div>
+
+        <div className={styleEdit.textareaField} style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', width: '100%', gap: '8px', padding: '0 20px' }}>
+          <label htmlFor="auditJustification" style={{ fontWeight: 'bold', color: '#333', fontSize: '15px' }}>
+            Justificativa da Auditoria (Obrigatório)
+          </label>
+          <textarea
+            id="auditJustification"
+            value={justification}
+            onChange={(e) => setJustification(e.target.value)}
+            placeholder="Descreva o motivo desta auditoria / ajuste de inventário..."
+            style={{
+              width: '100%',
+              height: '80px',
+              padding: '10px',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              resize: 'vertical'
+            }}
+            disabled={isSubmitting}
+          />
+        </div>
+
         <div className={styleEdit.btnRow} style={{ justifyContent: 'space-between', marginTop: '20px' }}>
            <button 
              className={styleEdit.closeBtn} 

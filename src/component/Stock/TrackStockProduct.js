@@ -326,7 +326,10 @@ const TrackStockProduct = () => {
         </div>
       )}
       {showInventoryHistoryPopup && (
-        <InventoryHistoryPopup onClose={() => setShowInventoryHistoryPopup(false)} />
+        <InventoryHistoryPopup 
+          onClose={() => setShowInventoryHistoryPopup(false)} 
+          fetchStock={fetchStock}
+        />
       )}
       {showExcludedStockPopup && (
         <ExcludedStockPopup onClose={() => setShowExcludedStockPopup(false)} />

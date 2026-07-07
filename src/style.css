@@ -1,5 +1,9 @@
 @import './assets//styles/variables.css';
 
+html {
+    font-size: 14px !important; /* Trava a escala do rem contra alterações do sistema/acessibilidade e alinha com o padrão de 14px do Semantic UI */
+}
+
 html,
 body {
     touch-action: pan-x pan-y;

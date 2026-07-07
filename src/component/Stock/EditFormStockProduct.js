@@ -198,7 +198,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
     let newCost = 0;
 
     if (originalVol > 0 && newVolume > 0) {
-      const unitPriceOriginal = Number(obj.totalCost) / originalVol;
+      let unitPriceOriginal = 0;
+      if (Number(obj.totalCost) > 0) {
+        unitPriceOriginal = Number(obj.totalCost) / originalVol;
+      } else if (Number(obj.lastUnitCost) > 0) {
+        unitPriceOriginal = Number(obj.lastUnitCost);
+      } else {
+        unitPriceOriginal = Number(obj.CostPerUnit || 0);
+      }
       newCost = newVolume * unitPriceOriginal;
     }
 

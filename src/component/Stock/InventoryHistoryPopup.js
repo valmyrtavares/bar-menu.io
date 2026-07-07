@@ -5,7 +5,7 @@ import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
 import styleProgress from '../../assets/styles/AuditingPopupProgress.module.scss';
 
-const InventoryHistoryPopup = ({ onClose }) => {
+const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -355,7 +355,7 @@ const InventoryHistoryPopup = ({ onClose }) => {
     }
     
     const oldVolume = Number(prod.currentVolume);
-    if (val === oldVolume) {
+    if (val === oldVolume && Number(prod.currentCost) > 0) {
       setEditingIndex(null);
       return;
     }
@@ -364,15 +364,34 @@ const InventoryHistoryPopup = ({ onClose }) => {
     try {
       const deltaVolume = val - oldVolume;
       
-      let invUnitCost = 0;
-      if (oldVolume > 0) {
-        invUnitCost = Number(prod.currentCost) / oldVolume;
-      } else if (Number(prod.previousVolume) > 0) {
-        invUnitCost = Number(prod.previousCost) / Number(prod.previousVolume);
+      let stockUnitCost = 0;
+      let stockDocId = null;
+      let stockData = null;
+      
+      const stockDocs = await getDocs(query(collection(db, 'stock'), where('product', '==', prod.product)));
+      if (!stockDocs.empty) {
+        const stockDoc = stockDocs.docs[0];
+        stockDocId = stockDoc.id;
+        stockData = stockDoc.data();
+        
+        if (Number(stockData.totalCost) > 0 && Number(stockData.totalVolume) > 0) {
+          stockUnitCost = Number(stockData.totalCost) / Number(stockData.totalVolume);
+        } else if (Number(stockData.lastUnitCost) > 0) {
+          stockUnitCost = Number(stockData.lastUnitCost);
+        } else {
+          stockUnitCost = Number(stockData.CostPerUnit || 0);
+        }
       }
       
-      const invDeltaCost = deltaVolume * invUnitCost;
-      const newCurrentCost = Number(prod.currentCost) + invDeltaCost;
+      if (stockUnitCost === 0) {
+        if (oldVolume > 0 && Number(prod.currentCost) > 0) {
+          stockUnitCost = Number(prod.currentCost) / oldVolume;
+        } else if (Number(prod.previousVolume) > 0 && Number(prod.previousCost) > 0) {
+          stockUnitCost = Number(prod.previousCost) / Number(prod.previousVolume);
+        }
+      }
+      
+      const newCurrentCost = Number((val * stockUnitCost).toFixed(2));
       
       const updatedItems = [...selectedInventory.items];
       updatedItems[idx] = {
@@ -386,29 +405,15 @@ const InventoryHistoryPopup = ({ onClose }) => {
         items: updatedItems
       });
       
-      const stockDocs = await getDocs(query(collection(db, 'stock'), where('product', '==', prod.product)));
-      if (!stockDocs.empty) {
-        const stockDoc = stockDocs.docs[0];
-        const stockData = stockDoc.data();
-        
-        let stockUnitCost = 0;
-        if (Number(stockData.totalVolume) > 0) {
-          stockUnitCost = Number(stockData.totalCost) / Number(stockData.totalVolume);
-        } else if (Number(stockData.lastUnitCost) > 0) {
-          stockUnitCost = Number(stockData.lastUnitCost);
-        } else {
-          stockUnitCost = Number(stockData.CostPerUnit || 0);
-        }
-          
-        const stockDeltaCost = deltaVolume * stockUnitCost;
+      if (stockDocId && stockData) {
         const newStockVolume = Math.max(0, Number(stockData.totalVolume) + deltaVolume);
-        const newStockCost = Math.max(0, Number(stockData.totalCost) + stockDeltaCost);
+        const newStockCost = Math.max(0, Number((newStockVolume * stockUnitCost).toFixed(2)));
         const newUnit = Number(stockData.volumePerUnit) > 0 ? newStockVolume / Number(stockData.volumePerUnit) : 0;
         
-        await updateDoc(doc(db, 'stock', stockDoc.id), {
+        await updateDoc(doc(db, 'stock', stockDocId), {
           totalVolume: newStockVolume,
           totalCost: newStockCost,
-          amount: newUnit
+          amount: Number(newUnit.toFixed(2))
         });
         
         const today = new Date();
@@ -421,12 +426,12 @@ const InventoryHistoryPopup = ({ onClose }) => {
         const formattedDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
 
         await addDoc(collection(db, 'stockUsageLogs'), {
-          stockId: stockDoc.id,
+          stockId: stockDocId,
           timestamp: new Date().toISOString(),
           date: formattedDate,
           category: 'Correção de Inventário',
           unit: stockData.unitOfMeasurement || prod.unit,
-          package: Number(newUnit),
+          package: Number(newUnit.toFixed(2)),
           inputProduct: deltaVolume > 0 ? deltaVolume : 0,
           outputProduct: deltaVolume < 0 ? Math.abs(deltaVolume) : 0,
           cost: 0,
@@ -444,6 +449,9 @@ const InventoryHistoryPopup = ({ onClose }) => {
       });
       setEditingIndex(null);
       setRefreshTrigger(prev => prev + 1);
+      if (fetchStock) {
+        await fetchStock();
+      }
     } catch (err) {
       console.error("Erro ao corrigir inventário:", err);
       alert("Ocorreu um erro ao corrigir o inventário.");

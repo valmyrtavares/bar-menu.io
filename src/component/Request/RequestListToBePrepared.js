@@ -793,16 +793,16 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             if (
               account !== 'Editado'
             ) {
-              const costPerUnit = parseToNumber(currentItem.CostPerUnit);
-              updatedTotalCost = round(previousCost - costPerUnit, 2);
-
               const volumeBefore = parseToNumber(currentItem.totalVolume);
               updatedTotalVolume = round(volumeBefore + previousVolume, 4);
 
               if (updatedTotalVolume <= 0) {
                 updatedTotalVolume = 0;
                 updatedTotalCost = 0;
-              } else if (updatedTotalCost < 0) {
+              } else if (previousVolume > 0) {
+                // Redução proporcional do custo com base no volume restante
+                updatedTotalCost = round(previousCost * (updatedTotalVolume / previousVolume), 2);
+              } else {
                 updatedTotalCost = 0;
               }
             }
