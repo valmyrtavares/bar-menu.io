@@ -1261,7 +1261,10 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
 
       if (userData && userData.id) {
         const userDocRef = doc(db, 'user', userData.id);
-        await updateDoc(userDocRef, { request: [] });
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          await updateDoc(userDocRef, { request: [] });
+        }
       }
 
       global.setOrderBeingEdited(null);

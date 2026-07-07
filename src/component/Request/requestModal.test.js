@@ -171,8 +171,8 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
 
         // O botão Enviar pedido deve estar presente (Pós-Pagamento)
         expect(screen.getByRole('button', { name: /Enviar pedido/i })).toBeInTheDocument();
-        // O botão Finalizar (Pré-Pagamento manual / encerramento) também fica lá
-        expect(screen.getByRole('button', { name: /Finalizar/i })).toBeInTheDocument();
+        // O botão Pedir a conta (Pré-Pagamento manual / encerramento) também fica lá
+        expect(screen.getByRole('button', { name: /Pedir a conta/i })).toBeInTheDocument();
     });
 
     it('deve usar o Pré-Pagamento como padrão (Finalizar apenas) quando NÃO houver mesa selecionada', async () => {

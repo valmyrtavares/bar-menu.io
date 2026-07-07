@@ -52,10 +52,10 @@ describe('issueAutoNfce', () => {
         const body = JSON.parse(options.body);
 
         // Verify the CPF field sent to API is empty string
-        expect(body.cpf_destinatario).toBe('');
+        expect(body.nfceData.cpf_destinatario).toBe('');
 
         // Verify other critical fields
-        expect(body.cnpj_emitente).toBe('19337953000178');
+        expect(body.nfceData.cnpj_emitente).toBe('19337953000178');
     });
 
     it('deve enviar CPF formatado quando order.cpfForInvoice existir', async () => {
@@ -73,7 +73,7 @@ describe('issueAutoNfce', () => {
         const body = JSON.parse(options.body);
 
         // Verify the CPF field sent to API is only digits
-        expect(body.cpf_destinatario).toBe('12345678900');
+        expect(body.nfceData.cpf_destinatario).toBe('12345678900');
     });
 
     it('NÃO deve chamar updateDoc no documento do pedido (anti race condition)', async () => {

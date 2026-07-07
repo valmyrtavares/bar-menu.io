@@ -112,7 +112,8 @@ describe('RequestListToBePrepared - Funcionalidade de Edição', () => {
                 id: '123',
                 countRequest: 1,
                 dateTime: '12:00',
-                discount: 0
+                discount: 0,
+                tableNumber: null
             });
             expect(mockGlobalContext.setPdvRequest).toHaveBeenCalledWith(true);
         });

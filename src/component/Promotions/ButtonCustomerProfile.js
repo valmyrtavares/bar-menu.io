@@ -26,10 +26,14 @@ const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {
   //Fetch user in firebase and check out if is it anonymous to fill the button's color and load the PromotionCient useState
   React.useEffect(() => {
     const fetchVoucherConfig = async () => {
-      const docRef = doc(db, 'GlobalConfig', 'voucherSettings');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setVoucherValue(docSnap.data().voucherValue || 0);
+      try {
+        const docRef = doc(db, 'GlobalConfig', 'voucherSettings');
+        const docSnap = await getDoc(docRef);
+        if (docSnap && typeof docSnap.exists === 'function' && docSnap.exists()) {
+          setVoucherValue(docSnap.data().voucherValue || 0);
+        }
+      } catch (err) {
+        console.error('Error fetching voucher config:', err);
       }
     };
 

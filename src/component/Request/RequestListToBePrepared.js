@@ -443,15 +443,33 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   };
 
   const handleDeleteRequest = async (id) => {
-    const data = await getOneItemColleciton('requests', id);
-    await deleteData('requests', id);
-    if (data.name === 'anonimo' || data.name === 'anonymous') {
-      await deleteData('user', data.idUser);
-    } else if (data.idUser) {
-      const userRef = doc(db, 'user', data.idUser);
-      await updateDoc(userRef, { request: [] });
+    try {
+      const data = await getOneItemColleciton('requests', id);
+      if (data) {
+        await deleteData('requests', id);
+        if (data.name === 'anonimo' || data.name === 'anonymous') {
+          if (data.idUser) {
+            const userRef = doc(db, 'user', data.idUser);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              await deleteData('user', data.idUser);
+            }
+          }
+        } else if (data.idUser) {
+          const userRef = doc(db, 'user', data.idUser);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            await updateDoc(userRef, { request: [] });
+          } else {
+            console.warn(`[WARNING] Documento de usuário ${data.idUser} não existe, pulando limpeza.`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao deletar/cancelar pedido:', error);
+    } finally {
+      setShowDefaultMessage(false); // Fecha o modal após excluir
     }
-    setShowDefaultMessage(false); // Fecha o modal após excluir
   };
 
   const openShowModal = (id) => {
@@ -1450,7 +1468,6 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         localStorage.removeItem('tableNumber');
       }
 
-      const userDocRef = doc(db, 'user', item.idUser);
       // Aqui o problema reportado: o 'item.request' que vem da base já contém o pedido exato que queremos editar.
       // E ao adicionar a array 'request' do 'user' novamente por cima do 'item.request', as informações dobram.
       // A solução é recarregar no user.request APENAS os itens da requisição atual que está sendo editada.
@@ -1466,9 +1483,23 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
         }))
         : [];
 
-      await updateDoc(userDocRef, {
-        request: cleanArray,
-      });
+      if (item.idUser) {
+        const userDocRef = doc(db, 'user', item.idUser);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          await updateDoc(userDocRef, {
+            request: cleanArray,
+          });
+        } else {
+          await setDoc(userDocRef, {
+            name: item.name || 'anonimo',
+            phone: '777',
+            birthday: '77',
+            email: 'anonimo@anonimo.com',
+            request: cleanArray
+          });
+        }
+      }
 
       global.setPdvRequest(true);
 
