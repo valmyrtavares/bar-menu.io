@@ -5,6 +5,203 @@ import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
 import styleProgress from '../../assets/styles/AuditingPopupProgress.module.scss';
 
+const renderSparkline = (history, unit) => {
+  if (!history || history.length === 0) return null;
+
+  const pointDistance = 95;
+  // Ponto de início + contagens de histórico
+  const historyLen = history.length;
+  const totalPoints = historyLen + 1;
+  const svgWidth = Math.max(320, totalPoints * pointDistance);
+  const svgHeight = 130;
+  const paddingX = 40;
+  const paddingY = 30;
+
+  // Gerar série acumulada
+  let cumulative = 0;
+  const cumulativeHistory = history.map(h => {
+    cumulative += h.difVol;
+    return {
+      date: h.date,
+      difVol: h.difVol, // mudança individual
+      cumulativeVol: cumulative
+    };
+  });
+
+  // Ponto de início virtual (0 discrepância)
+  const pointsData = [
+    { cumulativeVol: 0, difVol: 0, date: 'Início', isStart: true },
+    ...cumulativeHistory
+  ];
+
+  // Encontrar o maior desvio absoluto acumulado para escalonar o eixo Y
+  const maxAbsDiff = Math.max(...pointsData.map(p => Math.abs(p.cumulativeVol)), 0.1);
+  const centerY = svgHeight / 2; // Linha de discrepância zero (65)
+
+  // Gerar coordenadas X e Y para cada ponto
+  const points = pointsData.map((p, i) => {
+    const x = paddingX + (i / (pointsData.length - 1)) * (svgWidth - 2 * paddingX);
+    // Se cumulativeVol for negativo (perda), o y aumenta (vai para baixo no SVG)
+    // Se cumulativeVol for positivo (ganho), o y diminui (vai para cima no SVG)
+    const y = centerY - (p.cumulativeVol / maxAbsDiff) * (centerY - paddingY);
+    return {
+      x,
+      y,
+      cumulativeVal: p.cumulativeVol,
+      changeVal: p.difVol,
+      date: p.date,
+      isStart: p.isStart
+    };
+  });
+
+  return (
+    <div className={styleProgress.sparklineContainer}>
+      <h5 className={styleProgress.sparklineTitle}>Tendência de Discrepância Acumulada ({unit})</h5>
+      <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '10px' }}>
+        <svg 
+          style={{ width: `${svgWidth}px`, height: `${svgHeight}px`, display: 'block', overflow: 'visible' }} 
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        >
+          {/* Linha de referência Zero */}
+          <line
+            x1="15"
+            y1={centerY}
+            x2={svgWidth - 15}
+            y2={centerY}
+            stroke="rgba(255, 255, 255, 0.25)"
+            strokeDasharray="3,3"
+            strokeWidth="1"
+          />
+          <text
+            x="15"
+            y={centerY - 6}
+            className={styleProgress.sparklineText}
+            fontSize="10"
+            fontWeight="600"
+            opacity="0.8"
+          >
+            Esperado (Estável)
+          </text>
+
+          {/* Desenhar os segmentos de linha coloridos entre os pontos */}
+          {points.map((p, i) => {
+            if (i === 0) return null;
+            const prev = points[i - 1];
+            
+            // Cor do segmento baseada na mudança do ponto atual
+            const change = p.changeVal;
+            const strokeColor = change < 0 ? '#ef4444' : change > 0 ? '#34d399' : 'rgba(255, 255, 255, 0.25)';
+
+            return (
+              <line
+                key={`line-${i}`}
+                x1={prev.x}
+                y1={prev.y}
+                x2={p.x}
+                y2={p.y}
+                stroke={strokeColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            );
+          })}
+
+          {/* Desenhar os pontos (círculos) e textos */}
+          {points.map((p, idx) => {
+            if (p.isStart) {
+              return (
+                <g key={idx}>
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r="3"
+                    fill="rgba(255, 255, 255, 0.4)"
+                  />
+                  <text
+                    x={p.x}
+                    y={svgHeight - 6}
+                    textAnchor="middle"
+                    className={styleProgress.sparklineText}
+                    fontSize="10"
+                    opacity="0.6"
+                  >
+                    Início
+                  </text>
+                </g>
+              );
+            }
+
+            // O sinal e a cor do círculo representam o desvio individual daquele inventário
+            const change = p.changeVal;
+            const isNegativeLabel = change < 0;
+            const isPositiveLabel = change > 0;
+            const dotColor = isNegativeLabel ? '#ef4444' : isPositiveLabel ? '#34d399' : '#94a3b8';
+            
+            // Posicionamento vertical do rótulo baseado na posição acumulada (para não cruzar a linha zero confusamente)
+            const textY = p.cumulativeVal < 0 ? p.y + 14 : p.y - 8;
+            
+            // Formatador de valor: ganhos recebem sinal de + (ex: +1.00) e nunca sinal de menos (-)
+            const formattedVal = isPositiveLabel ? `+${change.toFixed(2)}` : change.toFixed(2);
+            
+            // Data curta abreviada (DD/MM) para evitar sobreposição horizontal
+            const shortDate = p.date.split(' - ')[0].substring(0, 5);
+
+            return (
+              <g key={idx}>
+                {/* Linha vertical pontilhada conectando o ponto à linha zero */}
+                <line
+                  x1={p.x}
+                  y1={centerY}
+                  x2={p.x}
+                  y2={p.y}
+                  stroke="rgba(255, 255, 255, 0.08)"
+                  strokeDasharray="2,2"
+                  strokeWidth="1"
+                />
+                
+                {/* Círculo do ponto */}
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r="4.5"
+                  fill={dotColor}
+                  stroke="#222232"
+                  strokeWidth="1.5"
+                />
+
+                {/* Rótulo do valor do desvio individual */}
+                <text
+                  x={p.x}
+                  y={textY}
+                  textAnchor="middle"
+                  className={styleProgress.sparklineText}
+                  fill={dotColor}
+                  fontWeight="700"
+                  fontSize="11"
+                >
+                  {formattedVal}
+                </text>
+
+                {/* Data da auditoria na base do gráfico */}
+                <text
+                  x={p.x}
+                  y={svgHeight - 6}
+                  textAnchor="middle"
+                  className={styleProgress.sparklineText}
+                  fontSize="10"
+                  opacity="0.6"
+                >
+                  {shortDate}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +211,7 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [adjustmentLogs, setAdjustmentLogs] = useState([]);
   const [analyticsData, setAnalyticsData] = useState([]);
+  const [expandedProduct, setExpandedProduct] = useState(null);
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -222,7 +420,7 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
           };
         });
 
-        // Ordenar por perda absoluta em dinheiro desc
+        // Ordenar por perda absoluta em dinheiro desc para marcar Alto Impacto
         processedAnalytics.sort((a, b) => b.totalLossValue - a.totalLossValue);
         
         // Marcar top 3 com perda significativa (> R$ 50) como Alto Impacto
@@ -231,6 +429,9 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
             item.isHighImpact = true;
           }
         });
+
+        // Ordenar alfabeticamente pelo nome da matéria-prima
+        processedAnalytics.sort((a, b) => a.product.localeCompare(b.product, 'pt-BR', { sensitivity: 'base' }));
 
         setAnalyticsData(processedAnalytics);
       } catch (err) {
@@ -462,7 +663,7 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
 
   return (
     <div className={styleEdit.popupOverlay}>
-      <div className={styleEdit.containerEditStock} style={{ maxWidth: '800px' }}>
+      <div className={styleEdit.containerEditStock} style={{ width: '95%', maxWidth: '1100px', height: '90vh', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         <div className={styleEdit.closeBtnRow}>
           <button className={styleEdit.closeBtn} type="button" onClick={onClose}>
             X
@@ -503,7 +704,7 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
           </div>
         )}
 
-        <div className={styleTrack.tableStockContainer} style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        <div className={styleTrack.tableStockContainer} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
           {loading ? (
             <p>Carregando histórico...</p>
           ) : historyItems.length === 0 ? (
@@ -579,12 +780,52 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
                 analyticsData.map((item, idx) => {
                   const hasSystematic = item.pattern === 'Perda Sistemática';
                   const hasFluctuation = item.pattern === 'Flutuação';
+                  const isExpanded = expandedProduct === item.product;
                   
+                  if (!isExpanded) {
+                    // Visualização fechada (apenas nome e badges de status/alertas)
+                    return (
+                      <div 
+                        key={idx} 
+                        className={styleProgress.collapsedCard}
+                        onClick={() => setExpandedProduct(item.product)}
+                      >
+                        <div className={styleProgress.collapsedLeft}>
+                          <h4 className={styleProgress.cardTitle}>{item.product}</h4>
+                          <div className={styleProgress.badgeList}>
+                            {item.isHighImpact && (
+                              <span className={`${styleProgress.badge} ${styleProgress.highImpact}`}>🚨 Alto Prejuízo</span>
+                            )}
+                            {hasSystematic && (
+                              <span className={`${styleProgress.badge} ${styleProgress.systematic}`}>⚠️ Perda Sistemática</span>
+                            )}
+                            {hasFluctuation && (
+                              <span className={`${styleProgress.badge} ${styleProgress.fluctuation}`}>🔄 Flutuação</span>
+                            )}
+                            {item.pattern === 'Estável' && (
+                              <span className={`${styleProgress.badge} ${styleProgress.stable}`}>✅ Saudável</span>
+                            )}
+                          </div>
+                        </div>
+                        <button 
+                          className={styleProgress.expandBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedProduct(item.product);
+                          }}
+                        >
+                          ▼ Expandir
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  // Visualização expandida (conteúdo completo)
                   return (
                     <div key={idx} className={styleProgress.analysisCard}>
                       <div className={styleProgress.cardHeader}>
                         <h4 className={styleProgress.cardTitle}>{item.product}</h4>
-                        <div className={styleProgress.badgeList}>
+                        <div className={styleProgress.badgeList} style={{ marginRight: 'auto', marginLeft: '15px' }}>
                           {item.isHighImpact && (
                             <span className={`${styleProgress.badge} ${styleProgress.highImpact}`}>🚨 Alto Prejuízo</span>
                           )}
@@ -598,6 +839,16 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
                             <span className={`${styleProgress.badge} ${styleProgress.stable}`}>✅ Saudável</span>
                           )}
                         </div>
+                        <button 
+                          className={styleProgress.expandBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedProduct(null);
+                          }}
+                          style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
+                        >
+                          ▲ Recolher
+                        </button>
                       </div>
 
                       <div className={styleProgress.cardBody}>
@@ -625,6 +876,41 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
                             {item.feedbackMessage}
                           </div>
                         )}
+
+                        {/* Gráfico de Tendência SVG (Sparkline) */}
+                        {renderSparkline(item.history, item.unit)}
+
+                        {/* Histórico detalhado de inventários (Linha do Tempo) */}
+                        <div className={styleProgress.timelineTitle}>Histórico de Contagens:</div>
+                        <div className={styleProgress.historyTimeline}>
+                          {[...item.history].reverse().map((hist, hIdx) => {
+                            const dif = hist.difVol;
+                            const isLoss = dif < 0;
+                            const isGain = dif > 0;
+                            
+                            return (
+                              <div key={hIdx} className={styleProgress.timelineItem}>
+                                <div className={styleProgress.timelineHeader}>
+                                  <span>Contagem #{item.history.length - hIdx}</span>
+                                  <span className={styleProgress.timelineDate}>{hist.date}</span>
+                                </div>
+                                <div className={styleProgress.timelineValues}>
+                                  <div>Esperado: <span>{hist.previousVolume.toFixed(2)} {item.unit}</span></div>
+                                  <div>Real: <span>{hist.currentVolume.toFixed(2)} {item.unit}</span></div>
+                                </div>
+                                <div className={`${styleProgress.timelineDiff} ${isLoss ? styleProgress.loss : isGain ? styleProgress.gain : styleProgress.stable}`}>
+                                  {isLoss ? (
+                                    <>↓ Perda de {Math.abs(dif).toFixed(2)} {item.unit}</>
+                                  ) : isGain ? (
+                                    <>↑ Ganho de {dif.toFixed(2)} {item.unit}</>
+                                  ) : (
+                                    <>→ Sem discrepância</>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       {hasSystematic && item.suggestedCorrectionPct > 0 && (
@@ -686,8 +972,8 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
           )}
         </div>
 
-        <div className={styleEdit.btnRow} style={{ justifyContent: 'center', marginTop: '20px', gap: '10px' }}>
-           {selectedInventory && (
+        {selectedInventory && (
+          <div className={styleEdit.btnRow} style={{ justifyContent: 'center', marginTop: '20px' }}>
              <button 
                className={styleEdit.closeBtn} 
                style={{ position: 'relative', top: 0, right: 0, backgroundColor: '#6c757d', color: '#fff' }} 
@@ -696,16 +982,8 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
              >
                Voltar
              </button>
-           )}
-           <button 
-             className={styleEdit.closeBtn} 
-             style={{ position: 'relative', top: 0, right: 0 }} 
-             type="button" 
-             onClick={onClose}
-           >
-             Fechar
-           </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
