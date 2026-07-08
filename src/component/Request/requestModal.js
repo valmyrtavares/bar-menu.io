@@ -1153,6 +1153,66 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
     }
   };
 
+  const isSameDish = (a, b) => {
+    if (a.name !== b.name) return false;
+    if ((a.size || '') !== (b.size || '')) return false;
+
+    const sidesA = a.sideDishes || [];
+    const sidesB = b.sideDishes || [];
+    if (sidesA.length !== sidesB.length) return false;
+
+    const namesA = sidesA.map(s => s.name).sort();
+    const namesB = sidesB.map(s => s.name).sort();
+    for (let i = 0; i < namesA.length; i++) {
+      if (namesA[i] !== namesB[i]) return false;
+    }
+    return true;
+  };
+
+  const getGroupedRequests = () => {
+    if (!userData || !Array.isArray(userData.request)) return [];
+
+    const grouped = [];
+
+    userData.request.forEach((item, originalIndex) => {
+      const isSentOrReady = item.status === 'Pronto' || item.sentToKitchen;
+
+      if (isSentOrReady) {
+        grouped.push({
+          ...item,
+          originalIndices: [originalIndex],
+          isGrouped: false
+        });
+      } else {
+        const match = grouped.find(g =>
+          !g.sentToKitchen &&
+          g.status !== 'Pronto' &&
+          isSameDish(g, item)
+        );
+
+        if (match) {
+          match.originalIndices.push(originalIndex);
+          match.totalPrice = (match.totalPrice || match.finalPrice) + (item.finalPrice || item.price || 0);
+        } else {
+          grouped.push({
+            ...item,
+            originalIndices: [originalIndex],
+            totalPrice: item.finalPrice || item.price || 0,
+            isGrouped: true
+          });
+        }
+      }
+    });
+
+    return grouped;
+  };
+
+  const decrementDish = async (originalIndices) => {
+    if (!originalIndices || originalIndices.length === 0) return;
+    const targetIndex = originalIndices[originalIndices.length - 1];
+    await deleteRequest(targetIndex);
+  };
+
   const duplicateDish = async (index) => {
 
 
@@ -1437,14 +1497,14 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       {userData &&
         Array.isArray(userData.request) &&
         userData.request.length > 0 ? (
-        userData.request.map((item, index) => (
+        getGroupedRequests().map((item, index) => (
           <div className="individual-dishes my-3" key={index}>
             <h2 onClick={() => callDishesModal(item)} className="my-0">
               {item.name}
             </h2>
             <p className="dishes-price">
               R${' '}
-              {item.finalPrice.toLocaleString('pt-BR', {
+              {(item.totalPrice || item.finalPrice).toLocaleString('pt-BR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -1458,19 +1518,50 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
               </div>
             ) : item.sentToKitchen ? (
               <p className="status-request-pend" style={{ color: 'var(--title-font-color)' }}>Em preparo</p>
+            ) : item.originalIndices && item.originalIndices.length > 1 ? (
+              <>
+                <p className="status-request-pend">Qtd: {item.originalIndices.length}</p>
+                <p className="cancel" onClick={() => decrementDish(item.originalIndices)} style={{ fontSize: '35px', fontWeight: 'bold', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  -
+                </p>
+                <button onClick={() => duplicateDish(item.originalIndices[item.originalIndices.length - 1])}>+</button>
+              </>
             ) : (
               <>
                 <p className="status-request-pend">pendente</p>
-                <p className="cancel" onClick={() => deleteRequest(index)}>
+                <p className="cancel" onClick={() => deleteRequest(item.originalIndices[0])}>
                   Cancelar
                 </p>
-                <button onClick={() => duplicateDish(index)}>+</button>
+                <button onClick={() => duplicateDish(item.originalIndices[0])}>+</button>
               </>
             )}
           </div>
         ))
       ) : (
         <p className="no-request">Não há pedidos por enquanto</p>
+      )}
+
+      {userData && Array.isArray(userData.request) && userData.request.length > 0 && (
+        <div className="total-request-sum" style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '80%',
+          margin: '20px 10% 10px 10%',
+          padding: '15px 10px',
+          borderTop: '2px solid var(--secundary-bg-color)',
+          fontSize: '1.2rem',
+          fontWeight: 'bold',
+          color: 'var(--title-font-color)'
+        }}>
+          <span>Total do Pedido:</span>
+          <span>
+            R$ {finalPriceRequest ? finalPriceRequest.toLocaleString('pt-BR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) : '0,00'}
+          </span>
+        </div>
       )}
       <div className={stylePdv ? 'pdv-footer-actions' : 'customer-footer-actions'}>
         <div className="btnFinalRequest">
