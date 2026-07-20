@@ -237,8 +237,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
             order.paymentDone === true &&
             !order.nfceIssued &&
             !order.sendingNfce &&
-            order.nfceStatus !== 'erro' &&
-            order.nfceStatus !== 'rejeitado' &&
+            !order.nfceStatus &&
             !global.processedOrdersGlobal.current.has(order.id)
           ) {
             // Marca IMEDIATAMENTE na memória para bloquear próximas renderizações
@@ -319,10 +318,9 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 );
                 await updateDoc(orderRef, { 
                   sendingNfce: false,
-                  nfceStatus: result?.status || 'erro',
+                  nfceStatus: (result?.status === 'rejeitado') ? 'rejeitado' : 'erro',
                   nfceErrorDetail: result?.mensagem_sefaz || result?.erro || 'Erro na resposta da Focus API'
                 });
-                global.processedOrdersGlobal.current.delete(order.id);
               }
             } catch (err) {
               // ERRO GERAL (Ex: Falha de rede ao travar)
@@ -330,7 +328,6 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 `[ERRO GERAL] Falha no processo para ${order.countRequest}:`,
                 err,
               );
-              global.processedOrdersGlobal.current.delete(order.id);
               try {
                 await updateDoc(doc(db, 'requests', order.id), {
                   sendingNfce: false,

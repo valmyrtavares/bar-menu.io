@@ -52,7 +52,7 @@ describe('NFCe Safety Lock Verification', () => {
 
         // Mock da função trigger que existe no componente
         const triggerFiscalLogic = async (order) => {
-            if (order.paymentDone === true && !order.nfceIssued && !order.sendingNfce && !processedOrdersLock.has(order.id)) {
+            if (order.paymentDone === true && !order.nfceIssued && !order.sendingNfce && !order.nfceStatus && !processedOrdersLock.has(order.id)) {
                 // TRAVA IMEDIATA EM MEMÓRIA (Igual ao RequestListToBePrepared.js:101)
                 processedOrdersLock.add(order.id);
 
@@ -63,7 +63,7 @@ describe('NFCe Safety Lock Verification', () => {
                     // Chama o serviço de emissão
                     await issueAutoNfce(order);
                 } catch (err) {
-                    processedOrdersLock.delete(order.id);
+                    // Mantém a trava para evitar loops
                 }
             }
         };

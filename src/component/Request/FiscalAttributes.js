@@ -17,7 +17,7 @@ import {
 import { db } from '../../config-firebase/firebase.js';
 import { getBtnData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
-import { issueAutoNfce } from '../../services/fiscalService';
+import { issueAutoNfce, paymentMethodWay } from '../../services/fiscalService';
 
 const FiscalAttributes = () => {
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
@@ -192,16 +192,7 @@ const FiscalAttributes = () => {
     }
   };
 
-  const paymentMethodWay = (method) => {
-    let op = {
-      debit: '04',
-      credite: '03',
-      vr: '03',
-      cash: '01',
-      pix: '99',
-    };
-    return op[method];
-  };
+
 
   const cpfAndCardFlagValidation = () => {
     const typePayment = paymentMethodWay(paymentMethod);
@@ -423,6 +414,7 @@ const FiscalAttributes = () => {
         <div>
           <Input
             id="cpf"
+            label="CPF"
             autoComplete="off"
             placeholder="CPF"
             value={form.cpf}
@@ -457,73 +449,110 @@ const FiscalAttributes = () => {
             <th>Nota</th>
             <th>Data</th>
             <th>valor total</th>
+            <th>Status</th>
             <th>Imprimir</th>
             <th>Cancelar Nota</th>
           </tr>
         </thead>
         <tbody>
           {taxDocument &&
-            taxDocument.map((item, index) => (
-              <tr key={index}>
-                <td>
-                  <a
-                    href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {item.ref}
-                  </a>
-                </td>
-                <td>{item.date_issued}</td>
-                <td>{item.total_value}</td>
-                <td>
-                  <button
-                    className="btn btn-link"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      try {
-                        await fetch(
-                          'https://focusrender.onrender.com/api/print-nfce',
-                          {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              caminho_danfe: item.caminho_danfe,
-                              nfceRef: item.nfceRef || item.ref, // Passa a referência
-                            }),
-                          },
-                        );
-                      } catch (err) {
-                        console.error('Erro ao reimprimir:', err);
-                        alert('Erro ao conectar com o serviço de impressão.');
-                      }
-                    }}
-                  >
-                    imprimir
-                  </button>
-                </td>
-                <td>
-                  <button
-                    onClick={() => {
-                      setOpenpopCancelTax(item);
-                    }}
-                    disabled={item.activate}
-                  >
-                    Cancelar
-                  </button>
-                  {openpopCancelTax?.ref === item.ref && (
-                    <DefaultComumMessage
-                      msg="Tem certeza que deseja cancelar essa nota"
-                      onClose={() => {
-                        setOpenpopCancelTax(null);
+            taxDocument.map((item, index) => {
+              const isSuccess = item.status === 'autorizado';
+              const statusLabel = isSuccess ? 'Autorizado' : (item.status === 'rejeitado' ? 'Rejeitado' : 'Erro');
+              const statusColor = isSuccess ? 'green' : 'red';
+              let errorMessage = null;
+              if (item.mensagem_sefaz) {
+                errorMessage = typeof item.mensagem_sefaz === 'object' ? JSON.stringify(item.mensagem_sefaz) : item.mensagem_sefaz;
+              } else if (item.erro) {
+                errorMessage = typeof item.erro === 'object' ? (item.erro.mensagem || item.erro.message || JSON.stringify(item.erro)) : item.erro;
+              } else if (item.mensagem) {
+                errorMessage = typeof item.mensagem === 'object' ? JSON.stringify(item.mensagem) : item.mensagem;
+              }
+
+              return (
+                <tr key={index}>
+                  <td>
+                    {item.caminho_danfe ? (
+                      <a
+                        href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {item.ref}
+                      </a>
+                    ) : (
+                      <span>{item.ref}</span>
+                    )}
+                  </td>
+                  <td>{item.date_issued}</td>
+                  <td>
+                    {item.total_value !== undefined && item.total_value !== null ? (
+                      `R$ ${parseFloat(item.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                    ) : (
+                      'R$ 0,00'
+                    )}
+                  </td>
+                  <td>
+                    <span style={{ color: statusColor, fontWeight: 'bold' }}>
+                      {statusLabel}
+                    </span>
+                    {errorMessage && (
+                      <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px', maxWidth: '300px', wordBreak: 'break-word' }}>
+                        {errorMessage}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-link"
+                      disabled={!item.caminho_danfe}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://focusrender.onrender.com';
+                          await fetch(
+                            `${backendUrl}/api/print-nfce`,
+                            {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                caminho_danfe: item.caminho_danfe,
+                                nfceRef: item.nfceRef || item.ref, // Passa a referência
+                              }),
+                            },
+                          );
+                        } catch (err) {
+                          console.error('Erro ao reimprimir:', err);
+                          alert('Erro ao conectar com o serviço de impressão.');
+                        }
                       }}
-                      onConfirm={cancelarNfce}
-                      item={item}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
+                    >
+                      imprimir
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => {
+                        setOpenpopCancelTax(item);
+                      }}
+                      disabled={!isSuccess || item.activate}
+                    >
+                      Cancelar
+                    </button>
+                    {openpopCancelTax?.ref === item.ref && (
+                      <DefaultComumMessage
+                        msg="Tem certeza que deseja cancelar essa nota"
+                        onClose={() => {
+                          setOpenpopCancelTax(null);
+                        }}
+                        onConfirm={cancelarNfce}
+                        item={item}
+                      />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
         </tbody>
       </table>
     </div>

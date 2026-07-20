@@ -33,7 +33,7 @@ const fillingNcmCode = (category) => {
   }
 };
 
-const paymentMethodWay = (method) => {
+export const paymentMethodWay = (method) => {
   let op = {
     DEBIT: '04',
     CREDIT: '03',
@@ -103,13 +103,20 @@ export const issueAutoNfce = async (order) => {
   // Mapeia formas de pagamento usando paymentDetails se disponível
   const paymentMethod = order.paymentMethod;
   const paymentDetails = order.paymentDetails;
+  const pgWay = paymentMethodWay(paymentMethod);
 
-  nfce.formas_pagamento.push({
+  const pg = {
     indicador_pagamento: '0', // 0: Pagamento à Vista
-    forma_pagamento: paymentMethodWay(paymentMethod),
+    forma_pagamento: pgWay,
     valor_pagamento: parseFloat(order.finalPriceRequest || 0),
-    bandeira_operadora: paymentDetails ? paymentDetails.cardBrandCode : '',
-  });
+  };
+
+  // Se for cartão de crédito ou débito, envia a bandeira. Se não houver, usa '99' (Outros) como fallback.
+  if (pgWay === '03' || pgWay === '04') {
+    pg.bandeira_operadora = (paymentDetails && paymentDetails.cardBrandCode) || '99';
+  }
+
+  nfce.formas_pagamento.push(pg);
 
   // Itens do pedido
   if (order.request && Array.isArray(order.request)) {
@@ -202,9 +209,8 @@ export const issueAutoNfce = async (order) => {
       const result = await response.json();
       console.log('Resposta NFC-e:', result);
 
-      if (result && result.status === 'autorizado' && result.caminho_danfe) {
-        await saveToFirestore(result, order.finalPriceRequest, ref);
-      }
+      // Salva no Firestore se for autorizado ou se for erro/rejeitado retornado pela API
+      await saveToFirestore(result, order.finalPriceRequest, ref);
 
       // Retorna o resultado + ref para que o chamador (triggerFiscal) faça o updateDoc
       // IMPORTANTE: NÃO fazemos updateDoc aqui para evitar onSnapshot intermediário
@@ -212,10 +218,30 @@ export const issueAutoNfce = async (order) => {
       return { ...result, ref };
     } else {
       console.error('Erro ao enviar NFC-e:', response.statusText);
+      const errResult = {
+        status: 'erro',
+        mensagem_sefaz: `Erro na rede ou Focus API: ${response.statusText}`,
+      };
+      try {
+        await saveToFirestore(errResult, order.finalPriceRequest, ref);
+      } catch (saveErr) {
+        console.error('Erro ao salvar erro fiscal no Firestore:', saveErr);
+      }
       throw new Error(`Erro na rede: ${response.statusText}`);
     }
   } catch (error) {
     console.error('Erro na emissão automática de NFC-e:', error);
+    if (!error.message || !error.message.startsWith('Erro na rede:')) {
+      const errResult = {
+        status: 'erro',
+        mensagem_sefaz: error.message || 'Erro de rede ou conexão com o servidor',
+      };
+      try {
+        await saveToFirestore(errResult, order.finalPriceRequest, ref);
+      } catch (saveErr) {
+        console.error('Erro ao salvar erro de exceção fiscal no Firestore:', saveErr);
+      }
+    }
     throw error;
   }
 };
