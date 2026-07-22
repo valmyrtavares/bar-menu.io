@@ -54,6 +54,7 @@ import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
 import FiscalObserver from './component/FiscalObserver';
+import TotenIdlePresentation from './component/TotenIdlePresentation';
 
 import { useEnsureAnonymousUser } from './Hooks/useEnsureAnonymousUser';
 
@@ -101,6 +102,7 @@ function App() {
   return (
     <div className="ultra-wrapper">
       <FiscalObserver />
+      <TotenIdlePresentation />
       {showHeader && <Header />}
 
       <Routes>
