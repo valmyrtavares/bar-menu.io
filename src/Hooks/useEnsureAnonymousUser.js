@@ -51,6 +51,17 @@ export const getAnonymousUser = async () => {
 
 export const useEnsureAnonymousUser = () => {
   useEffect(() => {
+    const isToten = localStorage.getItem('isToten') === 'true';
+    if (isToten && !localStorage.getItem('userMenu')) {
+      const initialUid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
+      const tempUser = {
+        id: initialUid,
+        name: 'anonimo',
+        migratedToAuth: false
+      };
+      localStorage.setItem('userMenu', JSON.stringify(tempUser));
+    }
+
     const checkAndSetAnonymousUser = async () => {
       try {
         // 1. Garante que o cliente tem uma sessão anônima ativa do Firebase Auth

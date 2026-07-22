@@ -185,6 +185,23 @@ const TotenRegisterPopup = ({
 
     if (form.name !== '') {
       try {
+        const storedBackorder = localStorage.getItem('backorder');
+        let itemsToCopy = [];
+        if (storedBackorder) {
+          try {
+            itemsToCopy = JSON.parse(storedBackorder) || [];
+          } catch (e) { }
+        }
+
+        const noCustomer = {
+          name: 'anonimo',
+          phone: '777',
+          birthday: '77',
+          fantasyName: form.name,
+          email: 'anonimo@anonimo.com',
+          request: itemsToCopy,
+        };
+
         // Adiciona o cliente ao Firestore
         const docRef = await addDoc(collection(db, 'user'), noCustomer);
 

@@ -59,8 +59,8 @@ function MainMenu() {
   }, []);
 
   const checkToten = () => {
-    const totenExist = localStorage.getItem('toten');
-    if (!totenExist || global.isToten !== true) {
+    const totenExist = localStorage.getItem('isToten') === 'true';
+    if (!totenExist) {
       global.setIsToten(false);
       if (!global.authorizated) {
         CheckLogin(global.packageTier);

@@ -32,59 +32,74 @@ const AutoPayment = ({ onChoose, price, setIdPayer, setAutoPayment, isSubmitting
     return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '01' : '02';
   };
 
+  const hasProcessedRef = React.useRef(false);
+
   React.useEffect(() => {
     if (!correlationId) return; // evita montar antes do submit
 
+    hasProcessedRef.current = false;
     const backendUrl = process.env.REACT_APP_PAYER_API_URL || 'https://payer-4ptm.onrender.com';
-    const socket = io(backendUrl); // url do seu backend
+    const socket = io(backendUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    });
 
-    socket.on('connect', () => { });
+    const handleApproved = (payload) => {
+      if (hasProcessedRef.current) return;
+      hasProcessedRef.current = true;
+
+      setLoading(false);
+      setWaitingForPayment(false);
+      setIdPayer(payload.idPayer || null);
+
+      const currentPaymentData = {
+        idPayer: payload.idPayer,
+        cardBrand: payload.flag,
+        cardBrandCode: payload.flagCode,
+        nsu: payload.thirdPartyId,
+        nsuAuthorizer: payload.authorizerUsn,
+        authorizationCode: payload.authorizerId,
+        transactionDateTime: payload.transactionDateTime,
+        acquirer: payload.acquirer,
+        acquirerCNPJ: payload.acquirerCNPJ,
+        value: payload.value,
+        installments: payload.installments,
+        terminalId: payload.terminalId,
+        paymentMethod: payload.paymentMethod,
+        paymentType: payload.paymentType,
+        customerReceipt: payload.reducedCustomerPaymentReceipt,
+        shopReceipt: payload.reducedShopPaymentReceipt,
+      };
+
+      setPaymentData(currentPaymentData);
+      onChoose(selected, cpfRef.current, currentPaymentData);
+    };
 
     // evento enviado pelo backend quando webhook chegar
-    // payload: { correlationId, status: 'SUCESSO'|'ERRO'|'PENDING', idPayer }
     socket.on('paymentStatus', (payload) => {
       console.log('📦 PAYLOAD COMPLETO:', JSON.stringify(payload, null, 2));
 
       if (payload.correlationId !== correlationId) return;
-      const { statusTransaction } = payload;
+      const statusTransaction = (payload.statusTransaction || payload.status || '').toUpperCase();
       console.log('statusTransaction recebido no socket:', statusTransaction);
-      if (statusTransaction === 'APPROVED') {
-        setLoading(false);
-        setWaitingForPayment(false);
-        setIdPayer(payload.idPayer || null);
 
-        // Captura TODOS os dados da transação para nota fiscal
-        const currentPaymentData = {
-          idPayer: payload.idPayer,
-          cardBrand: payload.flag, // VISA, MASTERCARD, ELO, etc.
-          cardBrandCode: payload.flagCode, // Código da bandeira
-          nsu: payload.thirdPartyId, // NSU principal
-          nsuAuthorizer: payload.authorizerUsn, // NSU do autorizador
-          authorizationCode: payload.authorizerId, // Código de autorização
-          transactionDateTime: payload.transactionDateTime, // Data/hora da transação
-          acquirer: payload.acquirer, // STONE, CIELO, etc.
-          acquirerCNPJ: payload.acquirerCNPJ, // CNPJ do adquirente
-          value: payload.value, // Valor da transação
-          installments: payload.installments, // Número de parcelas
-          terminalId: payload.terminalId, // ID do terminal
-          paymentMethod: payload.paymentMethod, // CARD, PIX
-          paymentType: payload.paymentType, // CREDIT, DEBIT
-          customerReceipt: payload.reducedCustomerPaymentReceipt, // Cupom do cliente
-          shopReceipt: payload.reducedShopPaymentReceipt, // Cupom da loja
-        };
+      const approvedStatuses = ['APPROVED', 'SUCESSO', 'CONFIRMED', 'PAID', '00'];
 
-        setPaymentData(currentPaymentData);
-        onChoose(selected, cpfRef.current, currentPaymentData);
-      } else if (statusTransaction === 'REJECTED') {
+      if (approvedStatuses.includes(statusTransaction)) {
+        handleApproved(payload);
+      } else if (statusTransaction === 'REJECTED' || statusTransaction === 'ERRO') {
+        if (hasProcessedRef.current) return;
         setLoading(false);
         setWaitingForPayment(false);
         setMessage('Falha no pagamento. Tente novamente');
-        onChoose('desabled'); // manter seu comportamento anterior
+        onChoose('desabled');
       } else if (statusTransaction === 'ABORTED') {
-        console.log('Objeto completo  ', payload);
+        if (hasProcessedRef.current) return;
         setLoading(false);
         setWaitingForPayment(false);
-        onChoose('ABORTED'); // seu caso antigo tratava como pending -> selecionado
+        onChoose('ABORTED');
       }
     });
 

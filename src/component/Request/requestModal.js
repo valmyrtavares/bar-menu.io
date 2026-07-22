@@ -222,9 +222,9 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   const location = useLocation();
   const isAdminOrigin = !!location.state?.isAdminOrigin;
   const [stylePdv, setStylePdv] = React.useState(false);
-  let methodPayment = '';
-  let cpfForInvoice = '';
-  let paymentTransactionData = null;
+  const methodPaymentRef = React.useRef('');
+  const cpfForInvoiceRef = React.useRef('');
+  const paymentTransactionDataRef = React.useRef(null);
 
   const isTableClient = !pdv && !global.isToten && localStorage.getItem('tableNumber');
 
@@ -535,6 +535,8 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
           // O Toten tem um tempo de espera visual antes de voltar ao início
           await new Promise(resolve => setTimeout(resolve, 5000));
           setTotenMessage(false);
+          localStorage.removeItem('userMenu');
+          global.setAuthorizated(false);
           navigate('/');
         } catch (err) {
           console.error('Erro no envio Toten:', err);
@@ -587,14 +589,19 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
   };
 
   const cleanObject = (obj) => {
-    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+    if (Array.isArray(obj)) {
+      return obj
+        .filter((item) => item !== undefined && item !== null)
+        .map((item) => cleanObject(item));
+    }
+    if (obj && typeof obj === 'object') {
       return Object.fromEntries(
         Object.entries(obj)
           .filter(([_, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, cleanObject(value)]), // Limpa recursivamente
+          .map(([key, value]) => [key, cleanObject(value)]),
       );
     }
-    return obj; // Retorna o valor se não for objeto
+    return obj;
   };
 
   const calculateHistoricalCostsForItems = async (itemsArray, parentId = null) => {
@@ -805,24 +812,34 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       if (id) {
         setIsSubmitting(true);
         const data = await getOneItemColleciton('user', id);
-        // ... rest of the function (condensed for tool usage)
         const storedRequests = localStorage.getItem('backorder');
         
         let previousRequests = [];
         if (frozenRequestsForTotenCheckout.current && frozenRequestsForTotenCheckout.current.length > 0) {
           previousRequests = frozenRequestsForTotenCheckout.current;
         } else if (storedRequests) {
-          previousRequests = JSON.parse(storedRequests);
+          try {
+            previousRequests = JSON.parse(storedRequests);
+          } catch(e) {}
+        }
+
+        if (!previousRequests || previousRequests.length === 0) {
+          if (data && Array.isArray(data.request) && data.request.length > 0) {
+            previousRequests = data.request;
+          }
         }
 
         const requestWithHistory = await calculateHistoricalCostsForItems(previousRequests, null);
+        const methodPayment = methodPaymentRef.current;
+        const cpfForInvoice = cpfForInvoiceRef.current;
+        const paymentTransactionData = paymentTransactionDataRef.current;
 
         const userNewRequest = {
           name:
-            data.name === 'anonimo' || data.name === 'anonymous'
+            data?.name === 'anonimo' || data?.name === 'anonymous'
               ? data.fantasyName
-              : data.name,
-          idUser: data.id,
+              : data?.name || 'Cliente Toten',
+          idUser: data?.id || id,
           done: true,
           cpfForInvoice: cpfForInvoice ? cpfForInvoice : '',
           paymentDone:
@@ -863,7 +880,6 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
             : (manualTableNumber || localStorage.getItem('tableNumber') || null),
         };
 
-        localStorage.removeItem('backorder');
         if (userNewRequest) {
           const cleanedUserNewRequest = cleanObject(userNewRequest);
           if (global.orderBeingEdited) {
@@ -876,7 +892,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
 
             const userDocRef = doc(db, 'user', id);
             if (global.orderBeingEdited.tableNumber) {
-              const updatedRequests = (data.request || []).map((item, idx) => ({
+              const updatedRequests = (data?.request || []).map((item, idx) => ({
                 ...item,
                 sentToKitchen: true,
                 parentRequestId: global.orderBeingEdited.id,
@@ -893,7 +909,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
             );
             const userDocRef = doc(db, 'user', id);
             if (cleanedUserNewRequest.tableNumber) {
-              const updatedRequests = (data.request || []).map((item, idx) => ({
+              const updatedRequests = (data?.request || []).map((item, idx) => ({
                 ...item,
                 sentToKitchen: true,
                 parentRequestId: docRef.id,
@@ -904,6 +920,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
               await updateDoc(userDocRef, { request: [] });
             }
           }
+          localStorage.removeItem('backorder');
         }
       }
     } catch (error) {
@@ -1269,9 +1286,9 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
           setTotenRejectPaymentMessage(false);
         }, 7000);
       } else {
-        methodPayment = selectedPayment;
-        cpfForInvoice = cpf;
-        paymentTransactionData = paymentData;
+        methodPaymentRef.current = selectedPayment;
+        cpfForInvoiceRef.current = cpf;
+        paymentTransactionDataRef.current = paymentData;
         sendRequestToKitchen();
       }
     }

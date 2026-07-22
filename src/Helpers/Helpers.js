@@ -322,36 +322,76 @@ export function getFirstFourLetters(inputString, max) {
   return inputString ? inputString.slice(0, max) : '';
 }
 
-export async function CheckUser(check, isToten, packageTier) {
+export async function CheckUser(check, isTotenParam, packageTier) {
+  const isToten = isTotenParam || localStorage.getItem('isToten') === 'true';
+
+  if (isToten) {
+    if (!localStorage.hasOwnProperty(check)) {
+      const defaultNoCustomer = {
+        name: 'anonimo',
+        phone: '777',
+        birthday: '77',
+        email: 'anonimo@anonimo.com',
+        request: [],
+      };
+      const currentUid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
+      const updatedUser = {
+        id: currentUid,
+        name: 'anonimo',
+        migratedToAuth: false,
+      };
+      localStorage.setItem(check, JSON.stringify(updatedUser));
+      try {
+        const docRef = doc(db, 'user', currentUid);
+        getDoc(docRef).then((snap) => {
+          if (!snap.exists()) {
+            setDoc(docRef, defaultNoCustomer).catch((err) =>
+              console.warn('Erro ao criar doc anônimo no CheckUser:', err),
+            );
+          }
+        }).catch(() => {});
+      } catch (e) {}
+    }
+    return '/new-layout';
+  }
+
   if (localStorage.hasOwnProperty(check)) {
     const userMenu = JSON.parse(localStorage.getItem(check));
-    const userList = await getBtnData('user');
-    const currentUser = userList.filter((item) => item.id === userMenu.id);
-    if (currentUser && currentUser.length > 0 && currentUser[0].name) {
-      if (isToten) {
-        return '/new-layout';
-      } else if (localStorage.getItem('pdv') === 'true') {
+    if (!userMenu || !userMenu.id) {
+      localStorage.removeItem(check);
+      return Number(packageTier) === 1 ? '/create-customer' : '/admin/check-customer-nolog';
+    }
+
+    try {
+      const userDocRef = doc(db, 'user', userMenu.id);
+      const userSnap = await getDoc(userDocRef);
+
+      if (userSnap.exists() && userSnap.data()?.name) {
+        if (localStorage.getItem('pdv') === 'true') {
+          return '/admin/requestlist';
+        } else {
+          return '/';
+        }
+      } else {
+        localStorage.removeItem(check);
+        return Number(packageTier) === 1 ? '/create-customer' : '/admin/check-customer-nolog';
+      }
+    } catch (error) {
+      console.warn('Erro ao verificar usuário no Firestore (mantendo sessão local):', error);
+      if (localStorage.getItem('pdv') === 'true') {
         return '/admin/requestlist';
       } else {
-        return '/'; // return to main screen
+        return '/';
       }
-    } else {
-      localStorage.removeItem(check);
-      // No pacote básico (1), não queremos passar pela tela de busca de CPF (NoLog)
-      // Queremos ir direto para a tela de apelido (create-customer)
-      if (Number(packageTier) === 1) {
-        return '/create-customer';
-      }
-      return '/admin/check-customer-nolog';
     }
   } else {
-    // Mesma lógica aqui: se for pacote básico, vai direto pro apelido
     if (Number(packageTier) === 1) {
       return '/create-customer';
     }
     return '/admin/check-customer-nolog';
   }
 }
+
 
 export const requestSorter = (ObjList, direction) => {
   const sortedList = [...ObjList].map((item) => ({

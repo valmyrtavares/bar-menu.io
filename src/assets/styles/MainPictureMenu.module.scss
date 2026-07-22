@@ -143,10 +143,10 @@
                 touch-action: pan-y; // Habilita rolagem por toque no Toten/tablet
                 -webkit-overflow-scrolling: touch; // Rolagem suave no iOS/Safari
                 padding-bottom: 180px; // Evita que os últimos pratos fiquem cortados pela metade
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: flex-start;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
                 gap: 2%;
+                align-content: start;
 
                 opacity: 0;
                 transform: translateY(10px);
