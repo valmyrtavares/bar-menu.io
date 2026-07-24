@@ -16,3 +16,35 @@
     width:80%;
     margin:10px 10%;
 }
+
+.fiscal-attributes-container .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 25px 0 40px 0;
+    padding: 10px;
+}
+
+.fiscal-attributes-container .pagination-controls .page-info {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--title-font-color, #333);
+}
+
+.fiscal-attributes-container .pagination-controls .btn-pagination {
+    padding: 8px 20px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--btn-color, #007bff);
+    color: #fff;
+    border: none;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.fiscal-attributes-container .pagination-controls .btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #888 !important;
+}

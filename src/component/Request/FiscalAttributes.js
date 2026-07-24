@@ -7,6 +7,8 @@ import {
   getFirestore,
   collection,
   addDoc,
+  query,
+  where,
   doc,
   updateDoc,
   setDoc,
@@ -15,9 +17,9 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase.js';
-import { getBtnData } from '../../api/Api.js';
+import { getBtnData, getPaginatedData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
-import { issueAutoNfce } from '../../services/fiscalService';
+import { issueAutoNfce, paymentMethodWay } from '../../services/fiscalService';
 
 const FiscalAttributes = () => {
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
@@ -43,16 +45,38 @@ const FiscalAttributes = () => {
     paymentMethod,
   } = global.userNewRequest;
   const [card, setCard] = React.useState('');
+  const [firstDoc, setFirstDoc] = React.useState(null);
+  const [lastDoc, setLastDoc] = React.useState(null);
+  const [pageNumber, setPageNumber] = React.useState(1);
+  const [loading, setLoading] = React.useState(false);
+  const PAGE_SIZE = 40;
+
+  const fetchTaxDocuments = async (cursorDoc = null, direction = 'init') => {
+    try {
+      setLoading(true);
+      const response = await getPaginatedData(
+        'taxDocuments',
+        'timestamp',
+        'desc',
+        PAGE_SIZE,
+        cursorDoc,
+        direction
+      );
+      const sortedData = sortByDateIssued(response.data);
+      setTaxDocument(sortedData);
+      setFirstDoc(response.firstVisible);
+      setLastDoc(response.lastVisible);
+    } catch (error) {
+      console.error('Erro ao buscar notas fiscais paginadas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
     console.log('Estou no emissor de NFCe     ', global.userNewRequest);
     cpfAndCardFlagValidation();
-    const fetchData = async () => {
-      const data = await getBtnData('taxDocuments');
-      const sortedData = sortByDateIssued(data);
-      setTaxDocument(sortedData);
-    };
-    fetchData();
+    fetchTaxDocuments(null, 'init');
   }, []);
 
   /**
@@ -129,9 +153,8 @@ const FiscalAttributes = () => {
       }
 
       // Atualiza lista local de notas
-      const data = await getBtnData('taxDocuments');
-      const sortedData = sortByDateIssued(data);
-      setTaxDocument(sortedData);
+      setPageNumber(1);
+      await fetchTaxDocuments(null, 'init');
     } catch (error) {
       console.error('Erro na emissão manual:', error);
       alert('Erro ao emitir nota fiscal. Verifique os logs.');
@@ -167,41 +190,40 @@ const FiscalAttributes = () => {
 
   const saveToFirestore = async (result, finalPrice, ref) => {
     try {
-      const db = getFirestore(); // Inicializa o Firestore
       const currentDate = new Date();
-      const formattedDate = `${currentDate.getDate()}/${
-        currentDate.getMonth() + 1
-      }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+      const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
       const resultWithDateAndPrice = {
         ...result,
         date_issued: formattedDate,
+        timestamp: currentDate.getTime(),
         total_value: finalPrice,
         ref: ref,
         active: false,
       };
-      const docRef = await addDoc(
-        collection(db, 'taxDocuments'),
-        resultWithDateAndPrice,
-      ); // Adiciona o documento à coleção taxDocuments
 
-      console.log('Documento adicionado com ID:', docRef.id);
-      const data = await getBtnData('taxDocuments');
-      setTaxDocument(data);
+      const taxQuery = query(collection(db, 'taxDocuments'), where('ref', '==', ref));
+      const querySnap = await getDocs(taxQuery);
+
+      if (querySnap && !querySnap.empty && querySnap.docs && querySnap.docs.length > 0) {
+        const existingDoc = querySnap.docs[0];
+        await updateDoc(doc(db, 'taxDocuments', existingDoc.id), resultWithDateAndPrice);
+        console.log('Documento atualizado com ID:', existingDoc.id);
+      } else {
+        const docRef = await addDoc(
+          collection(db, 'taxDocuments'),
+          resultWithDateAndPrice,
+        );
+        console.log('Documento adicionado com ID:', docRef.id);
+      }
+
+      setPageNumber(1);
+      await fetchTaxDocuments(null, 'init');
     } catch (error) {
       console.error('Erro ao salvar o documento no Firestore:', error);
     }
   };
 
-  const paymentMethodWay = (method) => {
-    let op = {
-      debit: '04',
-      credite: '03',
-      vr: '03',
-      cash: '01',
-      pix: '99',
-    };
-    return op[method];
-  };
+
 
   const cpfAndCardFlagValidation = () => {
     const typePayment = paymentMethodWay(paymentMethod);
@@ -423,6 +445,7 @@ const FiscalAttributes = () => {
         <div>
           <Input
             id="cpf"
+            label="CPF"
             autoComplete="off"
             placeholder="CPF"
             value={form.cpf}
@@ -457,75 +480,136 @@ const FiscalAttributes = () => {
             <th>Nota</th>
             <th>Data</th>
             <th>valor total</th>
+            <th>Status</th>
             <th>Imprimir</th>
             <th>Cancelar Nota</th>
           </tr>
         </thead>
         <tbody>
           {taxDocument &&
-            taxDocument.map((item, index) => (
-              <tr key={index}>
-                <td>
-                  <a
-                    href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {item.ref}
-                  </a>
-                </td>
-                <td>{item.date_issued}</td>
-                <td>{item.total_value}</td>
-                <td>
-                  <button
-                    className="btn btn-link"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      try {
-                        await fetch(
-                          'https://focusrender.onrender.com/api/print-nfce',
-                          {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              caminho_danfe: item.caminho_danfe,
-                              nfceRef: item.nfceRef || item.ref, // Passa a referência
-                            }),
-                          },
-                        );
-                      } catch (err) {
-                        console.error('Erro ao reimprimir:', err);
-                        alert('Erro ao conectar com o serviço de impressão.');
-                      }
-                    }}
-                  >
-                    imprimir
-                  </button>
-                </td>
-                <td>
-                  <button
-                    onClick={() => {
-                      setOpenpopCancelTax(item);
-                    }}
-                    disabled={item.activate}
-                  >
-                    Cancelar
-                  </button>
-                  {openpopCancelTax?.ref === item.ref && (
-                    <DefaultComumMessage
-                      msg="Tem certeza que deseja cancelar essa nota"
-                      onClose={() => {
-                        setOpenpopCancelTax(null);
+            taxDocument.map((item, index) => {
+              const isSuccess = item.status === 'autorizado';
+              const statusLabel = isSuccess ? 'Autorizado' : (item.status === 'rejeitado' ? 'Rejeitado' : 'Erro');
+              const statusColor = isSuccess ? 'green' : 'red';
+              let errorMessage = null;
+              if (item.mensagem_sefaz) {
+                errorMessage = typeof item.mensagem_sefaz === 'object' ? JSON.stringify(item.mensagem_sefaz) : item.mensagem_sefaz;
+              } else if (item.erro) {
+                errorMessage = typeof item.erro === 'object' ? (item.erro.mensagem || item.erro.message || JSON.stringify(item.erro)) : item.erro;
+              } else if (item.mensagem) {
+                errorMessage = typeof item.mensagem === 'object' ? JSON.stringify(item.mensagem) : item.mensagem;
+              }
+
+              return (
+                <tr key={index}>
+                  <td>
+                    {item.caminho_danfe ? (
+                      <a
+                        href={`https://api.focusnfe.com.br${item.caminho_danfe}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {item.ref}
+                      </a>
+                    ) : (
+                      <span>{item.ref}</span>
+                    )}
+                  </td>
+                  <td>{item.date_issued}</td>
+                  <td>
+                    {item.total_value !== undefined && item.total_value !== null ? (
+                      `R$ ${parseFloat(item.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                    ) : (
+                      'R$ 0,00'
+                    )}
+                  </td>
+                  <td>
+                    <span style={{ color: statusColor, fontWeight: 'bold' }}>
+                      {statusLabel}
+                    </span>
+                    {errorMessage && (
+                      <div style={{ fontSize: '0.75rem', color: '#777', marginTop: '4px', maxWidth: '300px', wordBreak: 'break-word' }}>
+                        {errorMessage}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-link"
+                      disabled={!item.caminho_danfe}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://focusrender.onrender.com';
+                          await fetch(
+                            `${backendUrl}/api/print-nfce`,
+                            {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                caminho_danfe: item.caminho_danfe,
+                                nfceRef: item.nfceRef || item.ref, // Passa a referência
+                              }),
+                            },
+                          );
+                        } catch (err) {
+                          console.error('Erro ao reimprimir:', err);
+                          alert('Erro ao conectar com o serviço de impressão.');
+                        }
                       }}
-                      onConfirm={cancelarNfce}
-                      item={item}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
+                    >
+                      imprimir
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => {
+                        setOpenpopCancelTax(item);
+                      }}
+                      disabled={!isSuccess || item.activate}
+                    >
+                      Cancelar
+                    </button>
+                    {openpopCancelTax?.ref === item.ref && (
+                      <DefaultComumMessage
+                        msg="Tem certeza que deseja cancelar essa nota"
+                        onClose={() => {
+                          setOpenpopCancelTax(null);
+                        }}
+                        onConfirm={cancelarNfce}
+                        item={item}
+                      />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
         </tbody>
       </table>
+
+      <div className="pagination-controls">
+        <button
+          className="btn btn-pagination"
+          disabled={pageNumber === 1 || loading}
+          onClick={() => {
+            setPageNumber((prev) => prev - 1);
+            fetchTaxDocuments(firstDoc, 'prev');
+          }}
+        >
+          Anteriores
+        </button>
+        <span className="page-info">Página {pageNumber}</span>
+        <button
+          className="btn btn-pagination"
+          disabled={!lastDoc || (taxDocument && taxDocument.length < PAGE_SIZE) || loading}
+          onClick={() => {
+            setPageNumber((prev) => prev + 1);
+            fetchTaxDocuments(lastDoc, 'next');
+          }}
+        >
+          Próximos {PAGE_SIZE}
+        </button>
+      </div>
     </div>
   );
 };

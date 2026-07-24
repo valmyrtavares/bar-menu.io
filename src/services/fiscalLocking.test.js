@@ -1,4 +1,4 @@
-import { issueAutoNfce } from './fiscalService';
+import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
 import { updateDoc, doc } from 'firebase/firestore';
 
 // Mock dependencies
@@ -8,6 +8,9 @@ jest.mock('firebase/firestore', () => ({
     addDoc: jest.fn(),
     doc: jest.fn(),
     updateDoc: jest.fn(),
+    query: jest.fn(),
+    where: jest.fn(),
+    getDocs: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
 }));
 
 jest.mock('../config-firebase/firebase', () => ({
@@ -19,6 +22,7 @@ describe('NFCe Safety Lock Verification', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        resetFiscalCircuitBreaker();
         globalFetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
             ok: true,
             json: () => Promise.resolve({ status: 'autorizado', success: true, caminho_danfe: '/mock.pdf' }),
@@ -52,7 +56,7 @@ describe('NFCe Safety Lock Verification', () => {
 
         // Mock da função trigger que existe no componente
         const triggerFiscalLogic = async (order) => {
-            if (order.paymentDone === true && !order.nfceIssued && !order.sendingNfce && !processedOrdersLock.has(order.id)) {
+            if (order.paymentDone === true && !order.nfceIssued && !order.sendingNfce && !order.nfceStatus && !processedOrdersLock.has(order.id)) {
                 // TRAVA IMEDIATA EM MEMÓRIA (Igual ao RequestListToBePrepared.js:101)
                 processedOrdersLock.add(order.id);
 
@@ -63,7 +67,7 @@ describe('NFCe Safety Lock Verification', () => {
                     // Chama o serviço de emissão
                     await issueAutoNfce(order);
                 } catch (err) {
-                    processedOrdersLock.delete(order.id);
+                    // Mantém a trava para evitar loops
                 }
             }
         };
