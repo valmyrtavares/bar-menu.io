@@ -54,6 +54,7 @@ import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
 
 import FiscalObserver from './component/FiscalObserver';
+import FiscalAlertBanner from './component/Request/FiscalAlertBanner';
 
 import { useEnsureAnonymousUser } from './Hooks/useEnsureAnonymousUser';
 

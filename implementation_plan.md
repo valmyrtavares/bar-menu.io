@@ -11,17 +11,14 @@ Isso ocorre porque o leiaute das notas fiscais foi atualizado pela Nota Técnica
 
 ---
 
-## Open Questions
+## Dados Fiscais Confirmados pela Contadora
 
-Para que possamos implementar a correção exata, precisamos que você consulte o seu **contador** para obter as seguintes definições fiscais:
-
-> [!IMPORTANT]
-> 1. **Regime Tributário:** Qual é o regime tributário da empresa configurado na SEFAZ/Focus NFe (Simples Nacional ou Regime Normal)?
-> 2. **Código de Classificação Tributária (cClassTrib):** Qual o código `cClassTrib` (de 6 dígitos) que devemos usar para cada categoria de produto vendida?
->    * Para Bebidas (Água/Refrigerante)
->    * Para Comidas/Lanches (como o TROPICAL-X)
-> 3. **CST do IBS/CBS:** Qual é o CST específico de IBS e CBS aplicável aos produtos?
-> 4. **Abordagem da Implementação:** Deseja mapear esses novos códigos de forma estática no código-fonte do frontend (assim como é feito hoje com o código NCM por categoria) ou prefere que criemos campos no banco de dados para que você possa editá-los pelo painel de estoque no futuro?
+> [!NOTE]
+> Os parâmetros tributários para a emissão de notas com IBS/CBS foram informados:
+> - **cClassTrib:** `000001` (Situações tributadas integralmente pelo IBS e CBS)
+> - **CST de IBS/CBS:** `000` (Tributação integral)
+> - **Alíquota CBS:** `0.90%` (`0.90`)
+> - **Alíquota IBS:** `0.10%` (`0.10`)
 
 ---
 

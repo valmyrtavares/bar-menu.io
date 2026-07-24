@@ -1,4 +1,4 @@
-import { issueAutoNfce } from './fiscalService';
+import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
 import { addDoc, updateDoc } from 'firebase/firestore';
 
 // Mock dependencies
@@ -8,6 +8,9 @@ jest.mock('firebase/firestore', () => ({
     addDoc: jest.fn(),
     doc: jest.fn(),
     updateDoc: jest.fn(),
+    query: jest.fn(),
+    where: jest.fn(),
+    getDocs: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
 }));
 
 jest.mock('../config-firebase/firebase', () => ({
@@ -16,8 +19,9 @@ jest.mock('../config-firebase/firebase', () => ({
 
 describe('issueAutoNfce', () => {
     beforeEach(() => {
-        // Clear mocks before each test
+        // Clear mocks & circuit breaker before each test
         jest.clearAllMocks();
+        resetFiscalCircuitBreaker();
 
         // Mock global fetch
         global.fetch = jest.fn(() =>
@@ -109,8 +113,8 @@ describe('issueAutoNfce', () => {
         expect(result.ref).toBeDefined();
         expect(typeof result.ref).toBe('string');
 
-        // Deve seguir o novo padrão de ref contendo os dados do pedido 'REQ--{pedido}--{nome}--{hash}'
-        expect(result.ref.startsWith('REQ--123--CLIENTE-TESTE--')).toBe(true);
+        // Deve seguir o novo padrão de ref contendo os dados do pedido 'REQ--{pedido}--{nome}'
+        expect(result.ref.startsWith('REQ--123--CLIENTE-TESTE')).toBe(true);
     });
 });
 

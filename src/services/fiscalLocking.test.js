@@ -1,4 +1,4 @@
-import { issueAutoNfce } from './fiscalService';
+import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
 import { updateDoc, doc } from 'firebase/firestore';
 
 // Mock dependencies
@@ -8,6 +8,9 @@ jest.mock('firebase/firestore', () => ({
     addDoc: jest.fn(),
     doc: jest.fn(),
     updateDoc: jest.fn(),
+    query: jest.fn(),
+    where: jest.fn(),
+    getDocs: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
 }));
 
 jest.mock('../config-firebase/firebase', () => ({
@@ -19,6 +22,7 @@ describe('NFCe Safety Lock Verification', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        resetFiscalCircuitBreaker();
         globalFetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
             ok: true,
             json: () => Promise.resolve({ status: 'autorizado', success: true, caminho_danfe: '/mock.pdf' }),

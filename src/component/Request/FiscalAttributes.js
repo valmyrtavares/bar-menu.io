@@ -7,6 +7,8 @@ import {
   getFirestore,
   collection,
   addDoc,
+  query,
+  where,
   doc,
   updateDoc,
   setDoc,
@@ -15,7 +17,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase.js';
-import { getBtnData } from '../../api/Api.js';
+import { getBtnData, getPaginatedData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';
 import { issueAutoNfce, paymentMethodWay } from '../../services/fiscalService';
 
@@ -43,16 +45,38 @@ const FiscalAttributes = () => {
     paymentMethod,
   } = global.userNewRequest;
   const [card, setCard] = React.useState('');
+  const [firstDoc, setFirstDoc] = React.useState(null);
+  const [lastDoc, setLastDoc] = React.useState(null);
+  const [pageNumber, setPageNumber] = React.useState(1);
+  const [loading, setLoading] = React.useState(false);
+  const PAGE_SIZE = 40;
+
+  const fetchTaxDocuments = async (cursorDoc = null, direction = 'init') => {
+    try {
+      setLoading(true);
+      const response = await getPaginatedData(
+        'taxDocuments',
+        'timestamp',
+        'desc',
+        PAGE_SIZE,
+        cursorDoc,
+        direction
+      );
+      const sortedData = sortByDateIssued(response.data);
+      setTaxDocument(sortedData);
+      setFirstDoc(response.firstVisible);
+      setLastDoc(response.lastVisible);
+    } catch (error) {
+      console.error('Erro ao buscar notas fiscais paginadas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
     console.log('Estou no emissor de NFCe     ', global.userNewRequest);
     cpfAndCardFlagValidation();
-    const fetchData = async () => {
-      const data = await getBtnData('taxDocuments');
-      const sortedData = sortByDateIssued(data);
-      setTaxDocument(sortedData);
-    };
-    fetchData();
+    fetchTaxDocuments(null, 'init');
   }, []);
 
   /**
@@ -129,9 +153,8 @@ const FiscalAttributes = () => {
       }
 
       // Atualiza lista local de notas
-      const data = await getBtnData('taxDocuments');
-      const sortedData = sortByDateIssued(data);
-      setTaxDocument(sortedData);
+      setPageNumber(1);
+      await fetchTaxDocuments(null, 'init');
     } catch (error) {
       console.error('Erro na emissão manual:', error);
       alert('Erro ao emitir nota fiscal. Verifique os logs.');
@@ -167,26 +190,34 @@ const FiscalAttributes = () => {
 
   const saveToFirestore = async (result, finalPrice, ref) => {
     try {
-      const db = getFirestore(); // Inicializa o Firestore
       const currentDate = new Date();
-      const formattedDate = `${currentDate.getDate()}/${
-        currentDate.getMonth() + 1
-      }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+      const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
       const resultWithDateAndPrice = {
         ...result,
         date_issued: formattedDate,
+        timestamp: currentDate.getTime(),
         total_value: finalPrice,
         ref: ref,
         active: false,
       };
-      const docRef = await addDoc(
-        collection(db, 'taxDocuments'),
-        resultWithDateAndPrice,
-      ); // Adiciona o documento à coleção taxDocuments
 
-      console.log('Documento adicionado com ID:', docRef.id);
-      const data = await getBtnData('taxDocuments');
-      setTaxDocument(data);
+      const taxQuery = query(collection(db, 'taxDocuments'), where('ref', '==', ref));
+      const querySnap = await getDocs(taxQuery);
+
+      if (querySnap && !querySnap.empty && querySnap.docs && querySnap.docs.length > 0) {
+        const existingDoc = querySnap.docs[0];
+        await updateDoc(doc(db, 'taxDocuments', existingDoc.id), resultWithDateAndPrice);
+        console.log('Documento atualizado com ID:', existingDoc.id);
+      } else {
+        const docRef = await addDoc(
+          collection(db, 'taxDocuments'),
+          resultWithDateAndPrice,
+        );
+        console.log('Documento adicionado com ID:', docRef.id);
+      }
+
+      setPageNumber(1);
+      await fetchTaxDocuments(null, 'init');
     } catch (error) {
       console.error('Erro ao salvar o documento no Firestore:', error);
     }
@@ -555,6 +586,30 @@ const FiscalAttributes = () => {
             })}
         </tbody>
       </table>
+
+      <div className="pagination-controls">
+        <button
+          className="btn btn-pagination"
+          disabled={pageNumber === 1 || loading}
+          onClick={() => {
+            setPageNumber((prev) => prev - 1);
+            fetchTaxDocuments(firstDoc, 'prev');
+          }}
+        >
+          Anteriores
+        </button>
+        <span className="page-info">Página {pageNumber}</span>
+        <button
+          className="btn btn-pagination"
+          disabled={!lastDoc || (taxDocument && taxDocument.length < PAGE_SIZE) || loading}
+          onClick={() => {
+            setPageNumber((prev) => prev + 1);
+            fetchTaxDocuments(lastDoc, 'next');
+          }}
+        >
+          Próximos {PAGE_SIZE}
+        </button>
+      </div>
     </div>
   );
 };
