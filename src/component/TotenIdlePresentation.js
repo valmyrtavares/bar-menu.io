@@ -85,7 +85,7 @@ const TotenIdlePresentation = () => {
             className={style.logoImage}
           />
         )}
-        <p className={style.startText}>Clique aqui para começarmos</p>
+        <p className={style.startText}>Toque na tela para começarmos</p>
       </div>
     </div>
   );
