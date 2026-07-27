@@ -45,16 +45,9 @@ const FilterExpenses = forwardRef(({ filterExpenseList, cleanFilter }, ref) => {
         expenseName: '',
         supplier: '',
         rawMaterial: '',
-      }));
-    } else {
-      setForm({
-        initialDate: '',
-        finalDate: '',
-        expenseName: '',
-        supplier: '',
-        rawMaterial: '',
+        idRawMaterial: '',
         invoice: '',
-      });
+      }));
     }
   };
 

@@ -85,8 +85,72 @@ const ExpensesManegementList = () => {
     }
   };
 
+const parseToDate = (dateVal) => {
+  if (!dateVal) return null;
+  if (dateVal instanceof Date) return dateVal;
+  
+  if (typeof dateVal.toDate === 'function') {
+    return dateVal.toDate();
+  }
+  if (typeof dateVal.seconds === 'number') {
+    return new Date(dateVal.seconds * 1000);
+  }
+
+  if (typeof dateVal === 'number') {
+    const d = new Date(dateVal);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  if (typeof dateVal === 'string') {
+    const str = dateVal.trim();
+    if (!str) return null;
+
+    if (str.includes('/')) {
+      const cleanStr = str.split(' - ')[0].split(' ')[0].trim();
+      const parts = cleanStr.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+          return new Date(year, month, day);
+        }
+      }
+    }
+
+    if (str.includes('-')) {
+      const cleanStr = str.split('T')[0].split(' ')[0].trim();
+      const parts = cleanStr.split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          const year = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1;
+          const day = parseInt(parts[2], 10);
+          if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+            return new Date(year, month, day);
+          }
+        } else {
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1;
+          const year = parseInt(parts[2], 10);
+          if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+            return new Date(year, month, day);
+          }
+        }
+      }
+    }
+  }
+
+  const d = new Date(dateVal);
+  return isNaN(d.getTime()) ? null : d;
+};
+
   const sortedData = (data) => {
-    return data.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+    return data.sort((a, b) => {
+      const dateA = parseToDate(a.dueDate || a.paymentDate || a.date) || new Date(0);
+      const dateB = parseToDate(b.dueDate || b.paymentDate || b.date) || new Date(0);
+      return dateB - dateA;
+    });
   };
 
   const editContent = (data) => {
@@ -156,12 +220,6 @@ const ExpensesManegementList = () => {
       return false;
     }
 
-    if (hasFilters && !hasDates) {
-      alert('Para pesquisar por nome, matéria-prima ou fornecedor, as datas de filtro precisam estar preenchidas.');
-      filterRef.current?.clearForm();
-      return false;
-    }
-
     if (!hasFilters && !hasDates) {
       alert('Preencha algum campo para efetuar o filtro de dados.');
       return false;
@@ -171,27 +229,82 @@ const ExpensesManegementList = () => {
   };
 
   const grabSelectedItems = (form) => {
-    if (!expensesList || expensesList.length === 0) return [];
-    const normalize = (str) => str?.toLowerCase().replace(/\s+/g, ' ').trim();
-    const { initialDate, finalDate, expenseName, supplier, invoice, idRawMaterial } = form;
+    if (!originalExpensesList || originalExpensesList.length === 0) return [];
+    const normalize = (str) =>
+      str
+        ? str
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+        : '';
+    const { initialDate, finalDate, expenseName, supplier, invoice, idRawMaterial, rawMaterial } = form;
 
     let filteredItems = [...originalExpensesList];
 
     if (initialDate && finalDate) {
-      filteredItems = filteredItems.filter((expense) => expense.dueDate >= initialDate && expense.dueDate <= finalDate);
+      const start = parseToDate(initialDate);
+      if (start) start.setHours(0, 0, 0, 0);
+
+      const end = parseToDate(finalDate);
+      if (end) end.setHours(23, 59, 59, 999);
+
+      if (start && end) {
+        filteredItems = filteredItems.filter((expense) => {
+          const expDate = parseToDate(expense.dueDate || expense.paymentDate || expense.date);
+          if (!expDate) return false;
+          return expDate >= start && expDate <= end;
+        });
+      }
     }
+
     if (expenseName?.trim()) {
-      filteredItems = filteredItems.filter((expense) => normalize(expense.name) === normalize(expenseName));
+      const target = normalize(expenseName);
+      filteredItems = filteredItems.filter((expense) => {
+        const expName = normalize(expense.name);
+        return (
+          expName === target ||
+          expName.startsWith(target) ||
+          expName.includes(target) ||
+          target.includes(expName)
+        );
+      });
     }
+
     if (invoice?.trim()) {
-      filteredItems = filteredItems.filter((expense) => normalize(expense.account) === normalize(invoice));
+      const target = normalize(invoice);
+      filteredItems = filteredItems.filter((expense) => {
+        const expAccount = normalize(expense.account);
+        return expAccount === target || expAccount.includes(target);
+      });
     }
+
     if (supplier?.trim()) {
-      filteredItems = filteredItems.filter((expense) => normalize(expense.provider) === normalize(supplier));
+      const target = normalize(supplier);
+      filteredItems = filteredItems.filter((expense) => {
+        const expProvider = normalize(expense.provider);
+        return expProvider === target || expProvider.includes(target);
+      });
     }
-    if (idRawMaterial) {
-      filteredItems = filteredItems.filter((expense) => expense.items?.some((item) => item.idProduct === idRawMaterial));
+
+    if (idRawMaterial || rawMaterial?.trim()) {
+      const targetRawMaterial = normalize(rawMaterial);
+      filteredItems = filteredItems.filter((expense) => {
+        if (!expense.items || !Array.isArray(expense.items)) return false;
+        return expense.items.some((item) => {
+          if (idRawMaterial && (item.idProduct === idRawMaterial || item.id === idRawMaterial)) {
+            return true;
+          }
+          if (targetRawMaterial) {
+            const itemName = normalize(item.product || item.name);
+            return itemName === targetRawMaterial || itemName.includes(targetRawMaterial);
+          }
+          return false;
+        });
+      });
     }
+
     return filteredItems;
   };
 
