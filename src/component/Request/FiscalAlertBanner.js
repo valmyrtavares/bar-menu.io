@@ -7,6 +7,8 @@ const FiscalAlertBanner = () => {
   const [failedOrders, setFailedOrders] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reemittingId, setReemittingId] = useState(null);
+  const [discardingId, setDiscardingId] = useState(null);
+  const [isDiscardingAll, setIsDiscardingAll] = useState(false);
   const [circuitBreaker, setCircuitBreaker] = useState({ isTripped: false, reason: null });
 
   useEffect(() => {
@@ -69,6 +71,59 @@ const FiscalAlertBanner = () => {
       alert(`Falha ao re-emitir: ${err.message}`);
     } finally {
       setReemittingId(null);
+    }
+  };
+
+  const handleDiscard = async (order) => {
+    const confirmDiscard = window.confirm(
+      `Tem certeza que deseja descartar e remover o alerta fiscal do pedido #${order.countRequest || order.id}? Esta nota não será re-emitida.`
+    );
+    if (!confirmDiscard) return;
+
+    try {
+      setDiscardingId(order.id);
+      const orderRef = doc(db, 'requests', order.id);
+      await updateDoc(orderRef, {
+        nfceStatus: 'descartado',
+        nfceErrorDetail: null,
+        sendingNfce: false,
+        nfceDiscardedAt: new Date().toISOString()
+      });
+      alert(`Alerta fiscal do pedido #${order.countRequest || order.id} descartado com sucesso.`);
+    } catch (err) {
+      console.error('Erro ao descartar alerta fiscal:', err);
+      alert(`Falha ao descartar alerta: ${err.message}`);
+    } finally {
+      setDiscardingId(null);
+    }
+  };
+
+  const handleDiscardAll = async () => {
+    if (failedOrders.length === 0) return;
+    const confirmDiscardAll = window.confirm(
+      `Tem certeza que deseja descartar e remover O ALERTA FISCAL DE TODOS os ${failedOrders.length} pedido(s)? Nenhuma dessas notas será re-emitida.`
+    );
+    if (!confirmDiscardAll) return;
+
+    try {
+      setIsDiscardingAll(true);
+      const promises = failedOrders.map((order) => {
+        const orderRef = doc(db, 'requests', order.id);
+        return updateDoc(orderRef, {
+          nfceStatus: 'descartado',
+          nfceErrorDetail: null,
+          sendingNfce: false,
+          nfceDiscardedAt: new Date().toISOString()
+        });
+      });
+      await Promise.all(promises);
+      alert(`Todos os ${failedOrders.length} alertas fiscais foram descartados.`);
+      setShowModal(false);
+    } catch (err) {
+      console.error('Erro ao descartar todos os alertas fiscais:', err);
+      alert(`Falha ao descartar alertas: ${err.message}`);
+    } finally {
+      setIsDiscardingAll(false);
     }
   };
 
@@ -228,18 +283,34 @@ const FiscalAlertBanner = () => {
                     <strong>Motivo da Falha:</strong> {order.nfceErrorDetail || 'Erro genérico de rede ou transmissão SEFAZ.'}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '4px', flexWrap: 'wrap' }}>
                     <button
-                      onClick={() => handleReemit(order)}
-                      disabled={reemittingId === order.id}
+                      onClick={() => handleDiscard(order)}
+                      disabled={discardingId === order.id || reemittingId === order.id || isDiscardingAll}
                       style={{
-                        backgroundColor: reemittingId === order.id ? '#6c757d' : '#28a745',
+                        backgroundColor: (discardingId === order.id || isDiscardingAll) ? '#6c757d' : '#dc3545',
                         color: '#ffffff',
                         border: 'none',
                         padding: '6px 12px',
                         borderRadius: '4px',
                         fontWeight: 'bold',
-                        cursor: reemittingId === order.id ? 'not-allowed' : 'pointer',
+                        cursor: (discardingId === order.id || reemittingId === order.id || isDiscardingAll) ? 'not-allowed' : 'pointer',
+                        fontSize: '13px'
+                      }}
+                    >
+                      {discardingId === order.id ? 'Descartando...' : '🗑️ Descartar e Remover Alerta'}
+                    </button>
+                    <button
+                      onClick={() => handleReemit(order)}
+                      disabled={reemittingId === order.id || discardingId === order.id || isDiscardingAll}
+                      style={{
+                        backgroundColor: (reemittingId === order.id || isDiscardingAll) ? '#6c757d' : '#28a745',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
+                        cursor: (reemittingId === order.id || discardingId === order.id || isDiscardingAll) ? 'not-allowed' : 'pointer',
                         fontSize: '13px'
                       }}
                     >
@@ -250,7 +321,25 @@ const FiscalAlertBanner = () => {
               ))}
             </div>
 
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              {failedOrders.length > 1 && (
+                <button
+                  onClick={handleDiscardAll}
+                  disabled={isDiscardingAll || !!reemittingId || !!discardingId}
+                  style={{
+                    backgroundColor: isDiscardingAll ? '#6c757d' : '#8b0000',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 14px',
+                    borderRadius: '4px',
+                    cursor: (isDiscardingAll || !!reemittingId || !!discardingId) ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '13px'
+                  }}
+                >
+                  {isDiscardingAll ? 'Descartando Todos...' : `🗑️ Descartar Todos os Alertas (${failedOrders.length})`}
+                </button>
+              )}
               <button
                 onClick={() => setShowModal(false)}
                 style={{
@@ -260,7 +349,8 @@ const FiscalAlertBanner = () => {
                   padding: '8px 16px',
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  marginLeft: 'auto'
                 }}
               >
                 Fechar
