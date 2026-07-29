@@ -144,7 +144,8 @@ const FiscalAlertBanner = () => {
     alert("Disjuntor de segurança fiscal re-armado com sucesso!");
   };
 
-  if (!circuitBreaker.isTripped && failedOrders.length === 0) return null;
+  const isPdv = localStorage.getItem('pdv') === 'true';
+  if (!isPdv || (!circuitBreaker.isTripped && failedOrders.length === 0)) return null;
 
   return (
     <>
