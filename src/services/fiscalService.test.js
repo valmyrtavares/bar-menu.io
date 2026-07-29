@@ -36,7 +36,7 @@ describe('issueAutoNfce', () => {
         updateDoc.mockResolvedValue();
     });
 
-    it('deve enviar CPF vazio quando order.cpfForInvoice não existir', async () => {
+    it('não deve incluir o campo cpf_destinatario quando order.cpfForInvoice não existir', async () => {
         const mockOrder = {
             id: 'order123',
             paymentMethod: 'CREDIT',
@@ -55,11 +55,19 @@ describe('issueAutoNfce', () => {
         const [url, options] = global.fetch.mock.calls[0];
         const body = JSON.parse(options.body);
 
-        // Verify the CPF field sent to API is empty string
-        expect(body.nfceData.cpf_destinatario).toBe('');
+        // Verify the CPF field is omitted when empty to prevent SEFAZ Rejeição 696
+        expect(body.nfceData.cpf_destinatario).toBeUndefined();
+
+        // Verify card payment contains tipo_integracao = 2 to prevent SEFAZ Rejeição 391
+        expect(body.nfceData.formas_pagamento[0].tipo_integracao).toBe(2);
 
         // Verify other critical fields
         expect(body.nfceData.cnpj_emitente).toBe('19337953000178');
+        expect(body.nfceData.codigo_regime_tributario).toBe(1);
+        expect(body.nfceData.crt).toBe(1);
+        expect(body.nfceData.items[0].icms_situacao_tributaria).toBe('102');
+        expect(body.nfceData.items[0].ibs_cbs_classificacao_tributaria).toBe('000001');
+        expect(body.nfceData.items[0].ibs_cbs_situacao_tributaria).toBe('000');
     });
 
     it('deve enviar CPF formatado quando order.cpfForInvoice existir', async () => {

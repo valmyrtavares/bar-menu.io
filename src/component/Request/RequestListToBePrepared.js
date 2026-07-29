@@ -260,8 +260,8 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                 const freshData = freshDoc.data();
 
                 // Verifica com dados FRESCOS do servidor (não do snapshot local)
-                if (freshData.nfceIssued || freshData.sendingNfce) {
-                  return false; // Outro processo já travou ou emitiu
+                if (freshData.nfceIssued || freshData.sendingNfce || freshData.nfceStatus) {
+                  return false; // Outro processo já travou, emitiu, ou registrou erro/rejeição
                 }
 
                 // Trava atômica — ninguém mais pode travar até liberarmos

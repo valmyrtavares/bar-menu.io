@@ -112,6 +112,9 @@ if (typeof window !== 'undefined') {
   };
 }
 
+// Mapa de requisições ativas em memória JS para dedup de in-flight requests
+const inFlightEmissions = new Map();
+
 export const getCircuitBreakerState = () => {
   if (typeof window !== 'undefined' && window.fiscalCircuitBreaker) return window.fiscalCircuitBreaker;
   if (typeof global !== 'undefined' && global.fiscalCircuitBreaker) return global.fiscalCircuitBreaker;
@@ -123,6 +126,7 @@ export const resetFiscalCircuitBreaker = () => {
   state.timestamps = [];
   state.isTripped = false;
   state.reason = null;
+  inFlightEmissions.clear();
 };
 
 /**
@@ -130,51 +134,60 @@ export const resetFiscalCircuitBreaker = () => {
  * @param {Object} order - Objeto do pedido (do Firestore)
  */
 export const issueAutoNfce = async (order) => {
-  // 1. DISJUNTOR DE EMERGÊNCIA ANTI-FLOOD: Se disparou mais de 10 vezes em 30 segundos, bloqueia tudo
-  const cbState = getCircuitBreakerState();
-  if (cbState.isTripped) {
-    const errorMsg = `⛔ BLOQUEIO DE EMERGÊNCIA ANTI-FLOOD: ${cbState.reason}`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
-
-  const now = Date.now();
-  cbState.timestamps = (cbState.timestamps || []).filter(t => now - t < 30000);
-  if (cbState.timestamps.length >= 10) {
-    cbState.isTripped = true;
-    cbState.reason = `Disparo em massa bloqueado: ${cbState.timestamps.length + 1} emissões tentadas em menos de 30 segundos!`;
-    const errorMsg = `⛔ DISJUNTOR DE EMERGÊNCIA DISPARADO: ${cbState.reason}`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
-  cbState.timestamps.push(now);
-
   const cleanName = (order.name || 'CLIENTE').replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-').substring(0, 15).toUpperCase();
   const orderId = order.countRequest || order.id || 'SN';
   const ref = order.nfceRef || `REQ--${orderId}--${cleanName}`;
+  const lockKey = order.id || ref;
 
-  // 2. PRE-FLIGHT GUARD DE DUPLICIDADE: Consulta taxDocuments ANTES de tocar qualquer API externa
-  try {
-    const checkQuery = query(collection(db, 'taxDocuments'), where('ref', '==', ref));
-    const checkSnap = await getDocs(checkQuery);
-    if (checkSnap && !checkSnap.empty && checkSnap.docs.length > 0) {
-      const existingDocData = checkSnap.docs[0].data();
-      if (existingDocData.status === 'autorizado') {
-        console.warn(`[PRE-FLIGHT GUARD] Pedido ${orderId} já possui nota AUTORIZADA (${existingDocData.numero || 'N/A'}). Abortando chamada para API.`);
-        return { ...existingDocData, ref, duplicateBlocked: true };
-      }
-    }
-  } catch (checkErr) {
-    console.warn('[PRE-FLIGHT GUARD] Aviso ao verificar duplicidade pre-flight:', checkErr);
+  // 0. DEDUPLICAÇÃO DE REQUISIÇÃO EM ANDAMENTO (IN-FLIGHT LOCK):
+  if (inFlightEmissions.has(lockKey)) {
+    console.warn(`[IN-FLIGHT GUARD] Emissão para pedido ${orderId} (${lockKey}) já está em andamento. Aguardando promessa existente.`);
+    return inFlightEmissions.get(lockKey);
   }
 
+  const runEmissao = async () => {
+    // 1. DISJUNTOR DE EMERGÊNCIA ANTI-FLOOD: Se disparou mais de 5 vezes em 60 segundos, bloqueia tudo
+    const cbState = getCircuitBreakerState();
+    if (cbState.isTripped) {
+      const errorMsg = `⛔ BLOQUEIO DE EMERGÊNCIA ANTI-FLOOD: ${cbState.reason}`;
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    const now = Date.now();
+    cbState.timestamps = (cbState.timestamps || []).filter(t => now - t < 60000);
+    if (cbState.timestamps.length >= 5) {
+      cbState.isTripped = true;
+      cbState.reason = `Disparo em massa bloqueado: ${cbState.timestamps.length + 1} emissões tentadas em menos de 60 segundos!`;
+      const errorMsg = `⛔ DISJUNTOR DE EMERGÊNCIA DISPARADO: ${cbState.reason}`;
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+    cbState.timestamps.push(now);
+
+    // 2. PRE-FLIGHT GUARD DE DUPLICIDADE: Consulta taxDocuments ANTES de tocar qualquer API externa
+    try {
+      const checkQuery = query(collection(db, 'taxDocuments'), where('ref', '==', ref));
+      const checkSnap = await getDocs(checkQuery);
+      if (checkSnap && !checkSnap.empty && checkSnap.docs.length > 0) {
+        const existingDocData = checkSnap.docs[0].data();
+        if (existingDocData.status === 'autorizado' || existingDocData.caminho_danfe) {
+          console.warn(`[PRE-FLIGHT GUARD] Pedido ${orderId} já possui nota AUTORIZADA (${existingDocData.numero || 'N/A'}). Abortando chamada para API.`);
+          return { ...existingDocData, ref, duplicateBlocked: true };
+        }
+      }
+    } catch (checkErr) {
+      console.warn('[PRE-FLIGHT GUARD] Aviso ao verificar duplicidade pre-flight:', checkErr);
+    }
+
+  const cleanCpf = order.cpfForInvoice ? String(order.cpfForInvoice).replace(/\D/g, '') : '';
   const nfce = {
     data_emissao: isoDate(),
     cnpj_emitente: '19337953000178',
+    regime_tributario_emitente: 1, // 1: Simples Nacional (Evita Rejeição 1115 de IBS/CBS)
+    codigo_regime_tributario: 1,   // Fallback
+    crt: 1,                        // Fallback
     indicador_inscricao_estadual_destinatario: '9',
-    cpf_destinatario: order.cpfForInvoice
-      ? order.cpfForInvoice.replace(/\D/g, '')
-      : '',
     modalidade_frete: 9,
     local_destino: 1,
     presenca_comprador: 1,
@@ -182,6 +195,10 @@ export const issueAutoNfce = async (order) => {
     items: [],
     formas_pagamento: [],
   };
+
+  if (cleanCpf && cleanCpf.length === 11) {
+    nfce.cpf_destinatario = cleanCpf;
+  }
 
   // Mapeia formas de pagamento usando paymentDetails se disponível
   const paymentMethod = order.paymentMethod;
@@ -194,9 +211,10 @@ export const issueAutoNfce = async (order) => {
     valor_pagamento: parseFloat(order.finalPriceRequest || 0),
   };
 
-  // Se for cartão de crédito ou débito, envia a bandeira. Se não houver, usa '99' (Outros) como fallback.
+  // Se for cartão de crédito ou débito, envia a bandeira e tipo de integração (2: Não Integrado / POS)
   if (pgWay === '03' || pgWay === '04') {
     pg.bandeira_operadora = (paymentDetails && paymentDetails.cardBrandCode) || '99';
+    pg.tipo_integracao = 2; // 2: Pagamento não integrado (POS autônomo / maquininha manual) conforme SEFAZ
   }
 
   nfce.formas_pagamento.push(pg);
@@ -251,6 +269,10 @@ export const issueAutoNfce = async (order) => {
     }
 
     adjustedItems.forEach((item, index) => {
+      const itemPrice = parseFloat(item.finalPrice || 0);
+      const vIbsVal = parseFloat((itemPrice * 0.001).toFixed(2));
+      const vCbsVal = parseFloat((itemPrice * 0.009).toFixed(2));
+
       nfce.items.push({
         numero_item: index + 1,
         codigo_ncm: fillingNcmCode(item.category),
@@ -259,26 +281,33 @@ export const issueAutoNfce = async (order) => {
         descricao: item.name,
         cfop: '5102',
         codigo_produto: item.id || generationUniqueRandomString(8),
-        valor_unitario_tributavel: item.finalPrice,
-        valor_unitario_comercial: item.finalPrice,
+        valor_unitario_tributavel: itemPrice,
+        valor_unitario_comercial: itemPrice,
         valor_desconto: 0,
         icms_origem: '0',
         icms_situacao_tributaria: '102',
-        // Reforma Tributária (IBS / CBS - NT 2025.002)
-        cClassTrib: '000001',
-        cclass_trib: '000001',
-        codigo_classificacao_tributaria: '000001',
-        cst_ibs_cbs: '000',
-        aliquota_cbs: 0.90,
-        aliquota_ibs: 0.10,
         unidade_comercial: 'un',
         unidade_tributavel: 'un',
         valor_total_tributos: '0.00',
+        ibs_cbs_situacao_tributaria: '000',
+        ibs_cbs_classificacao_tributaria: '000001',
+        ibs_cbs_base_calculo: itemPrice,
+        cbs_aliquota: '0.9',
+        cbs_valor: vCbsVal,
+        ibs_uf_aliquota: '0.1',
+        ibs_uf_valor: vIbsVal,
+        ibs_mun_aliquota: '0',
+        ibs_mun_valor: '0',
+        ibs_valor_total: vIbsVal,
       });
     });
   } else {
     // Fallback para pedidos sem lista de itens (ex: cobrança direta ou consumo avulso)
     const fallbackPrice = parseFloat(order.finalPriceRequest || 0);
+    const itemPrice = fallbackPrice > 0 ? fallbackPrice : 1.0;
+    const vIbsVal = parseFloat((itemPrice * 0.001).toFixed(2));
+    const vCbsVal = parseFloat((itemPrice * 0.009).toFixed(2));
+
     nfce.items.push({
       numero_item: 1,
       codigo_ncm: '08119000',
@@ -287,26 +316,49 @@ export const issueAutoNfce = async (order) => {
       descricao: `CONSUMO / PEDIDO #${order.countRequest || 'SN'}`,
       cfop: '5102',
       codigo_produto: generationUniqueRandomString(8),
-      valor_unitario_tributavel: fallbackPrice > 0 ? fallbackPrice : 1.0,
-      valor_unitario_comercial: fallbackPrice > 0 ? fallbackPrice : 1.0,
+      valor_unitario_tributavel: itemPrice,
+      valor_unitario_comercial: itemPrice,
       valor_desconto: 0,
       icms_origem: '0',
       icms_situacao_tributaria: '102',
-      cClassTrib: '000001',
-      cclass_trib: '000001',
-      codigo_classificacao_tributaria: '000001',
-      cst_ibs_cbs: '000',
-      aliquota_cbs: 0.90,
-      aliquota_ibs: 0.10,
       unidade_comercial: 'un',
       unidade_tributavel: 'un',
       valor_total_tributos: '0.00',
+      ibs_cbs_situacao_tributaria: '000',
+      ibs_cbs_classificacao_tributaria: '000001',
+      ibs_cbs_base_calculo: itemPrice,
+      cbs_aliquota: '0.9',
+      cbs_valor: vCbsVal,
+      ibs_uf_aliquota: '0.1',
+      ibs_uf_valor: vIbsVal,
+      ibs_mun_aliquota: '0',
+      ibs_mun_valor: '0',
+      ibs_valor_total: vIbsVal,
     });
   }
+
+  // Calcular totais IBS/CBS de forma segura e anexar ao root da nfce
+  let totalIbsCbsBase = 0;
+  let totalCbsVal = 0;
+  let totalIbsUfVal = 0;
+
+  nfce.items.forEach(item => {
+    totalIbsCbsBase += item.ibs_cbs_base_calculo || 0;
+    totalCbsVal += item.cbs_valor || 0;
+    totalIbsUfVal += item.ibs_valor_total || 0;
+  });
+
+  nfce.ibs_cbs_base_calculo = parseFloat(totalIbsCbsBase.toFixed(2));
+  nfce.cbs_valor_total = parseFloat(totalCbsVal.toFixed(2));
+  nfce.ibs_uf_valor_total = parseFloat(totalIbsUfVal.toFixed(2));
+  nfce.ibs_valor_total = parseFloat(totalIbsUfVal.toFixed(2));
+  nfce.ibs_cbs_is_valor_total = parseFloat((totalCbsVal + totalIbsUfVal).toFixed(2));
 
   // URL do backend (ajustar se necessário para produção)
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://focusrender.onrender.com';
   const url = `${backendUrl}/api/send-nfce?ref=${ref}`;
+
+  console.log(`[FISCAL API REQUEST] Enviando NFC-e para ref=${ref}. Payload completo:`, JSON.stringify({ ref, nfceData: nfce }, null, 2));
 
   try {
     const response = await fetch(url, {
@@ -323,16 +375,15 @@ export const issueAutoNfce = async (order) => {
 
       // Salva no Firestore se for autorizado ou se for erro/rejeitado retornado pela API
       await saveToFirestore(result, order.finalPriceRequest, ref);
-
-      // Retorna o resultado + ref para que o chamador (triggerFiscal) faça o updateDoc
-      // IMPORTANTE: NÃO fazemos updateDoc aqui para evitar onSnapshot intermediário
-      // que causava race condition e notas duplicadas.
       return { ...result, ref };
     } else {
-      console.error('Erro ao enviar NFC-e:', response.statusText);
+      const errorBody = await response.text().catch(() => '');
+      console.error(`[FISCAL API ERROR] HTTP Status: ${response.status} ${response.statusText}. Resposta do servidor:`, errorBody);
+      console.error(`[FISCAL API ERROR PAYLOAD] Payload rejeitado para ref=${ref}:`, JSON.stringify({ ref, nfceData: nfce }));
+      
       const errResult = {
         status: 'erro',
-        mensagem_sefaz: `Erro na rede ou Focus API: ${response.statusText}`,
+        mensagem_sefaz: `Erro na rede ou Focus API: ${response.statusText}. Detalhes: ${errorBody.substring(0, 150)}`,
       };
       try {
         await saveToFirestore(errResult, order.finalPriceRequest, ref);
@@ -342,7 +393,9 @@ export const issueAutoNfce = async (order) => {
       throw new Error(`Erro na rede: ${response.statusText}`);
     }
   } catch (error) {
-    console.error('Erro na emissão automática de NFC-e:', error);
+    console.error(`[FISCAL EXCEPTION] Erro na emissão automática para ref=${ref}:`, error);
+    console.error(`[FISCAL EXCEPTION PAYLOAD] Payload da falha para ref=${ref}:`, JSON.stringify({ ref, nfceData: nfce }));
+    
     if (!error.message || !error.message.startsWith('Erro na rede:')) {
       const errResult = {
         status: 'erro',
@@ -355,5 +408,16 @@ export const issueAutoNfce = async (order) => {
       }
     }
     throw error;
+  }
+  };
+
+  const executionPromise = runEmissao();
+  inFlightEmissions.set(lockKey, executionPromise);
+
+  try {
+    const res = await executionPromise;
+    return res;
+  } finally {
+    inFlightEmissions.delete(lockKey);
   }
 };

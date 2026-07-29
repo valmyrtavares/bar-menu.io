@@ -95,4 +95,55 @@ describe('NFCe Safety Lock Verification', () => {
 
         console.log('✅ TESTE DE SEGURANÇA PASSOU: Apenas 1 nota emitida após 10 tentativas simultâneas.');
     });
+
+    it('NÃO deve emitir se o pedido já possuir nfceStatus (erro, rejeitado ou autorizado)', async () => {
+        const mockOrderWithError = {
+            id: 'PROVA_SEGURANCA_002',
+            countRequest: '1235',
+            paymentDone: true,
+            nfceIssued: false,
+            sendingNfce: false,
+            nfceStatus: 'erro', // Já possui status de erro anterior
+            finalPriceRequest: 15.00,
+            request: [{ name: 'AÇAI TROPICAL', finalPrice: 15.00, category: 'alimentacao' }]
+        };
+
+        const processedOrdersLock = new Set();
+        const triggerFiscalLogic = async (order) => {
+            if (order.paymentDone === true && !order.nfceIssued && !order.sendingNfce && !order.nfceStatus && !processedOrdersLock.has(order.id)) {
+                processedOrdersLock.add(order.id);
+                await issueAutoNfce(order);
+            }
+        };
+
+        await triggerFiscalLogic(mockOrderWithError);
+
+        // Nenhuma requisição HTTP deve ser disparada
+        expect(globalFetchSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('deve reutilizar a mesma promessa em memória para chamadas concorrentes diretas a issueAutoNfce (In-Flight Dedup)', async () => {
+        const mockOrder = {
+            id: 'DEDUP_TEST_001',
+            countRequest: '999',
+            finalPriceRequest: 20.00,
+            request: [{ name: 'CASQUINHA', finalPrice: 20.00, category: 'alimentacao' }]
+        };
+
+        // Dispara 5 chamadas diretas a issueAutoNfce sem passar pelo componente
+        const results = await Promise.all([
+            issueAutoNfce(mockOrder),
+            issueAutoNfce(mockOrder),
+            issueAutoNfce(mockOrder),
+            issueAutoNfce(mockOrder),
+            issueAutoNfce(mockOrder),
+        ]);
+
+        // Apenas UMA requisição fetch externa deve ocorrer
+        expect(globalFetchSpy).toHaveBeenCalledTimes(1);
+
+        // Todas as 5 promessas devem ter retornado o mesmo resultado
+        expect(results[0].status).toBe('autorizado');
+        expect(results[4].status).toBe('autorizado');
+    });
 });

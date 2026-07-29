@@ -44,7 +44,18 @@ const FiscalAlertBanner = () => {
   const handleReemit = async (order) => {
     try {
       setReemittingId(order.id);
-      const result = await issueAutoNfce(order);
+
+      // Gera uma referência única para o reenvio (evita que a API da Focus retorne o erro em cache do envio anterior)
+      const cleanName = (order.name || 'CLIENTE').replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-').substring(0, 15).toUpperCase();
+      const orderId = order.countRequest || order.id || 'SN';
+      const retryRef = `REQ--${orderId}--${cleanName}--R${Date.now().toString(36)}`;
+
+      const retryOrder = {
+        ...order,
+        nfceRef: retryRef
+      };
+
+      const result = await issueAutoNfce(retryOrder);
 
       const orderRef = doc(db, 'requests', order.id);
       if (result && (result.status === 'autorizado' || result.duplicateBlocked) && (result.caminho_danfe || result.duplicateBlocked)) {
@@ -54,7 +65,7 @@ const FiscalAlertBanner = () => {
           nfcePrinted: false,
           caminho_danfe: result.caminho_danfe || order.caminho_danfe,
           nfceStatus: 'autorizado',
-          nfceRef: result.ref || order.nfceRef,
+          nfceRef: result.ref || retryRef,
           nfceErrorDetail: null
         });
         alert(`Sucesso! Nota fiscal do pedido ${order.countRequest || order.id} autorizada.`);
