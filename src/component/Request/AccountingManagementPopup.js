@@ -8,7 +8,6 @@ import {
   getFirestore,
 } from 'firebase/firestore';
 import '../../assets/styles/AccountingManagementPopup.css';
-import CloseBtn from '../closeBtn';
 
 import { db } from '../../config-firebase/firebase.js';
 
@@ -225,29 +224,34 @@ const AccountingManagementPopup = ({
   };
 
   return (
-    <div className="accounting-management-popup-container">
-      <CloseBtn setClose={setShowAccountingManagementPopup} />
-      {costPrice?.costPriceObj ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Custo</th>
-              <th>Preço</th>
-              <th>Lucro</th>
-              <th>Porcentagem</th>
-              <th>Acompanhamento</th>
-              <th>Custo</th>
-              <th>Preço</th>
-              <th>Lucro</th>
-              <th>Porcentagem</th>
-            </tr>
-          </thead>
-          <tbody>{renderTableRows()}</tbody>
-        </table>
-      ) : (
-        <h1>Esses dados não foram cadastrados</h1>
-      )}
+    <div className="accounting-popup-overlay" onClick={() => setShowAccountingManagementPopup(false)}>
+      <div className="accounting-management-popup-container" onClick={(e) => e.stopPropagation()}>
+        <button className="accounting-popup-close-x" onClick={() => setShowAccountingManagementPopup(false)}>×</button>
+        <h3 className="accounting-popup-title">DRE e Custos dos Produtos Solicitados</h3>
+        {costPrice?.costPriceObj ? (
+          <div className="accounting-popup-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Custo</th>
+                  <th>Preço</th>
+                  <th>Lucro</th>
+                  <th>Margem (%)</th>
+                  <th>Acompanhamento</th>
+                  <th>Custo</th>
+                  <th>Preço</th>
+                  <th>Lucro</th>
+                  <th>Margem (%)</th>
+                </tr>
+              </thead>
+              <tbody>{renderTableRows()}</tbody>
+            </table>
+          </div>
+        ) : (
+          <h1 className="no-data-msg">Estes dados não foram cadastrados</h1>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,19 +1,129 @@
-.accounting-management-popup-container{
-    width: 100%;
-    max-width: 900px;
-    background-color: var(--secundary-bg-color);
+.accounting-popup-overlay {
     position: fixed;
-    z-index: 50;
-    left:16%;
-    top:100px;
-    height: 40vh;
-    overflow-y: auto;
-    background:white;
-    box-shadow: 4px 8px 24px rgba(0, 0, 0, 0.18);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 15, 25, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
-.accounting-management-popup-container table  h1{
-text-align: center;
-width: 100%;
-color:red;
+.accounting-management-popup-container {
+    width: 95%;
+    max-width: 1100px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+    padding: 24px;
+    position: relative;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: popupFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.accounting-popup-title {
+    margin: 0 0 20px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    font-family: 'Inter', system-ui, sans-serif;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.accounting-popup-close-x {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 32px;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s, transform 0.15s;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.accounting-popup-close-x:hover {
+    color: #ef4444;
+    background-color: #fef2f2;
+    transform: rotate(90deg);
+}
+
+.accounting-popup-table-wrapper {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex: 1;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.accounting-management-popup-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9rem;
+}
+
+.accounting-management-popup-container th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.accounting-management-popup-container td {
+    padding: 12px 16px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.accounting-management-popup-container tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.accounting-management-popup-container tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.accounting-management-popup-container td strong {
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+.no-data-msg {
+    text-align: center;
+    color: #ef4444;
+    padding: 40px;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
