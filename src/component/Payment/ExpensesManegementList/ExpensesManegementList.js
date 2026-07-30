@@ -13,10 +13,21 @@ import Title from '../../title.js';
 import FilterExpenses from './filterExpenses.js';
 import Table from '../../Table.js';
 
+const formatDateToDMY = (dateStr) => {
+  if (!dateStr) return '-';
+  if (typeof dateStr !== 'string') return String(dateStr);
+  const trimmed = dateStr.trim();
+  const parts = trimmed.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return trimmed;
+};
+
 const Expensescolumns = [
   { nomeDaColuna: 'Tipo de despesa', valorDaColuna: 'name' },
   { nomeDaColuna: 'Valor', valorDaColuna: 'value' },
-  { nomeDaColuna: 'Data', valorDaColuna: 'dueDate' },
+  { nomeDaColuna: 'Data', valorDaColuna: 'dueDateDisplay' },
   { nomeDaColuna: 'Fornecedor', valorDaColuna: 'provider' },
   { nomeDaColuna: 'NotaFiscal', valorDaColuna: 'account' },
 ];
@@ -315,6 +326,14 @@ const parseToDate = (dateVal) => {
     setOneExpense(item);
   };
 
+  const formattedExpensesList = React.useMemo(() => {
+    if (!expensesList) return null;
+    return expensesList.map(item => ({
+      ...item,
+      dueDateDisplay: formatDateToDMY(item.dueDate || item.paymentDate || item.date)
+    }));
+  }, [expensesList]);
+
   return (
     <div className={expenses.customerListContainer}>
       <div className={expenses.containerIcon}>
@@ -362,7 +381,7 @@ const parseToDate = (dateVal) => {
       <div className={expenses.containerExpensesManegementTable}>
         <Table
           title="Lista de Despesas"
-          data={expensesList}
+          data={formattedExpensesList}
           columns={Expensescolumns}
           onEdit={editContent}
           onDelete={deleteExpenses}

@@ -2,6 +2,17 @@ import React from 'react';
 import style from '../../../assets/styles/SumaryExpensesListPopup.module.scss';
 import CloseBtn from '../../closeBtn';
 
+const formatDateToDMY = (dateStr) => {
+  if (!dateStr) return '-';
+  if (typeof dateStr !== 'string') return String(dateStr);
+  const trimmed = dateStr.trim();
+  const parts = trimmed.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return trimmed;
+};
+
 const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
   React.useState(() => {
     if (oneExpense) {
@@ -16,7 +27,7 @@ const SumaryExpensesListPopup = ({ oneExpense, setOpenSumaryPopup }) => {
         <main>
           <div className={style.detailsWrapper}>
             <p>
-              Data de Pagamento<span>: {oneExpense.paymentDate}</span>
+              Data de Pagamento<span>: {formatDateToDMY(oneExpense.paymentDate)}</span>
             </p>
             <p>
               Número da nota<span>: {oneExpense.account}</span>
