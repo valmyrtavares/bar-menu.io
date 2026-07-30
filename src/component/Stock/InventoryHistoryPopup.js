@@ -549,6 +549,13 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
   };
 
   const handleSaveCorrection = async (prod, idx) => {
+    const sentTime = prod.sentAt || selectedInventory.timestamp || 0;
+    if (Date.now() - sentTime > 2 * 60 * 60 * 1000) {
+      alert("Este item foi enviado há mais de 2 horas e não pode mais ser editado.");
+      setEditingIndex(null);
+      return;
+    }
+
     const val = Number(editValue);
     if (isNaN(val) || val < 0 || editValue === '') {
       alert("Valor inválido. Digite um número maior ou igual a zero.");
@@ -764,7 +771,15 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
                              <button onClick={() => setEditingIndex(null)} disabled={isSavingCorrection} style={{ color: 'red', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Cancelar</button>
                            </div>
                         ) : (
-                           <button onClick={() => { setEditingIndex(idx); setEditValue(Number(prod.currentVolume).toString()); }} style={{ color: '#007bff', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Editar</button>
+                          (() => {
+                            const sentTime = prod.sentAt || selectedInventory.timestamp || 0;
+                            const canEdit = Date.now() - sentTime <= 2 * 60 * 60 * 1000;
+                            return canEdit ? (
+                              <button onClick={() => { setEditingIndex(idx); setEditValue(Number(prod.currentVolume).toString()); }} style={{ color: '#007bff', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 'bold' }}>Editar</button>
+                            ) : (
+                              <span style={{ color: '#999', fontSize: '12px' }}>Não editável (>2h)</span>
+                            );
+                          })()
                         )}
                       </td>
                     </tr>

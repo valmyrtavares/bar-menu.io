@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
-import { doc, updateDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
-import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 
 import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';
@@ -13,7 +12,6 @@ import styleProgress from '../../assets/styles/AuditingPopupProgress.module.scss
 const AuditingPopup = ({ onClose, fetchStock }) => {
   const [stockItems, setStockItems] = useState([]);
   const [allItems, setAllItems] = useState([]);
-  const [originalItems, setOriginalItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dishes, setDishes] = useState([]);
@@ -21,10 +19,6 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   const [justification, setJustification] = useState('');
 
   // Estados para o Progresso e Resiliência
-  const [progressIndex, setProgressIndex] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
-  const [currentUpdatingItemName, setCurrentUpdatingItemName] = useState('');
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [pendingAuditState, setPendingAuditState] = useState(null);
 
   useEffect(() => {
@@ -43,30 +37,46 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
           (item) => item.operationSupplies === false && (item.activityStatus === undefined || item.activityStatus === false)
         );
 
-        const initialOriginals = {};
         const itemsWithEditedVolume = filtered.map(item => {
-          initialOriginals[item.id] = { ...item };
           return { ...item, correctionValue: '' }; // empty means no change yet
         });
 
-        setOriginalItems(initialOriginals);
         setAllItems(itemsWithEditedVolume);
         setStockItems(itemsWithEditedVolume);
         
         exportToExcel(itemsWithEditedVolume);
 
         // Verificar se há alguma auditoria não concluída no localStorage
-        const saved = localStorage.getItem('pending_stock_audit');
+        const saved = localStorage.getItem('active_stock_audit_session');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            if (parsed && parsed.summaryItems && parsed.summaryItems.length > 0) {
+            if (parsed && parsed.items) {
               setPendingAuditState(parsed);
             }
           } catch (e) {
-            console.error("Erro ao ler auditoria pendente do localStorage:", e);
-            localStorage.removeItem('pending_stock_audit');
+            console.error("Erro ao ler auditoria ativa do localStorage:", e);
+            localStorage.removeItem('active_stock_audit_session');
           }
+        } else {
+          // Inicializar uma nova sessão caso não exista
+          const today = new Date();
+          const day = String(today.getDate()).padStart(2, '0');
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const year = today.getFullYear();
+          const hours = String(today.getHours()).padStart(2, '0');
+          const minutes = String(today.getMinutes()).padStart(2, '0');
+          const seconds = String(today.getSeconds()).padStart(2, '0');
+          const paymentDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+          const fullDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+
+          const newSession = {
+            id: `session_${Date.now()}`,
+            fullDate,
+            paymentDate,
+            items: {}
+          };
+          localStorage.setItem('active_stock_audit_session', JSON.stringify(newSession));
         }
       } catch (err) {
         console.error("Erro ao carregar dados", err);
@@ -77,27 +87,211 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     init();
   }, []);
 
-  // Efeito do Cronômetro Ativo durante a submissão
-  useEffect(() => {
-    let interval = null;
-    if (isSubmitting) {
-      setElapsedTime(0);
-      interval = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
-      }, 1000);
-    } else {
-      setElapsedTime(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isSubmitting]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  const getFormattedPaymentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const seconds = String(today.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
   };
+
+  const getFormattedFullDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const seconds = String(today.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  };
+
+  const loadSessionIntoState = (session) => {
+    if (!session || !session.items) return;
+    
+    setAllItems(prev => prev.map(item => {
+      const sessionItem = session.items[item.id];
+      if (sessionItem) {
+        return {
+          ...item,
+          originalVolume: sessionItem.originalVolume,
+          originalCost: sessionItem.originalCost,
+          lastSentVolume: sessionItem.lastSentVolume,
+          lastSentCost: sessionItem.lastSentCost,
+          firstSentAt: sessionItem.firstSentAt,
+          hasBeenSent: true,
+          correctionValue: sessionItem.correctionValue
+        };
+      }
+      return item;
+    }));
+    
+    setStockItems(prev => prev.map(item => {
+      const sessionItem = session.items[item.id];
+      if (sessionItem) {
+        return {
+          ...item,
+          originalVolume: sessionItem.originalVolume,
+          originalCost: sessionItem.originalCost,
+          lastSentVolume: sessionItem.lastSentVolume,
+          lastSentCost: sessionItem.lastSentCost,
+          firstSentAt: sessionItem.firstSentAt,
+          hasBeenSent: true,
+          correctionValue: sessionItem.correctionValue
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleResumeAudit = () => {
+    if (!pendingAuditState) return;
+    loadSessionIntoState(pendingAuditState);
+    setPendingAuditState(null);
+  };
+
+  const handleSaveFromPoint = () => {
+    if (!pendingAuditState) return;
+    loadSessionIntoState(pendingAuditState);
+    setPendingAuditState(null);
+    setShowSummaryScreen(true);
+  };
+
+  const revertSessionChanges = async (session) => {
+    setIsSubmitting(true);
+    try {
+      const itemsToRevert = Object.values(session.items || {}).filter(item => item.hasBeenSent);
+      
+      for (const item of itemsToRevert) {
+        const netVolumeDelta = Number(item.lastSentVolume) - Number(item.originalVolume);
+        if (netVolumeDelta === 0) continue;
+
+        const docRef = doc(db, 'stock', item.id);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) continue;
+
+        const dbItem = docSnap.data();
+
+        // Revert volume by subtracting the net change
+        const revertedVolume = Math.max(0, Number(dbItem.totalVolume) - netVolumeDelta);
+        
+        let unitPrice = 0;
+        if (Number(item.originalCost) > 0 && Number(item.originalVolume) > 0) {
+          unitPrice = Number(item.originalCost) / Number(item.originalVolume);
+        } else if (Number(dbItem.lastUnitCost) > 0) {
+          unitPrice = Number(dbItem.lastUnitCost);
+        } else {
+          unitPrice = Number(dbItem.CostPerUnit || 0);
+        }
+
+        const revertedCost = Math.max(0, Number((revertedVolume * unitPrice).toFixed(2)));
+        const newUnit = Number(dbItem.volumePerUnit) > 0 ? revertedVolume / Number(dbItem.volumePerUnit) : 0;
+        const newCostPerUnit = revertedVolume > 0 ? revertedCost / revertedVolume : (Number(dbItem.CostPerUnit) || 0);
+
+        const updatedProduct = {
+          ...dbItem,
+          totalVolume: revertedVolume,
+          totalCost: revertedCost,
+          amount: Number(newUnit.toFixed(2)),
+          CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+          lastUnitCost: newCostPerUnit > 0 ? Number(newCostPerUnit.toFixed(2)) : (dbItem.lastUnitCost || 0)
+        };
+
+        const cost = 0;
+        const pack = Number(updatedProduct.amount);
+        const volume = 0;
+        const unit = updatedProduct.unitOfMeasurement;
+        const previousCost = dbItem.totalCost;
+        const previousVolume = dbItem.totalVolume;
+
+        const logEvent = stockHistoryList(
+          dbItem,
+          'Auditoria',
+          getFormattedPaymentDate(),
+          pack,
+          cost,
+          unit,
+          volume,
+          previousVolume,
+          previousCost,
+          updatedProduct.totalCost,
+          updatedProduct.totalVolume,
+          '',
+          'Descarte de auditoria (Reversão de calibragem)'
+        );
+
+        delete updatedProduct.UsageHistory;
+
+        const dishesToUpdateForThisItem = updateRecipesinDishesAndSideDishes(updatedProduct, dishes);
+        if (dishesToUpdateForThisItem && dishesToUpdateForThisItem.length > 0) {
+          const uniqueDishesMap = new Map();
+          dishesToUpdateForThisItem.forEach(d => uniqueDishesMap.set(d.id, d));
+          await Promise.all(Array.from(uniqueDishesMap.values()).map(updateDishInFirebase));
+        }
+
+        await updateDoc(docRef, updatedProduct);
+        await logStockUsage(updatedProduct.id, logEvent);
+        await updateSideDishesInFirebase(updatedProduct);
+        await checkUnavaiableRawMaterial(updatedProduct.id);
+      }
+
+      localStorage.removeItem('active_stock_audit_session');
+      setPendingAuditState(null);
+      
+      const newSession = {
+        id: `session_${Date.now()}`,
+        fullDate: getFormattedFullDate(),
+        paymentDate: getFormattedPaymentDate(),
+        items: {}
+      };
+      localStorage.setItem('active_stock_audit_session', JSON.stringify(newSession));
+      
+      alert("Sessão de auditoria descartada e valores revertidos com sucesso no estoque!");
+      fetchStock();
+    } catch (error) {
+      console.error("Erro ao reverter auditoria descartada:", error);
+      alert("Ocorreu um erro ao tentar reverter as modificações no estoque.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDiscardAudit = () => {
+    if (!pendingAuditState) return;
+    
+    const sessionItems = Object.values(pendingAuditState.items || {});
+    const sentItems = sessionItems.filter(item => item.hasBeenSent);
+    
+    if (sentItems.length === 0) {
+      localStorage.removeItem('active_stock_audit_session');
+      setPendingAuditState(null);
+      
+      const newSession = {
+        id: `session_${Date.now()}`,
+        fullDate: getFormattedFullDate(),
+        paymentDate: getFormattedPaymentDate(),
+        items: {}
+      };
+      localStorage.setItem('active_stock_audit_session', JSON.stringify(newSession));
+      alert("Sessão de auditoria vazia limpa com sucesso.");
+      return;
+    }
+
+    const hasExpiredItem = sentItems.some(item => (Date.now() - item.firstSentAt > 2 * 60 * 60 * 1000));
+    if (hasExpiredItem) {
+      alert("Não é possível descartar este inventário porque existem itens cujo tempo de edição (2 horas) já expirou. Você deve concluir o salvamento definitivo deste inventário.");
+      return;
+    }
+
+    if (window.confirm("Atenção! Descartar esta sessão irá reverter todos os valores de estoque das matérias-primas alteradas para os valores originais anteriores à auditoria, preservando as vendas que ocorreram no meio tempo. Deseja continuar?")) {
+      revertSessionChanges(pendingAuditState);
+    }
+  };
+
+
 
   const exportToExcel = (items) => {
     const dataToExport = items.map(item => ({
@@ -129,22 +323,33 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     }));
   };
 
-  const hasUnsavedChanges = () => {
-    return allItems.some(item => item.correctionValue !== '');
-  };
-
   const handleClose = () => {
-    if (hasUnsavedChanges()) {
-      const confirmClose = window.confirm('Existem alterações que serão perdidas se não forem salvas, tem certeza que quer fechar a tela?');
-      if (!confirmClose) return;
+    const activeSession = localStorage.getItem('active_stock_audit_session');
+    if (activeSession) {
+      try {
+        const parsed = JSON.parse(activeSession);
+        const hasSentItems = Object.keys(parsed.items || {}).length > 0;
+        if (hasSentItems) {
+          const confirmClose = window.confirm('Este inventário possui alterações já enviadas ao estoque que ainda não foram registradas definitivamente no histórico. Tem certeza que deseja fechar a tela? Você poderá retomar o inventário depois.');
+          if (!confirmClose) return;
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
     onClose();
   };
 
   const handleNext = () => {
-    const itemsToUpdate = allItems.filter(item => item.correctionValue !== '' && !isNaN(item.correctionValue));
-    if (itemsToUpdate.length === 0) {
-      alert("Nenhuma alteração de volume válida foi detectada.");
+    const unsentItems = allItems.filter(item => item.correctionValue !== '' && !item.hasBeenSent);
+    if (unsentItems.length > 0) {
+      const confirmProceed = window.confirm(`Existem ${unsentItems.length} itens modificados que não foram enviados ao estoque. Eles não farão parte deste inventário se não forem enviados. Deseja prosseguir mesmo assim?`);
+      if (!confirmProceed) return;
+    }
+
+    const sentItems = allItems.filter(item => item.hasBeenSent);
+    if (sentItems.length === 0) {
+      alert("Nenhum item foi enviado para o estoque ainda nesta auditoria.");
       return;
     }
     setShowSummaryScreen(true);
@@ -319,126 +524,164 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
     };
   };
 
-  const runAuditProcess = async (auditData) => {
+  const handleSendItem = async (itemId) => {
+    if (isSubmitting) return;
+
+    const item = allItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    const enteredValue = Number(item.correctionValue);
+    if (item.correctionValue === '' || isNaN(enteredValue) || enteredValue < 0) {
+      alert("Por favor, insira um valor de volume válido (número maior ou igual a zero).");
+      return;
+    }
+
+    const isReedition = item.firstSentAt !== undefined && item.firstSentAt !== null;
+    const originalVolume = isReedition ? item.originalVolume : Number(item.totalVolume);
+    const originalCost = isReedition ? item.originalCost : Number(item.totalCost);
+    const firstSentAt = isReedition ? item.firstSentAt : Date.now();
+
+    const previousSentVolume = isReedition ? item.lastSentVolume : originalVolume;
+    const deltaVolume = enteredValue - previousSentVolume;
+
+    let unitPrice = 0;
+    if (originalCost > 0 && originalVolume > 0) {
+      unitPrice = originalCost / originalVolume;
+    } else if (Number(item.lastUnitCost) > 0) {
+      unitPrice = Number(item.lastUnitCost);
+    } else {
+      unitPrice = Number(item.CostPerUnit || 0);
+    }
+
     setIsSubmitting(true);
-    let currentAudit = { ...auditData };
-    setTotalItems(currentAudit.summaryItems.length);
-    setProgressIndex(currentAudit.currentIndex);
-
     try {
-      // 1. Criar o registro no histórico de inventário caso ainda não exista no Firestore
-      if (!currentAudit.inventoryHistoryDocId) {
-        const inventoryRecord = {
-          date: currentAudit.fullDate,
-          timestamp: Date.now(),
-          totalLossValue: currentAudit.totalLossValue,
-          justification: currentAudit.justification || '',
-          items: currentAudit.summaryItems.map(item => ({
-            product: item.product,
-            unit: item.unitOfMeasurement,
-            previousVolume: item.originalVolume,
-            previousCost: item.originalCost,
-            currentVolume: item.newVolume,
-            currentCost: item.newCost,
-            lossVolume: item.lossVolume,
-            lossValue: item.lossValue,
-            correction: item.correction
-          }))
-        };
+      const docRef = doc(db, 'stock', item.id);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        alert("Produto não encontrado no estoque.");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const dbItem = docSnap.data();
+      const newVolumeDb = Math.max(0, Number(dbItem.totalVolume) + deltaVolume);
+      const newCostDb = Math.max(0, Number((newVolumeDb * unitPrice).toFixed(2)));
+      
+      const newUnit = Number(dbItem.volumePerUnit) > 0 ? newVolumeDb / Number(dbItem.volumePerUnit) : 0;
+      const newCostPerUnit = newVolumeDb > 0 ? newCostDb / newVolumeDb : (Number(dbItem.CostPerUnit) || 0);
 
-        const docRef = await addDoc(collection(db, 'inventoryHistory'), inventoryRecord);
-        currentAudit.inventoryHistoryDocId = docRef.id;
-        localStorage.setItem('pending_stock_audit', JSON.stringify(currentAudit));
+      const updatedProduct = {
+        ...dbItem,
+        totalVolume: newVolumeDb,
+        totalCost: newCostDb,
+        amount: Number(newUnit.toFixed(2)),
+        CostPerUnit: Number(newCostPerUnit.toFixed(2)),
+        lastUnitCost: newCostPerUnit > 0 ? Number(newCostPerUnit.toFixed(2)) : (dbItem.lastUnitCost || 0)
+      };
+
+      const cost = 0;
+      const pack = Number(updatedProduct.amount);
+      const volume = 0;
+      const unit = updatedProduct.unitOfMeasurement;
+      const previousCost = dbItem.totalCost;
+      const previousVolume = dbItem.totalVolume;
+
+      const logEvent = stockHistoryList(
+        dbItem,
+        'Auditoria',
+        getFormattedPaymentDate(),
+        pack,
+        cost,
+        unit,
+        volume,
+        previousVolume,
+        previousCost,
+        updatedProduct.totalCost,
+        updatedProduct.totalVolume,
+        '',
+        `Ajuste calibrado ${isReedition ? '(Reedição)' : ''}`
+      );
+
+      delete updatedProduct.UsageHistory;
+
+      // Atualizar pratos localmente para este item
+      const dishesToUpdateForThisItem = updateRecipesinDishesAndSideDishes(updatedProduct, dishes);
+      if (dishesToUpdateForThisItem && dishesToUpdateForThisItem.length > 0) {
+        const uniqueDishesMap = new Map();
+        dishesToUpdateForThisItem.forEach(d => uniqueDishesMap.set(d.id, d));
+        await Promise.all(Array.from(uniqueDishesMap.values()).map(updateDishInFirebase));
       }
 
-      // 2. Loop de atualização atômica item por item
-      for (let i = currentAudit.currentIndex; i < currentAudit.summaryItems.length; i++) {
-        const item = currentAudit.summaryItems[i];
-        setCurrentUpdatingItemName(item.product);
-        setProgressIndex(i);
+      // Gravar no Firestore
+      await updateDoc(docRef, updatedProduct);
+      await logStockUsage(updatedProduct.id, logEvent);
 
-        const original = originalItems[item.id] || item;
-        const newVolumeValue = item.newVolume;
-        const newTotalCostValue = item.newCost;
+      // Atualizar Side Dishes
+      await updateSideDishesInFirebase(updatedProduct);
 
-        const newUnit = Number(original.volumePerUnit) > 0 ? newVolumeValue / Number(original.volumePerUnit) : 0;
-        const newCostPerUnit = newVolumeValue > 0 ? newTotalCostValue / newVolumeValue : (Number(original.CostPerUnit) || 0);
+      // Verificar disponibilidade
+      await checkUnavaiableRawMaterial(updatedProduct.id);
 
-        const updatedProduct = {
-          ...original,
-          totalVolume: newVolumeValue,
-          totalCost: newTotalCostValue,
-          amount: Number(newUnit.toFixed(2)),
-          CostPerUnit: Number(newCostPerUnit.toFixed(2)),
-          lastUnitCost: newCostPerUnit > 0 ? Number(newCostPerUnit.toFixed(2)) : (original.lastUnitCost || 0)
-        };
+      // Atualizar estado local
+      const updatedItemState = {
+        ...item,
+        totalVolume: newVolumeDb,
+        totalCost: newCostDb,
+        amount: updatedProduct.amount,
+        CostPerUnit: updatedProduct.CostPerUnit,
+        lastUnitCost: updatedProduct.lastUnitCost,
+        originalVolume,
+        originalCost,
+        lastSentVolume: enteredValue,
+        lastSentCost: enteredValue * unitPrice,
+        firstSentAt,
+        hasBeenSent: true,
+        correctionValue: String(enteredValue)
+      };
 
-        const previousCost = original.totalCost;
-        const previousVolume = original.totalVolume;
-        const cost = 0;
-        const pack = Number(updatedProduct.amount);
-        const volume = 0;
-        const unit = updatedProduct.unitOfMeasurement;
+      setAllItems(prev => prev.map(i => i.id === item.id ? updatedItemState : i));
+      setStockItems(prev => prev.map(i => i.id === item.id ? updatedItemState : i));
 
-        const logEvent = stockHistoryList(
-          original,
-          'Auditoria',
-          currentAudit.paymentDate,
-          pack,
-          cost,
-          unit,
-          volume,
-          previousVolume,
-          previousCost,
-          updatedProduct.totalCost,
-          updatedProduct.totalVolume,
-          '',
-          currentAudit.justification || ''
-        );
+      // Persistir no localStorage
+      const activeSession = JSON.parse(localStorage.getItem('active_stock_audit_session')) || {};
+      if (!activeSession.items) activeSession.items = {};
+      activeSession.items[item.id] = {
+        id: item.id,
+        product: item.product,
+        unitOfMeasurement: item.unitOfMeasurement,
+        originalVolume,
+        originalCost,
+        lastSentVolume: enteredValue,
+        lastSentCost: enteredValue * unitPrice,
+        firstSentAt,
+        hasBeenSent: true,
+        correctionValue: String(enteredValue)
+      };
+      localStorage.setItem('active_stock_audit_session', JSON.stringify(activeSession));
 
-        delete updatedProduct.UsageHistory;
-
-        // Atualizar pratos localmente para este item
-        const dishesToUpdateForThisItem = updateRecipesinDishesAndSideDishes(updatedProduct, dishes);
-        // Gravar no Firestore imediatamente (se existirem pratos afetados)
-        if (dishesToUpdateForThisItem && dishesToUpdateForThisItem.length > 0) {
-          const uniqueDishesMap = new Map();
-          dishesToUpdateForThisItem.forEach(d => uniqueDishesMap.set(d.id, d));
-          await Promise.all(Array.from(uniqueDishesMap.values()).map(updateDishInFirebase));
-        }
-
-        // Atualizar Firestore Stock
-        const docRef = doc(db, 'stock', updatedProduct.id);
-        await updateDoc(docRef, updatedProduct);
-        await logStockUsage(updatedProduct.id, logEvent);
-
-        // Atualizar Side Dishes
-        await updateSideDishesInFirebase(updatedProduct);
-
-        // Verificar disponibilidade (otimizada)
-        await checkUnavaiableRawMaterial(updatedProduct.id);
-
-        // Atualizar progresso no localStorage
-        currentAudit.currentIndex = i + 1;
-        currentAudit.completedIds = [...(currentAudit.completedIds || []), item.id];
-        localStorage.setItem('pending_stock_audit', JSON.stringify(currentAudit));
-      }
-
-      // 3. Registrar movimentação consolidada final
-      setProgressIndex(currentAudit.summaryItems.length);
-      await registerDailyStockMovement('Inventário/Auditoria');
-      
-      // Limpar do localStorage
-      localStorage.removeItem('pending_stock_audit');
-      
-      fetchStock();
-      onClose();
+      alert(`${item.product} enviado e atualizado no estoque com sucesso!`);
     } catch (error) {
-      console.error("Erro ao salvar auditoria:", error);
-      alert("Ocorreu um erro ao salvar a auditoria. O progresso foi mantido e você poderá retomar de onde parou ao reabrir a tela.");
+      console.error("Erro ao enviar item de auditoria:", error);
+      alert("Ocorreu um erro ao atualizar o estoque deste item.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditItem = (itemId) => {
+    const item = allItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    // Verificar limite de 2 horas
+    if (item.firstSentAt && Date.now() - item.firstSentAt > 2 * 60 * 60 * 1000) {
+      alert("Este item foi enviado há mais de 2 horas e não pode mais ser editado nesta sessão.");
+      return;
+    }
+
+    // Colocar o item de volta em modo de edição local (hasBeenSent = false)
+    const updated = { ...item, hasBeenSent: false };
+    setAllItems(prev => prev.map(i => i.id === itemId ? updated : i));
+    setStockItems(prev => prev.map(i => i.id === itemId ? updated : i));
   };
 
   const handleConfirmAndSave = async (summaryItems, totalLossValue, fullDate, paymentDate) => {
@@ -449,65 +692,55 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
       return;
     }
 
-    const auditData = {
-      summaryItems,
-      totalLossValue,
-      fullDate,
-      paymentDate,
-      justification: justification.trim(),
-      currentIndex: 0,
-      completedIds: [],
-      inventoryHistoryDocId: null
-    };
+    setIsSubmitting(true);
+    try {
+      const inventoryRecord = {
+        date: fullDate,
+        timestamp: Date.now(),
+        totalLossValue: totalLossValue,
+        justification: justification.trim(),
+        items: summaryItems.map(item => ({
+          product: item.product,
+          unit: item.unitOfMeasurement || item.unit,
+          previousVolume: item.originalVolume,
+          previousCost: item.originalCost,
+          currentVolume: item.newVolume,
+          currentCost: item.newCost,
+          lossVolume: item.lossVolume,
+          lossValue: item.lossValue,
+          correction: item.correction,
+          sentAt: item.firstSentAt
+        }))
+      };
 
-    localStorage.setItem('pending_stock_audit', JSON.stringify(auditData));
-    await runAuditProcess(auditData);
-  };
-
-  const handleResumeAudit = async () => {
-    if (!pendingAuditState) return;
-    const auditToRun = { ...pendingAuditState };
-    setPendingAuditState(null); // Fecha a tela de prompt
-    await runAuditProcess(auditToRun);
-  };
-
-  const handleDiscardAudit = () => {
-    if (window.confirm("Tem certeza de que deseja descartar o progresso salvo? Alguns itens que já foram atualizados no banco de dados não serão desfeitos.")) {
-      localStorage.removeItem('pending_stock_audit');
-      setPendingAuditState(null);
+      // Gravar histórico de inventários no Firebase
+      await addDoc(collection(db, 'inventoryHistory'), inventoryRecord);
+      
+      // Registrar movimentação consolidada final
+      await registerDailyStockMovement('Inventário/Auditoria');
+      
+      // Limpar do localStorage
+      localStorage.removeItem('active_stock_audit_session');
+      
+      alert("Inventário definitivo salvo com sucesso!");
+      fetchStock();
+      onClose();
+    } catch (error) {
+      console.error("Erro ao salvar inventário definitivo:", error);
+      alert("Ocorreu um erro ao salvar o inventário definitivamente.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const renderProgressScreen = () => {
-    const percent = totalItems > 0 ? Math.round((progressIndex / totalItems) * 100) : 0;
     return (
       <div className={styleProgress.progressOverlay}>
         <div className={styleProgress.progressCard}>
           <div className={styleProgress.spinner}></div>
-          <h3>Salvando Auditoria de Estoque</h3>
-          
-          <div className={styleProgress.progressBarContainer}>
-            <div 
-              className={styleProgress.progressBar} 
-              style={{ width: `${percent}%` }}
-            ></div>
-          </div>
-          
+          <h3>Atualizando Estoque...</h3>
           <p className={styleProgress.progressText}>
-            Atualizando item <strong>{progressIndex + 1}</strong> de <strong>{totalItems}</strong> ({percent}%)
-          </p>
-          
-          <p className={styleProgress.currentItemName}>
-            {currentUpdatingItemName}
-          </p>
-          
-          <div className={styleProgress.timerContainer}>
-            Tempo decorrido: <strong>{formatTime(elapsedTime)}</strong>
-          </div>
-          
-          <p className={styleProgress.warningText}>
-            ⚠️ Por favor, não feche esta página ou recarregue o navegador.
-            O sistema está realizando gravações otimizadas e seguras.
+            Por favor, aguarde enquanto o sistema grava as informações de auditoria no Firestore.
           </p>
         </div>
       </div>
@@ -515,32 +748,47 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   };
 
   const renderRecoveryScreen = () => {
+    const sessionItems = Object.values(pendingAuditState?.items || {});
+    const sentItems = sessionItems.filter(item => item.hasBeenSent);
+    const hasExpiredItem = sentItems.some(item => (Date.now() - item.firstSentAt > 2 * 60 * 60 * 1000));
+    const showDiscard = !hasExpiredItem;
+
     return (
       <div className={styleProgress.recoveryOverlay}>
-        <div className={styleProgress.recoveryCard}>
-          <h3>Auditoria Incompleta Detectada</h3>
+        <div className={styleProgress.recoveryCard} style={{ maxWidth: '480px' }}>
+          <h3>Inventário Não Finalizado</h3>
           <p>
-            Uma auditoria de estoque iniciada em <strong>{pendingAuditState.fullDate}</strong> não foi concluída com sucesso.
+            Foi detectado um inventário em andamento iniciado em <strong>{pendingAuditState.fullDate}</strong>.
           </p>
           <p>
-            Total de itens a atualizar: <strong>{pendingAuditState.summaryItems.length}</strong>
+            Matérias-primas já atualizadas no estoque: <strong>{sentItems.length}</strong>
           </p>
-          <p>
-            Progresso salvo: <strong>{pendingAuditState.currentIndex}</strong> de <strong>{pendingAuditState.summaryItems.length}</strong> itens concluídos.
-          </p>
-          <div className={styleProgress.recoveryButtons}>
+          <div className={styleProgress.recoveryButtons} style={{ flexDirection: 'column', gap: '10px' }}>
             <button 
               className={styleProgress.confirmBtn} 
               onClick={handleResumeAudit}
             >
-              Retomar Auditoria
+              Terminar o Inventário (Continuar)
             </button>
             <button 
-              className={styleProgress.cancelBtn} 
-              onClick={handleDiscardAudit}
+              className={styleProgress.confirmBtn} 
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
+              onClick={handleSaveFromPoint}
             >
-              Descartar
+              Salvar a partir daquele ponto (Resumo)
             </button>
+            {showDiscard ? (
+              <button 
+                className={styleProgress.cancelBtn} 
+                onClick={handleDiscardAudit}
+              >
+                Descartar (Reverter Estoque)
+              </button>
+            ) : (
+              <p style={{ fontSize: '0.8rem', color: '#ff6b6b', marginTop: '10px', lineHeight: '1.4' }}>
+                ⚠️ A opção de descarte está indisponível porque existem itens cuja alteração de estoque foi feita há mais de 2 horas. Você deve terminar o inventário ou salvá-lo a partir deste ponto.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -574,29 +822,28 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                   <th>Novo Volume</th>
                   <th>Custo Atual</th>
                   <th>Novo Custo</th>
+                  <th>Ação</th>
                 </tr>
               </thead>
               <tbody>
                 {stockItems.map(item => {
                   const enteredValue = Number(item.correctionValue);
                   const hasCorrection = item.correctionValue !== '' && !isNaN(enteredValue);
-                  const newVolume = hasCorrection ? enteredValue : Number(item.totalVolume);
                   
-                  let newCost = Number(item.totalCost);
-                  if (hasCorrection) {
-                    let unitPriceOriginal = 0;
-                    if (Number(item.totalCost) > 0 && Number(item.totalVolume) > 0) {
-                      unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
-                    } else if (Number(item.lastUnitCost) > 0) {
-                      unitPriceOriginal = Number(item.lastUnitCost);
-                    } else {
-                      unitPriceOriginal = Number(item.CostPerUnit || 0);
-                    }
-                    newCost = newVolume * unitPriceOriginal;
+                  let unitPriceOriginal = 0;
+                  if (Number(item.totalCost) > 0 && Number(item.totalVolume) > 0) {
+                    unitPriceOriginal = Number(item.totalCost) / Number(item.totalVolume);
+                  } else if (Number(item.lastUnitCost) > 0) {
+                    unitPriceOriginal = Number(item.lastUnitCost);
+                  } else {
+                    unitPriceOriginal = Number(item.CostPerUnit || 0);
                   }
 
+                  const newVolume = item.hasBeenSent ? Number(item.lastSentVolume) : (hasCorrection ? enteredValue : Number(item.totalVolume));
+                  const newCost = item.hasBeenSent ? Number(item.lastSentCost) : (hasCorrection ? newVolume * unitPriceOriginal : Number(item.totalCost));
+
                   return (
-                    <tr key={item.id}>
+                    <tr key={item.id} style={{ opacity: item.hasBeenSent ? 0.75 : 1 }}>
                       <td>{item.product}</td>
                       <td>{Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
                       <td>
@@ -606,14 +853,53 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                           onChange={(e) => handleVolumeChange(item.id, e.target.value)}
                           placeholder="Ex: 5"
                           style={{ width: '80px', padding: '5px' }}
+                          disabled={item.hasBeenSent}
                         />
                       </td>
-                      <td style={{ fontWeight: hasCorrection ? 'bold' : 'normal', color: hasCorrection ? '#007bff' : 'inherit' }}>
+                      <td style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
                         {newVolume.toFixed(2)} {item.unitOfMeasurement}
                       </td>
                       <td>R$ {Number(item.totalCost).toFixed(2)}</td>
-                      <td style={{ fontWeight: hasCorrection ? 'bold' : 'normal', color: hasCorrection ? '#007bff' : 'inherit' }}>
+                      <td style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
                         R$ {newCost.toFixed(2)}
+                      </td>
+                      <td>
+                        {item.hasBeenSent ? (
+                          <button
+                            type="button"
+                            onClick={() => handleEditItem(item.id)}
+                            className={styleEdit.addBtn}
+                            style={{ 
+                              padding: '5px 10px', 
+                              fontSize: '12px', 
+                              backgroundColor: '#6c757d', 
+                              border: 'none', 
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              color: '#fff'
+                            }}
+                            disabled={isSubmitting}
+                          >
+                            Editar
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSendItem(item.id)}
+                            className={styleEdit.addBtn}
+                            style={{ 
+                              padding: '5px 10px', 
+                              fontSize: '12px', 
+                              border: 'none', 
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              color: '#fff'
+                            }}
+                            disabled={isSubmitting || item.correctionValue === '' || isNaN(Number(item.correctionValue))}
+                          >
+                            Enviar
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -630,7 +916,7 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
             onClick={handleNext} 
             disabled={isSubmitting || loading}
           >
-            {isSubmitting ? 'Enviando...' : 'Salvar Alterações'}
+            Avançar / Resumo do Inventário
           </button>
         </div>
       </div>
@@ -638,51 +924,27 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
   };
 
   const renderSummaryScreen = () => {
-    const itemsToUpdate = allItems.filter(item => item.correctionValue !== '' && !isNaN(item.correctionValue));
+    const itemsToUpdate = allItems.filter(item => item.hasBeenSent);
     let totalLossValue = 0;
 
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const hours = String(today.getHours()).padStart(2, '0');
-    const minutes = String(today.getMinutes()).padStart(2, '0');
-    const seconds = String(today.getSeconds()).padStart(2, '0');
-    const paymentDate = `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
-    const fullDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    const activeSession = JSON.parse(localStorage.getItem('active_stock_audit_session')) || {};
+    const fullDate = activeSession.fullDate || getFormattedFullDate();
+    const paymentDate = activeSession.paymentDate || getFormattedPaymentDate();
 
     const summaryItems = itemsToUpdate.map(item => {
-      const original = originalItems[item.id];
-      const enteredValue = Number(item.correctionValue);
-      const newVolume = enteredValue;
-      const correction = newVolume - Number(original.totalVolume);
-
-      let newCost = Number(original.totalCost);
-      if (Number(original.totalCost) > 0 && Number(original.totalVolume) > 0) {
-         const unitPriceOriginal = Number(original.totalCost) / Number(original.totalVolume);
-         newCost = newVolume * unitPriceOriginal;
-      } else if (Number(original.lastUnitCost) > 0 || Number(original.CostPerUnit) > 0) {
-         const unitPriceOriginal = Number(original.lastUnitCost) > 0 ? Number(original.lastUnitCost) : Number(original.CostPerUnit || 0);
-         newCost = newVolume * unitPriceOriginal;
-      } else {
-         const unitPriceOriginal = Number(original.CostPerUnit || 0);
-         newCost = newVolume * unitPriceOriginal;
-      }
-
+      const correction = Number(item.lastSentVolume) - Number(item.originalVolume);
       const lossVolume = correction < 0 ? Math.abs(correction) : 0;
-      const lossValue = newCost < original.totalCost ? original.totalCost - newCost : 0;
+      const lossValue = Number(item.lastSentCost) < Number(item.originalCost) ? Number(item.originalCost) - Number(item.lastSentCost) : 0;
 
       totalLossValue += lossValue;
 
       return {
-         ...original,
-         originalVolume: original.totalVolume,
-         originalCost: original.totalCost,
-         newVolume,
-         newCost,
-         lossVolume,
-         lossValue,
-         correction
+        ...item,
+        newVolume: Number(item.lastSentVolume),
+        newCost: Number(item.lastSentCost),
+        lossVolume,
+        lossValue,
+        correction
       };
     });
 
