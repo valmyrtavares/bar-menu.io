@@ -65,8 +65,17 @@ function AddDishesForm({
     React.useState({});
   const [recipeModal, setRecipeModal] = React.useState(false);
   const [recipe, setRecipe] = React.useState(null);
+  const [redirectToEditList, setRedirectToEditList] = React.useState(() => {
+    return localStorage.getItem('redirectToEditListDishes') === 'true';
+  });
   const { handleBlur } = useFormValidation();
   const { packageTier, hasRawMaterial } = React.useContext(GlobalContext);
+
+  const handleRedirectToggle = (e) => {
+    const isChecked = e.target.checked;
+    setRedirectToEditList(isChecked);
+    localStorage.setItem('redirectToEditListDishes', isChecked);
+  };
 
   //FIRESTORE
 
@@ -182,7 +191,11 @@ function AddDishesForm({
     if (!dataObj) {
       addDoc(collection(db, 'item'), cleanedForm)
         .then((docRef) => {
-          navigate('/');
+          if (redirectToEditList) {
+            navigate('/admin/editButton/dishes');
+          } else {
+            navigate('/');
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -196,7 +209,12 @@ function AddDishesForm({
       setDoc(doc(db, 'item', dataObj.id), cleanedForm)
         .then(() => {
           if (fetchDataCollection) fetchDataCollection();
-          navigate('/');
+          if (closeModal) closeModal();
+          if (redirectToEditList) {
+            navigate('/admin/editButton/dishes');
+          } else {
+            navigate('/');
+          }
           console.log('Document successfully updated !');
         })
         .catch((error) => {
@@ -563,6 +581,20 @@ function AddDishesForm({
               </div>
             </div>
           </section>
+
+          {/* Opção Extra: Redirecionamento após salvar (Fora do campo branco) */}
+          <div className={style.extraOptionContainer}>
+            <label className={style.extraOptionLabel} htmlFor="redirectToEditList">
+              <input
+                className={style.extraOptionCheckbox}
+                id="redirectToEditList"
+                type="checkbox"
+                checked={redirectToEditList}
+                onChange={handleRedirectToggle}
+              />
+              <span>Ir para a lista de edição de pratos ao salvar (admin/editButton/dishes)</span>
+            </label>
+          </div>
 
           {/* Botão Salvar Principal */}
           <div className={style.formButtonSubmit}>

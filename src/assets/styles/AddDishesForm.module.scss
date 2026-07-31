@@ -242,6 +242,43 @@
             }
         }
 
+        .extraOptionContainer {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            padding: 14px 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 2px dashed #cbd5e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+
+            &:hover {
+                border-color: #FCA311;
+                background-color: #fffaf0;
+            }
+
+            .extraOptionLabel {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #14213D;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .extraOptionCheckbox {
+                width: 20px;
+                height: 20px;
+                accent-color: #FCA311;
+                cursor: pointer;
+            }
+        }
+
         .formButtonSubmit {
             margin-top: 30px;
             button {
