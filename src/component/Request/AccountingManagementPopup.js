@@ -128,6 +128,14 @@ const AccountingManagementPopup = ({
     }
   };
 
+  // Auxiliary function to format numeric values with 2 decimal places
+  const formatValue = (val, defaultValue = 'N/A') => {
+    if (val === null || val === undefined || val === '' || val === 'N/A' || isNaN(val)) {
+      return defaultValue;
+    }
+    return Number(val).toFixed(2);
+  };
+
   //renderTableRows
 
   const renderTableRows = () => {
@@ -149,13 +157,13 @@ const AccountingManagementPopup = ({
       }
 
       const costData = currentCostData || costPrice.costPriceObj;
-      const profit = costData ? costData.price - costData.cost : null;
+      const profit = costData ? Number(costData.price || 0) - Number(costData.cost || 0) : null;
 
       // Acumula os valores do item principal
       if (costData) {
-        totalCost += Number(costData.cost);
-        totalPrice += Number(costData.price);
-        totalProfit += Number(profit);
+        totalCost += Number(costData.cost || 0);
+        totalPrice += Number(costData.price || 0);
+        totalProfit += Number(profit || 0);
       }
 
       // Verifica se existem acompanhamentos
@@ -166,10 +174,10 @@ const AccountingManagementPopup = ({
       const mainRow = (
         <tr key={`${index}-main`}>
           <td>{item.name}</td>
-          <td>{costData?.cost || 'N/A'}</td>
-          <td>{costData?.price || 'N/A'}</td>
-          <td>{profit || 'N/A'}</td>
-          <td>{costData?.percentage || 'N/A'}</td>
+          <td>{formatValue(costData?.cost)}</td>
+          <td>{formatValue(costData?.price)}</td>
+          <td>{formatValue(profit)}</td>
+          <td>{formatValue(costData?.percentage)}</td>
         </tr>
       );
 
@@ -177,23 +185,23 @@ const AccountingManagementPopup = ({
       const sideDishRows = hasSideDishes
         ? item.sideDishes.map((sideDish, sideIndex) => {
             const sideData = sideDishesData[sideDish.name];
-            const sideProfit = sideData ? sideData.price - sideData.cost : null;
+            const sideProfit = sideData ? Number(sideData.price || 0) - Number(sideData.cost || 0) : null;
 
             if (sideData) {
               // Acumula os valores dos acompanhamentos
-              totalCost += Number(sideData.cost);
-              totalPrice += Number(sideData.price);
-              totalProfit += Number(sideProfit);
+              totalCost += Number(sideData.cost || 0);
+              totalPrice += Number(sideData.price || 0);
+              totalProfit += Number(sideProfit || 0);
             }
 
             return (
               <tr key={`${index}-sideDish-${sideIndex}`}>
                 <td colSpan="5"></td> {/* Células vazias para alinhamento */}
                 <td>{sideDish.name} {sideData?.isBasic ? '(Básico)' : ''}</td>
-                <td>{sideData?.cost || 0}</td>
-                <td>{sideData?.price || 'N/A'}</td>
-                <td>{sideProfit || 'N/A'}</td>
-                <td>{sideData?.percentage || 0}</td>
+                <td>{formatValue(sideData?.cost, '0.00')}</td>
+                <td>{formatValue(sideData?.price)}</td>
+                <td>{formatValue(sideProfit)}</td>
+                <td>{formatValue(sideData?.percentage, '0.00')}</td>
               </tr>
             );
           })
