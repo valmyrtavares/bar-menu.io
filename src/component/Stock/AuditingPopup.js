@@ -844,9 +844,9 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
 
                   return (
                     <tr key={item.id} style={{ opacity: item.hasBeenSent ? 0.75 : 1 }}>
-                      <td>{item.product}</td>
-                      <td>{Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
-                      <td>
+                      <td data-label="Produto">{item.product}</td>
+                      <td data-label="Volume Atual">{Number(item.totalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                      <td data-label="Estoque Físico">
                         <input
                           type="text"
                           value={item.correctionValue}
@@ -856,14 +856,14 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
                           disabled={item.hasBeenSent}
                         />
                       </td>
-                      <td style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
+                      <td data-label="Novo Volume" style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
                         {newVolume.toFixed(2)} {item.unitOfMeasurement}
                       </td>
-                      <td>R$ {Number(item.totalCost).toFixed(2)}</td>
-                      <td style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
+                      <td data-label="Custo Atual">R$ {Number(item.totalCost).toFixed(2)}</td>
+                      <td data-label="Novo Custo" style={{ fontWeight: (hasCorrection || item.hasBeenSent) ? 'bold' : 'normal', color: (hasCorrection || item.hasBeenSent) ? '#007bff' : 'inherit' }}>
                         R$ {newCost.toFixed(2)}
                       </td>
-                      <td>
+                      <td data-label="Ação">
                         {item.hasBeenSent ? (
                           <button
                             type="button"
@@ -969,15 +969,15 @@ const AuditingPopup = ({ onClose, fetchStock }) => {
             <tbody>
               {summaryItems.map(item => (
                 <tr key={item.id}>
-                  <td>{item.product}</td>
-                  <td>R$ {Number(item.originalCost).toFixed(2)}</td>
-                  <td>{Number(item.originalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
-                  <td>R$ {Number(item.newCost).toFixed(2)}</td>
-                  <td>{Number(item.newVolume).toFixed(2)} {item.unitOfMeasurement}</td>
-                  <td style={{ color: item.lossVolume > 0 ? 'red' : 'inherit' }}>
+                  <td data-label="Nome do item">{item.product}</td>
+                  <td data-label="Valor anterior">R$ {Number(item.originalCost).toFixed(2)}</td>
+                  <td data-label="Volume anterior">{Number(item.originalVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                  <td data-label="Valor atual">R$ {Number(item.newCost).toFixed(2)}</td>
+                  <td data-label="Volume atual">{Number(item.newVolume).toFixed(2)} {item.unitOfMeasurement}</td>
+                  <td data-label="Perda de MP" style={{ color: item.lossVolume > 0 ? 'red' : 'inherit' }}>
                     {item.lossVolume > 0 ? `${item.lossVolume.toFixed(2)} ${item.unitOfMeasurement}` : '-'}
                   </td>
-                  <td style={{ color: item.lossValue > 0 ? 'red' : 'inherit' }}>
+                  <td data-label="Perda de MT (R$)" style={{ color: item.lossValue > 0 ? 'red' : 'inherit' }}>
                     {item.lossValue > 0 ? `R$ ${item.lossValue.toFixed(2)}` : '-'}
                   </td>
                 </tr>

@@ -28,6 +28,123 @@
                 }
             }
         }
+
+        @media (max-width: 600px) {
+            max-height: 58vh !important;
+            overflow-y: auto !important;
+            padding: 2px !important;
+
+            table {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            thead {
+                display: none !important;
+            }
+
+            tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                width: 100% !important;
+            }
+
+            tr {
+                display: flex !important;
+                flex-direction: column !important;
+                background-color: #ffffff !important;
+                border: 1px solid #e0e0e0 !important;
+                border-left: 5px solid #14213D !important;
+                border-radius: 10px !important;
+                padding: 12px !important;
+                gap: 8px !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+
+                td {
+                    border: none !important;
+                    padding: 3px 0 !important;
+                    font-size: 0.88rem !important;
+                    display: flex !important;
+                    justify-content: space-between !important;
+                    align-items: center !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+
+                    &::before {
+                        content: attr(data-label) ": ";
+                        font-weight: 600;
+                        color: #555;
+                        font-size: 0.85rem;
+                        margin-right: 8px;
+                    }
+
+                    /* 1. Nome do Produto/Item como Cabeçalho do Card */
+                    &[data-label="Produto"],
+                    &[data-label="Nome do item"] {
+                        font-weight: bold !important;
+                        font-size: 1.05rem !important;
+                        color: #14213D !important;
+                        border-bottom: 1px solid #eee !important;
+                        padding-bottom: 6px !important;
+                        margin-bottom: 2px !important;
+
+                        &::before {
+                            font-size: 0.75rem !important;
+                            color: #888 !important;
+                            font-weight: normal !important;
+                            text-transform: uppercase !important;
+                            letter-spacing: 0.5px !important;
+                        }
+                    }
+
+                    /* 2. Campo de Digitação Estoque Físico */
+                    &[data-label="Estoque Físico"] {
+                        background: #f8f9fa !important;
+                        padding: 8px 10px !important;
+                        border-radius: 8px !important;
+                        border: 1px dashed #cccccc !important;
+                        margin: 4px 0 !important;
+
+                        &::before {
+                            color: #14213D !important;
+                            font-weight: bold !important;
+                            font-size: 0.9rem !important;
+                        }
+
+                        input {
+                            width: 110px !important;
+                            padding: 6px 10px !important;
+                            font-size: 1rem !important;
+                            font-weight: bold !important;
+                            text-align: center !important;
+                            border: 2px solid #FCA311 !important;
+                            border-radius: 6px !important;
+                            background-color: #ffffff !important;
+                        }
+                    }
+
+                    /* 3. Botão de Ação */
+                    &[data-label="Ação"] {
+                        margin-top: 6px !important;
+
+                        &::before {
+                            content: "" !important;
+                        }
+
+                        button {
+                            width: 100% !important;
+                            padding: 10px !important;
+                            font-size: 0.95rem !important;
+                            font-weight: bold !important;
+                            border-radius: 6px !important;
+                        }
+                    }
+                }
+            }
+        }
     }
 
         .containerBtnView {
