@@ -134,6 +134,14 @@ export const resetFiscalCircuitBreaker = () => {
  * @param {Object} order - Objeto do pedido (do Firestore)
  */
 export const issueAutoNfce = async (order) => {
+  // Trava de Isolamento de Marca: Apenas a instância TropicalX (react-bar-67f33) pode emitir NFC-e
+  const currentProjectId = process.env.REACT_APP_FIREBASE_PROJECT_ID;
+  const isTestEnv = process.env.NODE_ENV === 'test';
+  if (currentProjectId && currentProjectId !== 'react-bar-67f33' && !isTestEnv) {
+    console.warn(`[FISCAL GUARD] Emissão de NFC-e bloqueada para o projeto '${currentProjectId}'. Apenas 'tropicalx' ('react-bar-67f33') possui autorização fiscal.`);
+    return { status: 'ignorado', reason: 'Emissão fiscal desativada para esta marca/instância' };
+  }
+
   const cleanName = (order.name || 'CLIENTE').replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-').substring(0, 15).toUpperCase();
   const orderId = order.countRequest || order.id || 'SN';
   const ref = order.nfceRef || `REQ--${orderId}--${cleanName}`;
@@ -268,10 +276,12 @@ export const issueAutoNfce = async (order) => {
       }));
     }
 
+    const safeRound = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+
     adjustedItems.forEach((item, index) => {
       const itemPrice = parseFloat(item.finalPrice || 0);
-      const vIbsVal = parseFloat((itemPrice * 0.001).toFixed(2));
-      const vCbsVal = parseFloat((itemPrice * 0.009).toFixed(2));
+      const vIbsVal = safeRound(itemPrice * 0.001);
+      const vCbsVal = safeRound(itemPrice * 0.009);
 
       nfce.items.push({
         numero_item: index + 1,
@@ -297,7 +307,7 @@ export const issueAutoNfce = async (order) => {
         ibs_uf_aliquota: '0.1',
         ibs_uf_valor: vIbsVal,
         ibs_mun_aliquota: '0',
-        ibs_mun_valor: '0',
+        ibs_mun_valor: 0,
         ibs_valor_total: vIbsVal,
       });
     });
@@ -305,8 +315,9 @@ export const issueAutoNfce = async (order) => {
     // Fallback para pedidos sem lista de itens (ex: cobrança direta ou consumo avulso)
     const fallbackPrice = parseFloat(order.finalPriceRequest || 0);
     const itemPrice = fallbackPrice > 0 ? fallbackPrice : 1.0;
-    const vIbsVal = parseFloat((itemPrice * 0.001).toFixed(2));
-    const vCbsVal = parseFloat((itemPrice * 0.009).toFixed(2));
+    const safeRound = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+    const vIbsVal = safeRound(itemPrice * 0.001);
+    const vCbsVal = safeRound(itemPrice * 0.009);
 
     nfce.items.push({
       numero_item: 1,
@@ -332,7 +343,7 @@ export const issueAutoNfce = async (order) => {
       ibs_uf_aliquota: '0.1',
       ibs_uf_valor: vIbsVal,
       ibs_mun_aliquota: '0',
-      ibs_mun_valor: '0',
+      ibs_mun_valor: 0,
       ibs_valor_total: vIbsVal,
     });
   }

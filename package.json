@@ -41,11 +41,13 @@
     "start:main": "dotenv -e .env.main react-scripts start",
     "start:tropicalx": "dotenv -e .env.tropicalx react-scripts start",
     "start:pastelaria": "dotenv -e .env.pastelaria react-scripts start",
+    "start:anamaria": "dotenv -e .env.anamaria react-scripts start",
     "clean": "node deploy-copy.js",
     "build": "react-scripts build && node deploy-copy.js",
     "build:main": "dotenv -e .env.main react-scripts build && node deploy-copy.js",
     "build:tropicalx": "dotenv -e .env.tropicalx react-scripts build && node deploy-copy.js",
     "build:pastelaria": "dotenv -e .env.pastelaria react-scripts build && node deploy-copy.js",
+    "build:anamaria": "dotenv -e .env.anamaria react-scripts build && node deploy-copy.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "proxy-server": "node proxyServer.js"
