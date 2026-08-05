@@ -8,5 +8,14 @@
     color: $admin-title-color;
    font-size:$admin-title-fontsize;
    font-family: $admin-title-fontfamily;
+}
 
+@media (max-width: 600px) {
+    .containerTitle {
+        margin: 20px 0 10px 0;
+    }
+
+    .containerTitle h3 {
+        font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+    }
 }
