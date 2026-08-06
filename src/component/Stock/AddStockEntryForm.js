@@ -4,17 +4,19 @@ import style from '../../assets/styles/AddStockEntryForm.module.scss';
 import CloseBtn from '../closeBtn';
 import { db } from '../../config-firebase/firebase.js';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement, updateStockLogEntry, deleteStockLogEntry } from '../../api/Api';
 import { GlobalContext } from '../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage.js';
 import { tooltips } from '../../constants/tooltips.js';
 
-const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
+const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = null, onLogDeleted = null, onLogUpdated = null }) => {
   const global = useContext(GlobalContext);
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [form, setForm] = useState({
     name: 'Entrada de Estoque',
     value: 0,
@@ -93,6 +95,50 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
   const handleOpenRegisterProduct = () => {
     window.open('/admin/expenses?openPopup=registerProduct', '_blank');
   };
+
+  useEffect(() => {
+    if (editingLog) {
+      const rawDate = editingLog.date ? editingLog.date.split(' - ')[0] : '';
+      let formattedDate = rawDate;
+      if (rawDate.includes('/')) {
+        const parts = rawDate.split('/');
+        if (parts.length === 3) {
+          formattedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+
+      const totalCost = Number(editingLog.cost || editingLog.totalResourceInvested || 0);
+      const inputVol = Number(editingLog.inputProduct || editingLog.entrada || 0);
+      const packAmount = Number(editingLog.package || 1);
+      const costPerUnit = packAmount > 0 ? Number((totalCost / packAmount).toFixed(2)) : totalCost;
+      const volPerUnit = packAmount > 0 ? Number((inputVol / packAmount).toFixed(2)) : inputVol;
+
+      setForm(prev => ({
+        ...prev,
+        category: 'variable',
+        paymentDate: formattedDate,
+        account: editingLog.category || '',
+        provider: editingLog.provider || '',
+        value: totalCost,
+        confirmation: totalCost,
+        paymentProof: editingLog.paymentProof || '',
+      }));
+
+      const initialItem = {
+        product: editingLog.productName || editingLog.product || '',
+        amount: packAmount,
+        CostPerUnit: costPerUnit,
+        totalCost: totalCost,
+        volumePerUnit: volPerUnit,
+        totalVolume: inputVol,
+        operationSupplies: false,
+        unitOfMeasurement: editingLog.unit || 'Kg',
+      };
+
+      setItem(initialItem);
+      setItemArrayList([initialItem]);
+    }
+  }, [editingLog]);
 
   useEffect(() => {
     let totalItemsCost = itemArrayList.reduce((acc, i) => acc + i.totalCost, 0);
@@ -184,9 +230,64 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
 
   const deleteItem = (idx) => setItemArrayList(prev => prev.filter((_, i) => i !== idx));
 
+  const handleDeleteEntry = async () => {
+    if (!editingLog) return;
+    setIsDeleting(true);
+    try {
+      const success = await deleteStockLogEntry(editingLog.id || editingLog.logId, editingLog.stockId);
+      if (success) {
+        await registerDailyStockMovement('Exclusão de Entrada de Estoque');
+        if (onLogDeleted) onLogDeleted();
+        setShowPopup(false);
+      } else {
+        alert('Erro ao excluir a entrada de estoque.');
+      }
+    } catch (err) {
+      console.error('Erro ao excluir entrada:', err);
+      alert('Ocorreu um erro ao excluir a entrada.');
+    } finally {
+      setIsDeleting(false);
+      setShowConfirmDelete(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    if (editingLog) {
+      if (itemArrayList.length === 0) return alert('Adicione pelo menos um item ao estoque.');
+      setIsSubmitting(true);
+      try {
+        const currentItem = itemArrayList[0] || item;
+        const newVolume = Number(currentItem.totalVolume || (currentItem.amount * currentItem.volumePerUnit));
+        const newCost = Number(currentItem.totalCost);
+        const newPackage = Number(currentItem.amount);
+
+        const success = await updateStockLogEntry(
+          editingLog.id || editingLog.logId,
+          editingLog.stockId,
+          newVolume,
+          newCost,
+          newPackage
+        );
+
+        if (success) {
+          await registerDailyStockMovement('Edição de Entrada de Estoque');
+          if (onLogUpdated) onLogUpdated();
+          setShowPopup(false);
+        } else {
+          alert('Erro ao atualizar a entrada de estoque.');
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar log:', err);
+        alert('Ocorreu um erro ao atualizar a entrada.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!form.provider || !form.paymentDate || !form.account) return alert('Preencha todos os campos obrigatórios.');
     if (itemArrayList.length === 0) return alert('Adicione pelo menos um item ao estoque.');
 
@@ -205,7 +306,7 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       await registerDailyStockMovement('Entrada de Estoque');
 
-      setRefreshData(prev => !prev);
+      if (setRefreshData) setRefreshData(prev => !prev);
       setShowPopup(false);
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -301,29 +402,74 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
       <CloseBtn setClose={setShowPopup} />
       <div className={style.header}>
         {loadingAvailableMenuDishes && <UpdateMenuMessage />}
-        <h1>Nova Entrada de Estoque</h1>
+        <h1>{editingLog ? 'Editar / Corrigir Entrada de Estoque' : 'Nova Entrada de Estoque'}</h1>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className={style.topFields}>
           <div className={`${style.field} ${style.providerField}`} title={tooltips.addStockEntryForm.provider}>
             <label title={tooltips.addStockEntryForm.provider}>Fornecedor</label>
-            <select id="provider" required onChange={handleChange} value={form.provider} title={tooltips.addStockEntryForm.provider}>
+            <select
+              id="provider"
+              required
+              onChange={handleChange}
+              value={form.provider}
+              disabled={!!editingLog}
+              style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
+              title={tooltips.addStockEntryForm.provider}
+            >
               <option value="">Selecione...</option>
               {providerList?.map((p, i) => <option key={i} value={p.provider}>{p.name}</option>)}
             </select>
           </div>
           <div className={style.smallField}>
-            <Input id="account" required label="Nota Fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
+            <Input
+              id="account"
+              required
+              label="Nota Fiscal"
+              value={form.account}
+              type="text"
+              onChange={handleChange}
+              readOnly={!!editingLog}
+              style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
+              title={tooltips.addStockEntryForm.account}
+            />
           </div>
           <div className={style.smallField}>
-            <Input id="paymentDate" required label="Data Pagamento" value={form.paymentDate} type="date" onChange={handleChange} />
+            <Input
+              id="paymentDate"
+              required
+              label="Data Pagamento"
+              value={form.paymentDate}
+              type="date"
+              onChange={handleChange}
+              readOnly={!!editingLog}
+              style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
+            />
           </div>
           <div className={style.smallField}>
-            <Input id="value" label="Valor Total" value={form.value} type="number" readOnly className={style.readOnlyInput} title={tooltips.addStockEntryForm.value} />
+            <Input
+              id="value"
+              label="Valor Total"
+              value={form.value}
+              type="number"
+              readOnly
+              className={style.readOnlyInput}
+              style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+              title={tooltips.addStockEntryForm.value}
+            />
           </div>
           <div className={style.fullWidth}>
-            <Input id="paymentProof" label="Link do Comprovante (PDF)" value={form.paymentProof} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.paymentProof} />
+            <Input
+              id="paymentProof"
+              label="Link do Comprovante (PDF)"
+              value={form.paymentProof}
+              type="text"
+              onChange={handleChange}
+              readOnly={!!editingLog}
+              style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
+              title={tooltips.addStockEntryForm.paymentProof}
+            />
           </div>
         </div>
 
@@ -332,7 +478,14 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
           <div className={style.itemsGrid}>
             <div className={`${style.field} ${style.productField}`} title={tooltips.addStockEntryForm.product}>
               <label title={tooltips.addStockEntryForm.product}>Produto</label>
-              <select id="product" value={productList?.findIndex(p => p.name === item.product)} onChange={handleItemChange} title={tooltips.addStockEntryForm.product}>
+              <select
+                id="product"
+                value={productList?.findIndex(p => p.name === item.product)}
+                onChange={handleItemChange}
+                disabled={!!editingLog}
+                style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
+                title={tooltips.addStockEntryForm.product}
+              >
                 <option value="">Selecione...</option>
                 {productList?.map((p, i) => <option key={i} value={i}>{p.name}</option>)}
               </select>
@@ -379,7 +532,9 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
                 title={tooltips.addStockEntryForm.volumePerUnit}
               />
             </div>
-            <button type="button" onClick={addItem} className={style.addItemBtn}>ADICIONAR</button>
+            <button type="button" onClick={addItem} className={style.addItemBtn} disabled={!!editingLog}>
+              ADICIONAR
+            </button>
           </div>
         </fieldset>
 
@@ -403,7 +558,7 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
                   <td>R$ {it.CostPerUnit}</td>
                   <td>R$ {it.totalCost}</td>
                   <td>{it.volumePerUnit} {it.unitOfMeasurement}</td>
-                  <td onClick={() => deleteItem(idx)} className={style.deleteIcon}>X</td>
+                  <td onClick={() => !editingLog && deleteItem(idx)} className={style.deleteIcon} style={editingLog ? { opacity: 0.3, cursor: 'not-allowed' } : {}}>X</td>
                 </tr>
               ))}
             </tbody>
@@ -412,18 +567,60 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
 
         <div className={style.footer}>
           <button type="submit" className={style.submitBtn} disabled={isSubmitting}>
-            {isSubmitting ? 'ENVIANDO...' : 'ENVIAR ENTRADA'}
+            {isSubmitting ? 'ENVIANDO...' : editingLog ? 'ENVIAR EDIÇÃO' : 'ENVIAR ENTRADA'}
           </button>
-          <button
-            type="button"
-            onClick={handleOpenRegisterProduct}
-            className={style.registerNotRegisteredBtnFooter}
-            title="Cadastrar produto não encontrado em outra aba"
-          >
-            cadastrar produto<br />não encontrado
-          </button>
+          {editingLog ? (
+            <button
+              type="button"
+              onClick={() => setShowConfirmDelete(true)}
+              className={style.deleteEntryBtnFooter}
+              title="Excluir este lançamento de entrada de estoque"
+            >
+              Excluir entrada
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenRegisterProduct}
+              className={style.registerNotRegisteredBtnFooter}
+              title="Cadastrar produto não encontrado em outra aba"
+            >
+              cadastrar produto<br />não encontrado
+            </button>
+          )}
         </div>
       </form>
+
+      {showConfirmDelete && (
+        <div className={style.confirmOverlay}>
+          <div className={style.confirmModal}>
+            <h3>Excluir Entrada de Estoque</h3>
+            <p>
+              Tem certeza que deseja excluir esta entrada de estoque?
+              <br />
+              Esta ação removerá o lançamento do histórico e estornará os saldos do produto.
+            </p>
+            <div className={style.confirmBtnRow}>
+              <button
+                type="button"
+                className={style.cancelConfirmBtn}
+                onClick={() => setShowConfirmDelete(false)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={style.continueConfirmBtn}
+                onClick={handleDeleteEntry}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Excluindo...' : 'Continuar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

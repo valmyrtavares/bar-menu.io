@@ -506,6 +506,114 @@ export async function fetchStockUsageLogs(stockId) {
 }
 
 /**
+ * Edita uma entrada de estoque no histórico e ajusta os saldos do item no banco.
+ */
+export async function updateStockLogEntry(logId, stockId, newVolume, newCost, newPackage) {
+  try {
+    const { doc, getDoc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('../config-firebase/firebase.js');
+
+    const logRef = doc(db, 'stockUsageLogs', logId);
+    const logSnap = await getDoc(logRef);
+    if (!logSnap.exists()) return false;
+
+    const oldData = logSnap.data();
+    const oldVolume = Number(oldData.inputProduct || oldData.entrada || 0);
+    const oldCost = Number(oldData.cost || 0);
+    const oldPackage = Number(oldData.package || 0);
+
+    const diffVolume = Number(newVolume) - oldVolume;
+    const diffCost = Number(newCost) - oldCost;
+    const diffPackage = Number(newPackage) - oldPackage;
+
+    await updateDoc(logRef, {
+      inputProduct: Number(newVolume),
+      cost: Number(newCost),
+      package: Number(newPackage),
+      totalResourceInvested: Math.max(0, Number(oldData.previousCost || 0) + Number(newCost)),
+      ContentsInStock: Math.max(0, Number(oldData.previousVolume || 0) + Number(newVolume)),
+    });
+
+    if (stockId) {
+      const stockRef = doc(db, 'stock', stockId);
+      const stockSnap = await getDoc(stockRef);
+      if (stockSnap.exists()) {
+        const sData = stockSnap.data();
+        let updatedVolume = Math.max(0, Number(sData.totalVolume || 0) + diffVolume);
+        let updatedCost = Math.max(0, Number(sData.totalCost || 0) + diffCost);
+        let updatedPackage = Math.max(0, Number(sData.amount || 0) + diffPackage);
+        let updatedCostPerUnit = updatedVolume > 0 ? Number((updatedCost / updatedVolume).toFixed(2)) : 0;
+
+        const updateData = {
+          totalVolume: updatedVolume,
+          totalCost: updatedCost,
+          amount: updatedPackage,
+          CostPerUnit: updatedCostPerUnit,
+        };
+        if (updatedCostPerUnit > 0) {
+          updateData.lastUnitCost = updatedCostPerUnit;
+        }
+
+        await updateDoc(stockRef, updateData);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('Erro ao atualizar log de estoque:', err);
+    return false;
+  }
+}
+
+/**
+ * Remove um log de entrada de estoque e estorna os valores do item no estoque.
+ */
+export async function deleteStockLogEntry(logId, stockId) {
+  try {
+    const { doc, getDoc, updateDoc, deleteDoc } = await import('firebase/firestore');
+    const { db } = await import('../config-firebase/firebase.js');
+
+    const logRef = doc(db, 'stockUsageLogs', logId);
+    const logSnap = await getDoc(logRef);
+    if (!logSnap.exists()) return false;
+
+    const oldData = logSnap.data();
+    const oldVolume = Number(oldData.inputProduct || oldData.entrada || 0);
+    const oldCost = Number(oldData.cost || 0);
+    const oldPackage = Number(oldData.package || 0);
+
+    await deleteDoc(logRef);
+
+    if (stockId) {
+      const stockRef = doc(db, 'stock', stockId);
+      const stockSnap = await getDoc(stockRef);
+      if (stockSnap.exists()) {
+        const sData = stockSnap.data();
+        let updatedVolume = Math.max(0, Number(sData.totalVolume || 0) - oldVolume);
+        let updatedCost = Math.max(0, Number(sData.totalCost || 0) - oldCost);
+        let updatedPackage = Math.max(0, Number(sData.amount || 0) - oldPackage);
+        let updatedCostPerUnit = updatedVolume > 0 ? Number((updatedCost / updatedVolume).toFixed(2)) : 0;
+
+        const updateData = {
+          totalVolume: updatedVolume,
+          totalCost: updatedCost,
+          amount: updatedPackage,
+          CostPerUnit: updatedCostPerUnit,
+        };
+        if (updatedCostPerUnit > 0) {
+          updateData.lastUnitCost = updatedCostPerUnit;
+        }
+
+        await updateDoc(stockRef, updateData);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('Erro ao excluir log de estoque:', err);
+    return false;
+  }
+}
+
+/**
  * Registra a movimentação diária consolidada do estoque.
  * Essa função calcula o valor atualizado do estoque na hora em que é chamada
  * e insere um registro na coleção dailyStockSnapshot no documento correspondente a "hoje".

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import log from '../../assets/styles/AdjustmentRecords.module.scss';
 import CloseBtn from '../closeBtn';
+import AddStockEntryForm from './AddStockEntryForm';
 
 const getLogTimestamp = (item, useTimestampFirst = false) => {
   if (!item) return 0;
@@ -94,14 +95,15 @@ const getLogTimestamp = (item, useTimestampFirst = false) => {
   return 0;
 };
 
-
 const AdjustmentRecords = ({
   eventLogData,
   setShowAdjustmentRecords,
   title,
+  onRefreshLogs,
 }) => {
   const [filter, setFilter] = useState('Todas as Movimentações');
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingStockLog, setEditingStockLog] = useState(null);
   const itemsPerPage = 100;
 
   const filteredData = useMemo(() => {
@@ -111,17 +113,17 @@ const AdjustmentRecords = ({
     // 1. Pelo dia/hora real do evento (campo 'date')
     // 2. Se as datas forem idênticas (ou se uma delas não tiver 'date'), usa o 'timestamp' como critério de desempate.
     let data = [...eventLogData].sort((a, b) => {
-      const dateA = getLogTimestamp(a, false); // Prioriza 'date'
-      const dateB = getLogTimestamp(b, false); // Prioriza 'date'
+      // Prioriza o timestamp exato do sistema (hora em que a ação ocorreu) para garantir a ordem cronológica inversa (mais recente no topo)
+      const tsA = getLogTimestamp(a, true);
+      const tsB = getLogTimestamp(b, true);
       
-      if (dateA !== dateB) {
-        return dateB - dateA; // Decrescente (mais recente primeiro)
+      if (tsA !== tsB && tsA > 0 && tsB > 0) {
+        return tsB - tsA; // Decrescente (mais recente primeiro)
       }
       
-      // Se empatar na data, usa o timestamp preciso como tie-breaker
-      const tsA = getLogTimestamp(a, true); // Prioriza 'timestamp'
-      const tsB = getLogTimestamp(b, true); // Prioriza 'timestamp'
-      return tsB - tsA; // Decrescente (mais recente primeiro)
+      const dateA = getLogTimestamp(a, false);
+      const dateB = getLogTimestamp(b, false);
+      return dateB - dateA; // Decrescente (mais recente primeiro)
     });
 
     if (filter === 'Entrada de MP') {
@@ -159,6 +161,14 @@ const AdjustmentRecords = ({
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
     setCurrentPage(1);
+  };
+
+  const handleCategoryClick = (item, canEdit) => {
+    if (!canEdit) {
+      alert("Esta entrada de estoque foi realizada há mais de 2 horas e não pode mais ser editada ou excluída.");
+      return;
+    }
+    setEditingStockLog(item);
   };
 
   return (
@@ -238,18 +248,39 @@ const AdjustmentRecords = ({
                 const vol = safeNum(item.ContentsInStock);
                 const inv = safeNum(item.totalResourceInvested);
                 const avgCost = vol > 0 ? (inv / vol).toFixed(2) : '0.00';
+                const inputVal = safeNum(item.inputProduct ?? item.entrada ?? 0);
+                const isStockEntry = inputVal > 0;
+                const logTime = getLogTimestamp(item, true);
+                const canEdit = isStockEntry && (Date.now() - logTime) <= (2 * 60 * 60 * 1000);
 
                 return (
                   <tr key={index}>
                     <td>{item.date}</td>
                     <td>
-                      {item.inputProduct ?? item.entrada ?? 0} {item.unit}
+                      {inputVal} {item.unit}
                     </td>
                     <td>{item.outputProduct ?? item.saida ?? 0}</td>
                     <td style={{ fontWeight: item?.orderNumber ? 'bold' : 'normal' }}>
                       {item?.orderNumber || '-'}
                     </td>
-                    <td>{item.category}</td>
+                    <td>
+                      {isStockEntry ? (
+                        <span
+                          onClick={() => handleCategoryClick(item, canEdit)}
+                          style={{
+                            color: canEdit ? '#007bff' : '#6c757d',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            fontWeight: 'bold',
+                          }}
+                          title={canEdit ? "Clique para editar ou excluir esta entrada de estoque" : "Entrada realizada há mais de 2 horas (não editável)"}
+                        >
+                          {item.category}
+                        </span>
+                      ) : (
+                        item.category
+                      )}
+                    </td>
                     <td>
                       {safeNum(item.previousVolume).toFixed(2)} {item.unit}
                     </td>
@@ -299,6 +330,21 @@ const AdjustmentRecords = ({
             Próximo
           </button>
         </div>
+      )}
+
+      {editingStockLog && (
+        <AddStockEntryForm
+          setShowPopup={() => setEditingStockLog(null)}
+          editingLog={editingStockLog}
+          onLogDeleted={() => {
+            setEditingStockLog(null);
+            if (onRefreshLogs) onRefreshLogs();
+          }}
+          onLogUpdated={() => {
+            setEditingStockLog(null);
+            if (onRefreshLogs) onRefreshLogs();
+          }}
+        />
       )}
     </div>
   );
