@@ -17,6 +17,7 @@ import { getBtnData, addItemToCollection, logStockUsage, registerDailyStockMovem
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';
 import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
+import { tooltips } from '../../../constants/tooltips.js';
 
 const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType }) => {
   const global = React.useContext(GlobalContext);
@@ -654,40 +655,29 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
   const handleItemChange = (e) => {
     const { id, value } = e.target;
 
-    let selectedProduct = {};
     if (id === 'product') {
-      selectedProduct = productList[value]; // Acesse o produto selecionado pelo índice
+      const selectedProduct = productList[value];
       console.log('Produto selecionado:', selectedProduct);
 
-      const currentItem = {
-        product: selectedProduct.name,
-        idProduct: selectedProduct.idProduct
-          ? selectedProduct.idProduct
-          : selectedProduct.id, // Define o ID do produto
-        amount: Number(form.amount),
-        CostPerUnit: Number(form.CostPerUnit),
-        totalCost: Number(form.totalCost),
-        unitOfMeasurement: form.unitOfMeasurement,
-        totalVolume: Number(form.totalVolume),
-        volumePerUnit: Number(form.volumePerUnit),
-        minimumAmount: Number(form.minimumAmount),
-        operationSupplies: selectedProduct.operationSupplies || false,
-      };
-
-      setItem((prevForm) => ({
-        ...prevForm,
-        idProduct: selectedProduct.idProduct
-          ? selectedProduct.idProduct
-          : selectedProduct.id, // Define o ID do produto
-        product: selectedProduct ? selectedProduct.name : '', // Define o nome do produto
-        operationSupplies: selectedProduct.operationSupplies ? true : false,
-        unitOfMeasurement: selectedProduct
-          ? selectedProduct.unitOfMeasurement
-          : '', // Define a unidade de medida
-        minimumAmount: selectedProduct.minimumAmount
-          ? selectedProduct.minimumAmount
-          : 0,
-      }));
+      if (selectedProduct) {
+        setItem((prevForm) => ({
+          ...prevForm,
+          idProduct: selectedProduct.idProduct
+            ? selectedProduct.idProduct
+            : selectedProduct.id,
+          product: selectedProduct.name,
+          operationSupplies: selectedProduct.operationSupplies ? true : false,
+          unitOfMeasurement: selectedProduct.unitOfMeasurement || '',
+          minimumAmount: selectedProduct.minimumAmount || 0,
+        }));
+      } else {
+        setItem((prevForm) => ({
+          ...prevForm,
+          idProduct: '',
+          product: '',
+          unitOfMeasurement: '',
+        }));
+      }
       return;
     } else {
       if (id === 'amount' && item.unitOfMeasurement === 'un') {
@@ -837,10 +827,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             </div>
 
             <Input
-              title="Quantos pacotes do produto foi adquirido. Dentro 
-              desse pacote pode ter muitas unidades desse produto que sera
-              registrada no campo seguinte de Qtd por volume EX: Um pacote de 
-              colheres que dentro possui 100 unidade de colheres"
+              title={tooltips.addStockEntryForm.amount}
               id="amount"
               autoComplete="off"
               className="num"
@@ -850,7 +837,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
               onChange={handleItemChange}
             />
             <Input
-              title="O valor gasto em cada pacote"
+              title={tooltips.addStockEntryForm.CostPerUnit}
               id="CostPerUnit"
               autoComplete="off"
               className="num"
@@ -860,8 +847,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
               onChange={handleItemChange}
             />
             <Input
-              title="Campo preenchido automáticamente multiplica a quantidade
-            de volumes pelo seu valor unitário"
+              title={tooltips.addStockEntryForm.totalCost}
               id="totalCost"
               autoComplete="off"
               className="num"
@@ -885,7 +871,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             /> */}
 
             <Input
-              title="Registre aqui a quantidade de itens por pacote Ex: 100 colheres ou 2kg de leite por volume"
+              title={tooltips.addStockEntryForm.volumePerUnit}
               id="volumePerUnit"
               autoComplete="off"
               className="num"
@@ -893,6 +879,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
               value={item.volumePerUnit}
               type="text"
               onChange={handleItemChange}
+              unitText={item.unitOfMeasurement}
             />
           </fieldset>
         )}

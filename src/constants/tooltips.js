@@ -39,4 +39,11 @@ export const tooltips = {
     limit: "Limite máximo de acompanhamentos que o cliente pode escolher.",
     add: "Confirma a seleção de acompanhamentos para este prato.",
   },
+  addStockEntryForm: {
+    amount: "Quantos pacotes da matéria prima foram comprados.",
+    CostPerUnit: "Qual o valor por pacote.",
+    totalCost: "Custo total preenchido automaticamente (quanto se gastou ao todo).",
+    volumePerUnit: "Digite aqui o volume por pacote. Caso cada pacote tenha um volume diferente, como um pacote de banana um com 2 kg e outro com 1kg. O melhor é registrar apenas um pacote com o total de 3 kg e o valor total ser posto em um pacote só, para evitar erros.",
+  },
 };
+

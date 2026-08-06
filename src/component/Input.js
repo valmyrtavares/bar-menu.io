@@ -10,22 +10,37 @@ const Input = ({ label, fieldFocus, id, unitText, prefix, ...props }) => {
   };
   inputStyle.fontSize = props.fontSizeForm || inputStyle.fontSize;
   return (
-    <div className="mb-3">
-      <label className={style.labelForm} htmlFor={label}>
-        {label}
-      </label>
+    <div className="mb-3" title={props.title} style={{ display: 'flex', flexDirection: 'column' }}>
+      {label && (
+        <label className={style.labelForm} htmlFor={id || label} title={props.title} style={{ display: 'block', whiteSpace: 'nowrap', marginBottom: '4px' }}>
+          {label}
+        </label>
+      )}
       {unitText || prefix ? (
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          {prefix && <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#e74c3c', marginLeft: '5px' }}>{prefix}</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {prefix && <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#e74c3c' }}>{prefix}</span>}
           <input
             ref={fieldFocus}
-            style={{ ...inputStyle, margin: 0, width: '100%' }}
+            style={inputStyle}
             className="form-control"
             id={id}
             {...props}
           />
-          {unitText && <span style={{ fontWeight: 'bold', color: 'var(--font-color)' }}>{unitText}</span>}
-        </span>
+          {unitText && (
+            <span
+              style={{
+                fontWeight: 'bold',
+                color: '#14213D',
+                fontSize: '14px',
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+              }}
+              title={props.title}
+            >
+              {unitText}
+            </span>
+          )}
+        </div>
       ) : (
         <input
           ref={fieldFocus}

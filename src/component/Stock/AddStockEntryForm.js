@@ -4,10 +4,11 @@ import style from '../../assets/styles/AddStockEntryForm.module.scss';
 import CloseBtn from '../closeBtn';
 import { db } from '../../config-firebase/firebase.js';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { getBtnData, addItemToCollection, logStockUsage, registerDailyStockMovement } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement } from '../../api/Api';
 import { GlobalContext } from '../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers.js';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage.js';
+import { tooltips } from '../../constants/tooltips.js';
 
 const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
   const global = useContext(GlobalContext);
@@ -94,14 +95,23 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
     const { id, value } = e.target;
     if (id === 'product') {
       const selected = productList[value];
-      setItem(prev => ({
-        ...prev,
-        idProduct: selected.idProduct || selected.id,
-        product: selected.name,
-        operationSupplies: false,
-        unitOfMeasurement: selected.unitOfMeasurement || '',
-        minimumAmount: selected.minimumAmount || 0,
-      }));
+      if (selected) {
+        setItem(prev => ({
+          ...prev,
+          idProduct: selected.idProduct || selected.id,
+          product: selected.name,
+          operationSupplies: false,
+          unitOfMeasurement: selected.unitOfMeasurement || '',
+          minimumAmount: selected.minimumAmount || 0,
+        }));
+      } else {
+        setItem(prev => ({
+          ...prev,
+          idProduct: '',
+          product: '',
+          unitOfMeasurement: '',
+        }));
+      }
     } else {
       setItem(prev => ({ ...prev, [id]: value }));
     }
@@ -298,16 +308,46 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
               </select>
             </div>
             <div className={style.numberField}>
-              <Input id="amount" label="Qtd Volumes" value={item.amount} type="number" onChange={handleItemChange} />
+              <Input
+                id="amount"
+                label="Qtd Volumes"
+                value={item.amount}
+                type="number"
+                onChange={handleItemChange}
+                title={tooltips.addStockEntryForm.amount}
+              />
             </div>
             <div className={style.numberField}>
-              <Input id="CostPerUnit" label="Custo Vol" value={item.CostPerUnit} type="number" onChange={handleItemChange} />
+              <Input
+                id="CostPerUnit"
+                label="Custo Vol"
+                value={item.CostPerUnit}
+                type="number"
+                onChange={handleItemChange}
+                title={tooltips.addStockEntryForm.CostPerUnit}
+              />
             </div>
             <div className={style.numberField}>
-              <Input id="totalCost" label="Custo Total" value={item.totalCost} type="number" readOnly className={style.readOnlyInput} />
+              <Input
+                id="totalCost"
+                label="Custo Total"
+                value={item.totalCost}
+                type="number"
+                readOnly
+                className={style.readOnlyInput}
+                title={tooltips.addStockEntryForm.totalCost}
+              />
             </div>
             <div className={style.numberField}>
-              <Input id="volumePerUnit" label="Qtd Volume" value={item.volumePerUnit} type="number" onChange={handleItemChange} />
+              <Input
+                id="volumePerUnit"
+                label="Qtd Volume"
+                value={item.volumePerUnit}
+                type="number"
+                onChange={handleItemChange}
+                unitText={item.unitOfMeasurement}
+                title={tooltips.addStockEntryForm.volumePerUnit}
+              />
             </div>
             <button type="button" onClick={addItem} className={style.addItemBtn}>ADICIONAR</button>
           </div>
