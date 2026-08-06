@@ -736,8 +736,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
               </div>
             </>
           )}
-          <div className={style.selectform}>
-            <select id="provider" required onChange={handleChange} value={form.provider}>
+          <div className={style.selectform} title={tooltips.addStockEntryForm.provider}>
+            <select id="provider" required onChange={handleChange} value={form.provider} title={tooltips.addStockEntryForm.provider}>
               <option value="">Fornecedor</option>
               {providerList && providerList.map((category, index) => (
                 <option key={index} value={category.provider}>{category.name}</option>
@@ -755,6 +755,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             onChange={handleChange} 
             readOnly={forcedEntryType === 'stock'}
             style={forcedEntryType === 'stock' ? { backgroundColor: '#f0f0f0', cursor: 'not-allowed' } : {}}
+            title={tooltips.addStockEntryForm.value}
           />
           {forcedEntryType !== 'stock' && (
             <Input id="dueDate" required label="Vencimento" value={form.dueDate} type="date" onChange={handleChange} />
@@ -764,7 +765,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           )}
 
           {/* Row 3: Account, PaymentDate, Confirmation */}
-          <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} />
+          <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
           <Input 
             id="paymentDate" 
             required={form.category !== 'fixed' || forcedEntryType === 'stock'} 
@@ -793,6 +794,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
               value={form.paymentProof}
               type="text"
               onChange={handleChange}
+              title={tooltips.addStockEntryForm.paymentProof}
             />
             {form.paymentProof && (
               <button 
@@ -808,13 +810,14 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         {showItemsDetailsForm && (
           <fieldset>
             <legend>Adicionar Item</legend>
-            <div className={style.selectform}>
+            <div className={style.selectform} title={tooltips.addStockEntryForm.product}>
               <select
                 id="product"
                 value={productList?.findIndex(
                   (product) => product.name === item.product
                 )}
                 onChange={handleItemChange}
+                title={tooltips.addStockEntryForm.product}
               >
                 <option value="">Selecione um produto</option>
                 {productList &&

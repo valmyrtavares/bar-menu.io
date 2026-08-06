@@ -66,6 +66,10 @@ const ExpensesManegementList = () => {
 
   React.useEffect(() => {
     fetchExpensesData();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('openPopup') === 'registerProduct' || params.get('registerProduct') === 'true') {
+      setShowProductRegisterPopup(true);
+    }
   }, []);
 
   React.useEffect(() => {

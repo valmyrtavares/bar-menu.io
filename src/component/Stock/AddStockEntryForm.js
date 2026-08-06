@@ -46,23 +46,53 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
   const [productList, setProductList] = useState(null);
   const [providerList, setProviderList] = useState(null);
 
+  const fetchLists = React.useCallback(async () => {
+    const [dataProduct, dataProvider] = await Promise.all([
+      getBtnData('product'),
+      getBtnData('provider'),
+    ]);
+    if (dataProduct) {
+      // Only Raw Materials
+      const filtered = dataProduct.filter(p => p.operationSupplies === false || p.operationSupplies === undefined || p.operationSupplies === null);
+      setProductList(filtered.sort((a, b) => a.name.localeCompare(b.name)));
+    }
+    if (dataProvider) {
+      setProviderList(dataProvider.sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchLists = async () => {
-      const [dataProduct, dataProvider] = await Promise.all([
-        getBtnData('product'),
-        getBtnData('provider'),
-      ]);
-      if (dataProduct) {
-        // Only Raw Materials
-        const filtered = dataProduct.filter(p => p.operationSupplies === false || p.operationSupplies === undefined || p.operationSupplies === null);
-        setProductList(filtered.sort((a, b) => a.name.localeCompare(b.name)));
-      }
-      if (dataProvider) {
-        setProviderList(dataProvider.sort((a, b) => a.name.localeCompare(b.name)));
+    fetchLists();
+
+    const handleFocusOrStorage = (e) => {
+      if (!e || e.type === 'focus' || e.key === 'product_registered_event') {
+        fetchLists();
       }
     };
-    fetchLists();
-  }, []);
+
+    window.addEventListener('focus', handleFocusOrStorage);
+    window.addEventListener('storage', handleFocusOrStorage);
+
+    let channel;
+    if (typeof BroadcastChannel !== 'undefined') {
+      channel = new BroadcastChannel('product_updates_channel');
+      channel.onmessage = (msg) => {
+        if (msg.data === 'product_updated') {
+          fetchLists();
+        }
+      };
+    }
+
+    return () => {
+      window.removeEventListener('focus', handleFocusOrStorage);
+      window.removeEventListener('storage', handleFocusOrStorage);
+      if (channel) channel.close();
+    };
+  }, [fetchLists]);
+
+  const handleOpenRegisterProduct = () => {
+    window.open('/admin/expenses?openPopup=registerProduct', '_blank');
+  };
 
   useEffect(() => {
     let totalItemsCost = itemArrayList.reduce((acc, i) => acc + i.totalCost, 0);
@@ -276,33 +306,33 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
 
       <form onSubmit={handleSubmit}>
         <div className={style.topFields}>
-          <div className={`${style.field} ${style.providerField}`}>
-            <label>Fornecedor</label>
-            <select id="provider" required onChange={handleChange} value={form.provider}>
+          <div className={`${style.field} ${style.providerField}`} title={tooltips.addStockEntryForm.provider}>
+            <label title={tooltips.addStockEntryForm.provider}>Fornecedor</label>
+            <select id="provider" required onChange={handleChange} value={form.provider} title={tooltips.addStockEntryForm.provider}>
               <option value="">Selecione...</option>
               {providerList?.map((p, i) => <option key={i} value={p.provider}>{p.name}</option>)}
             </select>
           </div>
           <div className={style.smallField}>
-            <Input id="account" required label="Nota Fiscal" value={form.account} type="text" onChange={handleChange} />
+            <Input id="account" required label="Nota Fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
           </div>
           <div className={style.smallField}>
             <Input id="paymentDate" required label="Data Pagamento" value={form.paymentDate} type="date" onChange={handleChange} />
           </div>
           <div className={style.smallField}>
-            <Input id="value" label="Valor Total" value={form.value} type="number" readOnly className={style.readOnlyInput} />
+            <Input id="value" label="Valor Total" value={form.value} type="number" readOnly className={style.readOnlyInput} title={tooltips.addStockEntryForm.value} />
           </div>
           <div className={style.fullWidth}>
-            <Input id="paymentProof" label="Link do Comprovante (PDF)" value={form.paymentProof} type="text" onChange={handleChange} />
+            <Input id="paymentProof" label="Link do Comprovante (PDF)" value={form.paymentProof} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.paymentProof} />
           </div>
         </div>
 
         <fieldset className={style.itemsFieldset}>
           <legend>ADICIONAR ITEM</legend>
           <div className={style.itemsGrid}>
-            <div className={`${style.field} ${style.productField}`}>
-              <label>Produto</label>
-              <select id="product" value={productList?.findIndex(p => p.name === item.product)} onChange={handleItemChange}>
+            <div className={`${style.field} ${style.productField}`} title={tooltips.addStockEntryForm.product}>
+              <label title={tooltips.addStockEntryForm.product}>Produto</label>
+              <select id="product" value={productList?.findIndex(p => p.name === item.product)} onChange={handleItemChange} title={tooltips.addStockEntryForm.product}>
                 <option value="">Selecione...</option>
                 {productList?.map((p, i) => <option key={i} value={i}>{p.name}</option>)}
               </select>
@@ -383,6 +413,14 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj }) => {
         <div className={style.footer}>
           <button type="submit" className={style.submitBtn} disabled={isSubmitting}>
             {isSubmitting ? 'ENVIANDO...' : 'ENVIAR ENTRADA'}
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenRegisterProduct}
+            className={style.registerNotRegisteredBtnFooter}
+            title="Cadastrar produto não encontrado em outra aba"
+          >
+            cadastrar produto<br />não encontrado
           </button>
         </div>
       </form>

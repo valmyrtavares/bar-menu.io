@@ -295,6 +295,16 @@ const RegisterProduct = ({ setShowPopup }) => {
       await setDoc(documentRef, cleanedForm)
         .then(() => {
           console.log('Document successfully updated !');
+          try {
+            localStorage.setItem('product_registered_event', String(Date.now()));
+            if (typeof BroadcastChannel !== 'undefined') {
+              const channel = new BroadcastChannel('product_updates_channel');
+              channel.postMessage('product_updated');
+              channel.close();
+            }
+          } catch (err) {
+            console.error('Error dispatching product update event:', err);
+          }
           fetchProvider();
           setEditForm(false);
           setForm({
@@ -311,6 +321,16 @@ const RegisterProduct = ({ setShowPopup }) => {
 
     addDoc(collection(db, 'product'), form)
       .then(() => {
+        try {
+          localStorage.setItem('product_registered_event', String(Date.now()));
+          if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('product_updates_channel');
+            channel.postMessage('product_updated');
+            channel.close();
+          }
+        } catch (err) {
+          console.error('Error dispatching product update event:', err);
+        }
         setRefreshScreen((prev) => !prev);
         setForm({
           name: '',

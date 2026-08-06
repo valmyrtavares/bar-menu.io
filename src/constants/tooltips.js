@@ -40,6 +40,11 @@ export const tooltips = {
     add: "Confirma a seleção de acompanhamentos para este prato.",
   },
   addStockEntryForm: {
+    product: "Esse formulário deve ser usado somente para matérias primas usadas na confecção dos pratos. Materiais de apoio como água sanitária não devem ser adicionados nesse formulário e não serão encontrados nessa lista.",
+    provider: "Selecione o local ou fornecedor onde fez a compra. Caso não o encontre deverá cadastrar no módulo de despesas.",
+    account: "Preencha o número da nota fiscal da compra, caso não tenha preencha com um número genérico.",
+    value: "Esse campo é automaticamente preenchido com a soma do valor em dinheiro de todos os itens adicionados na lista.",
+    paymentProof: "Esse é um campo não opcional. Guarde a sua nota fiscal em um repositório pessoal e cole o link aqui, para futuras consultas.",
     amount: "Quantos pacotes da matéria prima foram comprados.",
     CostPerUnit: "Qual o valor por pacote.",
     totalCost: "Custo total preenchido automaticamente (quanto se gastou ao todo).",
