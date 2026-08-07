@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import log from '../../assets/styles/AdjustmentRecords.module.scss';
 import CloseBtn from '../closeBtn';
 import AddStockEntryForm from './AddStockEntryForm';
+import EditFormStockProduct from './EditFormStockProduct';
 
 const getLogTimestamp = (item, useTimestampFirst = false) => {
   if (!item) return 0;
@@ -104,6 +105,7 @@ const AdjustmentRecords = ({
   const [filter, setFilter] = useState('Todas as Movimentações');
   const [currentPage, setCurrentPage] = useState(1);
   const [editingStockLog, setEditingStockLog] = useState(null);
+  const [editingDiscardLog, setEditingDiscardLog] = useState(null);
   const itemsPerPage = 100;
 
   const filteredData = useMemo(() => {
@@ -163,16 +165,29 @@ const AdjustmentRecords = ({
     setCurrentPage(1);
   };
 
-  const handleCategoryClick = (item, canEdit) => {
+  const handleCategoryClick = (item, canEdit, isDiscard = false) => {
     if (!canEdit) {
-      alert("Esta entrada de estoque foi realizada há mais de 2 horas e não pode mais ser editada ou excluída.");
+      alert(isDiscard 
+        ? "Este descarte foi realizado há mais de 2 horas e não pode mais ser editado."
+        : "Esta entrada de estoque foi realizada há mais de 2 horas e não pode mais ser editada ou excluída."
+      );
       return;
     }
-    setEditingStockLog({
-      ...item,
-      product: item.product || title || '',
-      productName: item.productName || item.product || title || '',
-    });
+
+    if (isDiscard) {
+      setEditingDiscardLog({
+        ...item,
+        stockId: item.stockId || item.id,
+        product: item.product || title || '',
+        productName: item.productName || item.product || title || '',
+      });
+    } else {
+      setEditingStockLog({
+        ...item,
+        product: item.product || title || '',
+        productName: item.productName || item.product || title || '',
+      });
+    }
   };
 
   return (
@@ -253,9 +268,11 @@ const AdjustmentRecords = ({
                 const inv = safeNum(item.totalResourceInvested);
                 const avgCost = vol > 0 ? (inv / vol).toFixed(2) : '0.00';
                 const inputVal = safeNum(item.inputProduct ?? item.entrada ?? 0);
+                const outputVal = safeNum(item.outputProduct ?? item.saida ?? 0);
                 const isStockEntry = inputVal > 0;
+                const isDiscard = item.category === 'Descarte' || (outputVal > 0 && item.category !== 'Auditoria' && String(item.category || '').toLowerCase().includes('descarte'));
                 const logTime = getLogTimestamp(item, true);
-                const canEdit = isStockEntry && (Date.now() - logTime) <= (2 * 60 * 60 * 1000);
+                const canEdit = (isStockEntry || isDiscard) && (Date.now() - logTime) <= (2 * 60 * 60 * 1000);
 
                 return (
                   <tr key={index}>
@@ -268,16 +285,20 @@ const AdjustmentRecords = ({
                       {item?.orderNumber || '-'}
                     </td>
                     <td>
-                      {isStockEntry ? (
+                      {isStockEntry || isDiscard ? (
                         <span
-                          onClick={() => handleCategoryClick(item, canEdit)}
+                          onClick={() => handleCategoryClick(item, canEdit, isDiscard)}
                           style={{
                             color: canEdit ? '#007bff' : '#6c757d',
                             cursor: 'pointer',
                             textDecoration: 'underline',
                             fontWeight: 'bold',
                           }}
-                          title={canEdit ? "Clique para editar ou excluir esta entrada de estoque" : "Entrada realizada há mais de 2 horas (não editável)"}
+                          title={
+                            canEdit
+                              ? (isDiscard ? "Clique para editar este descarte" : "Clique para editar ou excluir esta entrada de estoque")
+                              : (isDiscard ? "Descarte realizado há mais de 2 horas (não editável)" : "Entrada realizada há mais de 2 horas (não editável)")
+                          }
                         >
                           {item.category}
                         </span>
@@ -346,6 +367,24 @@ const AdjustmentRecords = ({
           }}
           onLogUpdated={() => {
             setEditingStockLog(null);
+            if (onRefreshLogs) onRefreshLogs();
+          }}
+        />
+      )}
+
+      {editingDiscardLog && (
+        <EditFormStockProduct
+          obj={{
+            id: editingDiscardLog.stockId || editingDiscardLog.id,
+            product: editingDiscardLog.product || title || '',
+            unitOfMeasurement: editingDiscardLog.unit || '',
+            totalVolume: editingDiscardLog.ContentsInStock || 0,
+            totalCost: editingDiscardLog.totalResourceInvested || 0,
+          }}
+          editingLog={editingDiscardLog}
+          setShowEditForm={() => setEditingDiscardLog(null)}
+          fetchStock={() => {
+            setEditingDiscardLog(null);
             if (onRefreshLogs) onRefreshLogs();
           }}
         />

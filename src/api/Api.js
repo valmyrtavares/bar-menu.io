@@ -578,6 +578,95 @@ export async function updateStockLogEntry(logId, stockId, newVolume, newCost, ne
 }
 
 /**
+ * Edita um log de descarte de estoque no histórico e ajusta os saldos do item no banco.
+ */
+export async function updateStockDiscardLogEntry(logId, stockId, newDiscardAmount, newNote) {
+  try {
+    const { doc, getDoc, updateDoc, collection, query, where, getDocs } = await import('firebase/firestore');
+    const { db } = await import('../config-firebase/firebase.js');
+
+    const logRef = doc(db, 'stockUsageLogs', logId);
+    const logSnap = await getDoc(logRef);
+    if (!logSnap.exists()) return false;
+
+    const oldLogData = logSnap.data();
+    const oldDiscardVal = Number(oldLogData.outputProduct || oldLogData.saida || 0);
+    const newDiscardVal = Number(newDiscardAmount);
+
+    const baseVolume = Number(oldLogData.previousVolume !== undefined ? oldLogData.previousVolume : 0);
+    const baseCost = Number(oldLogData.previousCost !== undefined ? oldLogData.previousCost : 0);
+
+    const unitPrice = baseVolume > 0 ? (baseCost / baseVolume) : 0;
+    const newVolumeAfterDiscard = Math.max(0, baseVolume - newDiscardVal);
+    const newCostAfterDiscard = Number((newVolumeAfterDiscard * unitPrice).toFixed(2));
+
+    const diffDiscardVolume = newDiscardVal - oldDiscardVal;
+    const oldDiscardCost = baseCost - Number(oldLogData.totalResourceInvested || 0);
+    const newDiscardCost = baseCost - newCostAfterDiscard;
+    const diffDiscardCost = newDiscardCost - oldDiscardCost;
+
+    // 1. Atualizar o documento no stockUsageLogs
+    await updateDoc(logRef, {
+      outputProduct: newDiscardVal,
+      ContentsInStock: newVolumeAfterDiscard,
+      totalResourceInvested: newCostAfterDiscard,
+      noteReasonsEditingProduct: newNote,
+    });
+
+    // 2. Atualizar a matéria-prima na coleção stock
+    const targetStockId = stockId || oldLogData.stockId;
+    if (targetStockId) {
+      const stockRef = doc(db, 'stock', targetStockId);
+      const stockSnap = await getDoc(stockRef);
+      if (stockSnap.exists()) {
+        const sData = stockSnap.data();
+        let updatedVolume = Math.max(0, Number(sData.totalVolume || 0) - diffDiscardVolume);
+        let updatedCost = Math.max(0, Number(sData.totalCost || 0) - diffDiscardCost);
+        let updatedPackage = Number(sData.volumePerUnit) > 0 
+          ? Number((updatedVolume / Number(sData.volumePerUnit)).toFixed(2)) 
+          : Number(sData.amount || 0);
+        let updatedCostPerUnit = updatedVolume > 0 ? Number((updatedCost / updatedVolume).toFixed(2)) : 0;
+
+        const updateData = {
+          totalVolume: Number(updatedVolume.toFixed(2)),
+          totalCost: Number(updatedCost.toFixed(2)),
+          amount: updatedPackage,
+          CostPerUnit: updatedCostPerUnit,
+        };
+        if (updatedCostPerUnit > 0) {
+          updateData.lastUnitCost = updatedCostPerUnit;
+        }
+
+        await updateDoc(stockRef, updateData);
+      }
+    }
+
+    // 3. Atualizar despesa de descarte na coleção outgoing se existir
+    try {
+      if (targetStockId) {
+        const outgoingRef = collection(db, 'outgoing');
+        const q = query(outgoingRef, where('stockId', '==', targetStockId), where('category', '==', 'Descarte'));
+        const querySnap = await getDocs(q);
+        querySnap.forEach(async (dDoc) => {
+          await updateDoc(doc(db, 'outgoing', dDoc.id), {
+            value: Number(newDiscardCost.toFixed(2)),
+            confirmation: Number(newDiscardCost.toFixed(2)),
+            obs: newNote,
+          });
+        });
+      }
+    } catch (e) {
+      console.warn('Aviso ao atualizar despesa de descarte:', e);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Erro ao atualizar log de descarte:', err);
+    return false;
+  }
+}
+
+/**
  * Remove um log de entrada de estoque e estorna os valores do item no estoque.
  */
 export async function deleteStockLogEntry(logId, stockId) {

@@ -2,7 +2,7 @@ import React from 'react';
 import edit from '../../assets/styles/EditFormStockProduct.module.scss';
 import CloseBtn from '../closeBtn';
 import Input from '../Input';
-import { getBtnData, logStockUsage, registerDailyStockMovement, updateItemsSideDishes } from '../../api/Api';
+import { getBtnData, logStockUsage, registerDailyStockMovement, updateItemsSideDishes, updateStockDiscardLogEntry } from '../../api/Api';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
 import {
   getFirestore,
@@ -17,26 +17,59 @@ import {
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 
-const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
+const EditFormStockProduct = ({ obj = {}, setShowEditForm, fetchStock, editingLog = null }) => {
   const [Dishes, setDishes] = React.useState([]);
   const [stockProductObj, setStockProductObj] = React.useState({
-    CostPerUnit: Number(Number(obj.CostPerUnit).toFixed(2)),
-    amount: Number(Number(obj.amount).toFixed(2)),
-    product: obj.product,
-    totalCost: Number(Number(obj.totalCost).toFixed(2)),
-    totalVolume: Number(Number(obj.totalVolume).toFixed(2)),
-    unitOfMeasurement: obj.unitOfMeasurement,
-    volumePerUnit: Number(Number(obj.volumePerUnit).toFixed(2)),
-    minimumAmount: Number(Number(obj.minimumAmount).toFixed(2)),
+    CostPerUnit: Number(Number(obj?.CostPerUnit || 0).toFixed(2)),
+    amount: Number(Number(obj?.amount || 0).toFixed(2)),
+    product: obj?.product || '',
+    totalCost: Number(Number(obj?.totalCost || 0).toFixed(2)),
+    totalVolume: Number(Number(obj?.totalVolume || 0).toFixed(2)),
+    unitOfMeasurement: obj?.unitOfMeasurement || '',
+    volumePerUnit: Number(Number(obj?.volumePerUnit || 0).toFixed(2)),
+    minimumAmount: Number(Number(obj?.minimumAmount || 0).toFixed(2)),
     noteReasonsEditingProduct: '',
-    disabledDish: obj.disabledDish || null,
-    id: obj.id,
+    disabledDish: obj?.disabledDish || null,
+    id: obj?.id,
   });
   
   const [discardAmount, setDiscardAmount] = React.useState('');
   const [noteReasonsEditingProduct, setNoteReasonsEditingProduct] = React.useState('');
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (editingLog) {
+      const oldDiscard = Number(editingLog.outputProduct ?? editingLog.saida ?? 0);
+      setDiscardAmount(String(oldDiscard));
+      setNoteReasonsEditingProduct(editingLog.noteReasonsEditingProduct || '');
+
+      getBtnData('stock').then((data) => {
+        const found = data.find((s) => s.id === (editingLog.stockId || obj?.id) || s.product === (editingLog.product || obj?.product));
+        if (found) {
+          const baseVol = Number(editingLog.previousVolume !== undefined ? editingLog.previousVolume : (found.totalVolume + oldDiscard));
+          const baseCost = Number(editingLog.previousCost !== undefined ? editingLog.previousCost : found.totalCost);
+          const unitPrice = baseVol > 0 ? (baseCost / baseVol) : (found.CostPerUnit || 0);
+
+          const newVol = Math.max(0, baseVol - oldDiscard);
+          const newCost = newVol * unitPrice;
+
+          setStockProductObj({
+            ...found,
+            totalVolume: Number(newVol.toFixed(2)),
+            totalCost: Number(newCost.toFixed(2)),
+            CostPerUnit: Number(found.CostPerUnit || 0),
+            amount: Number(found.amount || 0),
+            volumePerUnit: Number(found.volumePerUnit || 0),
+            unitOfMeasurement: found.unitOfMeasurement || editingLog.unit || '',
+            minimumAmount: found.minimumAmount !== undefined ? found.minimumAmount : 0,
+            disabledDish: found.disabledDish !== undefined ? found.disabledDish : 0,
+            id: found.id,
+          });
+        }
+      }).catch(err => console.error("Erro ao carregar item para edicao de descarte:", err));
+    }
+  }, [editingLog]);
 
   React.useEffect(() => {
     getBtnData('item')
@@ -46,7 +79,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       .catch((error) => {
         console.error('Erro ao buscar dados:', error);
       });
-  });
+  }, []);
 
   const updateNoteEdit = () => {
     setStockProductObj((prevForm) => ({
@@ -186,25 +219,36 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       numVal = 0;
     }
 
-    if (numVal > Number(obj.totalVolume)) {
-      alert(`Você não pode descartar mais do que o volume total disponível (${Number(obj.totalVolume).toFixed(2)} ${obj.unitOfMeasurement}).`);
-      numVal = Number(obj.totalVolume);
+    let baseVol = 0;
+    let baseCost = 0;
+
+    if (editingLog) {
+      const oldDiscard = Number(editingLog.outputProduct ?? editingLog.saida ?? 0);
+      baseVol = Number(editingLog.previousVolume !== undefined ? editingLog.previousVolume : ((stockProductObj.totalVolume || 0) + oldDiscard));
+      baseCost = Number(editingLog.previousCost !== undefined ? editingLog.previousCost : (stockProductObj.totalCost || 0));
+    } else {
+      baseVol = Number(obj?.totalVolume || 0);
+      baseCost = Number(obj?.totalCost || 0);
+    }
+
+    if (numVal > baseVol) {
+      alert(`Você não pode descartar mais do que o volume total disponível (${baseVol.toFixed(2)} ${stockProductObj.unitOfMeasurement || obj?.unitOfMeasurement || ''}).`);
+      numVal = baseVol;
     }
 
     setDiscardAmount(val);
 
-    const originalVol = Number(obj.totalVolume);
-    const newVolume = Math.max(0, originalVol - numVal);
+    const newVolume = Math.max(0, baseVol - numVal);
     let newCost = 0;
 
-    if (originalVol > 0 && newVolume > 0) {
+    if (baseVol > 0 && newVolume > 0) {
       let unitPriceOriginal = 0;
-      if (Number(obj.totalCost) > 0) {
-        unitPriceOriginal = Number(obj.totalCost) / originalVol;
-      } else if (Number(obj.lastUnitCost) > 0) {
+      if (baseCost > 0) {
+        unitPriceOriginal = baseCost / baseVol;
+      } else if (Number(obj?.lastUnitCost) > 0) {
         unitPriceOriginal = Number(obj.lastUnitCost);
       } else {
-        unitPriceOriginal = Number(obj.CostPerUnit || 0);
+        unitPriceOriginal = Number(stockProductObj.CostPerUnit || obj?.CostPerUnit || 0);
       }
       newCost = newVolume * unitPriceOriginal;
     }
@@ -213,8 +257,9 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
       newCost = 0;
     }
 
-    const newUnit = Number(obj.volumePerUnit) > 0 ? newVolume / Number(obj.volumePerUnit) : 0;
-    const newCostPerUnit = newVolume > 0 ? newCost / newVolume : (Number(obj.CostPerUnit) || 0);
+    const volPerUnit = Number(stockProductObj.volumePerUnit || obj?.volumePerUnit || 0);
+    const newUnit = volPerUnit > 0 ? newVolume / volPerUnit : 0;
+    const newCostPerUnit = newVolume > 0 ? newCost / newVolume : (Number(stockProductObj.CostPerUnit || obj?.CostPerUnit || 0));
 
     setStockProductObj((prev) => ({
       ...prev,
@@ -234,70 +279,92 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
   };
 
   const addItem = async () => {
-    if (
-      !noteReasonsEditingProduct || noteReasonsEditingProduct.trim() === '' ||
-      stockProductObj.minimumAmount === '' ||
-      stockProductObj.disabledDish === '' ||
-      Number(stockProductObj.minimumAmount) < 0 ||
-      Number(stockProductObj.disabledDish) < 0
-    ) {
-      alert('Por favor, preencha a justificativa do descarte e certifique-se de que nenhum campo está vazio ou negativo.');
+    if (!noteReasonsEditingProduct || noteReasonsEditingProduct.trim() === '') {
+      alert('Por favor, preencha a justificativa do descarte.');
       return;
+    }
+
+    if (!editingLog) {
+      if (
+        stockProductObj.minimumAmount === '' ||
+        stockProductObj.disabledDish === '' ||
+        Number(stockProductObj.minimumAmount) < 0 ||
+        Number(stockProductObj.disabledDish) < 0
+      ) {
+        alert('Por favor, preencha a justificativa do descarte e certifique-se de que nenhum campo está vazio ou negativo.');
+        return;
+      }
     }
 
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
-
     try {
-      await Promise.all(updatedDishes.map(updateDishInFirebase));
-      await updateSideDishesInFirebase(stockProductObj);
-      await updateItemsSideDishes(); // Sincroniza a disponibilidade com os pratos
-    } catch (error) {
-      console.error('Erro ao atualizar receitas/acompanhamentos:', error);
-    }
+      if (editingLog) {
+        const discardedVolume = Number(discardAmount.replace(',', '.') || 0);
+        const success = await updateStockDiscardLogEntry(
+          editingLog.id,
+          stockProductObj.id || obj?.id || editingLog.stockId,
+          discardedVolume,
+          noteReasonsEditingProduct
+        );
 
-    try {
-      // 1. Atualizar histórico (Descarte) e salvar o documento principal do estoque
-      await handleStock(stockProductObj, 'Descarte');
-      const docRef = doc(db, 'stock', stockProductObj.id);
-      await updateDoc(docRef, stockProductObj);
-
-      // 2. Registrar despesa na coleção outgoing se houve perda real
-      const discardedVolume = Number(discardAmount.replace(',', '.') || 0);
-      if (discardedVolume > 0) {
-        const discardedCost = Number(obj.totalCost) - Number(stockProductObj.totalCost);
-        if (discardedCost > 0) {
-          const today = new Date();
-          const day = String(today.getDate()).padStart(2, '0');
-          const month = String(today.getMonth() + 1).padStart(2, '0');
-          const year = today.getFullYear();
-          const currentDate = `${day}/${month}/${year}`;
-
-          await addDoc(collection(db, 'outgoing'), {
-            name: `Descarte - ${obj.product}`,
-            value: Number(discardedCost.toFixed(2)),
-            confirmation: Number(discardedCost.toFixed(2)),
-            category: 'Descarte', // Nova categoria para fácil rastreamento
-            entryType: 'descarte',
-            paymentDate: currentDate,
-            dueDate: currentDate,
-            formOfPayment: 'N/A',
-            obs: noteReasonsEditingProduct,
-            stockId: stockProductObj.id
-          });
+        if (success) {
+          setLoadingAvailableMenuDishes(true);
+          const targetId = stockProductObj.id || obj?.id || editingLog.stockId;
+          const res = await checkUnavaiableRawMaterial(targetId);
+          setLoadingAvailableMenuDishes(res);
+          await updateItemsSideDishes();
+          await registerDailyStockMovement('Edição de Log de Descarte');
+          if (fetchStock) fetchStock();
+          setShowEditForm(false);
+        } else {
+          alert('Erro ao atualizar o descarte. Tente novamente.');
         }
+      } else {
+        const updatedDishes = updateRecipesinDishesAndSideDishes(stockProductObj);
+        await Promise.all(updatedDishes.map(updateDishInFirebase));
+        await updateSideDishesInFirebase(stockProductObj);
+        await updateItemsSideDishes();
+
+        await handleStock(stockProductObj, 'Descarte');
+        const docRef = doc(db, 'stock', stockProductObj.id);
+        await updateDoc(docRef, stockProductObj);
+
+        const discardedVolume = Number(discardAmount.replace(',', '.') || 0);
+        if (discardedVolume > 0) {
+          const discardedCost = Number(obj.totalCost) - Number(stockProductObj.totalCost);
+          if (discardedCost > 0) {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const currentDate = `${day}/${month}/${year}`;
+
+            await addDoc(collection(db, 'outgoing'), {
+              name: `Descarte - ${obj.product}`,
+              value: Number(discardedCost.toFixed(2)),
+              confirmation: Number(discardedCost.toFixed(2)),
+              category: 'Descarte',
+              entryType: 'descarte',
+              paymentDate: currentDate,
+              dueDate: currentDate,
+              formOfPayment: 'N/A',
+              obs: noteReasonsEditingProduct,
+              stockId: stockProductObj.id
+            });
+          }
+        }
+
+        setLoadingAvailableMenuDishes(true);
+        const res = await checkUnavaiableRawMaterial(stockProductObj.id);
+        setLoadingAvailableMenuDishes(res);
+
+        updateRecipesinDishesAndSideDishes(stockProductObj);
+        await registerDailyStockMovement('Edição de Estoque (Descarte)');
+        if (fetchStock) fetchStock();
+        setShowEditForm(false);
       }
-
-      setLoadingAvailableMenuDishes(true);
-      const res = await checkUnavaiableRawMaterial(stockProductObj.id);
-      setLoadingAvailableMenuDishes(res);
-
-      updateRecipesinDishesAndSideDishes(stockProductObj);
-      await registerDailyStockMovement('Edição de Estoque (Descarte)');
-      fetchStock();
-      setShowEditForm(false);
     } catch (error) {
       console.error('Erro ao atualizar o documento:', error);
     } finally {
@@ -559,8 +626,10 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               value={stockProductObj.minimumAmount}
               type="text"
               onChange={handleChange}
-              title="Limite mínimo de estoque. Abaixo disso, o sistema emitirá um alerta de reposição."
-              unitText={stockProductObj.unitOfMeasurement}
+              readOnly={!!editingLog}
+              disabled={!!editingLog}
+              title={editingLog ? "Não editável ao alterar um descarte existente." : "Limite mínimo de estoque. Abaixo disso, o sistema emitirá um alerta de reposição."}
+              unitText={stockProductObj.unitOfMeasurement || obj?.unitOfMeasurement}
             />
           </div>
           
@@ -573,13 +642,17 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               value={stockProductObj.disabledDish}
               type="text"
               onChange={handleChange}
-              title="Volume crítico. Quando o estoque atingir este nível, os pratos que usam esta matéria-prima serão desativados no menu."
-              unitText={stockProductObj.unitOfMeasurement}
+              readOnly={!!editingLog}
+              disabled={!!editingLog}
+              title={editingLog ? "Não editável ao alterar um descarte existente." : "Volume crítico. Quando o estoque atingir este nível, os pratos que usam esta matéria-prima serão desativados no menu."}
+              unitText={stockProductObj.unitOfMeasurement || obj?.unitOfMeasurement}
             />
           </div>
         </div>
         <div className={edit.textareaField}>
-          <label htmlFor="editAdminNote">Justificativa de Descarte (Obrigatório)</label>
+          <label htmlFor="editAdminNote">
+            {editingLog ? "Justificativa da Edição do Descarte (Obrigatório)" : "Justificativa de Descarte (Obrigatório)"}
+          </label>
           <textarea
             id="editAdminNote"
             className="num"
@@ -587,7 +660,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
             onChange={(e) => setNoteReasonsEditingProduct(e.target.value)}
             autoComplete="off"
             rows={3}
-            placeholder="Qual foi o motivo da perda ou descarte deste produto?"
+            placeholder={editingLog ? "Qual o motivo da alteração deste descarte?" : "Qual foi o motivo da perda ou descarte deste produto?"}
             onBlur={updateNoteEdit}
             title="Espaço para registrar o motivo deste ajuste manual (ex: validade, quebra, contaminação, etc.)."
             required
@@ -597,14 +670,14 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
         <div className={edit.volumeRow}>
           <h3>Volume Original do Produto</h3>
           <p>
-            {Number(obj.totalVolume).toFixed(2)}
-            {obj.unitOfMeasurement}
+            {Number(editingLog ? (editingLog.previousVolume !== undefined ? editingLog.previousVolume : obj?.totalVolume) : obj?.totalVolume || 0).toFixed(2)}
+            {stockProductObj.unitOfMeasurement || obj?.unitOfMeasurement || ''}
           </p>
         </div>
 
         <div className={edit.btnRow}>
           <button className={edit.addBtn} type="button" onClick={addItem} disabled={isSubmitting}>
-            {isSubmitting ? 'Enviando...' : 'Registrar Descarte'}
+            {isSubmitting ? 'Enviando...' : (editingLog ? 'Salvar Edição do Descarte' : 'Registrar Descarte')}
           </button>
         </div>
       </div>
