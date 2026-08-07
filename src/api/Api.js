@@ -520,18 +520,31 @@ export async function updateStockLogEntry(logId, stockId, newVolume, newCost, ne
     const oldData = logSnap.data();
     const oldVolume = Number(oldData.inputProduct || oldData.entrada || 0);
     const oldCost = Number(oldData.cost || 0);
-    const oldPackage = Number(oldData.package || 0);
+
+    // Buscar volumePerUnit do estoque para converter o volume antigo em quantidade de pacotes caso entryAmount não esteja disponível
+    let volPerUnit = 1;
+    if (oldData.entryAmount === undefined && stockId) {
+      const stockRef = doc(db, 'stock', stockId);
+      const stockSnap = await getDoc(stockRef);
+      if (stockSnap.exists()) {
+        const sData = stockSnap.data();
+        volPerUnit = Number(sData.volumePerUnit) > 0 ? Number(sData.volumePerUnit) : 1;
+      }
+    }
+    const oldEntryPackage = oldData.entryAmount !== undefined ? Number(oldData.entryAmount) : (volPerUnit > 0 ? Math.round(oldVolume / volPerUnit) : 1);
 
     const diffVolume = Number(newVolume) - oldVolume;
     const diffCost = Number(newCost) - oldCost;
-    const diffPackage = Number(newPackage) - oldPackage;
+    const diffPackage = Number(newPackage) - oldEntryPackage;
 
     await updateDoc(logRef, {
       inputProduct: Number(newVolume),
       cost: Number(newCost),
-      package: Number(newPackage),
+      package: Math.max(0, Number(oldData.package || 0) + diffPackage), // atualiza o acumulado de pacotes no log
       totalResourceInvested: Math.max(0, Number(oldData.previousCost || 0) + Number(newCost)),
       ContentsInStock: Math.max(0, Number(oldData.previousVolume || 0) + Number(newVolume)),
+      entryVolumePerUnit: Number(newVolume) / Math.max(1, Number(newPackage)),
+      entryAmount: Number(newPackage),
     });
 
     if (stockId) {
@@ -579,7 +592,18 @@ export async function deleteStockLogEntry(logId, stockId) {
     const oldData = logSnap.data();
     const oldVolume = Number(oldData.inputProduct || oldData.entrada || 0);
     const oldCost = Number(oldData.cost || 0);
-    const oldPackage = Number(oldData.package || 0);
+
+    // Buscar volumePerUnit do estoque para converter o volume antigo em quantidade de pacotes caso entryAmount não esteja disponível
+    let volPerUnit = 1;
+    if (oldData.entryAmount === undefined && stockId) {
+      const stockRef = doc(db, 'stock', stockId);
+      const stockSnap = await getDoc(stockRef);
+      if (stockSnap.exists()) {
+        const sData = stockSnap.data();
+        volPerUnit = Number(sData.volumePerUnit) > 0 ? Number(sData.volumePerUnit) : 1;
+      }
+    }
+    const oldEntryPackage = oldData.entryAmount !== undefined ? Number(oldData.entryAmount) : (volPerUnit > 0 ? Math.round(oldVolume / volPerUnit) : 1);
 
     await deleteDoc(logRef);
 
@@ -590,7 +614,7 @@ export async function deleteStockLogEntry(logId, stockId) {
         const sData = stockSnap.data();
         let updatedVolume = Math.max(0, Number(sData.totalVolume || 0) - oldVolume);
         let updatedCost = Math.max(0, Number(sData.totalCost || 0) - oldCost);
-        let updatedPackage = Math.max(0, Number(sData.amount || 0) - oldPackage);
+        let updatedPackage = Math.max(0, Number(sData.amount || 0) - oldEntryPackage);
         let updatedCostPerUnit = updatedVolume > 0 ? Number((updatedCost / updatedVolume).toFixed(2)) : 0;
 
         const updateData = {

@@ -30,6 +30,7 @@ const TrackStockProduct = () => {
   const [obj, setObj] = React.useState(null);
   const [title, setTitle] = React.useState('');
   const [eventLogData, setEventLogData] = React.useState(null);
+  const [currentSelectedStockItem, setCurrentSelectedStockItem] = React.useState(null);
   const [showAdjustmentRecords, setShowAdjustmentRecords] =
     React.useState(false);
   const [showStockMovementPopup, setShowStockMovementPopup] = React.useState(false);
@@ -174,6 +175,7 @@ const TrackStockProduct = () => {
   };
 
   const usageHistory = async (item) => {
+    setCurrentSelectedStockItem(item);
     setTitle(item.product);
     const logs = await fetchStockUsageLogs(item.id);
     
@@ -347,6 +349,17 @@ const TrackStockProduct = () => {
             eventLogData={eventLogData}
             setShowAdjustmentRecords={setShowAdjustmentRecords}
             title={title}
+            onRefreshLogs={async () => {
+              if (currentSelectedStockItem) {
+                const logs = await fetchStockUsageLogs(currentSelectedStockItem.id);
+                let mergedLogs = [...(logs || [])];
+                if (currentSelectedStockItem.UsageHistory && currentSelectedStockItem.UsageHistory.length > 0) {
+                  mergedLogs = [...mergedLogs, ...currentSelectedStockItem.UsageHistory];
+                }
+                setEventLogData(mergedLogs);
+              }
+              fetchStock();
+            }}
           />
         )}
       </div>

@@ -543,7 +543,7 @@ const EditFormStockProduct = ({ obj, setShowEditForm, fetchStock }) => {
               autoComplete="off"
               className="num"
               label="Novo Custo Total"
-              value={stockProductObj.totalCost}
+              value={`R$ ${stockProductObj.totalCost}`}
               type="text"
               readOnly={true}
               title="O custo total remanescente após o descarte (calculado proporcionalmente)."

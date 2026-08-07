@@ -90,26 +90,49 @@
 
         .inputGrid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-           
-            
-           div{
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            align-items: flex-start;
+            width: 100%;
+            margin-top: 10px;
+
+            .fieldWrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+
+                input {
+                    width: 100%;
+                    max-width: 100%;
+                    box-sizing: border-box;
+                    margin: 0;
+                }
+            }
+        }
+
+        .textareaField {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            input{
-                max-width: 120px;
-                margin: 0;
+            width: 100%;
+            margin: 10px 0;
+            text-align: left;
+
+            label {
+                font-weight: 600;
+                margin-bottom: 6px;
+                color: $admin-title-color;
             }
-           }           
+
+            textarea {
+                width: 100%;
+                padding: 10px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+                box-sizing: border-box;
+                font-family: inherit;
+            }
         }
-.textareaField{
-    display:grid;
-    grid-template-columns: auto;
-    width: 90%;
-    margin: 5px auto;
-}
 
 .volumeRow {
     width: 100%;

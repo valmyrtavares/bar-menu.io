@@ -98,47 +98,73 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
 
   useEffect(() => {
     if (editingLog) {
-      const rawDate = editingLog.date ? editingLog.date.split(' - ')[0] : '';
-      let formattedDate = rawDate;
-      if (rawDate.includes('/')) {
-        const parts = rawDate.split('/');
-        if (parts.length === 3) {
-          formattedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      const loadStockItemAndInit = async () => {
+        const rawDate = editingLog.date ? editingLog.date.split(' - ')[0] : '';
+        let formattedDate = rawDate;
+        if (rawDate.includes('/')) {
+          const parts = rawDate.split('/');
+          if (parts.length === 3) {
+            formattedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
         }
-      }
 
-      const totalCost = Number(editingLog.cost || editingLog.totalResourceInvested || 0);
-      const inputVol = Number(editingLog.inputProduct || editingLog.entrada || 0);
-      const packAmount = Number(editingLog.package || 1);
-      const costPerUnit = packAmount > 0 ? Number((totalCost / packAmount).toFixed(2)) : totalCost;
-      const volPerUnit = packAmount > 0 ? Number((inputVol / packAmount).toFixed(2)) : inputVol;
+        const totalCost = Number(editingLog.cost || editingLog.totalResourceInvested || 0);
+        const inputVol = Number(editingLog.inputProduct || editingLog.entrada || 0);
 
-      setForm(prev => ({
-        ...prev,
-        category: 'variable',
-        paymentDate: formattedDate,
-        account: editingLog.category || '',
-        provider: editingLog.provider || '',
-        value: totalCost,
-        confirmation: totalCost,
-        paymentProof: editingLog.paymentProof || '',
-      }));
+        let packAmount = editingLog.entryAmount !== undefined ? Number(editingLog.entryAmount) : 0;
+        let volPerUnit = editingLog.entryVolumePerUnit !== undefined ? Number(editingLog.entryVolumePerUnit) : 0;
 
-      const initialItem = {
-        product: editingLog.productName || editingLog.product || '',
-        amount: packAmount,
-        CostPerUnit: costPerUnit,
-        totalCost: totalCost,
-        volumePerUnit: volPerUnit,
-        totalVolume: inputVol,
-        operationSupplies: false,
-        unitOfMeasurement: editingLog.unit || 'Kg',
+        if (packAmount === 0 || volPerUnit === 0) {
+          // Buscar volumePerUnit do estoque para converter o volume em pacotes corretos (fallback)
+          let dbVolPerUnit = 1;
+          if (editingLog.stockId) {
+            const { doc, getDoc } = await import('firebase/firestore');
+            const { db } = await import('../../config-firebase/firebase.js');
+            const stockRef = doc(db, 'stock', editingLog.stockId);
+            const stockSnap = await getDoc(stockRef);
+            if (stockSnap.exists()) {
+              const sData = stockSnap.data();
+              dbVolPerUnit = Number(sData.volumePerUnit) > 0 ? Number(sData.volumePerUnit) : 1;
+            }
+          }
+          volPerUnit = dbVolPerUnit;
+          packAmount = volPerUnit > 0 ? Math.round(inputVol / volPerUnit) : 1;
+          if (packAmount <= 0) packAmount = 1;
+        }
+
+        const costPerUnit = packAmount > 0 ? Number((totalCost / packAmount).toFixed(2)) : totalCost;
+
+        setForm(prev => ({
+          ...prev,
+          category: 'variable',
+          paymentDate: formattedDate,
+          account: editingLog.category || '',
+          provider: editingLog.provider || '',
+          value: 0,
+          confirmation: 0,
+          paymentProof: editingLog.paymentProof || '',
+        }));
+
+        const prodName = editingLog.productName || editingLog.product || obj?.product || '';
+
+        const initialItem = {
+          product: prodName,
+          amount: packAmount,
+          CostPerUnit: costPerUnit,
+          totalCost: totalCost,
+          volumePerUnit: volPerUnit,
+          totalVolume: inputVol,
+          operationSupplies: false,
+          unitOfMeasurement: editingLog.unit || 'Kg',
+        };
+
+        setItem(initialItem);
+        setItemArrayList([]);
       };
 
-      setItem(initialItem);
-      setItemArrayList([initialItem]);
+      loadStockItemAndInit();
     }
-  }, [editingLog]);
+  }, [editingLog, obj]);
 
   useEffect(() => {
     let totalItemsCost = itemArrayList.reduce((acc, i) => acc + i.totalCost, 0);
@@ -174,9 +200,8 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
       if (selected) {
         setItem(prev => ({
           ...prev,
-          idProduct: selected.idProduct || selected.id,
+          idProduct: selected.idProduct || '',
           product: selected.name,
-          operationSupplies: false,
           unitOfMeasurement: selected.unitOfMeasurement || '',
           minimumAmount: selected.minimumAmount || 0,
         }));
@@ -194,15 +219,30 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
   };
 
   const addItem = () => {
-    if (!item.product) return alert('Selecione um produto.');
-    if (item.amount <= 0 || item.CostPerUnit <= 0) return alert('Quantidade e custo devem ser maiores que zero.');
-    if (item.volumePerUnit <= 0) return alert('Volume deve ser maior que zero.');
+    const targetProduct = item.product || (editingLog ? (editingLog.productName || editingLog.product || obj?.product || '') : '');
+    if (!targetProduct) return alert('Selecione um produto.');
+    if (Number(item.amount) <= 0 || Number(item.CostPerUnit) <= 0) return alert('Quantidade e custo devem ser maiores que zero.');
+    if (Number(item.volumePerUnit) <= 0) return alert('Volume deve ser maior que zero.');
 
-    setItemArrayList(prev => [...prev, { ...item, totalVolume: item.volumePerUnit * item.amount }]);
-    setItem({
-      product: '', amount: 0, CostPerUnit: 0, totalCost: 0, volumePerUnit: 0,
-      currentAmountProduct: 0, idProduct: '', totalVolume: 0, operationSupplies: false, unitOfMeasurement: '',
-    });
+    const newItemObj = {
+      ...item,
+      product: targetProduct,
+      amount: Number(item.amount),
+      CostPerUnit: Number(item.CostPerUnit),
+      totalCost: Number(item.totalCost || (item.amount * item.CostPerUnit)),
+      volumePerUnit: Number(item.volumePerUnit),
+      totalVolume: Number(item.volumePerUnit * item.amount),
+    };
+
+    if (editingLog) {
+      setItemArrayList([newItemObj]);
+    } else {
+      setItemArrayList(prev => [...prev, newItemObj]);
+      setItem({
+        product: '', amount: 0, CostPerUnit: 0, totalCost: 0, volumePerUnit: 0,
+        currentAmountProduct: 0, idProduct: '', totalVolume: 0, operationSupplies: false, unitOfMeasurement: '',
+      });
+    }
   };
 
   const formatPaymentDateWithCurrentTime = (dateStr) => {
@@ -256,12 +296,11 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
     if (isSubmitting) return;
 
     if (editingLog) {
-      if (itemArrayList.length === 0) return alert('Adicione pelo menos um item ao estoque.');
       setIsSubmitting(true);
       try {
         const currentItem = itemArrayList[0] || item;
-        const newVolume = Number(currentItem.totalVolume || (currentItem.amount * currentItem.volumePerUnit));
-        const newCost = Number(currentItem.totalCost);
+        const newVolume = Number(currentItem.amount) * Number(currentItem.volumePerUnit);
+        const newCost = Number(currentItem.amount) * Number(currentItem.CostPerUnit);
         const newPackage = Number(currentItem.amount);
 
         const success = await updateStockLogEntry(
@@ -370,7 +409,11 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
           package: pack, unit: currentItem.unitOfMeasurement, ContentsInStock: totalVolume,
           totalResourceInvested: totalCost, category: account,
           previousVolume: Number(itemFinded.totalVolume || 0),
-          previousCost: Number(itemFinded.totalCost || 0)
+          previousCost: Number(itemFinded.totalCost || 0),
+          entryVolumePerUnit: Number(currentItem.volumePerUnit),
+          entryAmount: Number(currentItem.amount),
+          product: currentItem.product || itemFinded.product || '',
+          productName: currentItem.product || itemFinded.product || '',
         });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(itemFinded.id);
@@ -388,7 +431,11 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
           package: currentItem.amount, unit: currentItem.unitOfMeasurement, ContentsInStock: currentItem.totalVolume,
           totalResourceInvested: currentItem.totalCost, category: account,
           previousVolume: 0,
-          previousCost: 0
+          previousCost: 0,
+          entryVolumePerUnit: Number(currentItem.volumePerUnit),
+          entryAmount: Number(currentItem.amount),
+          product: currentItem.product,
+          productName: currentItem.product,
         });
         setLoadingAvailableMenuDishes(true);
         const res = await checkUnavaiableRawMaterial(newDoc.id);
@@ -480,13 +527,13 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
               <label title={tooltips.addStockEntryForm.product}>Produto</label>
               <select
                 id="product"
-                value={productList?.findIndex(p => p.name === item.product)}
+                value={productList?.findIndex(p => p.name.trim().toLowerCase() === (item.product || '').trim().toLowerCase())}
                 onChange={handleItemChange}
                 disabled={!!editingLog}
                 style={editingLog ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
                 title={tooltips.addStockEntryForm.product}
               >
-                <option value="">Selecione...</option>
+                <option value="">{item.product || 'Selecione...'}</option>
                 {productList?.map((p, i) => <option key={i} value={i}>{p.name}</option>)}
               </select>
             </div>
@@ -532,7 +579,7 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
                 title={tooltips.addStockEntryForm.volumePerUnit}
               />
             </div>
-            <button type="button" onClick={addItem} className={style.addItemBtn} disabled={!!editingLog}>
+            <button type="button" onClick={addItem} className={style.addItemBtn}>
               ADICIONAR
             </button>
           </div>
@@ -558,7 +605,7 @@ const AddStockEntryForm = ({ setShowPopup, setRefreshData, obj, editingLog = nul
                   <td>R$ {it.CostPerUnit}</td>
                   <td>R$ {it.totalCost}</td>
                   <td>{it.volumePerUnit} {it.unitOfMeasurement}</td>
-                  <td onClick={() => !editingLog && deleteItem(idx)} className={style.deleteIcon} style={editingLog ? { opacity: 0.3, cursor: 'not-allowed' } : {}}>X</td>
+                  <td onClick={() => deleteItem(idx)} className={style.deleteIcon}>X</td>
                 </tr>
               ))}
             </tbody>

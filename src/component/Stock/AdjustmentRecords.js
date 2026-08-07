@@ -168,7 +168,11 @@ const AdjustmentRecords = ({
       alert("Esta entrada de estoque foi realizada há mais de 2 horas e não pode mais ser editada ou excluída.");
       return;
     }
-    setEditingStockLog(item);
+    setEditingStockLog({
+      ...item,
+      product: item.product || title || '',
+      productName: item.productName || item.product || title || '',
+    });
   };
 
   return (
