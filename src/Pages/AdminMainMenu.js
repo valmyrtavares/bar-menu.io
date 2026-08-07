@@ -4,6 +4,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 import { GlobalContext } from '../GlobalContext';
 import { initializeDatabase } from '../services/dbInitService';
+import HelpModal from '../component/Help/HelpModal';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const AdminMainMenu = ({ children }) => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [hideSideMenu, setHideSideMenu] = React.useState(true);
   const [warningMessage, setWarningMessage] = React.useState(false);
+  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
   const { hasClients, hasRawMaterial, hasFinancial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -229,14 +231,20 @@ const AdminMainMenu = ({ children }) => {
         </nav>
         <section>
           <div className={admin.containerIcon}>
-            <a
-              href="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Abrir documentação"
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              title="Ajuda Inteligente & Suporte"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                color: 'inherit',
+                font: 'inherit'
+              }}
             >
               <span>?</span>
-            </a>
+            </button>
           </div>
           <h1> Menu do administrador</h1>;
           <div className={admin.mainContent}>
@@ -245,6 +253,12 @@ const AdminMainMenu = ({ children }) => {
           </div>
         </section>
       </div>
+
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        currentScreenContext={location.pathname}
+      />
     </div>
   );
 };

@@ -56,6 +56,7 @@ import ManagementRecipes from './component/Recipes/ManagementRecipes';
 import FiscalObserver from './component/FiscalObserver';
 import TotenIdlePresentation from './component/TotenIdlePresentation';
 import FiscalAlertBanner from './component/Request/FiscalAlertBanner';
+import HelpModal from './component/Help/HelpModal';
 
 import { useEnsureAnonymousUser } from './Hooks/useEnsureAnonymousUser';
 
@@ -66,6 +67,35 @@ function App() {
   const global = React.useContext(GlobalContext);
 
   useEnsureAnonymousUser(); // Garante sessão anônima ativa em qualquer rota da aplicação
+
+  // Listener global para capturar cliques em TODOS os ícones '?' do sistema
+  React.useEffect(() => {
+    const handleGlobalHelpClick = (e) => {
+      const targetAnchor = e.target.closest('a[href*="docs.google.com"], [title*="documentação"], [title*="Documentação"], [title*="Ajuda"]');
+      const targetSpan = e.target.closest('span');
+      const isQuestionSpan = targetSpan && targetSpan.textContent.trim() === '?';
+
+      if (targetAnchor || isQuestionSpan) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const docUrl = targetAnchor ? targetAnchor.getAttribute('href') : null;
+        window.dispatchEvent(
+          new CustomEvent('openAiHelp', {
+            detail: {
+              screenContext: location.pathname,
+              docUrl: docUrl && docUrl.includes('http') ? docUrl : null,
+            },
+          })
+        );
+      }
+    };
+
+    document.addEventListener('click', handleGlobalHelpClick, true);
+    return () => {
+      document.removeEventListener('click', handleGlobalHelpClick, true);
+    };
+  }, [location.pathname]);
 
   React.useEffect(() => {
     const isToten = localStorage.getItem('isToten') === 'true';
@@ -102,6 +132,7 @@ function App() {
 
   return (
     <div className="ultra-wrapper">
+      <HelpModal />
       <FiscalObserver />
       <TotenIdlePresentation />
       <FiscalAlertBanner />
