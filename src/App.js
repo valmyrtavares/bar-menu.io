@@ -68,18 +68,25 @@ function App() {
 
   useEnsureAnonymousUser(); // Garante sessão anônima ativa em qualquer rota da aplicação
 
-  // Listener global para capturar cliques em TODOS os ícones '?' do sistema
   React.useEffect(() => {
     const handleGlobalHelpClick = (e) => {
+      // Ignora se o clique ocorreu dentro do próprio modal de ajuda
+      if (e.target.closest('[data-help-modal="true"]')) {
+        return;
+      }
+
       const targetAnchor = e.target.closest('a[href*="docs.google.com"], [title*="documentação"], [title*="Documentação"], [title*="Ajuda"]');
       const targetSpan = e.target.closest('span');
       const isQuestionSpan = targetSpan && targetSpan.textContent.trim() === '?';
+
+      console.log('[DEBUG App.js] handleGlobalHelpClick - targetAnchor:', targetAnchor, 'isQuestionSpan:', isQuestionSpan);
 
       if (targetAnchor || isQuestionSpan) {
         e.preventDefault();
         e.stopPropagation();
 
         const docUrl = targetAnchor ? targetAnchor.getAttribute('href') : null;
+        console.log('[DEBUG App.js] Dispatching openAiHelp with docUrl:', docUrl);
         window.dispatchEvent(
           new CustomEvent('openAiHelp', {
             detail: {

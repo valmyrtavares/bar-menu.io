@@ -61,6 +61,58 @@
     }
   }
 
+  .unansweredToggleBtn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    cursor: pointer;
+    line-height: 1;
+    color: #f1f5f9;
+    padding: 0.35rem 0.65rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 10px;
+    }
+  }
+
+  .settingsToggleBtn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    color: #94a3b8;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      transform: rotate(45deg);
+    }
+  }
+
   .closeBtn {
     background: transparent;
     border: none;
@@ -83,6 +135,196 @@
   }
 }
 
+/* Painel de Dúvidas sem Documentação */
+.unansweredPanel {
+  background: #fffbe6;
+  border-bottom: 1.5px solid #ffe58f;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: slideDown 0.25s ease-out forwards;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #873800;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #612500;
+    line-height: 1.4;
+  }
+
+  .emptyNotice {
+    font-size: 0.85rem;
+    color: #389e0d;
+    font-weight: 600;
+    background: #f6ffed;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #b7eb8f;
+  }
+
+  .unansweredList {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .unansweredCard {
+    background: #ffffff;
+    border: 1px solid #ffe58f;
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+
+    .cardHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+
+      .cardQuestion {
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: #1e293b;
+      }
+
+      .cardContext {
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+    }
+
+    .cardSnippet {
+      font-size: 0.8rem;
+      color: #475569;
+      font-style: italic;
+    }
+
+    .resolveBtn {
+      align-self: flex-end;
+      background: #52c41a;
+      color: #ffffff;
+      border: none;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #389e0d;
+      }
+    }
+  }
+}
+
+/* Painel de Configuração da Chave API */
+.settingsPanel {
+  background: #f1f5f9;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: slideDown 0.25s ease-out forwards;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  .apiKeyWrapper {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+
+    input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.88rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+
+      &:focus {
+        border-color: #6366f1;
+      }
+    }
+
+    .settingsButtons {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .saveBtn {
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+
+      &:hover {
+        background: #4338ca;
+      }
+    }
+
+    .clearBtn {
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+
+      &:hover {
+        background: #dc2626;
+      }
+    }
+  }
+
+  .linkHint {
+    font-size: 0.78rem;
+    color: #64748b;
+
+    a {
+      color: #4f46e5;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+  }
+}
+
 .body {
   padding: 1.5rem;
   overflow-y: auto;
@@ -90,6 +332,32 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+/* Indicador de Status (Online / Offline) */
+.statusIndicator {
+  display: flex;
+  align-self: flex-start;
+
+  .statusOnline {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .statusOffline {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
 }
 
 .inputSection {
@@ -179,6 +447,8 @@
   border-radius: 12px;
   padding: 1.25rem;
   position: relative;
+  max-height: 320px;
+  overflow-y: auto;
 
   .responseHeader {
     font-size: 0.8rem;
@@ -196,6 +466,17 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
+  }
+
+  .docWarningBanner {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    color: #873800;
+    font-size: 0.83rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
   }
 
   .responseText {
@@ -290,6 +571,11 @@
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

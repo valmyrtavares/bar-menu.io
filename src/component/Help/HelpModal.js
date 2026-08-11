@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../assets/styles/HelpModal.module.scss';
-import { askSystemAssistant, findScreenDoc } from '../../services/aiHelpService';
+import { 
+  askSystemAssistant, 
+  findScreenDoc, 
+  fetchUnansweredQueries, 
+  deleteUnansweredQuery 
+} from '../../services/aiHelpService';
 
 const DEFAULT_DOC_URL = 'https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7uh3xmsl0731#heading=h.txjco12lav7r';
 
@@ -11,26 +16,52 @@ const DEFAULT_SUGGESTIONS = [
   'Como dar entrada de estoque?',
 ];
 
-function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenContext: propsScreenContext }) {
-  const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const [screenContext, setScreenContext] = useState(propsScreenContext || '');
+function HelpModal({ currentScreenContext }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [screenContext, setScreenContext] = useState(currentScreenContext || '');
   const [currentDocUrl, setCurrentDocUrl] = useState(DEFAULT_DOC_URL);
+  
+  // Estados de Busca e IA
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
+  const [isDocInsufficient, setIsDocInsufficient] = useState(false);
   const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
 
-  const isOpen = propsIsOpen !== undefined ? propsIsOpen : internalIsOpen;
+  // Configurações de API Key
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [hasApiKey, setHasApiKey] = useState(false);
 
-  // Atualizar contexto e sugestões quando o modal abre ou altera o contexto de tela
+  // Painel de Dúvidas Não Documentadas
+  const [showUnansweredPanel, setShowUnansweredPanel] = useState(false);
+  const [unansweredList, setUnansweredList] = useState([]);
+
+  // Carregar API Key e Dúvidas ao abrir
   useEffect(() => {
-    const ctx = propsScreenContext || window.location.pathname;
+    const key = localStorage.getItem('REACT_APP_GEMINI_API_KEY') || '';
+    setApiKeyInput(key);
+    setHasApiKey(key.trim() !== '');
+
+    if (isOpen) {
+      loadUnansweredQueries();
+    }
+  }, [isOpen]);
+
+  const loadUnansweredQueries = async () => {
+    const list = await fetchUnansweredQueries();
+    setUnansweredList(list);
+  };
+
+  // Atualizar contexto e sugestões quando a rota muda
+  useEffect(() => {
+    const ctx = currentScreenContext || window.location.pathname;
     setScreenContext(ctx);
     updateSuggestionsForScreen(ctx);
-  }, [propsScreenContext, isOpen]);
+  }, [currentScreenContext, isOpen]);
 
-  // Listener para evento global de abertura por qualquer botão '?' do sistema
+  // Evento global para abrir o modal de qualquer interrogação '?'
   useEffect(() => {
     const handleGlobalOpen = (event) => {
       const { screenContext: ctx, docUrl } = event.detail || {};
@@ -40,7 +71,10 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
       updateSuggestionsForScreen(activeCtx);
       setResponse(null);
       setQuestion('');
-      setInternalIsOpen(true);
+      setShowSettings(false);
+      setShowUnansweredPanel(false);
+      setIsOpen(true);
+      loadUnansweredQueries();
     };
 
     window.addEventListener('openAiHelp', handleGlobalOpen);
@@ -59,10 +93,9 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
   };
 
   const handleClose = () => {
-    if (propsOnClose) {
-      propsOnClose();
-    }
-    setInternalIsOpen(false);
+    setIsOpen(false);
+    setShowSettings(false);
+    setShowUnansweredPanel(false);
   };
 
   if (!isOpen) return null;
@@ -73,12 +106,17 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
 
     setLoading(true);
     setResponse(null);
+    setIsDocInsufficient(false);
 
     try {
       const activeCtx = screenContext || window.location.pathname;
       const result = await askSystemAssistant(q, activeCtx);
       setResponse(result.answer);
       setIsAiGenerated(result.isAiGenerated);
+      setIsDocInsufficient(result.isDocInsufficient || false);
+      if (result.isDocInsufficient) {
+        loadUnansweredQueries();
+      }
     } catch (err) {
       setResponse('Desculpe, ocorreu um erro ao consultar a ajuda. Tente novamente.');
     } finally {
@@ -98,12 +136,33 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
     }
   };
 
+  const saveApiKey = () => {
+    const key = apiKeyInput.trim();
+    localStorage.setItem('REACT_APP_GEMINI_API_KEY', key);
+    setHasApiKey(key !== '');
+    setShowSettings(false);
+    alert('Chave API salva com sucesso no navegador!');
+  };
+
+  const clearApiKey = () => {
+    localStorage.removeItem('REACT_APP_GEMINI_API_KEY');
+    setApiKeyInput('');
+    setHasApiKey(false);
+    setShowSettings(false);
+    alert('Chave API removida. Retornando ao modo offline.');
+  };
+
+  const handleResolveUnanswered = async (id) => {
+    await deleteUnansweredQuery(id);
+    await loadUnansweredQueries();
+  };
+
   const openFullDoc = () => {
     window.open(currentDocUrl || DEFAULT_DOC_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className={styles.overlay} onClick={handleClose}>
+    <div className={styles.overlay} onClick={handleClose} data-help-modal="true">
       <div
         className={styles.modalContainer}
         onClick={(e) => e.stopPropagation()}
@@ -114,13 +173,110 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
             <span className={styles.aiBadge}>IA Assistente</span>
             <h3>Ajuda & Suporte</h3>
           </div>
-          <button className={styles.closeBtn} onClick={handleClose} title="Fechar">
-            &times;
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              type="button"
+              className={styles.unansweredToggleBtn}
+              onClick={() => {
+                setShowUnansweredPanel(!showUnansweredPanel);
+                setShowSettings(false);
+              }}
+              title="Dúvidas Pendentes de Documentação"
+            >
+              📋 {unansweredList.length > 0 && <span className={styles.badge}>{unansweredList.length}</span>}
+            </button>
+            <button
+              type="button"
+              className={styles.settingsToggleBtn}
+              onClick={() => {
+                setShowSettings(!showSettings);
+                setShowUnansweredPanel(false);
+              }}
+              title="Configurar IA"
+            >
+              ⚙️
+            </button>
+            <button className={styles.closeBtn} onClick={handleClose} title="Fechar">
+              &times;
+            </button>
+          </div>
         </div>
+
+        {/* Painel de Dúvidas sem Documentação */}
+        {showUnansweredPanel && (
+          <div className={styles.unansweredPanel}>
+            <h4>📋 Dúvidas sem Documentação ({unansweredList.length})</h4>
+            <p>Estas perguntas foram feitas no sistema, mas não constam no manual oficial:</p>
+            {unansweredList.length === 0 ? (
+              <span className={styles.emptyNotice}>Nenhuma dúvida pendente! A documentação cobre todas as perguntas feitas até agora.</span>
+            ) : (
+              <div className={styles.unansweredList}>
+                {unansweredList.map((item) => (
+                  <div key={item.id} className={styles.unansweredCard}>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.cardQuestion}>"{item.question}"</span>
+                      <span className={styles.cardContext}>Tela: {item.screenContext}</span>
+                    </div>
+                    {item.aiResponseSnippet && (
+                      <div className={styles.cardSnippet}>IA: {item.aiResponseSnippet}</div>
+                    )}
+                    <button
+                      type="button"
+                      className={styles.resolveBtn}
+                      onClick={() => handleResolveUnanswered(item.id)}
+                    >
+                      ✓ Marcar como Documentado
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Painel de Configurações (Chave API) */}
+        {showSettings && (
+          <div className={styles.settingsPanel}>
+            <h4>Configuração de Inteligência Artificial</h4>
+            <p>Insira sua API Key do Google Gemini para ativar o assistente dinâmico por voz/chat:</p>
+            <div className={styles.apiKeyWrapper}>
+              <input
+                type="password"
+                placeholder="Cole sua API Key do Gemini aqui (AIzaSy...)"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+              />
+              <div className={styles.settingsButtons}>
+                <button type="button" className={styles.saveBtn} onClick={saveApiKey}>
+                  Salvar
+                </button>
+                {hasApiKey && (
+                  <button type="button" className={styles.clearBtn} onClick={clearApiKey}>
+                    Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+            <span className={styles.linkHint}>
+              Obtenha uma chave gratuita acessando o{' '}
+              <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">
+                Google AI Studio
+              </a>.
+            </span>
+          </div>
+        )}
 
         {/* Body */}
         <div className={styles.body}>
+          {/* Indicador de Status */}
+          <div className={styles.statusIndicator}>
+            {hasApiKey ? (
+              <span className={styles.statusOnline}>✦ Modo Inteligência Artificial Ativo</span>
+            ) : (
+              <span className={styles.statusOffline}>🔎 Modo Offline (Buscador Local Ativo)</span>
+            )}
+          </div>
+
           <div className={styles.inputSection}>
             <label htmlFor="aiHelpInput">
               Faça uma pergunta objetiva sobre o sistema:
@@ -129,7 +285,7 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
               <input
                 id="aiHelpInput"
                 type="text"
-                placeholder="Ex: Para que serve essa tela? ou Como cadastrar produto?"
+                placeholder="Ex: Como eu altero a imagem de um prato?"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -175,6 +331,13 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
                   <span className={styles.aiIndicator}>✦ Gerado por Gemini IA</span>
                 )}
               </div>
+              
+              {isDocInsufficient && (
+                <div className={styles.docWarningBanner}>
+                  ⚠️ <strong>Aviso de Documentação:</strong> Esta funcionalidade ainda não consta no manual oficial do sistema. A sua pergunta foi salva na lista de atualizações do administrador.
+                </div>
+              )}
+
               <div className={styles.responseText}>{response}</div>
             </div>
           )}
@@ -195,3 +358,4 @@ function HelpModal({ isOpen: propsIsOpen, onClose: propsOnClose, currentScreenCo
 }
 
 export default HelpModal;
+

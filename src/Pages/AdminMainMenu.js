@@ -4,7 +4,6 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 import { GlobalContext } from '../GlobalContext';
 import { initializeDatabase } from '../services/dbInitService';
-import HelpModal from '../component/Help/HelpModal';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
@@ -12,7 +11,6 @@ const AdminMainMenu = ({ children }) => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [hideSideMenu, setHideSideMenu] = React.useState(true);
   const [warningMessage, setWarningMessage] = React.useState(false);
-  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
   const { hasClients, hasRawMaterial, hasFinancial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -232,7 +230,6 @@ const AdminMainMenu = ({ children }) => {
         <section>
           <div className={admin.containerIcon}>
             <button
-              onClick={() => setIsHelpOpen(true)}
               title="Ajuda Inteligente & Suporte"
               style={{
                 background: 'transparent',
@@ -253,12 +250,6 @@ const AdminMainMenu = ({ children }) => {
           </div>
         </section>
       </div>
-
-      <HelpModal
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
-        currentScreenContext={location.pathname}
-      />
     </div>
   );
 };
