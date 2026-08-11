@@ -133,16 +133,17 @@ const RecipeDish = ({
           : 0,
       }));
     } else {
+      const normalizedValue = id === 'amount' ? value.replace(',', '.') : value;
       setIngridients({
         ...ingridients,
-        [id]: value,
+        [id]: normalizedValue,
       });
       if (id === 'amount') {
         const costPerUnit = ingridients.costPerUnit || 0;
-        const newPortionCost = parseFloat(value) * costPerUnit;
+        const newPortionCost = parseFloat(normalizedValue) * costPerUnit;
         setIngridients((prevForm) => ({
           ...prevForm,
-          portionCost: newPortionCost,
+          portionCost: isNaN(newPortionCost) ? 0 : newPortionCost,
         }));
       }
     }
