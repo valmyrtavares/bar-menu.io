@@ -81,12 +81,23 @@ const ExpensesManegementList = () => {
       const expensesData = await getBtnData('outgoing');
       const outgoingList = Array.isArray(expensesData) ? expensesData : [];
 
-      const mergedItems = outgoingList.flatMap((expense) =>
+      const filteredOutgoingList = outgoingList.filter((exp) => {
+        const nameLower = (exp.name || '').toLowerCase();
+        const categoryLower = (exp.category || '').toLowerCase();
+        const entryTypeLower = (exp.entryType || '').toLowerCase();
+        return !(
+          nameLower.includes('descarte') ||
+          categoryLower === 'descarte' ||
+          entryTypeLower === 'descarte'
+        );
+      });
+
+      const mergedItems = filteredOutgoingList.flatMap((expense) =>
         Array.isArray(expense.items) ? expense.items : []
       );
 
       // Map names for Stock entries
-      const mappedList = outgoingList.map(exp => ({
+      const mappedList = filteredOutgoingList.map(exp => ({
         ...exp,
         name: exp.entryType === 'stock' ? 'Entrada de estoque' : exp.name
       }));
