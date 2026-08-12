@@ -639,10 +639,10 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
 
   const toggleFormItemsByExpenseType = (id, value) => {
     if (id === 'name') {
-      const selectedExpense = expensesList.filter(
+      const selectedExpense = expensesList.find(
         (item) => item.humanId === Number(value)
       );
-      if (selectedExpense[0].multiply === 'composto') {
+      if (selectedExpense && selectedExpense.multiply === 'composto') {
         setShowItemsDetailsForm(true);
         setEntryType('expense');
       } else {
@@ -720,16 +720,18 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           {forcedEntryType !== 'stock' && (
             <>
               <div className={style.selectform}>
+                <label style={{ display: 'block', whiteSpace: 'nowrap', marginBottom: '4px', fontSize: '16px' }}>Despesa</label>
                 <select id="name" required value={form.expenseId} onChange={handleChange} onFocus={handleFocus}>
-                  <option value="">Selecione uma despesa</option>
+                  <option value="" disabled hidden>Selecione uma despesa</option>
                   {expensesList && expensesList.map((expense, index) => (
                     <option key={index} value={String(expense.humanId)}>{expense.name}</option>
                   ))}
                 </select>
               </div>
               <div className={style.selectform}>
+                <label style={{ display: 'block', whiteSpace: 'nowrap', marginBottom: '4px', fontSize: '16px' }}>Tipo de custo</label>
                 <select id="category" value={form.category} required onChange={handleChange}>
-                  <option value="" disabled hidden>Tipo de custo</option>
+                  <option value="" disabled hidden>Selecione</option>
                   <option value="fixed">Fixo</option>
                   <option value="variable">Variável</option>
                 </select>
@@ -737,8 +739,9 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             </>
           )}
           <div className={style.selectform} title={tooltips.addStockEntryForm.provider}>
+            <label style={{ display: 'block', whiteSpace: 'nowrap', marginBottom: '4px', fontSize: '16px' }}>Fornecedor</label>
             <select id="provider" required onChange={handleChange} value={form.provider} title={tooltips.addStockEntryForm.provider}>
-              <option value="">Fornecedor</option>
+              <option value="" disabled hidden>Selecione</option>
               {providerList && providerList.map((category, index) => (
                 <option key={index} value={category.provider}>{category.name}</option>
               ))}
@@ -746,17 +749,36 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           </div>
 
           {/* Row 2: Value, DueDate, NumberOfTimes */}
-          <Input 
-            id="value" 
-            required 
-            label="Valor" 
-            value={form.value} 
-            type="number" 
-            onChange={handleChange} 
-            readOnly={forcedEntryType === 'stock'}
-            style={forcedEntryType === 'stock' ? { backgroundColor: '#f0f0f0', cursor: 'not-allowed' } : {}}
-            title={tooltips.addStockEntryForm.value}
-          />
+          {showItemsDetailsForm ? (
+            <div 
+              className={style.customTooltipWrapper} 
+              data-tooltip="Nesta modalidade de despesa composta (com itens), este campo será preenchido automaticamente com a soma do custo dos itens adicionados abaixo."
+            >
+              <Input 
+                id="value" 
+                required 
+                label="Valor" 
+                value={form.value} 
+                type="number" 
+                onChange={handleChange} 
+                readOnly
+                style={{ opacity: 0.4, cursor: 'not-allowed', backgroundColor: '#f0f0f0' }}
+                title=""
+              />
+            </div>
+          ) : (
+            <Input 
+              id="value" 
+              required 
+              label="Valor" 
+              value={form.value} 
+              type="number" 
+              onChange={handleChange} 
+              readOnly={forcedEntryType === 'stock'}
+              style={forcedEntryType === 'stock' ? { backgroundColor: '#f0f0f0', cursor: 'not-allowed' } : {}}
+              title={tooltips.addStockEntryForm.value}
+            />
+          )}
           {forcedEntryType !== 'stock' && (
             <Input id="dueDate" required label="Vencimento" value={form.dueDate} type="date" onChange={handleChange} />
           )}
@@ -764,26 +786,8 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             <Input id="numberOfTimes" label="Parcelas" value={form.numberOfTimes} type="number" onChange={handleChange} />
           )}
 
-          {/* Row 3: Account, PaymentDate, Confirmation */}
+          {/* Row 3: Account, etc */}
           <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
-          <Input 
-            id="paymentDate" 
-            required={form.category !== 'fixed' || forcedEntryType === 'stock'} 
-            label="Data Pagamento" 
-            value={form.paymentDate} 
-            type="date" 
-            onChange={handleChange} 
-          />
-          {forcedEntryType !== 'stock' && (
-            <Input 
-              id="confirmation" 
-              required={form.category !== 'fixed'} 
-              label="Confirmação" 
-              value={form.confirmation} 
-              type="number" 
-              onChange={handleChange} 
-            />
-          )}
 
           {/* Row 4: PaymentProof */}
           <div className={style.paymentProofRow}>
