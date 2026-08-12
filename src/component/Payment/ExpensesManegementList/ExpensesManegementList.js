@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import Title from '../../title.js';
 import FilterExpenses from './filterExpenses.js';
 import Table from '../../Table.js';
+import RecurringActionPopup from './RecurringActionPopup.js';
 
 const formatDateToDMY = (dateStr) => {
   if (!dateStr) return '-';
@@ -64,11 +65,21 @@ const ExpensesManegementList = () => {
   const [openSumaryPopup, setOpenSumaryPopup] = React.useState(false);
   const [oneExpense, setOneExpense] = React.useState(null);
 
+  const [showRecurringActionPopup, setShowRecurringActionPopup] = React.useState(false);
+  const [pendingAction, setPendingAction] = React.useState('');
+  const [pendingExpense, setPendingExpense] = React.useState(null);
+
   React.useEffect(() => {
     fetchExpensesData();
     const params = new URLSearchParams(window.location.search);
     if (params.get('openPopup') === 'registerProduct' || params.get('registerProduct') === 'true') {
       setShowProductRegisterPopup(true);
+    }
+    if (params.get('openPopup') === 'registerExpense') {
+      setShowExpensesRegisterPopup(true);
+    }
+    if (params.get('openPopup') === 'registerProvider') {
+      setShowProviderRegisterPopup(true);
     }
   }, []);
 
@@ -180,32 +191,80 @@ const parseToDate = (dateVal) => {
   };
 
   const editContent = (data) => {
+    if (data.numberOfTimes > 1 || data.groupId) {
+      setPendingExpense(data);
+      setPendingAction('edit');
+      setShowRecurringActionPopup(true);
+      return;
+    }
+    proceedWithEdit(data, false);
+  };
+
+  const proceedWithEdit = (data, applyToFuture) => {
     if (data.product && data.idProduct) {
       const expenseSelected = originalExpensesList.find(
         (expense) => expense.expenseId === data.expenseId
       );
-      setObj(expenseSelected);
+      setObj({ ...expenseSelected, applyToFuture });
       setShowExpensesPopup(true);
       return;
     }
-    setObj(data);
+    setObj({ ...data, applyToFuture });
     setShowExpensesPopup(true);
   };
 
   const deleteExpenses = async (item, permission) => {
-    setExcludeExpense(item);
-    setShowWarningDeltePopup(true);
+    if (!permission) {
+      // First click from the table
+      if (item.numberOfTimes > 1 || item.groupId) {
+        setPendingExpense(item);
+        setPendingAction('delete');
+        setShowRecurringActionPopup(true);
+        return;
+      }
+      setExcludeExpense(item);
+      setShowWarningDeltePopup(true);
+      return;
+    }
+    
+    // Confirmed from DefaultComumMessage (only this item)
     if (permission && excludeExpense) {
       setShowWarningDeltePopup(false);
+      await executeDeleteLogic(excludeExpense, false);
+    }
+  };
 
+  const executeDeleteLogic = async (item, applyToFuture) => {
+    if (applyToFuture) {
+      const targetDate = parseToDate(item.dueDate || item.paymentDate || item.date) || new Date(0);
+      
+      const futureExpenses = expensesList.filter((expense) => {
+        if (item.groupId) {
+          return expense.groupId === item.groupId && (parseToDate(expense.dueDate || expense.paymentDate || expense.date) || new Date(0)) >= targetDate;
+        }
+        // Fallback for older expenses
+        return (
+          expense.expenseId === item.expenseId &&
+          expense.provider === item.provider &&
+          (expense.numberOfTimes > 1) &&
+          (parseToDate(expense.dueDate || expense.paymentDate || expense.date) || new Date(0)) >= targetDate
+        );
+      });
+
+      for (const expense of futureExpenses) {
+        if (Array.isArray(expense.items) || expense.name) {
+          await deleteData('outgoing', expense.id);
+        }
+      }
+    } else {
       if (Array.isArray(item.items) || item.name) {
-        deleteData('outgoing', item.id);
+        await deleteData('outgoing', item.id);
       } else {
         const targetExpense = expensesList.find(
           (expense) => expense.expenseId === item.expenseId
         );
 
-        if (targetExpense.items && targetExpense.items.length > 0) {
+        if (targetExpense && targetExpense.items && targetExpense.items.length > 0) {
           const filteredItems = targetExpense.items.filter(
             (i) => i.idProduct !== item.idProduct
           );
@@ -216,7 +275,26 @@ const parseToDate = (dateVal) => {
           await updateCollection('outgoing', targetExpense.id, updatedExpense);
         }
       }
-      setRefreshData((prev) => !prev);
+    }
+    setRefreshData((prev) => !prev);
+  };
+
+  const handleRecurringConfirmOnlyThis = () => {
+    setShowRecurringActionPopup(false);
+    if (pendingAction === 'edit') {
+      proceedWithEdit(pendingExpense, false);
+    } else if (pendingAction === 'delete') {
+      setExcludeExpense(pendingExpense);
+      setShowWarningDeltePopup(true);
+    }
+  };
+
+  const handleRecurringConfirmAllFuture = async () => {
+    setShowRecurringActionPopup(false);
+    if (pendingAction === 'edit') {
+      proceedWithEdit(pendingExpense, true);
+    } else if (pendingAction === 'delete') {
+      await executeDeleteLogic(pendingExpense, true);
     }
   };
 
@@ -379,10 +457,30 @@ const parseToDate = (dateVal) => {
         />
       )}
 
-      {showExpensesRegisterPopup && <RegisterExpenses setShowPopup={setShowExpensesRegisterPopup} obj={obj} />}
-      {showProviderRegisterPopup && <RegisterProvider setShowPopup={setShowProviderRegisterPopup} obj={obj} />}
-      {showProductRegistePopup && <RegisterProduct setShowPopup={setShowProductRegisterPopup} obj={obj} />}
-      {showExpensesPopup && <AddExpensesForm setShowPopup={setShowExpensesPopup} setRefreshData={setRefreshData} obj={obj} />}
+      {showRecurringActionPopup && pendingExpense && (
+        <RecurringActionPopup
+          action={pendingAction}
+          expense={pendingExpense}
+          onConfirmOnlyThis={handleRecurringConfirmOnlyThis}
+          onConfirmAllFuture={handleRecurringConfirmAllFuture}
+          onClose={() => setShowRecurringActionPopup(false)}
+        />
+      )}
+
+      {showExpensesRegisterPopup && <RegisterExpenses setShowPopup={(val) => { setShowExpensesRegisterPopup(val); setRefreshData(!refreshData); }} obj={obj} />}
+      {showProviderRegisterPopup && <RegisterProvider setShowPopup={(val) => { setShowProviderRegisterPopup(val); setRefreshData(!refreshData); }} obj={obj} />}
+      {showProductRegistePopup && <RegisterProduct setShowPopup={(val) => { setShowProductRegisterPopup(val); setRefreshData(!refreshData); }} obj={obj} />}
+      {showExpensesPopup && (
+        <AddExpensesForm 
+          setShowPopup={setShowExpensesPopup} 
+          setRefreshData={setRefreshData} 
+          obj={obj} 
+          outgoingExpensesList={expensesList} 
+          onOpenRegisterExpense={() => window.open('/admin/expenses?openPopup=registerExpense', '_blank')}
+          onOpenRegisterProvider={() => window.open('/admin/expenses?openPopup=registerProvider', '_blank')}
+          refreshDataTrigger={refreshData}
+        />
+      )}
       {openSumaryPopup && <SumaryExpensesListPopup setOpenSumaryPopup={setOpenSumaryPopup} oneExpense={oneExpense} />}
 
       <div className={expenses.titleTable}>
