@@ -369,15 +369,17 @@ const RegisterProduct = ({ setShowPopup }) => {
 
       <form onSubmit={handleSubmit} className="m-1">
         <div className={product.containerInputs}>
-          <Input
-            id="name"
-            autoComplete="off"
-            required
-            label="Nome"
-            value={form.name}
-            type="text"
-            onChange={handleChange}
-          />
+          <div className={product.nameInput}>
+            <Input
+              id="name"
+              autoComplete="off"
+              required
+              label="Nome"
+              value={form.name}
+              type="text"
+              onChange={handleChange}
+            />
+          </div>
 
           <div className="checkbox-form">
             <label htmlFor="operationSupplies">
