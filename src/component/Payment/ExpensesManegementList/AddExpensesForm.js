@@ -19,7 +19,7 @@ import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 import { tooltips } from '../../../constants/tooltips.js';
 
-const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType, outgoingExpensesList, onOpenRegisterExpense, onOpenRegisterProvider, refreshDataTrigger }) => {
+const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType, outgoingExpensesList, onOpenRegisterExpense, onOpenRegisterProvider, onOpenRegisterProduct, refreshDataTrigger }) => {
   const global = React.useContext(GlobalContext);
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
@@ -990,9 +990,21 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType, o
               Adicionar
             </button>
           )}
+
           <button disabled={isSubmitting} className={style.btnSubmit}>
             {isSubmitting ? 'Enviando...' : 'Enviar'}
           </button>
+
+          {showItemsDetailsForm && (
+            <button 
+              type="button" 
+              className={style.registerNotRegisteredBtnFooter}
+              onClick={onOpenRegisterProduct}
+              title="Cadastrar produto não encontrado em outra aba"
+            >
+              cadastrar produto<br />não encontrado
+            </button>
+          )}
         </div>
       </form>
 

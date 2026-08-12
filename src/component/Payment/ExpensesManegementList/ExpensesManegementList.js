@@ -478,6 +478,7 @@ const parseToDate = (dateVal) => {
           outgoingExpensesList={expensesList} 
           onOpenRegisterExpense={() => window.open('/admin/expenses?openPopup=registerExpense', '_blank')}
           onOpenRegisterProvider={() => window.open('/admin/expenses?openPopup=registerProvider', '_blank')}
+          onOpenRegisterProduct={() => window.open('/admin/expenses?openPopup=registerProduct', '_blank')}
           refreshDataTrigger={refreshData}
         />
       )}

@@ -210,6 +210,36 @@
         margin-top: 20px;
         width: 100%;
         padding-bottom: 20px;
+        position: relative;
+
+        .registerNotRegisteredBtnFooter {
+            position: absolute;
+            right: 0;
+            bottom: 5px;
+            background-color: #FCA311 !important;
+            color: #14213D !important;
+            font-weight: 800;
+            font-size: 11px;
+            line-height: 1.2;
+            padding: 8px 14px !important;
+            height: 44px !important;
+            border: 1px solid #e5940e !important;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            text-align: center;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: all 0.2s ease;
+            
+            &:hover {
+                background-color: #14213D !important;
+                color: #FFFFFF !important;
+                border-color: #14213D !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+        }
     }
 }
 
