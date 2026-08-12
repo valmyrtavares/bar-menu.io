@@ -9,6 +9,8 @@ const Table = ({
   onDelete,
   eventClick,
   labelEventClick,
+  getDisableEditReason,
+  getDisableDeleteReason,
 }) => {
   const hasData = Array.isArray(data) && data.length > 0;
   const hasColumns = Array.isArray(columns) && columns.length > 0;
@@ -43,34 +45,50 @@ const Table = ({
               </td>
             </tr>
           ) : (
-            data.map((item, rowIndex) => (
-              <tr key={item.id || rowIndex}>
-                {columns.map((col, colIndex) => (
-                  <td key={colIndex}>
-                    {formatCellValue(item[col.valorDaColuna])}
+            data.map((item, rowIndex) => {
+              const editReason = getDisableEditReason ? getDisableEditReason(item) : null;
+              const deleteReason = getDisableDeleteReason ? getDisableDeleteReason(item) : null;
+
+              return (
+                <tr key={item.id || rowIndex}>
+                  {columns.map((col, colIndex) => (
+                    <td key={colIndex}>
+                      {formatCellValue(item[col.valorDaColuna])}
+                    </td>
+                  ))}
+                  <td className={styles.actions}>
+                    {eventClick && (
+                      <button onClick={() => eventClick(item)}>
+                        {labelEventClick}
+                      </button>
+                    )}
+                    {editReason ? (
+                      <div className={styles.customTooltipWrapper} data-tooltip={editReason}>
+                        <button className={styles.editBtn} disabled>
+                          Editar
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => onEdit && onEdit(item)} className={styles.editBtn}>
+                        Editar
+                      </button>
+                    )}
+                    
+                    {deleteReason ? (
+                      <div className={styles.customTooltipWrapper} data-tooltip={deleteReason}>
+                        <button className={styles.deleteBtn} disabled>
+                          Excluir
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => onDelete && onDelete(item)} className={styles.deleteBtn}>
+                        Excluir
+                      </button>
+                    )}
                   </td>
-                ))}
-                <td className={styles.actions}>
-                  {eventClick && (
-                    <button onClick={() => eventClick(item)}>
-                      {labelEventClick}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => onEdit && onEdit(item)}
-                    className={styles.editBtn}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => onDelete && onDelete(item)}
-                    className={styles.deleteBtn}
-                  >
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

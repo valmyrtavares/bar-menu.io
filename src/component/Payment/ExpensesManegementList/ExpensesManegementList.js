@@ -349,6 +349,14 @@ const parseToDate = (dateVal) => {
     }));
   }, [expensesList]);
 
+  const getDisableReason = (item) => {
+    const isEstoque = item.entryType === 'stock' || (item.name && item.name.toLowerCase() === 'entrada de estoque');
+    if (isEstoque) {
+      return "Entradas de estoque só podem ser editadas ou excluídas pelo Histórico de Ajustes de Estoque. E apenas até 2 horas após o registro original.";
+    }
+    return null;
+  };
+
   return (
     <div className={expenses.customerListContainer}>
       <div className={expenses.containerIcon}>
@@ -402,6 +410,8 @@ const parseToDate = (dateVal) => {
           onDelete={deleteExpenses}
           eventClick={openLoadSumaryPopup}
           labelEventClick="Ver Itens"
+          getDisableEditReason={getDisableReason}
+          getDisableDeleteReason={getDisableReason}
         />
       </div>
     </div>
