@@ -19,7 +19,7 @@ import { GlobalContext } from '../../../GlobalContext';
 import { checkUnavaiableRawMaterial } from '../../../Helpers/Helpers.js';
 import { tooltips } from '../../../constants/tooltips.js';
 
-const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType }) => {
+const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType, outgoingExpensesList, onOpenRegisterExpense, onOpenRegisterProvider, refreshDataTrigger }) => {
   const global = React.useContext(GlobalContext);
   const [loadingAvailableMenuDishes, setLoadingAvailableMenuDishes] =
     React.useState(false);
@@ -39,6 +39,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
     entryType: forcedEntryType || 'expense',
     category: forcedEntryType === 'stock' ? 'variable' : '',
     name: forcedEntryType === 'stock' ? 'Entrada de Estoque' : '',
+    groupId: '',
   });
 
   const [item, setItem] = React.useState({
@@ -93,7 +94,14 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
       }
     };
     fetchRegisterLists();
-  }, [forcedEntryType]);
+
+    const handleFocus = () => fetchRegisterLists();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [forcedEntryType, refreshDataTrigger]);
 
   const sortedData = (list) => {
     return list.sort((a, b) => a.name.localeCompare(b.name));
@@ -136,6 +144,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         numberOfTimes: obj.numberOfTimes || 1,
         paymentProof: obj.paymentProof || '',
         entryType: obj.entryType || 'expense',
+        groupId: obj.groupId || '',
       });
 
       if (obj.items && obj.items.length > 0) {
@@ -155,6 +164,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
         provider: '',
         items: [],
         paymentProof: '',
+        groupId: '',
       });
     }
   }, [obj]);
@@ -485,6 +495,28 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
   };
 
+  const parseToDate = (dateVal) => {
+    if (!dateVal) return null;
+    if (dateVal instanceof Date) return dateVal;
+    if (typeof dateVal.toDate === 'function') return dateVal.toDate();
+    if (typeof dateVal.seconds === 'number') return new Date(dateVal.seconds * 1000);
+    if (typeof dateVal === 'number') return isNaN(new Date(dateVal).getTime()) ? null : new Date(dateVal);
+    if (typeof dateVal === 'string') {
+      const str = dateVal.trim();
+      if (!str) return null;
+      if (str.includes('/')) {
+        const parts = str.split(' - ')[0].split(' ')[0].trim().split('/');
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      if (str.includes('-')) {
+        const parts = str.split('T')[0].split(' ')[0].trim().split('-');
+        if (parts.length === 3) return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+    }
+    const d = new Date(dateVal);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -495,8 +527,39 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
 
     const saveExpense = async (data) => {
       if (obj) {
-        const docRef = doc(db, 'outgoing', obj.id);
-        await updateDoc(docRef, data);
+        if (obj.applyToFuture && outgoingExpensesList) {
+          const targetDate = parseToDate(obj.dueDate || obj.paymentDate || obj.date) || new Date(0);
+          
+          const futureExpenses = outgoingExpensesList.filter((expense) => {
+            if (obj.groupId) {
+              return expense.groupId === obj.groupId && (parseToDate(expense.dueDate || expense.paymentDate || expense.date) || new Date(0)) >= targetDate;
+            }
+            return (
+              expense.expenseId === obj.expenseId &&
+              expense.provider === obj.provider &&
+              (expense.numberOfTimes > 1) &&
+              (parseToDate(expense.dueDate || expense.paymentDate || expense.date) || new Date(0)) >= targetDate
+            );
+          });
+
+          for (const expense of futureExpenses) {
+            const docRef = doc(db, 'outgoing', expense.id);
+            // We only update the common fields that were changed, keeping the specific dates of the future occurrences
+            const updatedData = {
+              ...expense,
+              value: data.value,
+              account: data.account,
+              provider: data.provider,
+              items: data.items,
+              category: data.category,
+              paymentProof: data.paymentProof,
+            };
+            await updateDoc(docRef, updatedData);
+          }
+        } else {
+          const docRef = doc(db, 'outgoing', obj.id);
+          await updateDoc(docRef, data);
+        }
       } else {
         await addDoc(collection(db, 'outgoing'), data);
       }
@@ -506,6 +569,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
       if (!obj && isFixed && installments > 1) {
         // Create multiple installments
         const baseDueDate = new Date(form.dueDate + 'T00:00:00');
+        const groupId = `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         for (let i = 0; i < installments; i++) {
           const installmentDate = new Date(baseDueDate);
           installmentDate.setMonth(baseDueDate.getMonth() + i);
@@ -521,6 +585,7 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
             confirmation: i === 0 ? Number(form.confirmation) : 0,
             numberOfTimes: installments,
             paymentProof: i === 0 ? form.paymentProof : '',
+            groupId: groupId,
           };
 
           const enrichedItems = installmentData.items.map((item) => ({
@@ -787,28 +852,56 @@ const AddExpensesForm = ({ setShowPopup, setRefreshData, obj, forcedEntryType })
           )}
 
           {/* Row 3: Account, etc */}
-          <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
+          <div className={style.inputWithBtnRow}>
+            <div className={style.flexGrow}>
+              <Input id="account" required label="Nota fiscal" value={form.account} type="text" onChange={handleChange} title={tooltips.addStockEntryForm.account} />
+            </div>
+            {forcedEntryType !== 'stock' && (
+              <button 
+                type="button" 
+                className={style.registerNotRegisteredBtn}
+                onClick={onOpenRegisterExpense}
+                title="Cadastrar despesa não encontrada em outra aba"
+              >
+                cadastrar despesa<br />não encontrada
+              </button>
+            )}
+          </div>
 
           {/* Row 4: PaymentProof */}
           <div className={style.paymentProofRow}>
-            <Input
-              id="paymentProof"
-              autoComplete="off"
-              label="Link do Comprovante (PDF)"
-              value={form.paymentProof}
-              type="text"
-              onChange={handleChange}
-              title={tooltips.addStockEntryForm.paymentProof}
-            />
-            {form.paymentProof && (
-              <button 
-                type="button" 
-                className={style.accessBtn}
-                onClick={() => window.open(form.paymentProof, '_blank')}
-              >
-                Acessar Comprovante
-              </button>
-            )}
+            <div className={style.flexGrow}>
+              <Input
+                id="paymentProof"
+                autoComplete="off"
+                label="Link do Comprovante (PDF)"
+                value={form.paymentProof}
+                type="text"
+                onChange={handleChange}
+                title={tooltips.addStockEntryForm.paymentProof}
+              />
+            </div>
+            <div className={style.paymentProofBtns}>
+              {form.paymentProof && (
+                <button 
+                  type="button" 
+                  className={style.accessBtn}
+                  onClick={() => window.open(form.paymentProof, '_blank')}
+                >
+                  Acessar Comprovante
+                </button>
+              )}
+              {forcedEntryType !== 'stock' && (
+                <button 
+                  type="button" 
+                  className={style.registerNotRegisteredBtn}
+                  onClick={onOpenRegisterProvider}
+                  title="Cadastrar fornecedor não encontrado em outra aba"
+                >
+                  cadastrar fornecedor<br />não encontrado
+                </button>
+              )}
+            </div>
           </div>
         </div>
         {showItemsDetailsForm && (
