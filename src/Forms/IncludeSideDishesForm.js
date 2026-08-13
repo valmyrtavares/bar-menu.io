@@ -26,11 +26,14 @@ function IncludeSideDishesForm({
   }, []);
 
   React.useEffect(() => {
-    if (newSideDishesList.length > 0) {
+    if (newSideDishesList && newSideDishesList.length > 0) {
       setSelectedSideDishes(newSideDishesList);
     }
-    if (maxLimitSideDishes) {
-      setMaxLimitSideDishes(Number(maxLimitSideDishes));
+    if (maxLimitSideDishes !== undefined && maxLimitSideDishes !== null) {
+      const num = Number(maxLimitSideDishes);
+      setMaxLimitSideDishes(num < 1 ? 1 : num);
+    } else {
+      setMaxLimitSideDishes(1);
     }
   }, []);
 
@@ -82,10 +85,11 @@ function IncludeSideDishesForm({
 
   const handleChange = ({ target }) => {
     const { value } = target;
-    if (value < 0) {
-      setMaxLimitSideDishes(Math.abs(value));
+    const numValue = Number(value);
+    if (numValue < 1) {
+      setMaxLimitSideDishes(1);
     } else {
-      setMaxLimitSideDishes(value);
+      setMaxLimitSideDishes(numValue);
     }
   };
 

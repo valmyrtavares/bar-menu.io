@@ -45,7 +45,7 @@ function AddDishesForm({
     display: false,
     carrossel: false,
     sideDishesElementList: [],
-    maxLimitSideDishes: 0,
+    maxLimitSideDishes: 1,
     CustomizedPrice: {},
     costProfitMarginCustomized: {},
   });
@@ -59,7 +59,7 @@ function AddDishesForm({
   const [showPopupCustomizePrice, setShowPopupCustomizePrice] =
     React.useState(false);
   const [newSideDishesList, setNewSideDishesList] = React.useState([]);
-  const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState([]);
+  const [maxLimitSideDishes, setMaxLimitSideDishes] = React.useState(1);
   const [customizedPriceObj, setCustomizedPriceObj] = React.useState({});
   const [costProfitMarginCustomized, setCostProfitMarginCustomized] =
     React.useState({});
@@ -103,8 +103,9 @@ function AddDishesForm({
   React.useEffect(() => {
     if (dataObj) {
       setForm(dataObj);
-      setNewSideDishesList(dataObj.sideDishesElementList);
-      setMaxLimitSideDishes(dataObj.maxLimitSideDishes);
+      setNewSideDishesList(dataObj.sideDishesElementList || []);
+      const loadedLimit = Number(dataObj.maxLimitSideDishes);
+      setMaxLimitSideDishes(loadedLimit < 1 || isNaN(loadedLimit) ? 1 : loadedLimit);
       setCustomizedPriceObj(dataObj.CustomizedPrice);
       setRecipe(dataObj.recipe ? dataObj.recipe : {});
       setCostProfitMarginCustomized(
