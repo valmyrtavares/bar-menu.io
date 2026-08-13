@@ -5,8 +5,6 @@ import style from '../../assets/styles/PriceAndExpenseBuilder.module.scss';
 import Tooltip from '../Tooltip';
 import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
-import { calculateItemCost } from '../../Helpers/Helpers';
-import { updateCollection } from '../../api/Api';
 import { tooltips } from '../../constants/tooltips.js';
 
 const PriceAndExpenseBuilder = ({
@@ -99,42 +97,7 @@ const PriceAndExpenseBuilder = ({
     }
   };
 
-  const calculatedRecipeCost = async () => {
-    try {
-      if (!recipe || (typeof recipe === 'object' && Object.keys(recipe).length === 0)) {
-        alert('Esse produto não tem receita criada, por isso é impossível calcular o custo.');
-        return;
-      }
 
-      if (typeof recipe.FinalingridientsList === 'object' && !Array.isArray(recipe.FinalingridientsList)) {
-        const lists = Object.values(recipe.FinalingridientsList);
-        const allEmpty = lists.every((arr) => Array.isArray(arr) && arr.length === 0);
-        if (allEmpty) {
-          alert('Esse produto não tem receita criada, por isso é impossível calcular o custo. Atualize a receita para que o custo possa ser preenchido corretamente pelo sistema.');
-          return;
-        }
-      }
-
-      const response = await calculateItemCost(recipe);
-      if (response.default !== undefined) {
-        await updateCollection('item', id, { 'costPriceObj.cost': response.default });
-      } else if (costProfitMarginCustomized && typeof costProfitMarginCustomized === 'object') {
-        const updates = {};
-        const costMap = response;
-        ['firstPrice', 'secondPrice', 'thirdPrice'].forEach((priceKey) => {
-          const priceData = costProfitMarginCustomized[priceKey];
-          if (priceData && priceData.label && costMap[priceData.label]) {
-            updates[`costProfitMarginCustomized.${priceKey}.cost`] = costMap[priceData.label];
-          }
-        });
-        if (Object.keys(updates).length > 0) {
-          await updateCollection('item', id, updates);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao calcular ou atualizar o custo no Firestore:', error);
-    }
-  };
 
   return (
     <div className={`${style.builderContainer} ${isStandalone ? style.standalone : ''}`}>
@@ -207,14 +170,7 @@ const PriceAndExpenseBuilder = ({
         </div>
 
         <div className={style.actionsContainer}>
-          <button
-            type="button"
-            className={style.calcButton}
-            onClick={calculatedRecipeCost}
-            title={tooltips.priceBuilder.calculate}
-          >
-            Calcular Custo
-          </button>
+
           
           {addPriceObj && (
             <button
