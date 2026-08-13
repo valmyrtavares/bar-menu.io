@@ -18,6 +18,7 @@ const EditFormButton = () => {
   const [modalEditDishes, setModalEditDishes] = React.useState(false); //Open and close Por-up Edit Dishes
   const [modalEditSideDishes, setModalEditSideDishes] = React.useState(false); //Open and close Por-up Edit SideDishes
   const [dataObj, setDataObj] = React.useState({});
+  const [itemToDelete, setItemToDelete] = React.useState(null); // Controls the delete confirmation popup
   const { id } = useParams();
 
   React.useEffect(() => {
@@ -47,10 +48,18 @@ const EditFormButton = () => {
     }
   };
 
-  async function grabItem(item) {
-    alert(
-      `Você está prestes a deletar ${item.title} tem certeza que quer fazer isso?`
-    );
+  const handleExcludeClick = (item) => {
+    setItemToDelete(item);
+  };
+
+  const cancelDelete = () => {
+    setItemToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    const item = itemToDelete;
+
     if (id === 'cat') {
       let res = item.title
         .replace(/\s/g, '')
@@ -59,14 +68,15 @@ const EditFormButton = () => {
         .toLowerCase();
 
       let bastardChildrens = [
-        ...menuButton.filter((item) => item.category === res),
-        ...dishes.filter((item) => item.category === res),
+        ...menuButton.filter((i) => i.category === res),
+        ...dishes.filter((i) => i.category === res),
       ];
 
       if (bastardChildrens.length > 0) {
         alert(
-          `Você não pode deletar ${item.title} porque ele outros elementos que não podem ser excluidos. Você precisa exclui-los`
+          `Você não pode deletar ${item.title} porque ele tem outros elementos vinculados que não podem ser excluídos juntos. Você precisa excluí-los primeiro.`
         );
+        setItemToDelete(null);
         return;
       }
       await fetchData('button', item.id);
@@ -78,7 +88,8 @@ const EditFormButton = () => {
       await fetchData('sideDishes', item.id);
       await fetchDataCollection();
     }
-  }
+    setItemToDelete(null);
+  };
 
   const fetchData = async (collecton, n) => {
     const test = await deleteData(collecton, n);
@@ -142,7 +153,7 @@ const EditFormButton = () => {
               <h2 className="col-5">{item.title}</h2>
               <button
                 className="btn btn-danger col-3 mx-1"
-                onClick={() => grabItem(item)}
+                onClick={() => handleExcludeClick(item)}
               >
                 Excluir{' '}
               </button>
@@ -175,7 +186,7 @@ const EditFormButton = () => {
               <h2 className="col-5 title-dishes">{item.title}</h2>
               <button
                 className="btn btn-danger col-3 mx-1"
-                onClick={() => grabItem(item)}
+                onClick={() => handleExcludeClick(item)}
               >
                 Excluir{' '}
               </button>
@@ -210,7 +221,7 @@ const EditFormButton = () => {
               <h2 className="col-5 title-dishes">{item.sideDishes}</h2>
               <button
                 className="btn btn-danger col-3 mx-1"
-                onClick={() => grabItem(item)}
+                onClick={() => handleExcludeClick(item)}
               >
                 Excluir{' '}
               </button>
@@ -223,6 +234,21 @@ const EditFormButton = () => {
             </div>
           );
         })}
+
+      {itemToDelete && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '8px', maxWidth: '400px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+            <h3 style={{ color: '#d9534f', marginBottom: '15px' }}>Atenção</h3>
+            <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
+              Você está prestes a deletar <strong>{itemToDelete.title || itemToDelete.sideDishes}</strong>. Tem certeza que quer fazer isso?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+              <button className="btn btn-secondary" onClick={cancelDelete} style={{ padding: '8px 20px' }}>Não Excluir</button>
+              <button className="btn btn-danger" onClick={confirmDelete} style={{ padding: '8px 20px' }}>Excluir</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
