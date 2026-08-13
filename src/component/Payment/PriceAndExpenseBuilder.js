@@ -2,6 +2,7 @@ import React from 'react';
 import Input from '../Input';
 import Title from '../title'; // Importando o Titulo para o modo standalone
 import style from '../../assets/styles/PriceAndExpenseBuilder.module.scss';
+import Tooltip from '../Tooltip';
 import { cardClasses } from '@mui/material';
 import CloseBtn from '../closeBtn';
 import { calculateItemCost } from '../../Helpers/Helpers';
@@ -179,15 +180,18 @@ const PriceAndExpenseBuilder = ({
             />
           </div>
           <div className={style.field}>
-            <Input
-              id="cost"
-              label="Custo R$"
-              value={form.cost}
-              type="number"
-              onChange={handleFatherChange ? (e) => handleFatherChange(e, labelPrice) : handleChange}
-              onBlur={handleFatherBlur ? (e) => handleFatherBlur(e, labelPrice) : handleBlur}
-              title={tooltips.priceBuilder.cost}
-            />
+            <Tooltip text="Este campo será preenchido a partir do custo das receitas, que refletem o que foi pago em cada matéria prima.">
+              <Input
+                id="cost"
+                label="Custo R$"
+                value={form.cost}
+                type="number"
+                onChange={handleFatherChange ? (e) => handleFatherChange(e, labelPrice) : handleChange}
+                onBlur={handleFatherBlur ? (e) => handleFatherBlur(e, labelPrice) : handleBlur}
+                readOnly={true}
+                style={{ cursor: 'help', backgroundColor: '#f5f5f5', pointerEvents: 'none' }}
+              />
+            </Tooltip>
           </div>
           <div className={style.field}>
             <Input
