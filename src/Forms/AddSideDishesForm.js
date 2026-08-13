@@ -60,7 +60,12 @@ function AddSideDishesForm({
       const sortedData = dataProduct.sort((a, b) =>
         a.product.localeCompare(b.product)
       );
-      setProductList(sortedData);
+      const filteredData = sortedData.filter(
+        (item) =>
+          item.operationSupplies === false &&
+          (item.activityStatus === undefined || item.activityStatus === false)
+      );
+      setProductList(filteredData);
     }
   };
 
@@ -359,7 +364,7 @@ function AddSideDishesForm({
           <>
             {dataObj?.isBasic && (
               <p style={{ color: 'orange', fontSize: '0.9rem', margin: '5px 0' }}>
-                ⚠️ Item do modo básico. Vincule ao estoque selecionando abaixo:
+                ⚠️ Vincule o seu acompanhamento a um item que existe de verdade no seu estoque que está dentro da lista. Caso o item não esteja la, adicione ele ao estoque antes de tentar disponibilizar como um acompanhamento disponível
               </p>
             )}
             <select
