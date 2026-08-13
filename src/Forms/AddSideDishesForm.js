@@ -95,8 +95,26 @@ function AddSideDishesForm({
       [id]: value,
     };
 
-    // Recalcular portionCost sempre que qualquer valor mudar
-    const portionCost = Number(newForm.portionUsed) * Number(newForm.price);
+    let calculatedPortionCost = 0;
+    
+    let currentTotalCost = newForm.totalCost;
+    let currentTotalVolume = newForm.totalVolume;
+    
+    if (id === 'sideDishes' && !isBasic) {
+      const itemSelected = productList?.find((item) => item.product === value);
+      if (itemSelected) {
+         currentTotalCost = itemSelected.totalCost;
+         currentTotalVolume = itemSelected.totalVolume;
+      } else {
+         currentTotalCost = 0;
+         currentTotalVolume = 1;
+      }
+    }
+    
+    if (currentTotalVolume > 0 && currentTotalCost > 0 && newForm.portionUsed) {
+      const costPerUnit = parseFloat((currentTotalCost / currentTotalVolume).toFixed(2));
+      calculatedPortionCost = parseFloat((costPerUnit * Number(newForm.portionUsed)).toFixed(2));
+    }
 
     if (id === 'sideDishes') {
       if (isBasic) {
@@ -119,10 +137,10 @@ function AddSideDishesForm({
           unit: itemSelected.unitOfMeasurement,
           totalVolume: itemSelected.totalVolume,
           totalCost: itemSelected.totalCost,
-          portionCost,
+          portionCost: calculatedPortionCost,
           costPriceObj: {
             ...form.costPriceObj,
-            cost: portionCost,
+            cost: calculatedPortionCost,
           },
         });
       } else {
@@ -130,20 +148,20 @@ function AddSideDishesForm({
           ...newForm,
           sideDishes: '',
           unit: '',
-          portionCost,
+          portionCost: calculatedPortionCost,
           costPriceObj: {
             ...form.costPriceObj,
-            cost: portionCost,
+            cost: calculatedPortionCost,
           },
         });
       }
     } else {
       setForm({
         ...newForm,
-        portionCost,
+        portionCost: calculatedPortionCost,
         costPriceObj: {
           ...form.costPriceObj,
-          cost: portionCost,
+          cost: calculatedPortionCost,
         },
       });
     }
@@ -369,45 +387,59 @@ function AddSideDishesForm({
                 </p>
               </div>
             )}
-            <select
-              id="sideDishes"
-              value={form.sideDishes}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Selecione o acompanhamento</option>
-              {productList &&
-                productList.map((category, index) => (
-                  <option key={index} value={category.product}>
-                    {category.product}
-                  </option>
-                ))}
-            </select>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <label style={{ fontSize: '12px', marginBottom: '4px', fontWeight: 'bold' }}>Selecione o acompanhamento</label>
+              <select
+                id="sideDishes"
+                value={form.sideDishes}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione o acompanhamento</option>
+                {productList &&
+                  productList.map((category, index) => (
+                    <option key={index} value={category.product}>
+                      {category.product}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </>
         )}
         {!isBasic && (
-          <div style={{ position: 'relative', width: '100%' }}>
-            <input
-              id="portionUsed"
-              required
-              placeholder="Volume da porçao"
-              value={form.portionUsed}
-              type="text"
-              onChange={handleChange}
-              style={{ paddingRight: '40px' }}
-            />
-            {form.unit && (
-              <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', fontWeight: 'bold' }}>
-                {form.unit}
-              </span>
-            )}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <label style={{ fontSize: '12px', marginBottom: '4px', fontWeight: 'bold' }}>Preencha a quantidade do seu acompanhamento</label>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                id="portionUsed"
+                required
+                placeholder="Volume da porçao"
+                value={form.portionUsed}
+                type="text"
+                onChange={handleChange}
+                style={{ paddingRight: '40px' }}
+              />
+              {form.unit && (
+                <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', fontWeight: 'bold' }}>
+                  {form.unit}
+                </span>
+              )}
+            </div>
           </div>
         )}
         <button
           className="btn btn-success"
           type="button"
-          onClick={() => !isBasic && setShowPopupCostAndPrice(true)}
-          style={{ cursor: isBasic ? 'default' : 'pointer' }}
+          onClick={() => {
+            if (!isBasic) {
+              if (!form.sideDishes || !form.portionUsed) {
+                alert('Por favor, selecione um acompanhamento e preencha a quantidade antes de definir o preço.');
+                return;
+              }
+              setShowPopupCostAndPrice(true);
+            }
+          }}
+          style={{ cursor: isBasic ? 'default' : 'pointer', opacity: (!isBasic && (!form.sideDishes || !form.portionUsed)) ? 0.5 : 1 }}
         >
           Preço R$ {form.price}
         </button>

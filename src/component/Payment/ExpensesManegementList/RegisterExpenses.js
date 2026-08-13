@@ -3,6 +3,7 @@ import CloseBtn from '../../closeBtn';
 import style from '../../../assets/styles/RegisterExpenses.module.scss';
 import WarningMessage from '../../WarningMessages';
 import Input from '../../Input';
+import Tooltip from '../../Tooltip';
 import {
   deleteData,
   addItemToCollection,
@@ -187,45 +188,39 @@ function RegisterExpenses({ setShowPopup }) {
 
       <form onSubmit={handleSubmit} className="m-1">
         <div className={style.containerInputs}>
-          <div
-            className={style.inputGroup}
-            title="Preencha o titulo de um tipo de despesa recorrente, como Feira, Supermercado, Aluguel. Essa
-          lista de despesas aparecerão como opções de despesas na hora de adicionar. Essa é a forma de padronizar tipos de despesas recorrentes.
-          Caso tenha um tipo de despesa eventual que não se encaixa em nenhum padrão, cadastre uma despesa com o nome de eventual"
-          >
-            <Input
-              id="name"
-              autoComplete="off"
-              required
-              label="Nome"
-              value={form.name}
-              type="text"
-              onChange={handleChange}
-            />
-          </div>
+          <Tooltip text="Preencha o titulo de um tipo de despesa recorrente, como Feira, Supermercado, Aluguel. Essa lista de despesas aparecerão como opções de despesas na hora de adicionar. Essa é a forma de padronizar tipos de despesas recorrentes. Caso tenha um tipo de despesa eventual que não se encaixa em nenhum padrão, cadastre uma despesa com o nome de eventual">
+            <div className={style.inputGroup}>
+              <Input
+                id="name"
+                autoComplete="off"
+                required
+                label="Nome"
+                value={form.name}
+                type="text"
+                onChange={handleChange}
+              />
+            </div>
+          </Tooltip>
 
-          <div
-            className={style.inputGroup}
-            title="Esse é um importante campo, onde o administrador decide se a despesa tem ou não itens
-          Se tem um único valor preenchido, ou se o valor final da despesa é uma soma de todos os itens adicioandos. Esse campo é o que 
-          disponibiliza ter ou não o forumlário de itens no tipo de despesa selecionado"
-          >
-            <label htmlFor="multiply">
-              A despesa é composta (vários itens) ou é uma despesa simples
-              (único valor)?
-            </label>
-            <select
-              id="multiply"
-              required
-              value={form.multiply}
-              onChange={handleChange}
-              className={style.selectInput}
-            >
-              <option value="">Selecione seu tipo de despesa</option>
-              <option value="simples">Simples</option>
-              <option value="composto">Composto</option>
-            </select>
-          </div>
+          <Tooltip text="Esse é um importante campo, onde o administrador decide se a despesa tem ou não itens. Se tem um único valor preenchido, ou se o valor final da despesa é uma soma de todos os itens adicioandos. Esse campo é o que disponibiliza ter ou não o forumlário de itens no tipo de despesa selecionado">
+            <div className={style.inputGroup}>
+              <label htmlFor="multiply">
+                A despesa é composta (vários itens) ou é uma despesa simples
+                (único valor)?
+              </label>
+              <select
+                id="multiply"
+                required
+                value={form.multiply}
+                onChange={handleChange}
+                className={style.selectInput}
+              >
+                <option value="">Selecione seu tipo de despesa</option>
+                <option value="simples">Simples</option>
+                <option value="composto">Composto</option>
+              </select>
+            </div>
+          </Tooltip>
 
           <div className={style.inputGroup}>
             <label htmlFor="multiply">
@@ -255,21 +250,19 @@ function RegisterExpenses({ setShowPopup }) {
               onChange={handleChange}
             />
           </div>
-          <div
-            className={style.inputGroup}
-            title="Preencha um texto com uma breve descrição que explique futuramente a um novo administrador 
-          o motive de existir e para que serve esse tipo de despesa"
-          >
-            <Input
-              id="description"
-              autoComplete="off"
-              required
-              label="Breve descrição da despesa"
-              value={form.description}
-              type="text"
-              onChange={handleChange}
-            />
-          </div>
+          <Tooltip text="Preencha um texto com uma breve descrição que explique futuramente a um novo administrador o motive de existir e para que serve esse tipo de despesa">
+            <div className={style.inputGroup}>
+              <Input
+                id="description"
+                autoComplete="off"
+                required
+                label="Breve descrição da despesa"
+                value={form.description}
+                type="text"
+                onChange={handleChange}
+              />
+            </div>
+          </Tooltip>
         </div>
 
         <div className={style.containerBtn}>
