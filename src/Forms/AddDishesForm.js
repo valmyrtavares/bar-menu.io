@@ -19,6 +19,7 @@ import '../assets/styles/form.css';
 import style from '../assets/styles/AddDishesForm.module.scss';
 import CustomizePriceForm from './CustomizePriceForm';
 import RecipeDish from './recipeDishForm.js';
+import Tooltip from '../component/Tooltip';
 import useFormValidation from '../Hooks/useFormValidation.js';
 import { GlobalContext } from '../GlobalContext.js';
 import { tooltips } from '../constants/tooltips.js';
@@ -527,11 +528,24 @@ function AddDishesForm({
             <div className={style.sectionTitle}>💰 Precificação e Custos</div>
             {hasRawMaterial ? (
               <div className={style.pricingOptions}>
-                <div className={style.priceBadge} onClick={() => setShowPopupCostAndPrice(true)}>
-                   <span className={style.badgeLabel}>Preço Único</span>
-                   <span className={style.badgeValue}>R$ {form.price}</span>
-                   <span className={style.editHint}>Clique para editar</span>
-                </div>
+                {costProfitMarginCustomized && Object.values(costProfitMarginCustomized).some(size => size && parseFloat(size.price) > 0) ? (
+                  <Tooltip text="O preço único está desabilitado porque reflete automaticamente o menor valor definido nos Preços Customizados (por tamanho).">
+                    <div 
+                      className={style.priceBadge} 
+                      style={{ opacity: 0.5, pointerEvents: 'none' }}
+                    >
+                       <span className={style.badgeLabel}>Preço Único</span>
+                       <span className={style.badgeValue}>R$ {form.price}</span>
+                       <span className={style.editHint}>Bloqueado</span>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <div className={style.priceBadge} onClick={() => setShowPopupCostAndPrice(true)}>
+                     <span className={style.badgeLabel}>Preço Único</span>
+                     <span className={style.badgeValue}>R$ {form.price}</span>
+                     <span className={style.editHint}>Clique para editar</span>
+                  </div>
+                )}
                 
                 <div className={style.priceBadge} onClick={() => setShowPopupCustomizePrice(true)}>
                    <span className={style.badgeLabel}>Preços Customizados</span>
