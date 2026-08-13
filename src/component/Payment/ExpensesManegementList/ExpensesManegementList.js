@@ -26,7 +26,7 @@ const formatDateToDMY = (dateStr) => {
 };
 
 const Expensescolumns = [
-  { nomeDaColuna: 'Tipo de despesa', valorDaColuna: 'name' },
+  { nomeDaColuna: 'Tipo de despesa', valorDaColuna: 'nameDisplay' },
   { nomeDaColuna: 'Valor', valorDaColuna: 'value' },
   { nomeDaColuna: 'Data', valorDaColuna: 'dueDateDisplay' },
   { nomeDaColuna: 'Fornecedor', valorDaColuna: 'provider' },
@@ -421,10 +421,35 @@ const parseToDate = (dateVal) => {
 
   const formattedExpensesList = React.useMemo(() => {
     if (!expensesList) return null;
-    return expensesList.map(item => ({
-      ...item,
-      dueDateDisplay: formatDateToDMY(item.dueDate || item.paymentDate || item.date)
-    }));
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return expensesList.map(item => {
+      let nameColor = 'inherit';
+      const isPaid = !!item.confirmation || !!item.paymentDate;
+      
+      const expDate = parseToDate(item.dueDate || item.paymentDate || item.date);
+      if (expDate) {
+        expDate.setHours(0, 0, 0, 0);
+      }
+
+      if (isPaid) {
+        nameColor = '#28a745'; // Green
+      } else if (expDate) {
+        if (expDate < today) {
+          nameColor = '#dc3545'; // Red (Overdue)
+        } else {
+          nameColor = '#E6B800'; // Dark Yellow (Pending)
+        }
+      }
+
+      return {
+        ...item,
+        nameDisplay: <span style={{ color: nameColor, fontWeight: 'bold' }}>{item.name}</span>,
+        dueDateDisplay: formatDateToDMY(item.dueDate || item.paymentDate || item.date)
+      };
+    });
   }, [expensesList]);
 
   const getDisableReason = (item) => {

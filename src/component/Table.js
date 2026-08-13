@@ -17,6 +17,7 @@ const Table = ({
 
   const formatCellValue = (value) => {
     if (value === null || value === undefined) return '-';
+    if (React.isValidElement(value)) return value;
     if (typeof value === 'object') {
       // Caso seja array, objeto, etc
       return '[objeto]'; // Ou você pode usar JSON.stringify(value) com cuidado
