@@ -271,20 +271,28 @@ function AddDishesForm({
 
     // Find the minimum price among the 3 sizes
     let minPrice = Infinity;
+    let minPriceObj = null;
     const keys = ['firstPrice', 'secondPrice', 'thirdPrice'];
     keys.forEach(key => {
       if (customizedPriceChanged[key] && customizedPriceChanged[key].price) {
         const p = parseFloat(customizedPriceChanged[key].price);
         if (p > 0 && p < minPrice) {
           minPrice = p;
+          minPriceObj = customizedPriceChanged[key];
         }
       }
     });
 
-    if (minPrice !== Infinity) {
+    if (minPrice !== Infinity && minPriceObj) {
       setForm((prevForm) => ({
         ...prevForm,
         price: minPrice,
+        costPriceObj: {
+          ...prevForm.costPriceObj,
+          price: minPriceObj.price,
+          cost: minPriceObj.cost || 0,
+          percentage: minPriceObj.percentage || 0
+        }
       }));
     }
 
