@@ -386,14 +386,22 @@ function AddSideDishesForm({
           </>
         )}
         {!isBasic && (
-          <input
-            id="portionUsed"
-            required
-            placeholder="Volume da porçao"
-            value={form.portionUsed}
-            type="text"
-            onChange={handleChange}
-          />
+          <div style={{ position: 'relative', width: '100%' }}>
+            <input
+              id="portionUsed"
+              required
+              placeholder="Volume da porçao"
+              value={form.portionUsed}
+              type="text"
+              onChange={handleChange}
+              style={{ paddingRight: '40px' }}
+            />
+            {form.unit && (
+              <span style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', fontWeight: 'bold' }}>
+                {form.unit}
+              </span>
+            )}
+          </div>
         )}
         <button
           className="btn btn-success"
