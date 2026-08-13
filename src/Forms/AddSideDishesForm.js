@@ -362,10 +362,12 @@ function AddSideDishesForm({
           </>
         ) : (
           <>
-            {dataObj?.isBasic && (
-              <p style={{ color: 'orange', fontSize: '0.9rem', margin: '5px 0' }}>
-                ⚠️ Vincule o seu acompanhamento a um item que existe de verdade no seu estoque que está dentro da lista. Caso o item não esteja la, adicione ele ao estoque antes de tentar disponibilizar como um acompanhamento disponível
-              </p>
+            {dataObj?.isBasic && !productList?.some(item => item.product === form.sideDishes) && (
+              <div style={{ gridColumn: 'span 2', width: '100%' }}>
+                <p style={{ color: 'black', fontSize: '12px', margin: '5px 0' }}>
+                  ⚠️ Vincule o seu acompanhamento a um item que existe de verdade no seu estoque que está dentro da lista. Caso o item não esteja la, adicione ele ao estoque antes de tentar disponibilizar como um acompanhamento disponível
+                </p>
+              </div>
             )}
             <select
               id="sideDishes"
