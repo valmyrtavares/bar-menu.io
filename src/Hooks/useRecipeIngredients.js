@@ -17,6 +17,21 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
 
             if (Array.isArray(data)) {
                 setIngredientsSimple(data);
+
+                // Migração: Se era preço único e agora tem tamanhos, clona a receita base para os tamanhos
+                if (customizedPriceObj && !isEmptyObject(customizedPriceObj)) {
+                    setIngredientsBySize({
+                        firstPrice: [...data],
+                        secondPrice: [...data],
+                        thirdPrice: [...data]
+                    });
+                } else {
+                    setIngredientsBySize({
+                        firstPrice: [],
+                        secondPrice: [],
+                        thirdPrice: []
+                    });
+                }
             } else {
                 // Lógica de Migração / Mapeamento
                 const newBySize = {
@@ -70,6 +85,13 @@ const useRecipeIngredients = (recipe, productList, customizedPriceObj) => {
                 }
 
                 setIngredientsBySize(newBySize);
+
+                // Migração: Se tinha tamanhos e agora voltou a ser preço único, usa a primeira receita como base
+                if (!customizedPriceObj || isEmptyObject(customizedPriceObj)) {
+                    setIngredientsSimple(newBySize.firstPrice || []);
+                } else {
+                    setIngredientsSimple([]);
+                }
             }
         } else {
             // Caso de receita vazia/nova
