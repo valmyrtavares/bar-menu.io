@@ -229,6 +229,7 @@ function AddSideDishesForm({
         action
           .then(() => {
             if (fetchDataCollection) fetchDataCollection();
+            updateItemsSideDishes();
             if (dataObj) {
               setModalEditSideDishes(false);
             } else if (!noNavigate) {
@@ -265,6 +266,7 @@ function AddSideDishesForm({
         addDoc(collection(db, 'sideDishes'), cleanedForm)
           .then((docRef) => {
             if (fetchDataCollection) fetchDataCollection();
+            updateItemsSideDishes();
             if (!noNavigate) {
               navigate('/admin/editButton/sidedishes');
             } else {
@@ -280,6 +282,7 @@ function AddSideDishesForm({
         .then(() => {
           console.log('Document successfully updated !');
           if (fetchDataCollection) fetchDataCollection();
+          updateItemsSideDishes();
           setModalEditSideDishes(false);
         })
         .catch((error) => {
@@ -398,13 +401,7 @@ function AddSideDishesForm({
         </div>
       </form>{' '}
       <div className={style.outform}>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={updateItemsSideDishes}
-        >
-          Atualizar pratos
-        </button>
+
         {hideShowCheckForm && (
           <div className="form-check my-1">
             <input
