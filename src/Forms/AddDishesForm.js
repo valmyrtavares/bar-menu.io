@@ -267,6 +267,26 @@ function AddDishesForm({
 
   const onPriceChange = (customizedPriceChanged) => {
     setCostProfitMarginCustomized(customizedPriceChanged);
+
+    // Find the minimum price among the 3 sizes
+    let minPrice = Infinity;
+    const keys = ['firstPrice', 'secondPrice', 'thirdPrice'];
+    keys.forEach(key => {
+      if (customizedPriceChanged[key] && customizedPriceChanged[key].price) {
+        const p = parseFloat(customizedPriceChanged[key].price);
+        if (p > 0 && p < minPrice) {
+          minPrice = p;
+        }
+      }
+    });
+
+    if (minPrice !== Infinity) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        price: minPrice,
+      }));
+    }
+
     setShowPopupCustomizePrice(false);
   };
 

@@ -154,6 +154,32 @@ function CustomizePriceForm({
     }
   };
 
+  const handleConfirm = () => {
+    const missingFields = [];
+    const sizes = [
+      { key: 'firstPrice', name: 'Tamanho / Categoria 1' },
+      { key: 'secondPrice', name: 'Tamanho / Categoria 2' },
+      { key: 'thirdPrice', name: 'Tamanho / Categoria 3' },
+    ];
+
+    sizes.forEach(size => {
+      const { label, price } = formPrice[size.key];
+      if (!label || (typeof label === 'string' && label.trim() === '')) {
+        missingFields.push(`Identificação (${size.name})`);
+      }
+      if (price === undefined || price === null || parseFloat(price) <= 0) {
+        missingFields.push(`Preço (${size.name})`);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      alert(`Por favor, preencha os seguintes campos antes de salvar:\n- ${missingFields.join('\n- ')}`);
+      return;
+    }
+
+    onPriceChange(formPrice);
+  };
+
   //  HTML++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   return (
@@ -263,7 +289,7 @@ function CustomizePriceForm({
         <button
           className={style.submitBtn}
           type="button"
-          onClick={() => onPriceChange(formPrice)}
+          onClick={handleConfirm}
         >
           Confirmar Preços
         </button>
