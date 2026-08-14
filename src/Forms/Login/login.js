@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import Error from '../../component/error.js';
 import TextKeyboard from '../../component/Textkeyboard.js';
 import useFormValidation from '../../Hooks/useFormValidation.js';
+import { logAction } from '../../api/AuditLogger';
 
 function Login() {
   const navigate = useNavigate();
@@ -16,8 +17,8 @@ function Login() {
   const [errorMessage, setErrorMessage] = React.useState(false);
   const [showNameKeyboard, setShowNameKeyboard] = React.useState(false);
   const [showEmailKeyboard, setShowEmailKeyboard] = React.useState(false);
-  const [showPasswordlKeyboard, setShowPasswordKeyboard] =
-    React.useState(false);
+  const [showPasswordlKeyboard, setShowPasswordKeyboard] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const global = React.useContext(GlobalContext);
   const { form, setForm, error, handleChange, handleBlur, clientFinded } =
     useFormValidation({
@@ -120,19 +121,30 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      const email = form.email.trim().toLowerCase();
+      const password = form.password.trim();
+
+      let loggedInEmail = null;
+      let token = null;
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
         form.email,
         form.password
       );
-      const user = userCredential.user;
-      localStorage.setItem('token', JSON.stringify(user.accessToken));
-      navigate('/admin');
+      loggedInEmail = userCredential.user.email;
+      token = userCredential.user.accessToken;
 
-      //navigate("/admin");
+      if (loggedInEmail) {
+        global.loginUser(loggedInEmail, token);
+        setTimeout(() => {
+          logAction('Fez Login', 'Usuário efetuou login administrativo com sucesso.');
+        }, 100);
+        navigate('/admin');
+      }
     } catch (error) {
       setErrorMessage(true);
-      console.log(error);
+      console.error('Erro de autenticação:', error);
     }
   };
 
@@ -163,15 +175,47 @@ function Login() {
           />
         )}
 
-        <Input
-          id="password"
-          autoComplete="off"
-          label="Password"
-          value={form.password}
-          type="password"
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
+        <div style={{ position: 'relative' }}>
+          <Input
+            id="password"
+            autoComplete="off"
+            label="Password"
+            value={form.password}
+            type={showPassword ? 'text' : 'password'}
+            onFocus={handleFocus}
+            onChange={handleChange}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              right: '12px',
+              top: '35px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#333',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+          >
+            {showPassword ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            )}
+          </button>
+        </div>
         {showPasswordlKeyboard && global.isToten && (
           <TextKeyboard
             addCharacter={addCharacter}

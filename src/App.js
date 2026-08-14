@@ -53,6 +53,8 @@ import SuppliesManagement from './component/Stock/SuppliesManagement';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
+import PermissionsManagement from './component/Admin/PermissionsManagement';
+import AuditLogsList from './component/Admin/AuditLogsList';
 
 import FiscalObserver from './component/FiscalObserver';
 import TotenIdlePresentation from './component/TotenIdlePresentation';
@@ -60,6 +62,14 @@ import FiscalAlertBanner from './component/Request/FiscalAlertBanner';
 import HelpModal from './component/Help/HelpModal';
 
 import { useEnsureAnonymousUser } from './Hooks/useEnsureAnonymousUser';
+
+const SuperAdminRoute = ({ children }) => {
+  const role = localStorage.getItem('currentUserRole');
+  if (role !== 'admin_TOTAL') {
+    return <Navigate to="/admin" replace />;
+  }
+  return children;
+};
 
 function App() {
   const [showHeader, setShowHeader] = React.useState(true);
@@ -198,6 +208,8 @@ function App() {
           <Route path="financial-summary" element={<FinancialSummary />} />
           <Route path="excel-management" element={<ExcelManagement />} />
           <Route path="master-control" element={<MasterControl />} />
+          <Route path="permissions" element={<SuperAdminRoute><PermissionsManagement /></SuperAdminRoute>} />
+          <Route path="audit-logs" element={<SuperAdminRoute><AuditLogsList /></SuperAdminRoute>} />
         </Route>
 
         {/* <Route path="*" element={<Navigate to="/bar-menu.io" replace />} /> */}

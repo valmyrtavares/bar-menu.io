@@ -103,9 +103,15 @@
         }
 
         .disabledLink {
-            opacity: 0.8;
+            opacity: 0.4;
             cursor: not-allowed !important;
-            pointer-events: none;
+            pointer-events: auto;
+            filter: grayscale(50%);
+            
+            &:hover {
+                color: #FCA311 !important;
+                background: #14213D !important;
+            }
         }
     }
 

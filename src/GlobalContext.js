@@ -1,5 +1,5 @@
 import React from 'react';
-import { onSnapshot, doc } from 'firebase/firestore';
+import { onSnapshot, doc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { db } from './config-firebase/firebase';
 
 export const GlobalContext = React.createContext();
@@ -36,6 +36,23 @@ export const GlobalStorage = ({ children }) => {
   const [establishmentCep, setEstablishmentCep] = React.useState('');
   const [establishmentCoords, setEstablishmentCoords] = React.useState(null);
   const [pdvMobileView, setPdvMobileView] = React.useState('menu'); // 'menu' ou 'orders'
+  const [currentUser, setCurrentUser] = React.useState(null);
+  const [currentUserEmail, setCurrentUserEmail] = React.useState(() => {
+    return localStorage.getItem('currentUserEmail') || '';
+  });
+
+  const loginUser = (email, token) => {
+    localStorage.setItem('token', JSON.stringify(token));
+    localStorage.setItem('currentUserEmail', email);
+    setCurrentUserEmail(email);
+  };
+
+  const logoutUser = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUserEmail');
+    setCurrentUserEmail('');
+    setCurrentUser(null);
+  };
 
   // Listen for global configuration changes
   React.useEffect(() => {
@@ -101,6 +118,48 @@ export const GlobalStorage = ({ children }) => {
   // [NOVO] Ref global para evitar disparos duplicados de NFC-e em toda a aplicação
   const processedOrdersGlobal = React.useRef(new Set());
 
+
+
+  // Listen to current logged-in user changes in Firestore
+  React.useEffect(() => {
+    if (!db || !currentUserEmail) {
+      setCurrentUser(null);
+      return;
+    }
+    const emailClean = currentUserEmail.trim().toLowerCase();
+    const unsub = onSnapshot(doc(db, 'admins', emailClean), (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        setCurrentUser(data);
+        localStorage.setItem('currentUserName', data.name || '');
+        localStorage.setItem('currentUserRole', data.role || '');
+        localStorage.setItem('currentUserPermissions', JSON.stringify(data.permissions || []));
+      } else {
+        // Autonomia total: se a coleção admins estiver vazia, o primeiro a logar vira Super Admin!
+        getDocs(collection(db, 'admins')).then(snapshot => {
+          const isFirstUser = snapshot.empty;
+          const tempUser = {
+            email: emailClean,
+            name: emailClean.split('@')[0],
+            role: isFirstUser ? 'admin_TOTAL' : 'custom',
+            permissions: isFirstUser ? [] : ['requestlist']
+          };
+          
+          // Salva automaticamente o novo usuário no banco para que ele apareça na tabela de Gerência de Acessos
+          setDoc(doc(db, 'admins', emailClean), tempUser).catch(e => console.error('Erro ao auto-registrar admin', e));
+          
+          setCurrentUser(tempUser);
+          localStorage.setItem('currentUserName', tempUser.name);
+          localStorage.setItem('currentUserRole', tempUser.role);
+          localStorage.setItem('currentUserPermissions', JSON.stringify(tempUser.permissions || []));
+        });
+      }
+    }, (err) => {
+      console.error('[RBAC] Erro ao monitorar permissões do usuário logado:', err);
+    });
+    return () => unsub();
+  }, [db, currentUserEmail]);
+
   return (
     <GlobalContext.Provider
       value={{
@@ -138,6 +197,11 @@ export const GlobalStorage = ({ children }) => {
         maxDeliveryDistance,
         establishmentCep,
         establishmentCoords,
+        currentUser,
+        setCurrentUser,
+        currentUserEmail,
+        loginUser,
+        logoutUser,
       }}
     >
       {children}
