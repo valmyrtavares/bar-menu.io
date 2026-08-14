@@ -4,6 +4,8 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WarningMessage from '../component/WarningMessages';
 import { GlobalContext } from '../GlobalContext';
 import { initializeDatabase } from '../services/dbInitService';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../config-firebase/firebase';
 
 const AdminMainMenu = ({ children }) => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ const AdminMainMenu = ({ children }) => {
   const [logoutAdminPopup, setLogoutAdminPopup] = React.useState(false);
   const [hideSideMenu, setHideSideMenu] = React.useState(true);
   const [warningMessage, setWarningMessage] = React.useState(false);
+  const [hasOverdueSupplies, setHasOverdueSupplies] = React.useState(false);
   const { hasClients, hasRawMaterial, hasFinancial } = React.useContext(GlobalContext);
 
   React.useEffect(() => {
@@ -47,6 +50,70 @@ const AdminMainMenu = ({ children }) => {
 
     return hasFilledItem;
   };
+
+  React.useEffect(() => {
+    if (!hasRawMaterial) return;
+
+    const parseToDate = (dateVal) => {
+      if (!dateVal) return null;
+      if (dateVal instanceof Date) return dateVal;
+      if (typeof dateVal.toDate === 'function') return dateVal.toDate();
+      if (typeof dateVal.seconds === 'number') return new Date(dateVal.seconds * 1000);
+      if (typeof dateVal === 'number') {
+        const d = new Date(dateVal);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      if (typeof dateVal === 'string') {
+        const str = dateVal.trim();
+        if (!str) return null;
+        if (str.includes('/')) {
+          const parts = str.split(' - ')[0].split(' ')[0].split('/');
+          if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            return new Date(year, month, day);
+          }
+        }
+        if (str.includes('-')) {
+          const parts = str.split('T')[0].split(' ')[0].split('-');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) {
+              return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else {
+              return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            }
+          }
+        }
+      }
+      const d = new Date(dateVal);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    const unsub = onSnapshot(collection(db, 'stock'), (snapshot) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let overdue = false;
+
+      snapshot.forEach((doc) => {
+        const item = doc.data();
+        if (item.operationSupplies === true && (item.activityStatus === undefined || item.activityStatus === false)) {
+          const purchaseDate = parseToDate(item.lastUpdate || item.date || item.createdAt);
+          if (purchaseDate && item.regularityDays) {
+            const limitDate = new Date(purchaseDate);
+            limitDate.setDate(limitDate.getDate() + Number(item.regularityDays));
+            limitDate.setHours(0, 0, 0, 0);
+            if (limitDate < today) {
+              overdue = true;
+            }
+          }
+        }
+      });
+      setHasOverdueSupplies(overdue);
+    });
+
+    return () => unsub();
+  }, [hasRawMaterial]);
 
   React.useEffect(() => {
     if (location.pathname !== '/admin/admin') {
@@ -137,6 +204,14 @@ const AdminMainMenu = ({ children }) => {
               onClick={(e) => !hasRawMaterial && e.preventDefault()}
             >
               Estoque
+            </NavLink>
+            <NavLink
+              to="/admin/supplies"
+              className={!hasRawMaterial ? admin.disabledLink : ''}
+              style={{ color: hasOverdueSupplies ? 'red' : undefined }}
+              onClick={(e) => !hasRawMaterial && e.preventDefault()}
+            >
+              Insumos
             </NavLink>
             <NavLink
               to="/admin/managementRecipes"

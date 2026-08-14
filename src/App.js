@@ -49,6 +49,7 @@ import AutoPaymentList from './component/Payment/AutoPaymentList';
 import FinancialSummary from './component/Payment/FinancialSummary';
 import ExcelManagement from './component/Admin/ExcelManagement';
 import MasterControl from './Pages/MasterControl';
+import SuppliesManagement from './component/Stock/SuppliesManagement';
 
 import './style.css';
 import ManagementRecipes from './component/Recipes/ManagementRecipes';
@@ -175,6 +176,7 @@ function App() {
           <Route path="sell-flow" element={<SellFlowMangement />} />
           <Route path="request" element={<RequestManagementModule />} />
           <Route path="stock" element={<TrackStockProduct />} />
+          <Route path="supplies" element={<SuppliesManagement />} />
           <Route path="requestlist" element={<PDV />} />
           <Route
             path="kitchen"

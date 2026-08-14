@@ -11,6 +11,7 @@ const Table = ({
   labelEventClick,
   getDisableEditReason,
   getDisableDeleteReason,
+  hideEditButton = false,
 }) => {
   const hasData = Array.isArray(data) && data.length > 0;
   const hasColumns = Array.isArray(columns) && columns.length > 0;
@@ -63,16 +64,18 @@ const Table = ({
                         {labelEventClick}
                       </button>
                     )}
-                    {editReason ? (
-                      <div className={styles.customTooltipWrapper} data-tooltip={editReason}>
-                        <button className={styles.editBtn} disabled>
+                    {!hideEditButton && (
+                      editReason ? (
+                        <div className={styles.customTooltipWrapper} data-tooltip={editReason}>
+                          <button className={styles.editBtn} disabled>
+                            Editar
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={() => onEdit && onEdit(item)} className={styles.editBtn}>
                           Editar
                         </button>
-                      </div>
-                    ) : (
-                      <button onClick={() => onEdit && onEdit(item)} className={styles.editBtn}>
-                        Editar
-                      </button>
+                      )
                     )}
                     
                     {deleteReason ? (
