@@ -9,7 +9,8 @@ import style from '../assets/styles/mainMenu.module.scss';
 import { common } from '@mui/material/colors';
 import { GlobalContext } from '../GlobalContext';
 import { CheckUser, updatingSideDishes } from '../Helpers/Helpers.js';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection } from 'firebase/firestore';
+import { addDoc } from '../api/FirestoreInterceptor';
 import WarningMessage from '../component/WarningMessages';
 import { db } from '../config-firebase/firebase.js';
 import {

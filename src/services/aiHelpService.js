@@ -1,6 +1,7 @@
 import { SYSTEM_HELP_DOCUMENT, SCREEN_DOCUMENTATION_MAP } from '../assets/docs/systemHelpDoc';
 import { db } from '../config-firebase/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, query, orderBy } from 'firebase/firestore';
+import { addDoc, deleteDoc } from '../api/FirestoreInterceptor';
 
 // Lista estruturada de artigos para o buscador semântico offline
 const HELP_ARTICLES = [

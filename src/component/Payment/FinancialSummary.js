@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../config-firebase/firebase';
-import { collection, onSnapshot, query, doc, getDoc, setDoc, getDocs, where, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, getDoc, getDocs, where } from 'firebase/firestore';
+import { setDoc, updateDoc } from '../../api/FirestoreInterceptor';
 import {
   LineChart,
   Line,

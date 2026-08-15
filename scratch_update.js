@@ -1,21 +1,69 @@
 const fs = require('fs');
-const docJsPath = 'c:/Codigo/bar-menu.io/src/assets/docs/systemHelpDoc.js';
-const mdPath = 'C:/Users/DragonArena 08/.gemini/antigravity-ide/brain/22ba9322-fdd1-471a-8648-88a75a2eeae0/.system_generated/steps/24/content.md';
+const path = require('path');
 
-let docJs = fs.readFileSync(docJsPath, 'utf8');
-let md = fs.readFileSync(mdPath, 'utf8');
+const walkSync = (dir, filelist = []) => {
+  fs.readdirSync(dir).forEach(file => {
+    const dirFile = path.join(dir, file);
+    if (fs.statSync(dirFile).isDirectory()) {
+      filelist = walkSync(dirFile, filelist);
+    } else if (dirFile.endsWith('.js') && !dirFile.includes('FirestoreInterceptor.js') && !dirFile.includes('AuditLogger.js')) {
+      filelist.push(dirFile);
+    }
+  });
+  return filelist;
+};
 
-// Remove header from md
-const splitMd = md.split('---');
-let newDoc = splitMd.length > 1 ? splitMd.slice(1).join('---').trim() : md.trim();
+const mutations = ['addDoc', 'setDoc', 'updateDoc', 'deleteDoc'];
+const files = walkSync('./src');
+let changedCount = 0;
 
-// Escape backticks and dollars
-newDoc = newDoc.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+files.forEach(fullPath => {
+  let content = fs.readFileSync(fullPath, 'utf8');
+  let hasChanges = false;
+  
+  // Find import statement from firebase/firestore
+  // Handle multi-line imports
+  const importRegex = /import\s+{([^}]+)}\s+from\s+['"]firebase\/firestore['"];?/g;
+  
+  content = content.replace(importRegex, (match, importsStr) => {
+    // split imports by comma
+    let imports = importsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    
+    // find which mutations are imported
+    let intercepted = imports.filter(imp => {
+       const name = imp.split(/\s+as\s+/)[0].trim();
+       return mutations.includes(name);
+    });
+    
+    if (intercepted.length === 0) return match; // no changes needed for this import block
+    
+    hasChanges = true;
+    
+    // remove intercepted from original imports
+    let remaining = imports.filter(imp => {
+       const name = imp.split(/\s+as\s+/)[0].trim();
+       return !mutations.includes(name);
+    });
+    
+    // calculate relative path to FirestoreInterceptor.js
+    const depth = fullPath.replace(/\\/g, '/').split('src/')[1].split('/').length - 1;
+    let prefix = depth === 0 ? './' : '../'.repeat(depth);
+    const interceptorPath = prefix + 'api/FirestoreInterceptor';
+    
+    let replacement = '';
+    
+    if (remaining.length > 0) {
+      replacement += `import { ${remaining.join(', ')} } from 'firebase/firestore';\n`;
+    }
+    replacement += `import { ${intercepted.join(', ')} } from '${interceptorPath}';`;
+    
+    return replacement;
+  });
 
-const regex = /export const SYSTEM_HELP_DOCUMENT = `[\s\S]*?`;/;
-const replacement = 'export const SYSTEM_HELP_DOCUMENT = `\\n' + newDoc + '\\n`;';
+  if (hasChanges) {
+    fs.writeFileSync(fullPath, content);
+    changedCount++;
+  }
+});
 
-docJs = docJs.replace(regex, replacement);
-
-fs.writeFileSync(docJsPath, docJs);
-console.log('Updated systemHelpDoc.js successfully.');
+console.log(`Successfully patched ${changedCount} files to use FirestoreInterceptor.`);

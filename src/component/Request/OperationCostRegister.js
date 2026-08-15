@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getBtnData, deleteData } from '../../api/Api'; // Ajuste o caminho conforme necessário
-import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { collection, getFirestore } from 'firebase/firestore';
+import { addDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase'; // Ajuste o caminho do firebaseConfig conforme necessário
 import style from '../../assets/styles/CostOperations.module.scss';
 import { Link } from 'react-router-dom';

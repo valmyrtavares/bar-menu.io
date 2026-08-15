@@ -3,7 +3,8 @@ import Input from '../component/Input';
 
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage, db, getFirestore } from '../config-firebase/firebase';
-import { setDoc, doc, updateDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { setDoc, updateDoc } from '../api/FirestoreInterceptor';
 
 import { GlobalContext } from '../GlobalContext.js';
 import '../assets/styles/form.css';

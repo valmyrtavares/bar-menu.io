@@ -5,3 +5,4 @@
 
 - Sempre que precisar adicionar um Tooltip ou mensagem flutuante para explicar algo ao administrador, utilize o componente `Tooltip` (src/component/Tooltip.js). Isso garante o padrão visual de chamar a atenção: formato quadrado/retangular, fundo preto e letras brancas.
 
+\n\n## FIREBASE FINANCIAL IMPACT RULE\nCRITICAL RULE: Any modification or architecture change that could potentially cause a massive spike in Firebase Reads/Writes (like putting reads in loops, missing useEffect dependencies, or logging bulk operations) MUST be flagged to the user. Stop and ask for clarification regarding the financial impact before proceeding.\n

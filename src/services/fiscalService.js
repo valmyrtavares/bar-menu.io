@@ -1,12 +1,5 @@
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from 'firebase/firestore';
+import { collection, query, where, getDocs, doc } from 'firebase/firestore';
+import { addDoc, updateDoc } from '../api/FirestoreInterceptor';
 import { db } from '../config-firebase/firebase';
 
 const isoDate = () => {

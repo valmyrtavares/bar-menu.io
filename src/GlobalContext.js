@@ -1,5 +1,6 @@
 import React from 'react';
-import { onSnapshot, doc, collection, getDocs, setDoc } from 'firebase/firestore';
+import { onSnapshot, doc, collection, getDocs } from 'firebase/firestore';
+import { setDoc } from './api/FirestoreInterceptor';
 import { db } from './config-firebase/firebase';
 
 export const GlobalContext = React.createContext();

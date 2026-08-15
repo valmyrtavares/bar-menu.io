@@ -3,19 +3,8 @@ import { GlobalContext } from '../../GlobalContext';
 import Input from '../Input.js';
 import '../../assets/styles/FiscalAttributes.css';
 import useFormValidation from '../../Hooks/useFormValidation.js';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  doc,
-  updateDoc,
-  setDoc,
-  getDoc,
-  getDocs,
-  deleteDoc,
-} from 'firebase/firestore';
+import { getFirestore, collection, query, where, doc, getDoc, getDocs } from 'firebase/firestore';
+import { addDoc, updateDoc, setDoc, deleteDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase.js';
 import { getBtnData, getPaginatedData } from '../../api/Api.js';
 import DefaultComumMessage from '../Messages/DefaultComumMessage.js';

@@ -8,13 +8,8 @@ import {
 import MenuButton from '../component/menuHamburguerButton.js';
 import Title from '../component/title.js';
 import { db, storage } from '../config-firebase/firebase.js';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  setDoc,
-  doc,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc } from 'firebase/firestore';
+import { addDoc, setDoc } from '../api/FirestoreInterceptor';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/form.css';

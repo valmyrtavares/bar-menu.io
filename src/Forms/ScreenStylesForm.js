@@ -3,10 +3,8 @@ import Title from '../component/title';
 import Input from '../component/Input';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config-firebase/firebase.js';
-import {
-  setDoc,
-  doc,
-} from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { setDoc } from '../api/FirestoreInterceptor';
 import { useNavigate } from 'react-router-dom';
 import { getOneItemColleciton } from '../api/Api';
 import { Link } from 'react-router-dom';

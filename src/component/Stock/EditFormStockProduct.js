@@ -4,16 +4,8 @@ import CloseBtn from '../closeBtn';
 import Input from '../Input';
 import { getBtnData, logStockUsage, registerDailyStockMovement, updateItemsSideDishes, updateStockDiscardLogEntry } from '../../api/Api';
 import { UpdateMenuMessage } from '../Messages/UpdateMenuMessage';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc, query, where, getDocs } from 'firebase/firestore';
+import { addDoc, updateDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import { checkUnavaiableRawMaterial } from '../../Helpers/Helpers';
 

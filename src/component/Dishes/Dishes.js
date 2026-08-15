@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { updateDoc, setDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import { GlobalContext } from '../../GlobalContext';
 import { CheckUser } from '../../Helpers/Helpers.js';

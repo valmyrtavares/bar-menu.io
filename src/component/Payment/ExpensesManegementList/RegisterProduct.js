@@ -2,17 +2,8 @@ import React, { useEffect } from 'react';
 import Input from '../../Input';
 import product from '../../../assets/styles/RegisterProduct.module.scss';
 import CloseBtn from '../../closeBtn';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  setDoc,
-  doc,
-} from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc } from 'firebase/firestore';
+import { addDoc, updateDoc, setDoc } from '../../../api/FirestoreInterceptor';
 import { db } from '../../../config-firebase/firebase.js';
 import { getBtnData, deleteData, registerDailyStockMovement } from '../../../api/Api';
 import WarningMessage from '../../WarningMessages.js';

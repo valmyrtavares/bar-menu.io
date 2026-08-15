@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, addDoc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, query, where } from 'firebase/firestore';
+import { addDoc, updateDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import styleEdit from '../../assets/styles/EditFormStockProduct.module.scss';
 import styleTrack from '../../assets/styles/TrackStockProduct.module.scss';

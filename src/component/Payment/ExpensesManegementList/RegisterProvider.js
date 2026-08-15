@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import Input from '../../Input';
 import provider from '../../../assets/styles/RegisterProvider.module.scss';
 import CloseBtn from '../../closeBtn';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection } from 'firebase/firestore';
+import { addDoc } from '../../../api/FirestoreInterceptor';
 import { db } from '../../../config-firebase/firebase';
 import { getBtnData, deleteData } from '../../../api/Api';
 

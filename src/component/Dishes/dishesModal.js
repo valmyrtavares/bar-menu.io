@@ -1,16 +1,8 @@
 import React from 'react';
 import '../../assets/styles/dishesModal.css';
 import { useCachedImage } from '../../Hooks/useCachedImage';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  setDoc,
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc, getDoc, arrayUnion } from 'firebase/firestore';
+import { addDoc, setDoc, updateDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase.js';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomizedPrice from './CustomizedPrice.js';

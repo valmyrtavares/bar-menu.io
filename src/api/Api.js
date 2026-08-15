@@ -1,24 +1,7 @@
 import { debugErrorMap } from 'firebase/auth';
 
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  doc,
-  getDocs,
-  onSnapshot,
-  getDoc,
-  deleteDoc,
-  updateDoc,
-  orderBy,
-  limit,
-  startAfter,
-  endBefore,
-  limitToLast,
-  arrayUnion,
-  setDoc,
-} from 'firebase/firestore';
+import { getFirestore, collection, query, where, doc, getDocs, onSnapshot, getDoc, orderBy, limit, startAfter, endBefore, limitToLast, arrayUnion } from 'firebase/firestore';
+import { deleteDoc, updateDoc, setDoc } from '../api/FirestoreInterceptor';
 import {
   getStorage,
   ref,

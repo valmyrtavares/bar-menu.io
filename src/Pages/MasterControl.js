@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../config-firebase/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { setDoc } from '../api/FirestoreInterceptor';
 import { GlobalContext } from '../GlobalContext';
 import style from '../assets/styles/AdminMainMenu.module.scss';
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc } from 'firebase/firestore';
+import { updateDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import Table from '../Table';
 import Title from '../title';

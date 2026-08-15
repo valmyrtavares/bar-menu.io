@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
+import { updateDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import { issueAutoNfce, getCircuitBreakerState, resetFiscalCircuitBreaker } from '../../services/fiscalService';
 

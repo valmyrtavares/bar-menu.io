@@ -1,5 +1,5 @@
 import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
-import { addDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, updateDoc } from '../api/FirestoreInterceptor';
 
 // Mock dependencies
 jest.mock('firebase/firestore', () => ({

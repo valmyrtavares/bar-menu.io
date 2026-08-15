@@ -5,13 +5,8 @@ import Title from '../component/title.js';
 import { db, storage } from '../config-firebase/firebase.js';
 import MenuButton from '../component/menuHamburguerButton.js';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  setDoc,
-  doc,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc } from 'firebase/firestore';
+import { addDoc, setDoc } from '../api/FirestoreInterceptor';
 import { useNavigate, Link } from 'react-router-dom';
 import IncludeSideDishesForm from './IncludeSideDishesForm.js';
 import PriceAndExpenseBuilder from '../component/Payment/PriceAndExpenseBuilder';

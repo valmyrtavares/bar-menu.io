@@ -2,15 +2,8 @@ import React, { useState } from 'react';
 import styles from '../../assets/styles/CreatePromotions.module.scss';
 import Title from '../title';
 import { Link } from 'react-router-dom';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  getDoc,
-  setDoc,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc, getDoc } from 'firebase/firestore';
+import { addDoc, updateDoc, setDoc } from '../../api/FirestoreInterceptor';
 import { getApp } from 'firebase/app';
 import { getBtnData, deleteData } from '../../api/Api';
 import { db } from '../../config-firebase/firebase';

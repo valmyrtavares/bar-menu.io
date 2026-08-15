@@ -3,19 +3,8 @@ import { getBtnData, deleteData, getOneItemColleciton, logStockUsage, registerDa
 import { db } from '../../config-firebase/firebase.js';
 import PaymentMethod from '../Payment/PaymentMethod.js';
 import { fetchInDataChanges } from '../../api/Api.js';
-import {
-  getFirestore,
-  setDoc,
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  updateDoc,
-  runTransaction,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import { getFirestore, collection, doc, getDoc, runTransaction, query, where, getDocs } from 'firebase/firestore';
+import { setDoc, addDoc, updateDoc } from '../../api/FirestoreInterceptor';
 import style from '../../assets/styles/RequestListToBePreparedKitchen.module.scss';
 import WarningAmoutMessage from '../Messages/WarningAmoutMessage';
 import { Link } from 'react-router-dom';

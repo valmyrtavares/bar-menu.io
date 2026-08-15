@@ -1,5 +1,6 @@
 import { db } from '../config-firebase/firebase';
-import { doc, getDoc, setDoc, collection, addDoc, getDocs, query, limit, where } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, limit, where } from 'firebase/firestore';
+import { setDoc, addDoc } from '../api/FirestoreInterceptor';
 
 export const initializeDatabase = async () => {
   const results = [];

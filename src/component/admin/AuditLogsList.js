@@ -1,17 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-  getDocs,
-  deleteDoc,
-  doc,
-  where,
-  Timestamp
-} from 'firebase/firestore';
+import { collection, query, orderBy, limit, startAfter, getDocs, doc, where, Timestamp } from 'firebase/firestore';
+import { deleteDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import styles from './AuditLogsList.module.scss';
 

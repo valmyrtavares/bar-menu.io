@@ -4,14 +4,8 @@ import style from '../../../assets/styles/AddExpensesForm.module.scss';
 import { UpdateMenuMessage } from '../../Messages/UpdateMenuMessage.js';
 import CloseBtn from '../../closeBtn';
 // import ProductVolumeAdjustmentNote from './ProductVolumeAdjustmentNote';
-import {
-  getDocs,
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-} from 'firebase/firestore';
+import { getDocs, getFirestore, collection, doc } from 'firebase/firestore';
+import { addDoc, updateDoc } from '../../../api/FirestoreInterceptor';
 import { db } from '../../../config-firebase/firebase.js';
 import { getBtnData, addItemToCollection, logStockUsage, registerDailyStockMovement } from '../../../api/Api';
 //import { alertMinimunAmount } from '../../../Helpers/Helpers';

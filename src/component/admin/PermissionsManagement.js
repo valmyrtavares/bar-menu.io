@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc } from 'firebase/firestore';
+import { updateDoc, deleteDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 import { GlobalContext } from '../../GlobalContext';
 import { logAction } from '../../api/AuditLogger';

@@ -2,7 +2,8 @@ import React from 'react';
 import style from '../assets/styles/WelcomeSaluteForm.module.scss';
 import Title from '../component/title.js';
 import { db } from '../config-firebase/firebase.js';
-import { setDoc, doc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { setDoc } from '../api/FirestoreInterceptor';
 import { Link, useNavigate } from 'react-router-dom';
 
 function WelcomeSaluteForm() {

@@ -10,7 +10,8 @@ import { useEnsureAnonymousUser, getAnonymousUser } from '../Hooks/useEnsureAnon
 import WarningMessage from '../component/WarningMessages.js';
 import { useCachedImage } from '../Hooks/useCachedImage.js';
 import { ensureImagesInCache, nativePreloadImages, getHotCache } from '../util/imageCache.js';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { updateDoc, setDoc } from '../api/FirestoreInterceptor';
 
 import { db } from '../config-firebase/firebase.js';
 

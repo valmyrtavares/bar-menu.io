@@ -2,7 +2,8 @@ import React from 'react';
 import '../../assets/styles/ButtonCustomerProfile.css';
 import { getOneItemColleciton, getBtnData } from '../../api/Api';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
-import { collection, addDoc, getFirestore, doc, getDoc } from 'firebase/firestore';
+import { collection, getFirestore, doc, getDoc } from 'firebase/firestore';
+import { addDoc } from '../../api/FirestoreInterceptor';
 import { db } from '../../config-firebase/firebase';
 
 const ButtonCustomerProfile = ({ item, request, descontFinalPrice }) => {

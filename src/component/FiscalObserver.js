@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { fetchPendingPrints } from '../api/Api';
 import { db } from '../config-firebase/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { updateDoc } from '../api/FirestoreInterceptor';
 
 const FiscalObserver = () => {
     // Mantém registro local dos IDs que já abrimos a janela nesta sessão

@@ -1,12 +1,8 @@
 import { useEffect } from 'react';
 import { db, auth } from '../config-firebase/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  deleteDoc,
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { setDoc, deleteDoc } from '../api/FirestoreInterceptor';
 
 const defaultNoCustomer = {
   name: 'anonimo',

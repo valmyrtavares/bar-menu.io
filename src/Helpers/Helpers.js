@@ -2,16 +2,8 @@ import React from 'react';
 
 import { getBtnData, getStockByProductName } from '../api/Api';
 import { cardClasses } from '@mui/material';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  doc,
-  setDoc,
-} from 'firebase/firestore';
+import { getFirestore, collection, getDoc, getDocs, doc } from 'firebase/firestore';
+import { addDoc, updateDoc, setDoc } from '../api/FirestoreInterceptor';
 import { db, auth } from '../config-firebase/firebase.js';
 import { signInAnonymously } from 'firebase/auth';
 import * as XLSX from 'xlsx';

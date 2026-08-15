@@ -1,18 +1,7 @@
 import React from 'react';
 import { db } from '../../config-firebase/firebase.js';
-import {
-  getFirestore,
-  getDoc,
-  collection,
-  updateDoc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  doc,
-  onSnapshot,
-} from 'firebase/firestore';
+import { getFirestore, getDoc, collection, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore';
+import { updateDoc, setDoc, addDoc } from '../../api/FirestoreInterceptor';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import CheckDishesModal from '../Dishes/CheckdishesModal.js';
 import AutoPayment from '../Payment/AutoPayment.js';
