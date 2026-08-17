@@ -78,6 +78,34 @@ export const initializeDatabase = async () => {
       results.push('✅ Produto de amostra criado.');
     }
 
+    // 6. Inicializar Admin (Super Admin Padrão)
+    const adminQuery = query(collection(db, 'admins'), where('role', '==', 'admin_TOTAL'), limit(1));
+    const adminSnap = await getDocs(adminQuery);
+    if (adminSnap.empty) {
+      await addDoc(collection(db, 'admins'), {
+        email: 'suporte@barmenu.com',
+        name: 'Super Admin',
+        role: 'admin_TOTAL',
+        permissions: ['ALL'],
+        createdAt: new Date(),
+        status: 'active'
+      });
+      results.push('✅ Administrador padrão (Super Admin) criado no banco.');
+    }
+
+    // 7. Inicializar Audit Logs
+    const auditQuery = query(collection(db, 'audit_logs'), limit(1));
+    const auditSnap = await getDocs(auditQuery);
+    if (auditSnap.empty) {
+      await addDoc(collection(db, 'audit_logs'), {
+        action: 'Setup Inicial',
+        details: 'Criação automática das coleções iniciais, incluindo admins e audit_logs.',
+        timestamp: new Date(),
+        user: 'Sistema'
+      });
+      results.push('✅ Coleção de Audit Logs inicializada.');
+    }
+
     if (results.length === 0) {
       return { success: true, log: ['ℹ️ O banco de dados já parece estar inicializado. Nenhuma mudança feita.'] };
     }
