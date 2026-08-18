@@ -157,7 +157,7 @@ function Login() {
           error={{ login: 'Sua senha ou email estão incorretos' }}
         />
       )}
-      <form onSubmit={handleSubmit} className="m-1">
+      <form onSubmit={handleSubmit} className="m-1" autoComplete="off">
         <Input
           id="email"
           label="email"
@@ -178,7 +178,7 @@ function Login() {
         <div style={{ position: 'relative' }}>
           <Input
             id="password"
-            autoComplete="off"
+            autoComplete="new-password"
             label="Password"
             value={form.password}
             type={showPassword ? 'text' : 'password'}
