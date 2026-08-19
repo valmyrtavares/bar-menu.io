@@ -219,6 +219,7 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [isSavingCorrection, setIsSavingCorrection] = useState(false);
+  const [calibrationPreview, setCalibrationPreview] = useState(null);
 
   useEffect(() => {
     const fetchHistoryAndAnalytics = async () => {
@@ -449,17 +450,232 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
     if (isAdjusting) return;
     
     const scaleFactor = 1 + (correctionPct / 100);
-    const confirm = window.confirm(
-      `Deseja ajustar as receitas automaticamente? Isso aumentará a quantidade de "${productName}" em todas as receitas em +${Math.round(correctionPct)}% e atualizará seus respectivos custos no sistema.`
+    const affectedDishes = [];
+
+    // Encontra o analytics do produto atual para ver se tem oscilações (contagens positivas > 0)
+    const currentProdAnalytics = analyticsData.find(
+      a => a.product.trim().toLowerCase() === productName.trim().toLowerCase()
     );
-    if (!confirm) return;
+    const hasOscillationWarning = currentProdAnalytics ? currentProdAnalytics.positiveCount > 0 : false;
+
+    menuItems.forEach((dish) => {
+      let recipeList = dish.recipe?.FinalingridientsList;
+      if (!recipeList) return;
+
+      // Vamos clonar o prato para simular
+      const clonedDish = JSON.parse(JSON.stringify(dish));
+      let changed = false;
+
+      const scaleArraySimulate = (arr) => {
+        if (!Array.isArray(arr)) return { diff: 0, details: [] };
+        let diff = 0;
+        const details = [];
+        arr.forEach((ing) => {
+          if (ing.name && ing.name.trim().toLowerCase() === productName.trim().toLowerCase()) {
+            const originalAmount = Number(ing.amount) || 0;
+            const originalPortionCost = Number(ing.portionCost) || 0;
+
+            const newAmount = Number((originalAmount * scaleFactor).toFixed(4));
+            const newPortionCost = Number((originalPortionCost * scaleFactor).toFixed(2));
+            
+            diff += (newPortionCost - originalPortionCost);
+            changed = true;
+
+            details.push({
+              ingredientName: ing.name,
+              oldQty: originalAmount,
+              newQty: newAmount,
+              oldPortionCost: originalPortionCost,
+              newPortionCost: newPortionCost,
+              unit: ing.unitOfMeasurement || ''
+            });
+          }
+        });
+        return { diff, details };
+      };
+
+      const changes = [];
+      const warnings = [];
+
+      if (Array.isArray(recipeList)) {
+        const { diff, details } = scaleArraySimulate(clonedDish.recipe.FinalingridientsList);
+        if (changed) {
+          const oldCost = Number(clonedDish.costPriceObj?.cost || 0);
+          const newCost = Number((oldCost + diff).toFixed(2));
+          details.forEach(det => {
+            changes.push({
+              sizeLabel: 'Preço Único',
+              oldQty: det.oldQty,
+              newQty: det.newQty,
+              oldPortionCost: det.oldPortionCost,
+              newPortionCost: det.newPortionCost,
+              oldDishCost: oldCost,
+              newDishCost: newCost,
+              unit: det.unit
+            });
+          });
+        }
+      } else if (typeof recipeList === 'object' && recipeList !== null) {
+        const labels = clonedDish.CustomizedPrice;
+        
+        // Tratar firstPrice
+        const firstArr = recipeList.firstPrice || (labels ? recipeList[labels.firstLabel] : null);
+        if (firstArr) {
+          const { diff, details } = scaleArraySimulate(firstArr);
+          if (details.length > 0) {
+            const oldCost = Number(labels?.firstCost || clonedDish.costPriceObj?.cost || 0);
+            const newCost = Number((oldCost + diff).toFixed(2));
+            details.forEach(det => {
+              changes.push({
+                sizeLabel: labels?.firstLabel || 'Tamanho 1',
+                oldQty: det.oldQty,
+                newQty: det.newQty,
+                oldPortionCost: det.oldPortionCost,
+                newPortionCost: det.newPortionCost,
+                oldDishCost: oldCost,
+                newDishCost: newCost,
+                unit: det.unit
+              });
+            });
+          }
+        }
+
+        // Tratar secondPrice
+        const secondArr = recipeList.secondPrice || (labels ? recipeList[labels.secondLabel] : null);
+        if (secondArr) {
+          const { diff, details } = scaleArraySimulate(secondArr);
+          if (details.length > 0) {
+            const oldCost = Number(labels?.secondCost || 0);
+            const newCost = Number((oldCost + diff).toFixed(2));
+            details.forEach(det => {
+              changes.push({
+                sizeLabel: labels?.secondLabel || 'Tamanho 2',
+                oldQty: det.oldQty,
+                newQty: det.newQty,
+                oldPortionCost: det.oldPortionCost,
+                newPortionCost: det.newPortionCost,
+                oldDishCost: oldCost,
+                newDishCost: newCost,
+                unit: det.unit
+              });
+            });
+          }
+        }
+
+        // Tratar thirdPrice
+        const thirdArr = recipeList.thirdPrice || (labels ? recipeList[labels.thirdLabel] : null);
+        if (thirdArr) {
+          const { diff, details } = scaleArraySimulate(thirdArr);
+          if (details.length > 0) {
+            const oldCost = Number(labels?.thirdCost || 0);
+            const newCost = Number((oldCost + diff).toFixed(2));
+            details.forEach(det => {
+              changes.push({
+                sizeLabel: labels?.thirdLabel || 'Tamanho 3',
+                oldQty: det.oldQty,
+                newQty: det.newQty,
+                oldPortionCost: det.oldPortionCost,
+                newPortionCost: det.newPortionCost,
+                oldDishCost: oldCost,
+                newDishCost: newCost,
+                unit: det.unit
+              });
+            });
+          }
+        }
+      }
+
+      if (changed) {
+        // Diagnóstico: Outros ingredientes instáveis com padrão de Flutuação
+        const getIngredientsNames = (list) => {
+          if (!list) return [];
+          const extract = (arr) => {
+            if (!Array.isArray(arr)) return [];
+            return arr.map(i => i.name?.trim().toLowerCase()).filter(Boolean);
+          };
+          if (Array.isArray(list)) return extract(list);
+          if (typeof list === 'object') {
+            return [
+              ...extract(list.firstPrice),
+              ...extract(list.secondPrice),
+              ...extract(list.thirdPrice),
+              ...(dish.CustomizedPrice ? [
+                ...extract(list[dish.CustomizedPrice.firstLabel]),
+                ...extract(list[dish.CustomizedPrice.secondLabel]),
+                ...extract(list[dish.CustomizedPrice.thirdLabel])
+              ] : [])
+            ];
+          }
+          return [];
+        };
+
+        const allIngredients = getIngredientsNames(dish.recipe?.FinalingridientsList);
+        const otherIngredients = allIngredients.filter(
+          name => name !== productName.trim().toLowerCase()
+        );
+
+        // Achar se algum outro ingrediente possui padrão de Flutuação
+        const fluctuatingOthers = [];
+        otherIngredients.forEach(otherName => {
+          const matchingAnalytics = analyticsData.find(
+            a => a.product.trim().toLowerCase() === otherName
+          );
+          if (matchingAnalytics && matchingAnalytics.pattern === 'Flutuação') {
+            fluctuatingOthers.push(matchingAnalytics.product);
+          }
+        });
+
+        if (fluctuatingOthers.length > 0) {
+          warnings.push(
+            `Prato usa outros ingredientes com flutuação de estoque: ${fluctuatingOthers.join(', ')} (possíveis falhas de contagem).`
+          );
+        }
+
+        affectedDishes.push({
+          id: dish.id,
+          title: dish.title,
+          selected: true, // selecionado por padrão
+          changes,
+          warnings
+        });
+      }
+    });
+
+    if (affectedDishes.length === 0) {
+      alert(`Nenhuma receita ativa encontrada que utilize "${productName}".`);
+      return;
+    }
+
+    setCalibrationPreview({
+      productName,
+      correctionPct,
+      scaleFactor,
+      hasOscillationWarning,
+      dishes: affectedDishes
+    });
+  };
+
+  const executeRecipeAdjustment = async () => {
+    if (isAdjusting || !calibrationPreview) return;
+
+    const selectedDishes = calibrationPreview.dishes.filter(d => d.selected);
+    if (selectedDishes.length === 0) {
+      alert("Selecione pelo menos um prato para calibrar.");
+      return;
+    }
 
     setIsAdjusting(true);
     try {
       let updatedCount = 0;
       const updates = [];
+      const scaleFactor = calibrationPreview.scaleFactor;
+      const productName = calibrationPreview.productName;
 
+      // Iterar sobre os itens que estão no menuItems originais mas que foram selecionados para ajuste
       menuItems.forEach((dish) => {
+        const isSelected = selectedDishes.some(sd => sd.id === dish.id);
+        if (!isSelected) return;
+
         let recipeList = dish.recipe?.FinalingridientsList;
         if (!recipeList) return;
 
@@ -536,10 +752,11 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
           date: dateStr
         });
 
-        alert(`Sucesso! ${updatedCount} receita(s) contendo "${productName}" foram recalibradas em +${Math.round(correctionPct)}% no sistema.`);
+        alert(`Sucesso! ${updatedCount} receita(s) contendo "${productName}" foram recalibradas em +${Math.round(calibrationPreview.correctionPct)}% no sistema.`);
+        setCalibrationPreview(null);
         setRefreshTrigger(prev => prev + 1);
       } else {
-        alert(`Nenhuma receita ativa encontrada que utilize "${productName}".`);
+        alert("Nenhum prato pôde ser atualizado.");
       }
     } catch (err) {
       console.error("Erro ao recalibrar receitas:", err);
@@ -671,6 +888,125 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
 
   return (
     <div className={styleEdit.popupOverlay}>
+      {calibrationPreview && (
+        <div className={styleProgress.progressOverlay}>
+          <div className={styleProgress.progressCard} style={{ maxWidth: '850px', width: '90%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', textAlign: 'left', padding: '25px' }}>
+            <h3 style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginBottom: '15px' }}>
+              Confirmar Calibração de Receita: {calibrationPreview.productName}
+            </h3>
+            <p style={{ marginBottom: '15px', fontSize: '0.95rem', color: '#c0c0d0' }}>
+              Ajuste sugerido: <strong style={{ color: '#fbbf24' }}>+{Math.round(calibrationPreview.correctionPct)}%</strong> nas receitas.
+              Selecione quais pratos deseja recalibrar e confira o impacto de custo abaixo:
+            </p>
+
+            {calibrationPreview.hasOscillationWarning && (
+              <div className={styleProgress.warningText} style={{ marginBottom: '15px', marginTop: '0px', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                <strong>⚠️ Diagnóstico de Registro (Oscilação):</strong> Este ingrediente possui histórico de variações (perdas e ganhos alternados) entre as auditorias de estoque. Isso pode indicar erros físicos pontuais de contagem ou atraso no lançamento de compras, em vez de um desvio sistemático nas receitas. Calibre com atenção.
+              </div>
+            )}
+
+            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '20px', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px', background: '#141420' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#a0a0b0' }}>
+                    <th style={{ padding: '8px', textAlign: 'left', width: '40px' }}>
+                      <input 
+                        type="checkbox"
+                        checked={calibrationPreview.dishes.every(d => d.selected)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setCalibrationPreview(prev => ({
+                            ...prev,
+                            dishes: prev.dishes.map(d => ({ ...d, selected: checked }))
+                          }));
+                        }}
+                      />
+                    </th>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>Prato / Tamanho</th>
+                    <th style={{ padding: '8px', textAlign: 'center' }}>Dosagem ({calibrationPreview.productName})</th>
+                    <th style={{ padding: '8px', textAlign: 'center' }}>Custo Total do Prato</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calibrationPreview.dishes.map((dish, dIdx) => (
+                    <React.Fragment key={dish.id}>
+                      <tr style={{ borderBottom: dish.changes.length > 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.05)', verticalAlign: 'middle', background: dIdx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
+                        <td style={{ padding: '10px 8px', textAlign: 'left' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={dish.selected}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setCalibrationPreview(prev => {
+                                const newDishes = [...prev.dishes];
+                                newDishes[dIdx] = { ...newDishes[dIdx], selected: checked };
+                                return { ...prev, dishes: newDishes };
+                              });
+                            }}
+                          />
+                        </td>
+                        <td style={{ padding: '10px 8px', fontWeight: '600', color: '#ffffff' }}>
+                          {dish.title}
+                          {dish.warnings.map((w, wIdx) => (
+                            <div key={wIdx} style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 'normal', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span>🚨</span> <span>{w}</span>
+                            </div>
+                          ))}
+                        </td>
+                        {dish.changes.length === 1 ? (
+                          <>
+                            <td style={{ padding: '10px 8px', textAlign: 'center' }}>
+                              {dish.changes[0].oldQty.toFixed(3)} {dish.changes[0].unit} → <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>{dish.changes[0].newQty.toFixed(3)} {dish.changes[0].unit}</span>
+                            </td>
+                            <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 'bold' }}>
+                              R$ {dish.changes[0].oldDishCost.toFixed(2).replace('.', ',')} → <span style={{ color: '#ef4444' }}>R$ {dish.changes[0].newDishCost.toFixed(2).replace('.', ',')}</span>
+                            </td>
+                          </>
+                        ) : (
+                          <td colSpan="2" style={{ padding: '10px 8px' }}></td>
+                        )}
+                      </tr>
+                      {dish.changes.length > 1 && dish.changes.map((ch, cIdx) => (
+                        <tr key={`size-${cIdx}`} style={{ borderBottom: cIdx === dish.changes.length - 1 ? '1px solid rgba(255, 255, 255, 0.05)' : 'none', opacity: 0.85, fontSize: '0.85rem', background: dIdx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
+                          <td></td>
+                          <td style={{ padding: '6px 8px 6px 20px', color: '#a0a0b0' }}>
+                            ↳ {ch.sizeLabel}
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                            {ch.oldQty.toFixed(3)} {ch.unit} → <span style={{ color: '#fbbf24' }}>{ch.newQty.toFixed(3)} {ch.unit}</span>
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: '600' }}>
+                            R$ {ch.oldDishCost.toFixed(2).replace('.', ',')} → <span style={{ color: '#ef4444' }}>R$ {ch.newDishCost.toFixed(2).replace('.', ',')}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={styleProgress.recoveryButtons} style={{ marginTop: '0px', width: '100%', gap: '15px' }}>
+              <button 
+                className={styleProgress.confirmBtn}
+                onClick={executeRecipeAdjustment}
+                disabled={isAdjusting}
+                style={{ padding: '10px', fontSize: '0.9rem' }}
+              >
+                {isAdjusting ? 'Efetivando...' : 'Efetivar Calibração'}
+              </button>
+              <button 
+                className={styleProgress.cancelBtn}
+                onClick={() => setCalibrationPreview(null)}
+                disabled={isAdjusting}
+                style={{ padding: '10px', fontSize: '0.9rem' }}
+              >
+                Voltar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className={styleEdit.containerEditStock} style={{ width: '95%', maxWidth: '1100px', height: '90vh', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         <div className={styleEdit.closeBtnRow}>
           <button className={styleEdit.closeBtn} type="button" onClick={onClose}>
@@ -679,13 +1015,39 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
         </div>
 
         <div className={styleEdit.titleRow}>
-          <h2>
-            {selectedInventory 
-              ? `Detalhes do Inventário ${selectedInventory.id}` 
-              : activeTab === 'analytics' 
-                ? 'Inteligência de Estoque e Receitas' 
-                : 'Histórico de Inventários'}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <h2 style={{ margin: 0 }}>
+              {selectedInventory 
+                ? `Detalhes do Inventário ${selectedInventory.id}` 
+                : activeTab === 'analytics' 
+                  ? 'Inteligência de Estoque e Receitas' 
+                  : 'Histórico de Inventários'}
+            </h2>
+            {!selectedInventory && (
+              <span 
+                data-help-context="/admin/inventory-history"
+                data-doc-url="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.7c2ifjagfuaz#heading=h.mfmkui5c4ebz"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#fff',
+                  color: '#FCA311',
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                  userSelect: 'none'
+                }}
+                title="Ajuda / Resumo da Tela"
+              >
+                ?
+              </span>
+            )}
+          </div>
           <p style={{ marginTop: '10px' }}>
             {selectedInventory 
               ? `Data: ${selectedInventory.date}` 
@@ -790,6 +1152,33 @@ const InventoryHistoryPopup = ({ onClose, fetchStock }) => {
             </table>
           ) : activeTab === 'analytics' ? (
             <div className={styleProgress.analysisGrid}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
+                <span 
+                  data-help-context="/admin/inventory-analytics"
+                  data-doc-url="https://docs.google.com/document/d/1JO_71SmMvI_lkzAerER1YuuM_F-0Sdp6-dJrdy7E1oQ/edit?tab=t.h5nat0ptwi5i#heading=h.fpnothve2kfe"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#fff',
+                    color: '#FCA311',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    borderRadius: '50%',
+                    width: '22px',
+                    height: '22px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    userSelect: 'none'
+                  }}
+                  title="Ajuda sobre Análise de Inteligência"
+                >
+                  ?
+                </span>
+                <span style={{ fontSize: '0.9rem', color: '#c0c0d0' }}>
+                  Clique no ícone para abrir a ajuda sobre diagnósticos de estoque e calibração de receitas.
+                </span>
+              </div>
               {analyticsData.length === 0 ? (
                 <p>Nenhuma matéria-prima analisada ainda. Faça mais inventários.</p>
               ) : (

@@ -93,6 +93,24 @@ const HELP_ARTICLES = [
       'despesa', 'despesas', 'fornecedor', 'fornecedores', 'conta', 'pagar', 'vencimento'
     ],
     content: `**Como registrar despesas e fornecedores:**\n\n1. Acesse **"Despesas"** no menu do administrador.\n2. Para novos fornecedores: clique em **"Cadastrar Fornecedor"**.\n3. Para lançar um custo: clique em **"Registrar Despesa"**, informe o fornecedor, valor, vencimento e categoria.\n4. Salve para acompanhar no fluxo financeiro.`
+  },
+  {
+    id: 'inventory_history',
+    title: 'Histórico de Inventários e Auditorias',
+    keywords: [
+      'inventário', 'inventario', 'inventários', 'inventarios', 'histórico', 'historico', 
+      'auditoria', 'auditorias', 'correção', 'correcao', 'editar', 'diferença', 'prejuízo', 'desvio'
+    ],
+    content: `**Histórico de Inventários e Auditorias:**\n\n* **Consulta:** A tela lista todas as contagens físicas passadas com ID, data e a diferença financeira total de desvio.\n* **Comparação Detalhada:** Clique em qualquer linha para ver a comparação entre o volume teórico esperado e o volume real contado, bem como a variação de custo de cada item.\n* **Correção:** Você pode editar e corrigir a quantidade contada de qualquer insumo clicando em "Editar" na linha correspondente. Essa ação é permitida por motivos de auditoria apenas nas **primeiras 2 horas** após a gravação do inventário.`
+  },
+  {
+    id: 'inventory_analytics',
+    title: 'Análise de Inteligência e Calibragem de Receitas',
+    keywords: [
+      'inteligência', 'inteligencia', 'análise', 'analise', 'calibrar', 'calibração', 'calibracao', 
+      'receitas', 'receita', 'desperdício', 'desperdicio', 'flutuação', 'flutuacao', 'sistemática'
+    ],
+    content: `**Análise de Inteligência e Calibragem de Receitas:**\n\n* **Perda Sistemática:** Identifica ingredientes que somem constantemente (mais de 80% das vezes). Sugere aumentar a dosagem nas fichas técnicas para alinhar o sistema ao consumo real.\n* **Flutuação:** Identifica ingredientes com perdas e ganhos alternados. Indica erros de contagem física do operador ou notas fiscais atrasadas.\n* **Estável:** Insumos sem discrepâncias significativas.\n* **Calibragem:** Clique em "Calibrar Receitas" (disponível para Perda Sistemática) para ver a simulação de custos antigo vs. novo por prato e aplicar a atualização automática apenas nas receitas que você marcar.`
   }
 ];
 

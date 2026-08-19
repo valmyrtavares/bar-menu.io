@@ -44,6 +44,32 @@ export const SCREEN_DOCUMENTATION_MAP = {
       'Como ver o histórico de movimentações?',
     ]
   },
+  '/admin/inventory-history': {
+    title: 'Histórico de Inventários e Auditorias',
+    description: `A tela de **HISTÓRICO DE INVENTÁRIOS** serve como um livro de registro de todas as auditorias físicas realizadas na despensa.
+- **Tabela Geral:** Lista cronologicamente todas as contagens anteriores, exibindo o ID único do inventário, data/hora e o saldo financeiro da diferença.
+- **Consulta Detalhada:** Clicar em qualquer linha da tabela abre a comparação detalhada insumo por insumo (Quantidade Esperada vs. Quantidade Real), a discrepância de volume e o impacto financeiro.
+- **Correções Rápidas:** O administrador pode clicar no botão "Editar" ao lado do insumo para corrigir a quantidade física digitada incorretamente. Isso é permitido apenas durante as primeiras 2 horas após a gravação.`,
+    faq: [
+      'Para que serve o histórico de inventários?',
+      'Como corrigir uma contagem de inventário digitada errada?',
+      'Qual o tempo limite para editar um inventário?',
+    ]
+  },
+  '/admin/inventory-analytics': {
+    title: 'Análise de Inteligência de Estoque e Calibragem',
+    description: `O painel de **ANÁLISE DE INTELIGÊNCIA** avalia o histórico das contagens de estoque para identificar de forma autônoma gargalos operacionais e desajustes nas receitas (fichas técnicas) dos pratos.
+- **Classificação de Padrões:**
+  * **Perda Sistemática:** Insumos que registram falta física constante (em mais de 80% das auditorias). Sugere que a cozinha está usando porções maiores que o padrão ou que há desperdício no preparo.
+  * **Flutuação:** Insumos que registram perdas e ganhos alternados. Indica erros de contagem física do operador ou atraso no lançamento de notas de entrada.
+  * **Estável:** Insumos operando em perfeito equilíbrio.
+- **Calibragem Seletiva de Receitas:** Para itens com Perda Sistemática, o sistema sugere um reajuste (ex: reajustar dose em +9%). O botão "Calibrar Receitas" abre uma simulação mostrando o comparativo de dosagem anterior/nova, impacto de custo de produção e seleção por prato para reajuste automático no banco.`,
+    faq: [
+      'O que é a perda sistemática?',
+      'Como funciona a calibragem de receitas?',
+      'Por que um ingrediente é classificado como flutuação?',
+    ]
+  },
   '/admin/item': {
     title: 'Cadastro de Produtos e Pratos',
     description: `A tela de **CADASTRO DE PRATOS** permite incluir novos itens no cardápio digital e totem.

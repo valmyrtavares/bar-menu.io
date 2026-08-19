@@ -96,12 +96,17 @@ function App() {
         e.preventDefault();
         e.stopPropagation();
 
-        const docUrl = targetAnchor ? targetAnchor.getAttribute('href') : null;
-        console.log('[DEBUG App.js] Dispatching openAiHelp with docUrl:', docUrl);
+        const docUrl = targetAnchor 
+          ? targetAnchor.getAttribute('href') 
+          : (e.target.closest('[data-doc-url]')?.getAttribute('data-doc-url') || null);
+          
+        const ctx = e.target.closest('[data-help-context]')?.getAttribute('data-help-context') || location.pathname;
+
+        console.log('[DEBUG App.js] Dispatching openAiHelp with docUrl:', docUrl, 'context:', ctx);
         window.dispatchEvent(
           new CustomEvent('openAiHelp', {
             detail: {
-              screenContext: location.pathname,
+              screenContext: ctx,
               docUrl: docUrl && docUrl.includes('http') ? docUrl : null,
             },
           })
