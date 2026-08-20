@@ -37,6 +37,7 @@ const NoLog = () => {
       const currentUser = {
         id: recoveredClient[0].id,
         name: recoveredClient[0].name,
+        migratedToAuth: true,
       };
       localStorage.setItem('userMenu', JSON.stringify(currentUser));
       const pdv = localStorage.getItem('pdv') === 'true';

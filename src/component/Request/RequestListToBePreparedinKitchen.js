@@ -667,7 +667,9 @@ const RequestListToBePrepared = () => {
 
   // disparada quando o usuário seleciona uma promoção
   const handleSelectChange = async (e, item) => {
-    const index = Number(e.target.value);
+    const rawValue = e.target.value;
+    if (rawValue === '') return;
+    const index = Number(rawValue);
     const currentPromotion = promotions[index]; // Obtém a promoção selecionada
     const { title, reusable, rules, discount, minimumValue, promotionalItemId, promotionalItemName } = currentPromotion; // Extrai os dados da promoção
     setCurrentRequest(item);
@@ -718,8 +720,12 @@ const RequestListToBePrepared = () => {
         }
 
         const promoMsg = promotionalItemId 
-          ? `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name}, acrescentando o item ${promotionalItemName} por R$ ${discount || 0}. As regras são:${rules} `
-          : `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são:${rules} `;
+          ? (currentPromotion.isPercentage 
+              ? `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name}, acrescentando o item ${promotionalItemName} com desconto de ${discount}%. As regras são: ${rules} `
+              : `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name}, acrescentando o item ${promotionalItemName} por R$ ${discount || 0}. As regras são: ${rules} `)
+          : (currentPromotion.isPercentage 
+              ? `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount}%. As regras são: ${rules} `
+              : `Você está prestes a resgatar a promoção ${title} para o cliente ${item.name} concedendo um desconto de ${discount} reais. As regras são: ${rules} `);
         
         setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
@@ -783,11 +789,16 @@ const RequestListToBePrepared = () => {
     });
 
     const promoMsg = currentPromotion.promotionalItemId 
-      ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
-      : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+      ? (currentPromotion.isPercentage 
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} com desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são: ${currentPromotion.rules} `)
+      : (currentPromotion.isPercentage 
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são: ${currentPromotion.rules} `);
     
     setTextPromotion(promoMsg);
     setCurrentDiscount(currentPromotion.discount);
+    setMessagePromotionPopup(true);
     setSelectedPromotion('');
     setOperation('edit');
     setBenefitedClientEdited(benefitedClientFinded);
@@ -814,9 +825,14 @@ const RequestListToBePrepared = () => {
             ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
             : 0;
 
+          const originalPrice = Number(itemPromo.price || 0);
+          const finalItemPrice = selectedPromo.isPercentage 
+            ? Math.floor(originalPrice * (1 - Number(selectedPromo.discount || 0) / 100))
+            : Number(selectedPromo.discount || 0);
+
           const newPromoItem = {
             ...itemPromo,
-            price: Number(selectedPromo.discount || 0),
+            price: finalItemPrice,
             promotional: true,
             entregue: false,
             deliveredByWaiter: false,
@@ -830,7 +846,11 @@ const RequestListToBePrepared = () => {
         }
       } else {
         // Lógica de Desconto Global
-        finalPriceRequest -= Number(benefitedClientEdited.benefitUsed[0].discount);
+        if (selectedPromo?.isPercentage) {
+          finalPriceRequest = Math.floor(finalPriceRequest * (1 - Number(benefitedClientEdited.benefitUsed[0].discount || 0) / 100));
+        } else {
+          finalPriceRequest -= Number(benefitedClientEdited.benefitUsed[0].discount || 0);
+        }
       }
 
       currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
@@ -853,6 +873,10 @@ const RequestListToBePrepared = () => {
           ]?.nomeDaPromocao
         );
       }
+      // Marca que o pedido já recebeu promoção
+      currentRequest.hasAppliedPromotion = true;
+      currentRequest.appliedPromotion = selectedPromo?.title || 'Promoção';
+
       //add the promotion title to the list of promotions used by the client
       setDoc(doc(db, 'requests', currentRequest.id), currentRequest);
       const docRef = await addDoc(
@@ -873,9 +897,14 @@ const RequestListToBePrepared = () => {
             ? Math.max(...currentRequest.request.map(r => r.indexInRequest ?? 0)) + 1 
             : 0;
 
+          const originalPrice = Number(itemPromo.price || 0);
+          const finalItemPrice = selectedPromo.isPercentage 
+            ? Math.floor(originalPrice * (1 - Number(selectedPromo.discount || 0) / 100))
+            : Number(selectedPromo.discount || 0);
+
           const newPromoItem = {
             ...itemPromo,
-            price: Number(selectedPromo.discount || 0),
+            price: finalItemPrice,
             promotional: true,
             entregue: false,
             deliveredByWaiter: false,
@@ -889,7 +918,11 @@ const RequestListToBePrepared = () => {
         }
       } else {
         // Lógica de Desconto Global
-        finalPriceRequest -= Number(currentDiscount);
+        if (selectedPromo?.isPercentage) {
+          finalPriceRequest = Math.floor(finalPriceRequest * (1 - Number(currentDiscount || 0) / 100));
+        } else {
+          finalPriceRequest -= Number(currentDiscount);
+        }
       }
 
       currentRequest.finalPriceRequest = finalPriceRequest < 0 ? 0 : finalPriceRequest;
@@ -913,6 +946,10 @@ const RequestListToBePrepared = () => {
           ]?.nomeDaPromocao
         );
       }
+
+      // Marca que o pedido já recebeu promoção
+      currentRequest.hasAppliedPromotion = true;
+      currentRequest.appliedPromotion = selectedPromo?.title || 'Promoção';
 
       const NoEmpty = cleanObject(benefitedClientEdited);
       setBenefitedClientEdited(NoEmpty);
@@ -935,8 +972,12 @@ const RequestListToBePrepared = () => {
         setMessagePromotionPopup(true);
         setAddPromotion(true);
         const promoMsg = currentPromotion.promotionalItemId 
-          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
-          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+          ? (currentPromotion.isPercentage 
+              ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} com desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+              : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são: ${currentPromotion.rules} `)
+          : (currentPromotion.isPercentage 
+              ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+              : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são: ${currentPromotion.rules} `);
         
         setTextPromotion(promoMsg);
         benefitedClientObj.benefitUsed.push({
@@ -988,8 +1029,12 @@ const RequestListToBePrepared = () => {
       setMessagePromotionPopup(true);
       setAddPromotion(true);
       const promoMsg = currentPromotion.promotionalItemId 
-        ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são:${currentPromotion.rules} `
-        : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são:${currentPromotion.rules} `;
+        ? (currentPromotion.isPercentage 
+            ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} com desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+            : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são: ${currentPromotion.rules} `)
+        : (currentPromotion.isPercentage 
+            ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+            : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${item.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são: ${currentPromotion.rules} `);
       
       setTextPromotion(promoMsg);
       setSelectedPromotion('');

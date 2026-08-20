@@ -98,37 +98,38 @@ export const useEnsureAnonymousUser = () => {
             return;
           }
 
-          // Cenário de Migração: O cliente tem um cadastro legado (ID aleatório antigo, ex: "4pPu7raB1l...")
+          // Verificação de segurança: Checa se o ID antigo pertence a um cliente cadastrado no Firestore
           const legacyId = userData.id;
-          console.log(`Iniciando migração do cliente legado ${legacyId} para o UID ${currentUser.uid}...`);
-
           const legacyDocRef = doc(db, 'user', legacyId);
           const legacyDocSnap = await getDoc(legacyDocRef);
 
-          let profileData = { ...defaultNoCustomer };
           if (legacyDocSnap.exists()) {
-            profileData = legacyDocSnap.data();
+            const profileData = legacyDocSnap.data();
+
+            // Se for um usuário real cadastrado (possuir CPF ou nome diferente de 'anonimo'), NUNCA deletar nem sobrescrever
+            if (profileData.cpf || (profileData.name && profileData.name !== 'anonimo')) {
+              console.log(`Usuário ${profileData.name} (${legacyId}) é um cliente registrado. Preservando cadastro.`);
+              const updatedUser = {
+                id: legacyId,
+                name: profileData.fantasyName || profileData.name || userData.name,
+                migratedToAuth: true
+              };
+              localStorage.setItem('userMenu', JSON.stringify(updatedUser));
+              return;
+            }
+
+            // Apenas para dados anônimos não migrados: cria cópia vinculada ao UID atual sem deletar o documento antigo
+            const newDocRef = doc(db, 'user', currentUser.uid);
+            await setDoc(newDocRef, profileData);
           }
 
-          // Cria o novo documento indexado pelo UID do Firebase
-          const newDocRef = doc(db, 'user', currentUser.uid);
-          await setDoc(newDocRef, profileData);
-
-          // Deleta o registro antigo para evitar lixo no banco de dados
-          try {
-            await deleteDoc(legacyDocRef);
-          } catch (e) {
-            console.warn('Erro ao deletar documento do usuário legado:', e);
-          }
-
-          // Atualiza o localStorage com o novo UID e a marca de migração
           const updatedUser = {
             id: currentUser.uid,
-            name: profileData.fantasyName || profileData.name || userData.name,
+            name: userData.name || 'anonimo',
             migratedToAuth: true
           };
           localStorage.setItem('userMenu', JSON.stringify(updatedUser));
-          console.log(`Migração realizada com sucesso para o cliente: ${updatedUser.name}`);
+          console.log(`Sessão ajustada para o UID anônimo: ${currentUser.uid}`);
         } else {
           // Se for Toten e não possuir sessão iniciada, gera uma sessão anônima inicial padrão
           const isToten = localStorage.getItem('isToten') === 'true';

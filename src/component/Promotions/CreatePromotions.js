@@ -13,6 +13,7 @@ const CreatePromotions = () => {
   const [formData, setFormData] = useState({
     title: '',
     discount: '',
+    isPercentage: false,
     finalDate: '',
     startDate: '',
     minimumValue: '',
@@ -61,6 +62,7 @@ const CreatePromotions = () => {
       setFormData({
         title: promotion.title,
         discount: promotion.discount,
+        isPercentage: promotion.isPercentage || false,
         finalDate: promotion.finalDate,
         startDate: promotion.startDate,
         minimumValue: promotion.minimumValue,
@@ -73,7 +75,7 @@ const CreatePromotions = () => {
   }, [selectedPromotion]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, checked, value } = e.target;
     
     // Prevent negative values for discount
     if (name === 'discount' && value < 0) return;
@@ -91,7 +93,7 @@ const CreatePromotions = () => {
 
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
 
@@ -112,6 +114,7 @@ const CreatePromotions = () => {
         setFormData({
           title: '',
           discount: '',
+          isPercentage: false,
           finalDate: '',
           startDate: '',
           minimumValue: '',
@@ -162,6 +165,7 @@ const CreatePromotions = () => {
     setFormData({
       title: '',
       discount: '',
+      isPercentage: false,
       finalDate: '',
       startDate: '',
       minimumValue: '',
@@ -206,8 +210,10 @@ const CreatePromotions = () => {
           />
         </div>
         <div>
-          <label title="O valor fixo que será subtraído do total do pedido.">
-            {formData.promotionalItemId ? 'Novo valor do produto com desconto:' : 'Desconto:'}
+          <label title={formData.promotionalItemId ? 'Novo valor ou porcentagem de desconto do produto:' : 'Desconto:'}>
+            {formData.promotionalItemId 
+              ? (formData.isPercentage ? 'Desconto do produto (%):' : 'Novo valor do produto com desconto:') 
+              : (formData.isPercentage ? 'Desconto (%):' : 'Desconto:')}
           </label>
           <input
             type="number"
@@ -216,8 +222,20 @@ const CreatePromotions = () => {
             step="0.01"
             value={formData.discount}
             onChange={handleChange}
-            title="O valor fixo que será subtraído do total ou o novo preço do item selecionado."
+            title="O valor ou porcentagem de desconto que será aplicado."
           />
+        </div>
+        <div className={styles.checkboxField}>
+          <input
+            type="checkbox"
+            name="isPercentage"
+            id="isPercentage"
+            checked={formData.isPercentage || false}
+            onChange={handleChange}
+          />
+          <label htmlFor="isPercentage" title="Se marcado, o desconto será tratado como porcentagem (%) em vez de Reais (R$).">
+            Desconto em porcentagem (%)?
+          </label>
         </div>
 
         <div className={styles.orSeparator}>ou</div>

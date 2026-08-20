@@ -13,6 +13,7 @@ const CpfMessage = ({ clientFinded, cpf, setCpfModal, pdv }) => {
     const currentUser = {
       id: clientFinded[0].id,
       name: clientFinded[0].name,
+      migratedToAuth: true,
     };
     localStorage.setItem('userMenu', JSON.stringify(currentUser));
     if (!pdv) {
