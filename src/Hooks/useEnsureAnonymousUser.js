@@ -106,9 +106,9 @@ export const useEnsureAnonymousUser = () => {
           if (legacyDocSnap.exists()) {
             const profileData = legacyDocSnap.data();
 
-            // Se for um usuário real cadastrado (possuir CPF ou nome diferente de 'anonimo'), NUNCA deletar nem sobrescrever
-            if (profileData.cpf || (profileData.name && profileData.name !== 'anonimo')) {
-              console.log(`Usuário ${profileData.name} (${legacyId}) é um cliente registrado. Preservando cadastro.`);
+            // Se for um usuário real cadastrado (possuir CPF, apelido/fantasyName ou nome diferente de 'anonimo'), NUNCA deletar nem sobrescrever
+            if (profileData.cpf || profileData.fantasyName || (profileData.name && profileData.name !== 'anonimo')) {
+              console.log(`Usuário ${profileData.fantasyName || profileData.name} (${legacyId}) é um cliente registrado. Preservando cadastro.`);
               const updatedUser = {
                 id: legacyId,
                 name: profileData.fantasyName || profileData.name || userData.name,

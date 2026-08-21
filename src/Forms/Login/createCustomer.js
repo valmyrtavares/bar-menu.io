@@ -132,13 +132,13 @@ const CreateCustomer = () => {
     if (error.birthday || error.phone || error.cpf) {
       setErrorPopup(true);
     } else {
-      // Envia o formulário para o Firestore usando o UID anônimo pré-existente
-      const uid = auth.currentUser?.uid || `legacy_user_${Date.now()}`;
-      setDoc(doc(db, 'user', uid), formToSubmit)
-        .then(() => {
-          global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+      // Envia o formulário para o Firestore gerando um ID único por cliente
+      addDoc(collection(db, 'user'), formToSubmit)
+        .then((docRef) => {
+          const newId = docRef.id;
+          global.setId(newId); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
           const currentUser = {
-            id: uid,
+            id: newId,
             name: formToSubmit.name,
             migratedToAuth: true
           };
@@ -195,7 +195,7 @@ const CreateCustomer = () => {
       } catch (e) {}
     }
 
-    // Define dados default e envia para o Firestore
+    // Define dados default e envia para o Firestore gerando um ID único
     const formWithDefaults = {
       fantasyName: '',
       name: 'anonimo',
@@ -208,12 +208,12 @@ const CreateCustomer = () => {
       formWithDefaults.fantasyName = name;
     }
 
-    const uid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
-    setDoc(doc(db, 'user', uid), formWithDefaults)
-      .then(() => {
-        global.setId(uid); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
+    addDoc(collection(db, 'user'), formWithDefaults)
+      .then((docRef) => {
+        const newId = docRef.id;
+        global.setId(newId); // Pega o id do cliente criado e manda para o meu useContext para vincular os pedidos ao cliente que os fez
         const currentUser = {
-          id: uid,
+          id: newId,
           name: formWithDefaults.fantasyName || 'anonimo',
           migratedToAuth: true
         };

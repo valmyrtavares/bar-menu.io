@@ -757,7 +757,7 @@ const RequestListToBePrepared = () => {
 
           setSelectedPromotion('');
           setTextPromotion(
-            `O cliente ${benefitedClientFinded.name
+            `O cliente ${item.name || benefitedClientFinded.name
             } já usou a promoção ${title} na data ${item.dateTime
             } na compra dos itens ${purchasedProducts
               .map((item) => item)
@@ -775,6 +775,11 @@ const RequestListToBePrepared = () => {
   };
 
   const redeemingBenefits = (benefitedClientFinded, item, currentPromotion) => {
+    if (item.name) {
+      benefitedClientFinded.name = item.name;
+    }
+    const clientName = item.name || benefitedClientFinded.name;
+
     if (currentPromotion.minimumValue) {
       acumulativePurchase(item, benefitedClientFinded, currentPromotion);
       return;
@@ -790,11 +795,11 @@ const RequestListToBePrepared = () => {
 
     const promoMsg = currentPromotion.promotionalItemId 
       ? (currentPromotion.isPercentage 
-          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} com desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
-          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são: ${currentPromotion.rules} `)
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${clientName}, acrescentando o item ${currentPromotion.promotionalItemName} com desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${clientName}, acrescentando o item ${currentPromotion.promotionalItemName} por R$ ${currentPromotion.discount || 0}. As regras são: ${currentPromotion.rules} `)
       : (currentPromotion.isPercentage 
-          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
-          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${benefitedClientFinded.name}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são: ${currentPromotion.rules} `);
+          ? `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${clientName}, concedendo um desconto de ${currentPromotion.discount}%. As regras são: ${currentPromotion.rules} `
+          : `Você está prestes a resgatar a promoção ${currentPromotion.title} para o cliente ${clientName}, concedendo um desconto de ${currentPromotion.discount} reais. As regras são: ${currentPromotion.rules} `);
     
     setTextPromotion(promoMsg);
     setCurrentDiscount(currentPromotion.discount);

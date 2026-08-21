@@ -391,10 +391,11 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
           request: currentRequests,
         });
       } else {
-        // Se o documento do usuário não existir, cria o documento com o array request
+        // Se o documento do usuário não existir, cria o documento preservando mesclagem segura
         await setDoc(userDocRef, {
+          name: 'anonimo',
           request: [...data],
-        });
+        }, { merge: true });
       }
       fetchUser();
       localStorage.removeItem('backorder');
