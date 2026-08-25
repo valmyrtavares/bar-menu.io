@@ -1,11 +1,21 @@
 import React from 'react';
 import clients from '../../assets/styles/customerList.module.scss';
 import { getBtnData, deleteData } from '../../api/Api';
-import { getFirstFourLetters, firstNameClient } from '../../Helpers/Helpers';
+import { firstNameClient } from '../../Helpers/Helpers';
 import EachCustomer from './eachCustomer';
+import EditCustomerModal from './EditCustomerModal';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { Link } from 'react-router-dom';
 import Title from '../title';
+
+export const getCustomerName = (item) => {
+  if (!item) return '';
+  const rawName =
+    item.name && item.name !== 'anonimo' && item.name !== 'anonymous'
+      ? item.name
+      : item.fantasyName || item.clientName || item.nome || item.name || '';
+  return typeof rawName === 'string' ? rawName.trim() : String(rawName || '');
+};
 
 const CustomerList = () => {
   const [customerList, setCustomerList] = React.useState(null);
@@ -14,6 +24,8 @@ const CustomerList = () => {
   const [originalCustomerList, setOriginalCustomerList] = React.useState([]);
   const [oneClient, setOneClient] = React.useState({});
   const [showPopup, setShowPopup] = React.useState(false);
+  const [editCustomerData, setEditCustomerData] = React.useState(null);
+  const [showEditModal, setShowEditModal] = React.useState(false);
   const [showWarningDeletePopup, setShowWarningDeltePopup] =
     React.useState(false);
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
@@ -44,8 +56,10 @@ const CustomerList = () => {
       await Promise.all(
         excludeCustomer.map((item) => deleteData('user', item.id))
       );
+      setRefreshData((prev) => !prev);
     }
   };
+
   const deleteCustomer = (item, permission) => {
     setExcludeCustomer(item);
     setShowWarningDeltePopup(true);
@@ -61,16 +75,18 @@ const CustomerList = () => {
 
     if (searchValue) {
       filtered = filtered.filter((item) => {
-        const nameMatch =
-          item.name && item.name.toLowerCase().includes(searchValue);
+        const clientName = getCustomerName(item).toLowerCase();
+        const nameMatch = clientName.includes(searchValue);
         const cpfMatch =
           item.cpf && item.cpf.toLowerCase().includes(searchValue);
         const phoneMatch =
           item.phone && item.phone.toLowerCase().includes(searchValue);
         const birthdayMatch =
           item.birthday && item.birthday.toLowerCase().includes(searchValue);
+        const emailMatch =
+          item.email && item.email.toLowerCase().includes(searchValue);
 
-        return nameMatch || cpfMatch || phoneMatch || birthdayMatch;
+        return nameMatch || cpfMatch || phoneMatch || birthdayMatch || emailMatch;
       });
     }
 
@@ -103,10 +119,46 @@ const CustomerList = () => {
     setShowPopup(true);
   };
 
+  const handleOpenEdit = (client) => {
+    setEditCustomerData(client);
+    setShowEditModal(true);
+  };
+
+  const handleCustomerSaved = (updatedCustomer) => {
+    setOriginalCustomerList((prevList) =>
+      prevList.map((item) =>
+        item.id === updatedCustomer.id ? { ...item, ...updatedCustomer } : item
+      )
+    );
+    setCustomerList((prevList) =>
+      prevList.map((item) =>
+        item.id === updatedCustomer.id ? { ...item, ...updatedCustomer } : item
+      )
+    );
+    setRefreshData((prev) => !prev);
+  };
+
+  const getDisplayName = (item) => {
+    const name = getCustomerName(item);
+    return firstNameClient(name) || name || 'Sem nome';
+  };
+
   return (
     <div className={clients.customerListContainer}>
       {showPopup && (
         <EachCustomer oneClient={oneClient} setShowPopup={setShowPopup} />
+      )}
+
+      {showEditModal && (
+        <EditCustomerModal
+          customer={editCustomerData}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditCustomerData(null);
+          }}
+          onSaved={handleCustomerSaved}
+        />
       )}
 
       <div className={clients.searchContainer}>
@@ -171,39 +223,60 @@ const CustomerList = () => {
             <th>Nome</th>
             <th>CPF</th>
             <th>Celular</th>
-            <th>Aniverário</th>
-            <th>Excluir</th>
+            <th>Aniversário</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           {customerList &&
             customerList.length > 0 &&
             customerList.map((item, index) => (
-              <tr key={index}>
-                <td onClick={() => eachCustomer(item)}>
-                  {firstNameClient(item.name)}
+              <tr key={item.id || index}>
+                <td
+                  className={clients.clickableName}
+                  onClick={() => eachCustomer(item)}
+                  title="Clique para ver detalhes do consumo"
+                >
+                  {getDisplayName(item)}
                 </td>
-                <td>{item.cpf}</td>
-                <td>{item.phone}</td>
-                <td>{item.birthday}</td>
+                <td>{item.cpf || '---'}</td>
+                <td>{item.phone || '---'}</td>
+                <td>{item.birthday || '---'}</td>
                 <td>
-                  {showWarningDeletePopup && (
-                    <DefaultComumMessage
-                      msg={`Você está prestes a excluir ${excludeCustomer.name}`}
-                      item={excludeCustomer}
-                      onConfirm={deleteCustomer}
-                      onClose={() => setShowWarningDeltePopup(false)}
-                    />
-                  )}
-                  <button onClick={() => deleteCustomer(item, false)}>
-                    Excluir
-                  </button>
+                  <div className={clients.actionButtons}>
+                    <button
+                      type="button"
+                      className={clients.btnEdit}
+                      onClick={() => handleOpenEdit(item)}
+                      title="Editar dados do cliente"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      className={clients.btnDelete}
+                      onClick={() => deleteCustomer(item, false)}
+                      title="Excluir cliente"
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
         </tbody>
       </table>
+
+      {showWarningDeletePopup && (
+        <DefaultComumMessage
+          msg={`Você está prestes a excluir ${getCustomerName(excludeCustomer) || 'este cliente'}`}
+          item={excludeCustomer}
+          onConfirm={deleteCustomer}
+          onClose={() => setShowWarningDeltePopup(false)}
+        />
+      )}
     </div>
   );
 };
 export default CustomerList;
+

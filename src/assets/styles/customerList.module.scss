@@ -97,10 +97,58 @@
     table {
         width: 90%;
         margin: 3px 5%;
-        @include tableadmin
+        @include tableadmin;
+
+        .clickableName {
+            cursor: pointer;
+            color: #14213D;
+            font-weight: 600;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+
+            &:hover {
+                color: #FCA311;
+                text-decoration: underline;
+            }
+        }
+
+        .actionButtons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            button {
+                margin: 0;
+                padding: 6px 12px;
+                font-size: 11px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .btnEdit {
+                background-color: #14213D !important;
+                color: #FCA311 !important;
+                border: 1px solid #14213D;
+
+                &:hover {
+                    background-color: #24355a !important;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+                }
+            }
+
+            .btnDelete {
+                background-color: #e63946 !important;
+                color: #ffffff !important;
+                border: 1px solid #e63946;
+
+                &:hover {
+                    background-color: #c92a37 !important;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+                }
+            }
+        }
     }
-
-
 }
 
 

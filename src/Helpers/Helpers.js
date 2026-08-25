@@ -302,12 +302,12 @@ export const exportToExcel = (ObjList, fileName = 'data.xlsx') => {
 };
 
 export function firstNameClient(nameCustomer) {
-  if (nameCustomer) {
-    let firstName = nameCustomer.split(' ')[0];
+  if (typeof nameCustomer === 'string' && nameCustomer.trim()) {
+    const cleanName = nameCustomer.trim();
+    const firstName = cleanName.split(/\s+/)[0];
     return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
-  } else {
-    return '';
   }
+  return '';
 }
 
 export function getFirstFourLetters(inputString, max) {

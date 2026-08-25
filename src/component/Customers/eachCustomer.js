@@ -15,7 +15,15 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
 
   React.useEffect(() => {
     if (oneClient) {
-      if (oneClient.name === 'anonimo') {
+      const isAnon =
+        (oneClient.name === 'anonimo' || oneClient.name === 'anonymous' || !oneClient.name) &&
+        !oneClient.fantasyName &&
+        !oneClient.clientName &&
+        !oneClient.nome &&
+        !oneClient.cpf &&
+        !oneClient.phone;
+
+      if (isAnon) {
         setMessageType(false);
       } else {
         setMessageType(true);
@@ -59,6 +67,11 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
     </div>
   );
 
+  const clientDisplayName =
+    oneClient?.name && oneClient.name !== 'anonimo' && oneClient.name !== 'anonymous'
+      ? oneClient.name
+      : oneClient?.fantasyName || oneClient?.clientName || oneClient?.nome || oneClient?.name || '---';
+
   return (
     <div className="container-eachCustomer">
       <div className="ec-header">
@@ -73,7 +86,7 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
           <>
             <section className="ec-client-info">
               <div className="ec-info-grid">
-                <InfoItem label="Nome" value={oneClient.name} />
+                <InfoItem label="Nome" value={clientDisplayName} />
                 <InfoItem label="Telefone" value={oneClient.phone} />
                 <InfoItem label="E-mail" value={oneClient.email} />
                 <InfoItem label="CPF" value={oneClient.cpf} />
