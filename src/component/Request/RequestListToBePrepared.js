@@ -54,6 +54,7 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   const [selectedPromotion, setSelectedPromotion] = React.useState('');
   const [activePromoIndex, setActivePromoIndex] = React.useState(null);
   const [registeredUserIds, setRegisteredUserIds] = React.useState(new Set());
+  const [usersMap, setUsersMap] = React.useState(new Map());
   const [benefitedClient, setBenefitedClient] = React.useState([]);
   const [messagePromotionPopup, setMessagePromotionPopup] =
     React.useState(false);
@@ -376,10 +377,23 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
   // }
 
   const fetchUserRequests = async () => {
-    let requestList = await getBtnData('requests');
+    let [requestList, usersData] = await Promise.all([
+      getBtnData('requests'),
+      getBtnData('user'),
+    ]);
     requestList = requestList.filter((item) => item.orderDelivered === false);
     requestList = requestSorter(requestList);
     setRequestDoneList(requestList);
+
+    if (Array.isArray(usersData)) {
+      const map = new Map();
+      usersData.forEach((u) => {
+        if (u && u.id) {
+          map.set(u.id, u);
+        }
+      });
+      setUsersMap(map);
+    }
   };
 
   const fetchData = async () => {
@@ -391,6 +405,14 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
       ]);
 
       if (Array.isArray(usersData)) {
+        const map = new Map();
+        usersData.forEach((u) => {
+          if (u && u.id) {
+            map.set(u.id, u);
+          }
+        });
+        setUsersMap(map);
+
         const validIds = new Set(
           usersData
             .filter((u) => u && u.name && u.name !== 'anonimo')
@@ -552,8 +574,40 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
     }
   };
 
-  const changeStatusPaid = (item) => {
+  const changeStatusPaid = async (item) => {
     item.paymentDone = true;
+
+    // DÉBITO DE CRÉDITO DO CLIENTE (se houver idUser e o cliente tiver saldo de crédito)
+    if (item.idUser) {
+      try {
+        const userRef = doc(db, 'user', item.idUser);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const currentCredit = parseFloat(userData.credit || 0);
+          if (currentCredit > 0) {
+            const orderTotal = parseFloat(item.finalPriceRequest || 0);
+            const creditUsed = Math.min(currentCredit, orderTotal);
+            const creditRemaining = Math.max(0, currentCredit - creditUsed);
+
+            item.creditUsed = Number(creditUsed.toFixed(2));
+            item.creditRemaining = Number(creditRemaining.toFixed(2));
+            item.previousCredit = Number(currentCredit.toFixed(2));
+
+            await updateDoc(userRef, {
+              credit: creditRemaining > 0 ? Number(creditRemaining.toFixed(2)) : 0,
+            });
+
+            console.log(
+              `[CRÉDITO DEBITADO] Cliente: ${userData.name || 'Cliente'}, Crédito anterior: R$ ${currentCredit.toFixed(2)}, Usado: R$ ${creditUsed.toFixed(2)}, Restante: R$ ${creditRemaining.toFixed(2)}`
+            );
+          }
+        }
+      } catch (creditErr) {
+        console.error('Erro ao processar débito de crédito do cliente:', creditErr);
+      }
+    }
+
     setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');
@@ -2043,6 +2097,42 @@ const RequestListToBePrepared = ({ title, statusByUrl }) => {
                     >
                       Nota
                     </button>
+
+                    {(() => {
+                      const customerUser = item.idUser ? usersMap.get(item.idUser) : null;
+                      const availableCredit = customerUser ? parseFloat(customerUser.credit || 0) : 0;
+
+                      if (!item.paymentDone && availableCredit > 0) {
+                        return (
+                          <div className={style.customerCreditBox} title="Crédito disponível do cliente">
+                            <span>Crédito:</span>
+                            <strong>
+                              R${' '}
+                              {availableCredit.toLocaleString('pt-BR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </strong>
+                          </div>
+                        );
+                      }
+
+                      if (item.paymentDone && item.creditUsed > 0) {
+                        return (
+                          <div className={style.customerCreditBoxPaid} title="Crédito utilizado neste pedido">
+                            <span>
+                              Crédito Usado: R${' '}
+                              {Number(item.creditUsed).toLocaleString('pt-BR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    })()}
                   </div>
 
                   {/* Modais movidos para fora da grid de botões */}

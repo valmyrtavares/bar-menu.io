@@ -7,6 +7,9 @@ import EditCustomerModal from './EditCustomerModal';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
 import { Link } from 'react-router-dom';
 import Title from '../title';
+import { doc } from 'firebase/firestore';
+import { db } from '../../config-firebase/firebase';
+import { updateDoc } from '../../api/FirestoreInterceptor';
 
 export const getCustomerName = (item) => {
   if (!item) return '';
@@ -30,6 +33,7 @@ const CustomerList = () => {
     React.useState(false);
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
+  const [editingCredits, setEditingCredits] = React.useState({});
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
@@ -138,6 +142,40 @@ const CustomerList = () => {
     setRefreshData((prev) => !prev);
   };
 
+  const handleCreditInputChange = (id, value) => {
+    setEditingCredits((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleCreditSave = async (item) => {
+    const rawValue = editingCredits[item.id];
+    if (rawValue === undefined) return;
+
+    let newCredit = 0;
+    if (rawValue !== '' && !isNaN(rawValue)) {
+      newCredit = Math.max(0, parseFloat(rawValue));
+      newCredit = parseFloat(newCredit.toFixed(2));
+    }
+
+    try {
+      const userDocRef = doc(db, 'user', item.id);
+      await updateDoc(userDocRef, { credit: newCredit });
+
+      const updatedCustomer = { ...item, credit: newCredit };
+      handleCustomerSaved(updatedCustomer);
+
+      setEditingCredits((prev) => {
+        const copy = { ...prev };
+        delete copy[item.id];
+        return copy;
+      });
+    } catch (err) {
+      console.error('Erro ao salvar crédito do cliente:', err);
+    }
+  };
+
   const getDisplayName = (item) => {
     const name = getCustomerName(item);
     return firstNameClient(name) || name || 'Sem nome';
@@ -224,6 +262,7 @@ const CustomerList = () => {
             <th>CPF</th>
             <th>Celular</th>
             <th>Aniversário</th>
+            <th>Crédito</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -242,6 +281,38 @@ const CustomerList = () => {
                 <td>{item.cpf || '---'}</td>
                 <td>{item.phone || '---'}</td>
                 <td>{item.birthday || '---'}</td>
+                <td>
+                  <div className={clients.creditContainer}>
+                    <span className={clients.currencyPrefix}>R$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0,00"
+                      className={clients.creditInput}
+                      value={
+                        editingCredits[item.id] !== undefined
+                          ? editingCredits[item.id]
+                          : item.credit !== undefined &&
+                            item.credit !== null &&
+                            item.credit !== '' &&
+                            Number(item.credit) > 0
+                          ? Number(item.credit).toFixed(2)
+                          : ''
+                      }
+                      onChange={(e) =>
+                        handleCreditInputChange(item.id, e.target.value)
+                      }
+                      onBlur={() => handleCreditSave(item)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.target.blur();
+                        }
+                      }}
+                      title="Preencha o valor do crédito do cliente"
+                    />
+                  </div>
+                </td>
                 <td>
                   <div className={clients.actionButtons}>
                     <button

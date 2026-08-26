@@ -213,8 +213,40 @@ const RequestListToBePrepared = () => {
     }
   };
 
-  const changeStatusPaid = (item) => {
+  const changeStatusPaid = async (item) => {
     item.paymentDone = true;
+
+    // DÉBITO DE CRÉDITO DO CLIENTE (se houver idUser e o cliente tiver saldo de crédito)
+    if (item.idUser) {
+      try {
+        const userRef = doc(db, 'user', item.idUser);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const currentCredit = parseFloat(userData.credit || 0);
+          if (currentCredit > 0) {
+            const orderTotal = parseFloat(item.finalPriceRequest || 0);
+            const creditUsed = Math.min(currentCredit, orderTotal);
+            const creditRemaining = Math.max(0, currentCredit - creditUsed);
+
+            item.creditUsed = Number(creditUsed.toFixed(2));
+            item.creditRemaining = Number(creditRemaining.toFixed(2));
+            item.previousCredit = Number(currentCredit.toFixed(2));
+
+            await updateDoc(userRef, {
+              credit: creditRemaining > 0 ? Number(creditRemaining.toFixed(2)) : 0,
+            });
+
+            console.log(
+              `[CRÉDITO DEBITADO - COZINHA] Cliente: ${userData.name || 'Cliente'}, Crédito anterior: R$ ${currentCredit.toFixed(2)}, Usado: R$ ${creditUsed.toFixed(2)}, Restante: R$ ${creditRemaining.toFixed(2)}`
+            );
+          }
+        }
+      } catch (creditErr) {
+        console.error('Erro ao processar débito de crédito do cliente na cozinha:', creditErr);
+      }
+    }
+
     setDoc(doc(db, 'requests', item.id), item)
       .then(() => {
         console.log('Document successfully updated !');

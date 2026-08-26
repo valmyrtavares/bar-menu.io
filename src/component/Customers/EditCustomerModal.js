@@ -12,6 +12,7 @@ const EditCustomerModal = ({ customer, isOpen, onClose, onSaved }) => {
     phone: '',
     birthday: '',
     email: '',
+    credit: '',
   });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,6 +30,13 @@ const EditCustomerModal = ({ customer, isOpen, onClose, onSaved }) => {
         phone: customer.phone || '',
         birthday: customer.birthday || '',
         email: customer.email && customer.email !== 'anonimo@anonimo.com' ? customer.email : '',
+        credit:
+          customer.credit !== undefined &&
+          customer.credit !== null &&
+          customer.credit !== '' &&
+          Number(customer.credit) > 0
+            ? String(customer.credit)
+            : '',
       });
       setErrorMsg('');
     }
@@ -57,6 +65,11 @@ const EditCustomerModal = ({ customer, isOpen, onClose, onSaved }) => {
 
     try {
       const cleanName = form.name.trim();
+      const parsedCredit =
+        form.credit !== '' && !isNaN(form.credit)
+          ? Math.max(0, parseFloat(parseFloat(form.credit).toFixed(2)))
+          : 0;
+
       const updatedFields = {
         name: cleanName,
         fantasyName: cleanName,
@@ -64,6 +77,7 @@ const EditCustomerModal = ({ customer, isOpen, onClose, onSaved }) => {
         phone: form.phone ? form.phone.trim() : '',
         birthday: form.birthday ? form.birthday.trim() : '',
         email: form.email ? form.email.trim() : '',
+        credit: parsedCredit,
       };
 
       const userDocRef = doc(db, 'user', customer.id);
@@ -168,6 +182,20 @@ const EditCustomerModal = ({ customer, isOpen, onClose, onSaved }) => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Ex: cliente@email.com"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="customer-credit">Crédito Disponível (R$)</label>
+              <input
+                id="customer-credit"
+                name="credit"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.credit}
+                onChange={handleChange}
+                placeholder="Ex: 50.00 (deixe vazio ou 0 para zerar)"
               />
             </div>
           </div>

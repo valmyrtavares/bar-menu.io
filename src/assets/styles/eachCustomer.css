@@ -204,6 +204,40 @@
   margin-bottom: 4px;
 }
 
+.request-credit-footer {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: #f1f8e9;
+  border: 1px solid #c8e6c9;
+  border-left: 4px solid #4caf50;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.credit-tag-used {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.credit-tag-used strong {
+  color: #1b5e20;
+}
+
+.credit-tag-remaining {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.credit-tag-remaining strong {
+  color: #1b5e20;
+  font-size: 0.95rem;
+}
+
 .advert-message {
   padding: 60px 40px;
   text-align: center;

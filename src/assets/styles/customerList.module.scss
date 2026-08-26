@@ -111,6 +111,51 @@
             }
         }
 
+        .creditContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: #ffffff;
+            border: 1.5px solid #dcdcdc;
+            border-radius: 6px;
+            padding: 3px 6px;
+            max-width: 105px;
+            margin: 0 auto;
+            transition: all 0.2s ease;
+
+            &:focus-within {
+                border-color: #28a745;
+                box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+            }
+
+            .currencyPrefix {
+                font-size: 11px;
+                font-weight: 700;
+                color: #28a745;
+            }
+
+            .creditInput {
+                width: 100% !important;
+                border: none !important;
+                outline: none !important;
+                padding: 2px 2px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                color: #14213D !important;
+                text-align: right;
+                min-height: auto !important;
+                background: transparent !important;
+
+                &::-webkit-outer-spin-button,
+                &::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                -moz-appearance: textfield;
+            }
+        }
+
         .actionButtons {
             display: flex;
             align-items: center;

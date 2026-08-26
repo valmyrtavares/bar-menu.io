@@ -91,6 +91,19 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
                 <InfoItem label="E-mail" value={oneClient.email} />
                 <InfoItem label="CPF" value={oneClient.cpf} />
                 <InfoItem label="Aniversário" value={oneClient.birthday} />
+                <InfoItem
+                  label="Crédito Disponível"
+                  value={
+                    oneClient.credit !== undefined &&
+                    oneClient.credit !== null &&
+                    Number(oneClient.credit) > 0
+                      ? `R$ ${Number(oneClient.credit).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}`
+                      : 'R$ 0,00'
+                  }
+                />
               </div>
             </section>
 
@@ -143,6 +156,50 @@ const EachCustomer = ({ oneClient, setShowPopup }) => {
                           </div>
                         ))}
                     </div>
+                    {item.creditUsed > 0 ? (
+                      <div className="request-credit-footer">
+                        <span className="credit-tag-used">
+                          💰 Crédito Utilizado:{' '}
+                          <strong>
+                            R${' '}
+                            {Number(item.creditUsed).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </strong>
+                        </span>
+                        <span className="credit-tag-remaining">
+                          Crédito Disponível:{' '}
+                          <strong>
+                            R${' '}
+                            {Number(item.creditRemaining || 0).toLocaleString(
+                              'pt-BR',
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </strong>
+                        </span>
+                      </div>
+                    ) : item.creditRemaining !== undefined &&
+                      Number(item.creditRemaining) > 0 ? (
+                      <div className="request-credit-footer">
+                        <span className="credit-tag-remaining">
+                          💰 Crédito Disponível após pedido:{' '}
+                          <strong>
+                            R${' '}
+                            {Number(item.creditRemaining).toLocaleString(
+                              'pt-BR',
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </strong>
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 ))
               ) : (
