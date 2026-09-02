@@ -68,7 +68,7 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
         console.log.mockRestore();
     });
 
-    it('deve chamar o logout e navegar para /create-customer ao clicar no nome do cliente quando estiver no modo PDV', async () => {
+    it('deve navegar para /admin/customer ao clicar no nome do cliente quando estiver no modo PDV', async () => {
         // Configura o ambiente PDV
         localStorage.setItem('pdv', 'true');
         localStorage.setItem('userMenu', JSON.stringify({ id: 'user123', name: 'Henrique' }));
@@ -85,9 +85,7 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
         fireEvent.click(clientElement);
 
         // Asserções
-        expect(localStorage.getItem('userMenu')).toBeNull();
-        expect(contextPDV.setAuthorizated).toHaveBeenCalledWith(false);
-        expect(mockNavigate).toHaveBeenCalledWith('/create-customer');
+        expect(mockNavigate).toHaveBeenCalledWith('/admin/customer', { state: { fromPdv: true } });
     });
 
     it('NÃO deve permitir a troca de cliente quando NÃO estiver no modo PDV', async () => {
@@ -197,5 +195,19 @@ describe('RequestModal - Funcionalidade de Troca de Cliente no PDV', () => {
         expect(screen.queryByRole('button', { name: /Enviar pedido/i })).not.toBeInTheDocument();
         // O botão Finalizar deve ser o único caminho para a cozinha
         expect(screen.getByRole('button', { name: /Finalizar/i })).toBeInTheDocument();
+    });
+
+    it('deve exibir o botão "Cadastre novo cliente" e navegar para /create-customer ao ser clicado no modo PDV', async () => {
+        localStorage.setItem('pdv', 'true');
+        const contextPDV = { ...mockGlobalContext, pdvRequest: true };
+
+        renderWithContext(contextPDV);
+
+        const newCustomerBtn = screen.getByRole('button', { name: /Cadastre novo cliente/i });
+        expect(newCustomerBtn).toBeInTheDocument();
+
+        fireEvent.click(newCustomerBtn);
+
+        expect(mockNavigate).toHaveBeenCalledWith('/create-customer', { state: { directRegister: true } });
     });
 });

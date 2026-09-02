@@ -5,11 +5,12 @@ import { firstNameClient } from '../../Helpers/Helpers';
 import EachCustomer from './eachCustomer';
 import EditCustomerModal from './EditCustomerModal';
 import DefaultComumMessage from '../Messages/DefaultComumMessage';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Title from '../title';
 import { doc } from 'firebase/firestore';
 import { db } from '../../config-firebase/firebase';
 import { updateDoc } from '../../api/FirestoreInterceptor';
+import { GlobalContext } from '../../GlobalContext';
 
 export const getCustomerName = (item) => {
   if (!item) return '';
@@ -21,6 +22,10 @@ export const getCustomerName = (item) => {
 };
 
 const CustomerList = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const global = React.useContext(GlobalContext);
+
   const [customerList, setCustomerList] = React.useState(null);
   const [customer, setCustomer] = React.useState('');
   const [selectedMonth, setSelectedMonth] = React.useState('');
@@ -34,6 +39,21 @@ const CustomerList = () => {
   const [excludeCustomer, setExcludeCustomer] = React.useState('');
   const [refreshData, setRefreshData] = React.useState(false);
   const [editingCredits, setEditingCredits] = React.useState({});
+
+  const handleSelectCustomer = (item) => {
+    const selectedName = getCustomerName(item) || item.name || 'Cliente';
+    const userMenuObj = {
+      id: item.id,
+      name: selectedName,
+      cpf: item.cpf || '',
+      phone: item.phone || '',
+    };
+    localStorage.setItem('userMenu', JSON.stringify(userMenuObj));
+    if (global && typeof global.setAuthorizated === 'function') {
+      global.setAuthorizated(true);
+    }
+    navigate('/admin/requestlist');
+  };
 
   React.useEffect(() => {
     const fetchCustomer = async () => {
@@ -330,6 +350,14 @@ const CustomerList = () => {
                       title="Excluir cliente"
                     >
                       Excluir
+                    </button>
+                    <button
+                      type="button"
+                      className={clients.btnSelect}
+                      onClick={() => handleSelectCustomer(item)}
+                      title="Selecionar cliente e voltar para o PDV"
+                    >
+                      Selecionar cliente
                     </button>
                   </div>
                 </td>

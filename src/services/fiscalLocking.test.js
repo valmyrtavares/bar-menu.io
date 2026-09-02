@@ -1,8 +1,13 @@
 import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
 import { doc } from 'firebase/firestore';
-import { updateDoc } from '../api/FirestoreInterceptor';
+import { addDoc, updateDoc } from '../api/FirestoreInterceptor';
 
 // Mock dependencies
+jest.mock('../api/FirestoreInterceptor', () => ({
+    addDoc: jest.fn().mockResolvedValue({ id: 'mock-doc-id' }),
+    updateDoc: jest.fn().mockResolvedValue(),
+}));
+
 jest.mock('firebase/firestore', () => ({
     getFirestore: jest.fn(),
     collection: jest.fn(),
@@ -29,7 +34,6 @@ describe('NFCe Safety Lock Verification', () => {
             json: () => Promise.resolve({ status: 'autorizado', success: true, caminho_danfe: '/mock.pdf' }),
         });
         updateDoc.mockResolvedValue();
-        const { addDoc } = require('firebase/firestore');
         addDoc.mockResolvedValue({ id: 'mock-doc-id' });
     });
 

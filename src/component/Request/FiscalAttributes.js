@@ -104,9 +104,11 @@ const FiscalAttributes = () => {
     });
   }
 
+  const currentCnpj = (process.env.REACT_APP_FISCAL_CNPJ || '19337953000178').replace(/\D/g, '');
+
   const nfce = {
     data_emissao: '',
-    cnpj_emitente: '19337953000178',
+    cnpj_emitente: currentCnpj,
     indicador_inscricao_estadual_destinatario: '9',
     cpf_destinatario: form.cpf,
     modalidade_frete: 9,

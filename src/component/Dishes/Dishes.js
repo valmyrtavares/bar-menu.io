@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { updateDoc, setDoc } from '../../api/FirestoreInterceptor';
-import { db } from '../../config-firebase/firebase';
+import { db, auth } from '../../config-firebase/firebase';
 import { GlobalContext } from '../../GlobalContext';
 import { CheckUser } from '../../Helpers/Helpers.js';
 import '../../assets/styles/dishes.css';
@@ -49,14 +49,23 @@ function Dishes({ newItem }) {
 
     try {
       // 1. Identificação do Usuário
+      const isPdv = JSON.parse(localStorage.getItem('pdv') || 'false') || global.pdvRequest;
       let currentUser = '';
       if (localStorage.hasOwnProperty('userMenu')) {
         const currentUserData = JSON.parse(localStorage.getItem('userMenu'));
         currentUser = currentUserData.id;
       }
 
+      if (isPdv && !currentUser) {
+        const currentUid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
+        const updatedUser = { id: currentUid, name: 'anonimo' };
+        localStorage.setItem('userMenu', JSON.stringify(updatedUser));
+        currentUser = currentUid;
+        global.setAuthorizated(true);
+      }
+
       // 2. Verificação de Autenticação
-      if (!global.authorizated) {
+      if (!global.authorizated && !isPdv) {
         CheckUser('userMenu', global.isToten, global.packageTier).then(path => {
            if (!currentUser) {
                navigate(path);

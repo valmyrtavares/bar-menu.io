@@ -127,11 +127,14 @@ export const resetFiscalCircuitBreaker = () => {
  * @param {Object} order - Objeto do pedido (do Firestore)
  */
 export const issueAutoNfce = async (order) => {
-  // Trava de Isolamento de Marca: Apenas a instância TropicalX (react-bar-67f33) pode emitir NFC-e
+  // Trava de Isolamento de Marca / Multi-tenant
   const currentProjectId = process.env.REACT_APP_FIREBASE_PROJECT_ID;
   const isTestEnv = process.env.NODE_ENV === 'test';
-  if (currentProjectId && currentProjectId !== 'react-bar-67f33' && !isTestEnv) {
-    console.warn(`[FISCAL GUARD] Emissão de NFC-e bloqueada para o projeto '${currentProjectId}'. Apenas 'tropicalx' ('react-bar-67f33') possui autorização fiscal.`);
+  const fiscalCnpj = (process.env.REACT_APP_FISCAL_CNPJ || (currentProjectId === 'react-bar-67f33' ? '19337953000178' : '')).replace(/\D/g, '');
+  const crtCode = parseInt(process.env.REACT_APP_FISCAL_CRT || '1', 10);
+
+  if (!fiscalCnpj && !isTestEnv) {
+    console.warn(`[FISCAL GUARD] Emissão de NFC-e desativada para o projeto '${currentProjectId}'. Nenhuma configuração fiscal (REACT_APP_FISCAL_CNPJ) encontrada.`);
     return { status: 'ignorado', reason: 'Emissão fiscal desativada para esta marca/instância' };
   }
 
@@ -184,10 +187,10 @@ export const issueAutoNfce = async (order) => {
   const cleanCpf = order.cpfForInvoice ? String(order.cpfForInvoice).replace(/\D/g, '') : '';
   const nfce = {
     data_emissao: isoDate(),
-    cnpj_emitente: '19337953000178',
-    regime_tributario_emitente: 1, // 1: Simples Nacional (Evita Rejeição 1115 de IBS/CBS)
-    codigo_regime_tributario: 1,   // Fallback
-    crt: 1,                        // Fallback
+    cnpj_emitente: fiscalCnpj || '19337953000178',
+    regime_tributario_emitente: crtCode, // 1: Simples Nacional (Evita Rejeição 1115 de IBS/CBS)
+    codigo_regime_tributario: crtCode,   // Fallback
+    crt: crtCode,                        // Fallback
     indicador_inscricao_estadual_destinatario: '9',
     modalidade_frete: 9,
     local_destino: 1,
@@ -361,16 +364,30 @@ export const issueAutoNfce = async (order) => {
   // URL do backend (ajustar se necessário para produção)
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://focusrender.onrender.com';
   const url = `${backendUrl}/api/send-nfce?ref=${ref}`;
+  const focusToken = process.env.REACT_APP_FISCAL_TOKEN;
+  const focusEnvironment = process.env.REACT_APP_FISCAL_ENVIRONMENT || 'homologacao';
 
-  console.log(`[FISCAL API REQUEST] Enviando NFC-e para ref=${ref}. Payload completo:`, JSON.stringify({ ref, nfceData: nfce }, null, 2));
+  const requestHeaders = {
+    'Content-Type': 'application/json',
+  };
+  if (focusToken) {
+    requestHeaders['Authorization'] = `Bearer ${focusToken}`;
+  }
+
+  const requestPayload = {
+    ref,
+    nfceData: nfce,
+    token: focusToken,
+    environment: focusEnvironment,
+  };
+
+  console.log(`[FISCAL API REQUEST] Enviando NFC-e para ref=${ref}. Payload completo:`, JSON.stringify(requestPayload, null, 2));
 
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ref, nfceData: nfce }),
+      headers: requestHeaders,
+      body: JSON.stringify(requestPayload),
     });
 
     if (response.ok) {

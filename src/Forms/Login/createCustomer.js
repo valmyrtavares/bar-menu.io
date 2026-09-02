@@ -3,7 +3,7 @@ import Input from '../../component/Input.js';
 import { getFirestore, collection, doc } from 'firebase/firestore';
 import { addDoc, setDoc } from '../../api/FirestoreInterceptor';
 import { db, auth } from '../../config-firebase/firebase.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalContext } from '../../GlobalContext';
 import '../../assets/styles/createCustomer.css';
 import useFormValidation from '../../Hooks/useFormValidation.js';
@@ -19,11 +19,21 @@ import NameForm from './NameForm';
 
 const CreateCustomer = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const global = React.useContext(GlobalContext);
   const [pdv, setPdv] = React.useState(false);
   const anonymousClient = React.useRef(null);
   const [cpfModal, setCpfModal] = React.useState(true);
   const [popupName, setPopupName] = React.useState(() => {
+    if (location.state?.directRegister) {
+      return false;
+    }
+    if (localStorage.hasOwnProperty('pdv')) {
+      try {
+        const isPdv = JSON.parse(localStorage.getItem('pdv'));
+        if (isPdv) return false;
+      } catch (e) {}
+    }
     if (localStorage.getItem('backorder') && !localStorage.getItem('noFantasyName')) {
       return false;
     }
@@ -97,6 +107,19 @@ const CreateCustomer = () => {
   //FUNCTIONS #############################################################################
 
   const requestDiscount = () => {
+    if (location.state?.directRegister) {
+      setPopupName(false);
+      return;
+    }
+    if (localStorage.hasOwnProperty('pdv')) {
+      try {
+        const isPdv = JSON.parse(localStorage.getItem('pdv'));
+        if (isPdv) {
+          setPopupName(false);
+          return;
+        }
+      } catch (e) {}
+    }
     if (localStorage.hasOwnProperty('backorder')) {
       setPopupName(false);
       if (localStorage.hasOwnProperty('noFantasyName')) {

@@ -2,6 +2,11 @@ import { issueAutoNfce, resetFiscalCircuitBreaker } from './fiscalService';
 import { addDoc, updateDoc } from '../api/FirestoreInterceptor';
 
 // Mock dependencies
+jest.mock('../api/FirestoreInterceptor', () => ({
+    addDoc: jest.fn().mockResolvedValue({ id: 'mock-doc-id' }),
+    updateDoc: jest.fn().mockResolvedValue(),
+}));
+
 jest.mock('firebase/firestore', () => ({
     getFirestore: jest.fn(),
     collection: jest.fn(),

@@ -3,7 +3,7 @@ import '../../assets/styles/dishesModal.css';
 import { useCachedImage } from '../../Hooks/useCachedImage';
 import { getFirestore, collection, doc, getDoc, arrayUnion } from 'firebase/firestore';
 import { addDoc, setDoc, updateDoc } from '../../api/FirestoreInterceptor';
-import { db } from '../../config-firebase/firebase.js';
+import { db, auth } from '../../config-firebase/firebase.js';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomizedPrice from './CustomizedPrice.js';
 import { GlobalContext } from '../../GlobalContext';
@@ -20,38 +20,61 @@ const DishesModal = ({ item, setModal }) => {
     //this object is regarding  to all dishes inside of request
     name: item.title,
     id: item.id,
-    category: item.category,
     recipeOpenCloseModal: false,
     finalPrice: Number(item.price),
-    finalCost: 0,
+    finalCost: item.costPriceObj?.cost || 0,
     image: item.image,
     recipe: item.recipe ? item.recipe : {},
     sideDishes: [],
     size: item.CustomizedPrice?.firstLabel || '',
   });
-  const [itemOnScreen, setItemOnScreen] = React.useState('');
+
+  const [itemOnScreen, setItemOnScreen] = React.useState([]);
   const [sideDishesListOnScreen, setSideDishesListOnScreen] = React.useState(
     []
   );
+
   const [radioDisabled, setRadioDisabled] = React.useState(false);
+  const [pdv, setPdv] = useLocalStorage('pdv', false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const pdv = useLocalStorage('pdv', false)[0];
 
   const navigate = useNavigate();
-  const src = useCachedImage(item.id, item.image, 'full');
 
-  React.useEffect(() => {
-    calculateFinalCost();
-    console.log('SOMOS UM PDV ?  ', pdv);
-  }, []);
+  const cachedImageSrc = useCachedImage(item.image);
+  const src = cachedImageSrc;
 
   React.useEffect(() => {
     if (localStorage.hasOwnProperty('userMenu')) {
       const currentUserNew = JSON.parse(localStorage.getItem('userMenu'));
+
       setCurrentUser(currentUserNew.id);
     }
-  }, [item]);
+  }, []);
 
+  const handleSideDishesChange = (sideDish) => {
+    setSideDishesListOnScreen((prevList) => {
+      const isSelected = prevList.some((item) => item.name === sideDish.name);
+      if (isSelected) {
+        return prevList.filter((item) => item.name !== sideDish.name);
+      } else {
+        return [...prevList, sideDish];
+      }
+    });
+  };
+
+  React.useEffect(() => {
+    // Calcula o valor adicional dos acompanhamentos selecionados
+    const additionalPrice = sideDishesListOnScreen.reduce(
+      (acc, dish) => acc + (Number(dish.price) || 0),
+      0
+    );
+
+    // Atualiza o preço final no form sempre que um item é selecionado/desselecionado
+    setForm((prevForm) => ({
+      ...prevForm,
+      finalPrice: totalPrice + additionalPrice,
+    }));
+  }, [sideDishesListOnScreen, totalPrice]);
 
   //load side dishes on  screen
   React.useEffect(() => {
@@ -164,18 +187,30 @@ const DishesModal = ({ item, setModal }) => {
     if (isSubmitting) return; // evita disparo duplo
     setIsSubmitting(true);
 
-    if (!global.authorizated) {
+    const isPdv = pdv || global.pdvRequest;
+    let activeUser = currentUser;
+
+    if (isPdv && !activeUser) {
+      const currentUid = auth.currentUser?.uid || `legacy_anon_${Date.now()}`;
+      const updatedUser = { id: currentUid, name: 'anonimo' };
+      localStorage.setItem('userMenu', JSON.stringify(updatedUser));
+      activeUser = currentUid;
+      setCurrentUser(currentUid);
+      global.setAuthorizated(true);
+    }
+
+    if (!global.authorizated && !isPdv) {
       CheckLogin();
     }
 
-    if (!currentUser) {
+    if (!activeUser) {
       setModal(false); 
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const userDocRef = doc(db, 'user', currentUser);
+      const userDocRef = doc(db, 'user', activeUser);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {

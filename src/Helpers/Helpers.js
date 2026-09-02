@@ -316,8 +316,9 @@ export function getFirstFourLetters(inputString, max) {
 
 export async function CheckUser(check, isTotenParam, packageTier) {
   const isToten = isTotenParam || localStorage.getItem('isToten') === 'true';
+  const isPdv = localStorage.getItem('pdv') === 'true';
 
-  if (isToten) {
+  if (isToten || isPdv) {
     if (!localStorage.hasOwnProperty(check)) {
       const defaultNoCustomer = {
         name: 'anonimo',
@@ -344,7 +345,7 @@ export async function CheckUser(check, isTotenParam, packageTier) {
         }).catch(() => {});
       } catch (e) {}
     }
-    return '/new-layout';
+    return isPdv ? '/admin/requestlist' : '/new-layout';
   }
 
   if (localStorage.hasOwnProperty(check)) {

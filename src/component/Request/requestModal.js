@@ -1316,6 +1316,10 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       alert("Você não pode trocar de cliente enquanto edita um pedido. Cancele ou finalize a edição primeiro.");
       return;
     }
+    if (stylePdv) {
+      navigate('/admin/customer', { state: { fromPdv: true } });
+      return;
+    }
     localStorage.removeItem('userMenu');
     global.setAuthorizated(false);
     navigate('/create-customer');
@@ -1342,6 +1346,39 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
       navigate('/admin/requestlist');
     } catch (err) {
       console.error("Erro ao cancelar edição:", err);
+    }
+  };
+
+  const handleAnonymousNameChange = async (e) => {
+    const newName = e.target.value;
+    setUserData(prev => ({ ...prev, fantasyName: newName }));
+    if (userData && userData.id) {
+      try {
+        const userDocRef = doc(db, 'user', userData.id);
+        await updateDoc(userDocRef, { fantasyName: newName });
+      } catch (err) {
+        console.error('Erro ao atualizar apelido do cliente anônimo:', err);
+      }
+    }
+  };
+
+  const handleFinalizeButtonClick = () => {
+    if (stylePdv) {
+      const isRegisteredUser = userData?.name && userData.name !== 'anonimo' && userData.name !== 'anonymous';
+      const hasNickname = userData?.fantasyName && userData.fantasyName.trim().length > 0;
+
+      if (!isRegisteredUser && !hasNickname) {
+        alert("Preencha o apelido/nome do cliente ou selecione um cliente registrado antes de finalizar o pedido.");
+        return;
+      }
+    }
+
+    if (deliveryAddress) {
+      sendOrderToKitchenOnly();
+    } else if (isTableClient) {
+      setBillPopUpStep(1);
+    } else {
+      openRegisterPopup();
     }
   };
 
@@ -1479,6 +1516,28 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
         )}
       </p>
 
+      {stylePdv && (!userData?.name || userData?.name === 'anonimo' || userData?.name === 'anonymous') && (
+        <div style={{ textAlign: 'center', margin: '10px 0 15px 0' }}>
+          <input
+            type="text"
+            placeholder="Apelido / Nome do cliente (Sem cadastro)"
+            value={userData?.fantasyName || ''}
+            onChange={handleAnonymousNameChange}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '5px',
+              border: '1px solid var(--btn-color)',
+              textAlign: 'center',
+              width: '80%',
+              maxWidth: '300px',
+              backgroundColor: 'white',
+              color: '#333',
+              fontSize: '0.95rem'
+            }}
+          />
+        </div>
+      )}
+
       {isTableClient && (
         <div className="call-waiter-container" style={{ textAlign: 'center', marginBottom: '15px' }}>
           <button
@@ -1591,13 +1650,7 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
           <button
             disabled={isSubmitting || (!userData?.request || userData.request.length === 0) || (isTableClient && !allRequestsReady)}
             className="send-request"
-            onClick={
-              deliveryAddress
-                ? sendOrderToKitchenOnly
-                : isTableClient
-                  ? () => setBillPopUpStep(1)
-                  : openRegisterPopup
-            }
+            onClick={handleFinalizeButtonClick}
           >
             {isSubmitting ? "ENVIANDO..." : (deliveryAddress ? "Fazer Pedido (Entrega)" : isTableClient ? "Pedir a conta" : "Finalizar")}
           </button>
@@ -1629,6 +1682,28 @@ const RequestModal = ({ manualTableNumber, setManualTableNumber }) => {
               cursor: (!userData || (!userData.name && !userData.fantasyName)) ? 'not-allowed' : 'text'
             }}
           />
+        </div>
+      )}
+
+      {stylePdv && (
+        <div style={{ margin: '12px 0 15px 0', textAlign: 'center' }}>
+          <button
+            type="button"
+            className="register-new-customer-btn"
+            onClick={() => navigate('/create-customer', { state: { directRegister: true } })}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--btn-color, #d97706)',
+              textDecoration: 'underline',
+              fontWeight: 'bold',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              padding: '5px 10px'
+            }}
+          >
+            Cadastre novo cliente
+          </button>
         </div>
       )}
 
